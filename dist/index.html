@@ -14,6 +14,8 @@
     <link rel="icon" type="image/jpeg" href="./assets/techcrush-logo.jpg" />
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./garage.css" />
+    <link rel="stylesheet" href="./ui-refresh.css" />
+    <link rel="stylesheet" href="./garage-refresh.css" />
     <script type="importmap">
       {
         "imports": {
@@ -107,6 +109,11 @@
         </div>
       </section>
       <section class="mission-card" id="mission-card">
+        <img
+          class="mission-cover"
+          src="./assets/tbilisi-cover.png"
+          alt="TECHCRUSH Tbilisi Chase cover: sports car, patrols and Tbilisi skyline"
+        />
         <div class="card-heading">
           <span>THE GETAWAY</span><span class="tag">01—06</span>
         </div>
@@ -114,14 +121,17 @@
           <b>01</b>
           <div>
             <strong>Hit the checkpoints</strong>
-            <p>Follow the animated cyan road arrows to each gate.</p>
+            <p>Follow the road arrows through branded checkpoint arches.</p>
           </div>
         </div>
         <div class="mission-row">
           <b>02</b>
           <div>
             <strong>Fight back</strong>
-            <p>Ram patrols or jump clear. More units join every 35 seconds.</p>
+            <p>
+              Ram patrols or jump clear. New levels bring SUVs, helicopters and
+              tanks.
+            </p>
           </div>
         </div>
         <div class="mission-row">
@@ -188,8 +198,8 @@
         </div>
         <div id="toast" class="toast" aria-live="polite"></div>
         <div id="route-cue" class="route-cue">
-          <span id="direction">↑</span>
-          <div><b id="distance">120 M</b><small>NEXT CHECKPOINT</small></div>
+          <span id="direction" aria-hidden="true">↑</span>
+          <div><small>NEXT CHECKPOINT</small><b id="distance">120 M</b></div>
         </div>
       </section>
       <section id="modal" class="modal" hidden>
@@ -209,7 +219,7 @@
         <header class="workshop-header">
           <div>
             <span class="eyebrow">TECHCRUSH / PERFORMANCE DIVISION</span>
-            <h2 id="workshop-title">BUILD YOUR GETAWAY.</h2>
+            <h2 id="workshop-title">YOUR GARAGE.</h2>
           </div>
           <button
             id="workshop-close"
@@ -230,11 +240,22 @@
           class="workshop-cars"
           aria-label="Car to upgrade"
         ></div>
-        <div id="garage-stats" class="garage-stats"></div>
-        <p id="level-threat" class="level-threat"></p>
+        <section class="garage-showcase">
+          <div class="garage-build">
+            <span class="eyebrow">YOUR CURRENT BUILD</span>
+            <h3 id="garage-selected-car">Original 458</h3>
+            <div id="garage-stats" class="garage-stats"></div>
+            <p id="level-threat" class="level-threat"></p>
+          </div>
+          <img
+            class="garage-cover"
+            src="./assets/tbilisi-cover.png"
+            alt="TECHCRUSH Tbilisi Chase key art"
+          />
+        </section>
         <section class="box-bench">
           <div>
-            <h3>THREE SLOTS. ANY COMBINATION.</h3>
+            <h3>YOUR NEXT UPGRADE STARTS HERE.</h3>
             <p>14 parts · four tiers · repeated drops are possible.</p>
             <small
               >Bronze 55% · Silver 28% · Gold 13% · Diamond 4% per slot</small
@@ -247,7 +268,20 @@
         <button id="save-retry" class="secondary" hidden>RETRY SAVE</button>
         <div class="parts-heading">
           <h3>PERFORMANCE PARTS</h3>
-          <span>Earn credits from checkpoints, wrecks and escaping.</span>
+          <span id="parts-count">14 PARTS</span>
+        </div>
+        <div
+          id="part-filters"
+          class="part-filters"
+          role="group"
+          aria-label="Filter performance parts"
+        >
+          <button data-filter="all" aria-pressed="true">ALL PARTS</button
+          ><button data-filter="power" aria-pressed="false">POWER</button
+          ><button data-filter="handling" aria-pressed="false">HANDLING</button
+          ><button data-filter="body" aria-pressed="false">
+            BODY & WHEELS
+          </button>
         </div>
         <div id="part-grid" class="part-grid"></div>
         <div class="save-footer">

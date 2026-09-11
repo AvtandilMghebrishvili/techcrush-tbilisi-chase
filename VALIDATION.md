@@ -1,5 +1,24 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Interface and pursuit expansion 1.2.0 — 12 September 2026
+
+`npm test`: **69 passed, 0 failed**. The six added cases check twenty levels of deterministic clear checkpoint positions, connected routes, SUV/air/tank unlocks, capped tanks and restart behavior, heavier vehicle contacts and HP, three-dimensional air sight through rotated/thin walls, lost-contact searching, escape and helicopter rewind, radial radar bearings, road distance, and finite positive previews for all fourteen parts at four tiers. Existing vehicle, bridge, collision and save tests continue to pass.
+
+Browser review used the real local game and an isolated QA garage in Chromium at 1280 × 720, plus the garage at 390 × 844. Part images, category filtering, all three reward results and free installation were checked; a Silver engine changed the Original 458 from 230 to 245 km/h displayed top speed. The narrow garage had no horizontal overflow. A local fixture positioned the SUV, tank, aircraft and arch for close visual inspection; the aircraft was lowered only in this non-shipped fixture to inspect fittings. The public simulation uses its normal roof-aware flight altitude. No browser errors were observed during these checks.
+
+Full-route controller runs with ordinary driving inputs, recovery, collisions and pursuit enabled:
+
+| Car / equipment         | Level | Result                             | Gates |    Time |  HP |
+| ----------------------- | ----: | ---------------------------------- | ----- | ------: | --: |
+| Original 458 / stock    |     1 | Captured after all gates           | 6/6   | 198.5 s |  56 |
+| Apex R / stock          |     1 | Won                                | 6/6   | 221.7 s |  26 |
+| Apex R / all Silver     |     2 | Wrecked during escape              | 6/6   | 194.3 s |   0 |
+| Vector V12 / all Silver |     3 | Won, including loss of air contact | 6/6   | 168.0 s |  83 |
+
+The level-2 controller broke air contact and reached 5.4 seconds of escape before a collision ended the run; this is not reported as a passing full-route run. The controller has ideal route knowledge and does not establish human difficulty. Failed early tuning runs led to the mixed-fleet tank cap and air-search refinements. No physical-phone, Safari or measured GPU/FPS claim is made. Local fixtures and test garage databases are excluded from the published game.
+
+In the browser, a three-second throttle/turbo input from the local gate fixture crossed the new first arch, advanced the HUD to 1/6, awarded 150 CR and retained 100 HP. The scene, radar and guide updated to the next checkpoint without browser errors. The established Worker build (`npm run build`) completed successfully.
+
 ## Vehicle and contact refinements 1.1.1 — 11 September 2026
 
 `npm test`: **63 passed, 0 failed**.

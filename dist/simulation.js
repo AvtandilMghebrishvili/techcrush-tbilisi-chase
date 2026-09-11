@@ -5,6 +5,8 @@ import { RewindTimeline } from "./rewind.js";
 import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
 import { riverDistance } from "./district-data.js";
 import { upgradedSpec, pursuitTuning } from "./progression.js";
+import { checkpointsForLevel } from "./level-routes.js";
+import { createAirSupport, updateAirSupport } from "./air-support.js";
 // Deterministic, renderer-independent simulation. Distances are metres, time is seconds.
 import {
   GRID,
@@ -261,6 +263,8 @@ export class ChaseSimulation {
     this.player.carId = this.selectedCar || "gt";
     this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
     this.difficulty = pursuitTuning(this.level);
+    this.checkpoints = checkpointsForLevel(this.level);
+    this.helicopter = createAirSupport(this.player, this.level);
     this.player.equipment = structuredClone(this.runOptions?.equipment || {});
     this.player.performance = upgradedSpec(
       carSpec(this.player.carId),
@@ -298,6 +302,7 @@ export class ChaseSimulation {
       fallAngle: 0,
     }));
     this.nextCopId = 1;
+    this.police = [];
     this.police = Array.from(
       { length: this.difficulty.initialUnits },
       (_, i) => 75 + i * 40,
@@ -348,13 +353,55 @@ export class ChaseSimulation {
     this.radioContact = null;
   }
   makePolice(x, z, role = "pursuit") {
+    const id = this.nextCopId++;
+    const tanks = (this.police || []).filter(
+      (c) => c.kind === "tank" && !c.destroyed,
+    ).length;
+    const kind =
+      this.level >= 3 &&
+      tanks < Math.min(3, 2 + Math.floor((this.level - 3) / 4)) &&
+      (role === "blockade" || id % 3 === 0)
+        ? "tank"
+        : this.level >= 2 && id % 2 === 0
+          ? "suv"
+          : "sedan";
+    const spec =
+      kind === "tank"
+        ? {
+            maxHealth: 220,
+            mass: 4.2,
+            width: 3.15,
+            length: 6.3,
+            speedScale: 0.5,
+            accelerationScale: 0.55,
+            yawScale: 0.65,
+          }
+        : kind === "suv"
+          ? {
+              maxHealth: 145,
+              mass: 1.85,
+              width: 2.22,
+              length: 5.3,
+              speedScale: 0.94,
+              accelerationScale: 1.05,
+              yawScale: 0.9,
+            }
+          : {
+              maxHealth: 100,
+              mass: 1.2,
+              width: 1.98,
+              length: 4.98,
+              speedScale: 1,
+              accelerationScale: 1,
+              yawScale: 1,
+            };
     return {
       ...vehicle(x, z),
-      id: this.nextCopId++,
-      health: 100,
-      role,
-      mass: 1.2,
-      length: 4.98,
+      id,
+      kind,
+      ...spec,
+      health: spec.maxHealth,
+      role: kind === "tank" ? "blockade" : role,
       blockPoint: null,
       blockUntil: 0,
       blockExpires: 0,
@@ -376,7 +423,13 @@ export class ChaseSimulation {
     this.reset();
     this.phase = "running";
     this.timeline.capture(this);
-    this.events.push("CHASE ON — HIT THE CYAN GATES");
+    this.events.push(
+      this.level >= 3
+        ? "HEAVY PURSUIT — TANKS & AIR SUPPORT"
+        : this.level >= 2
+          ? "SUV PATROLS & AIR SUPPORT INBOUND"
+          : "CHASE ON — HIT THE TECHCRUSH ARCHES",
+    );
   }
   damagePolice(cop, impact, credit = true) {
     if (cop.destroyed || cop.hitCooldown > 0 || impact < 5) return false;
@@ -479,7 +532,7 @@ export class ChaseSimulation {
     this.player.isDrifting = false;
     const toward = routeBetween(
       p,
-      CHECKPOINTS[this.checkpoint] || CHECKPOINTS[0],
+      this.checkpoints[this.checkpoint] || this.checkpoints[0],
     ).find((q) => distance(q, p) > 10);
     this.player.angle = toward
       ? Math.atan2(toward.x - p.x, toward.z - p.z)
@@ -651,12 +704,23 @@ export class ChaseSimulation {
       for (const block of this.obstacles) resolveCircleRect(t, 2.1, block);
     }
     // Patrols share observed positions. Once all sightlines are broken the radio goes quiet.
-    const sighted = this.police.some(
-      (cop) =>
-        !cop.destroyed &&
-        distance(cop, p) < this.difficulty.sight &&
-        lineOfSight(cop, p, this.obstacles),
+    updateAirSupport(
+      this.helicopter,
+      p,
+      this.obstacles,
+      this.radioContact,
+      this.time,
+      dt,
+      this.level,
     );
+    const sighted =
+      this.helicopter?.tracking ||
+      this.police.some(
+        (cop) =>
+          !cop.destroyed &&
+          distance(cop, p) < this.difficulty.sight &&
+          lineOfSight(cop, p, this.obstacles),
+      );
     if (sighted)
       this.radioContact = {
         x: p.x,
@@ -772,7 +836,8 @@ export class ChaseSimulation {
         turn = angleDelta(desired, cop.angle);
       const max =
         (this.difficulty.maxSpeed + Math.min(this.checkpoint, 5) * 0.7) *
-        (cop.ramRecovery > 0 ? 0.55 : 1);
+        (cop.ramRecovery > 0 ? 0.55 : 1) *
+        (cop.speedScale || 1);
       let want =
         holding || distance(cop, target) < 3
           ? 0
@@ -804,7 +869,7 @@ export class ChaseSimulation {
           want = Math.min(want, Math.max(2, (ahead - 4.8) * 3));
       }
       const cs = Math.hypot(cop.vx, cop.vz);
-      const yawLimit = 2.7 / (1 + cs * 0.008);
+      const yawLimit = (2.7 / (1 + cs * 0.008)) * (cop.yawScale || 1);
       const reversing = cop.reverseUntil > this.time;
       if (!reversing) cop.angle += clamp(turn, -yawLimit * dt, yawLimit * dt);
       const signed =
@@ -814,7 +879,7 @@ export class ChaseSimulation {
         clamp(
           (reversing ? -7 : want) - signed,
           -34 * dt,
-          this.difficulty.acceleration * dt,
+          this.difficulty.acceleration * (cop.accelerationScale || 1) * dt,
         );
       const grip = 1 - Math.exp(-dt * 9);
       cop.vx += (Math.sin(cop.angle) * speed - cop.vx) * grip;
@@ -827,7 +892,12 @@ export class ChaseSimulation {
       cop.x += cop.vx * dt;
       cop.z += cop.vz * dt;
       cop.impact = 0;
-      for (const block of this.obstacles) resolveCircleRect(cop, 2.1, block);
+      for (const block of this.obstacles)
+        resolveCircleRect(
+          cop,
+          cop.kind === "tank" ? 3.35 : cop.kind === "suv" ? 2.65 : 2.1,
+          block,
+        );
       cop.stuck =
         !holding && (cop.impact > 1 || Math.abs(speed) < 2)
           ? cop.stuck + dt
@@ -928,7 +998,11 @@ export class ChaseSimulation {
       // Pairwise pushes cannot leave an officer or civilian inside a building.
       for (const block of this.obstacles)
         if ((car.y || 0) < (block.h || 50) + 1)
-          resolveCircleRect(car, 2.1, block);
+          resolveCircleRect(
+            car,
+            car.kind === "tank" ? 3.35 : car.kind === "suv" ? 2.65 : 2.1,
+            block,
+          );
     }
     let closest = Infinity;
     for (const cop of this.police)
@@ -967,7 +1041,7 @@ export class ChaseSimulation {
       4,
     );
     this.closestPolice = closest;
-    const cp = CHECKPOINTS[this.checkpoint];
+    const cp = this.checkpoints[this.checkpoint];
     if (cp && distance(p, cp) < 13 && p.y < 3 && !p.flipped) {
       this.checkpoint++;
       this.runCash += 150;
@@ -991,12 +1065,14 @@ export class ChaseSimulation {
         this.events.push("ALL CHECKPOINTS — LOSE THE POLICE");
     }
     if (this.checkpoint === 6) {
-      const unseen = this.police.every(
-        (c) =>
-          c.destroyed ||
-          distance(c, p) > 100 ||
-          (!lineOfSight(c, p, this.obstacles) && distance(c, p) > 60),
-      );
+      const unseen =
+        !this.helicopter?.tracking &&
+        this.police.every(
+          (c) =>
+            c.destroyed ||
+            distance(c, p) > 100 ||
+            (!lineOfSight(c, p, this.obstacles) && distance(c, p) > 60),
+        );
       this.escape = clamp(this.escape + (unseen ? dt : -dt * 1.5), 0, 8);
       if (this.escape >= 8) {
         this.phase = "won";
@@ -1015,6 +1091,18 @@ export class ChaseSimulation {
     return {
       phase: this.phase,
       level: this.level,
+      route: this.checkpoints.map((p) => ({
+        name: p.name,
+        x: +p.x.toFixed(2),
+        z: +p.z.toFixed(2),
+      })),
+      helicopter: this.helicopter
+        ? {
+            tracking: this.helicopter.tracking,
+            x: this.helicopter.x,
+            z: this.helicopter.z,
+          }
+        : null,
       runCash: this.runCash,
       trafficWrecks: this.trafficWrecks,
       score: Math.floor(this.score),
@@ -1057,6 +1145,8 @@ export class ChaseSimulation {
         hp: Math.ceil(c.health),
         destroyed: c.destroyed,
         role: c.role,
+        kind: c.kind,
+        maxHp: c.maxHealth,
       })),
       car: this.player.carId,
       takedowns: this.takedowns,

@@ -85,7 +85,12 @@ export function makePatrolHealthBar() {
   sprite.scale.set(4.5, 0.84, 1);
   return { canvas, texture, sprite, previous: -1 };
 }
-export function updatePatrolHealthBar(bar, health) {
+export function updatePatrolHealthBar(
+  bar,
+  health,
+  maxHealth = 100,
+  kind = "sedan",
+) {
   const hp = Math.ceil(health);
   if (hp === bar.previous) return;
   bar.previous = hp;
@@ -96,10 +101,17 @@ export function updatePatrolHealthBar(bar, health) {
   c.fillStyle = "#dce6e9";
   c.font = "bold 20px sans-serif";
   c.textAlign = "center";
-  c.fillText("PATROL · " + hp + " HP", 128, 21);
+  c.fillText(
+    (kind === "tank" ? "TANK" : kind === "suv" ? "SUV" : "PATROL") +
+      " · " +
+      hp +
+      " HP",
+    128,
+    21,
+  );
   c.fillStyle = "#3a4a53";
   c.fillRect(10, 30, 236, 9);
   c.fillStyle = hp < 35 ? "#ff745e" : "#7ce6ce";
-  c.fillRect(10, 30, (236 * hp) / 100, 9);
+  c.fillRect(10, 30, (236 * Math.min(hp, maxHealth)) / maxHealth, 9);
   bar.texture.needsUpdate = true;
 }

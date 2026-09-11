@@ -94,7 +94,8 @@ export function makeSedan(
     eighties = style.includes("80"),
     wagon = style === "wagon80",
     hatch = style === "hatch90",
-    roofHeight = classic ? 1.73 : 1.6;
+    suv = style === "patrolSUV",
+    roofHeight = suv ? 2.06 : classic ? 1.73 : 1.6;
   const group = new THREE.Group();
   const paint = new THREE.MeshPhysicalMaterial({
     color: police ? "#e5e8e3" : color,
@@ -147,8 +148,8 @@ export function makeSedan(
     ),
     paint,
   );
-  const rear = wagon ? -2.12 : hatch ? -1.98 : -1.5,
-    roofRear = wagon ? -1.75 : hatch ? -1.48 : -0.9;
+  const rear = wagon || suv ? -2.12 : hatch ? -1.98 : -1.5,
+    roofRear = wagon || suv ? -1.75 : hatch ? -1.48 : -0.9;
   add(
     shell(
       [
@@ -172,7 +173,7 @@ export function makeSedan(
     (0.48 + roofRear) / 2,
     0.025,
   );
-  if (wagon)
+  if (wagon || suv)
     for (const x of [-0.55, 0.55])
       box(
         0.045,
@@ -243,12 +244,18 @@ export function makeSedan(
   for (const x of [-0.97, 0.97])
     for (const z of [-1.58, 1.52]) {
       const pivot = new THREE.Group();
-      pivot.position.set(x, 0.45, z);
+      pivot.position.set(x, suv ? 0.49 : 0.45, z);
       group.add(pivot);
       const wheel = new THREE.Group();
       pivot.add(wheel);
       const tire = add(
-        new THREE.CylinderGeometry(0.39, 0.39, 0.26, 40, 1),
+        new THREE.CylinderGeometry(
+          suv ? 0.45 : 0.39,
+          suv ? 0.45 : 0.39,
+          0.26,
+          40,
+          1,
+        ),
         black,
         0,
         0,
@@ -305,8 +312,9 @@ export function makeSedan(
         (_, i) =>
           new THREE.Vector3(
             x * 1.028,
-            0.45 + Math.sin((i * Math.PI) / 20) * 0.43,
-            z + Math.cos((i * Math.PI) / 20) * 0.43,
+            (suv ? 0.49 : 0.45) +
+              Math.sin((i * Math.PI) / 20) * (suv ? 0.5 : 0.43),
+            z + Math.cos((i * Math.PI) / 20) * (suv ? 0.5 : 0.43),
           ),
       );
       add(
@@ -447,12 +455,21 @@ export function makeSedan(
   }
   group.userData.brakeLights = tail;
   if (police) {
-    box(1.15, 0.06, 0.28, black, 0, 1.7, -0.15, 0.025);
+    box(1.15, 0.06, 0.28, black, 0, roofHeight + 0.1, -0.15, 0.025);
     const lights = ["#ee2440", "#187fff"].map((color) =>
       material(color, { emissive: color, emissiveIntensity: 5 }),
     );
     lights.forEach((m, i) => {
-      box(0.49, 0.115, 0.26, m, i ? 0.29 : -0.29, 1.78, -0.15, 0.04);
+      box(
+        0.49,
+        0.115,
+        0.26,
+        m,
+        i ? 0.29 : -0.29,
+        roofHeight + 0.18,
+        -0.15,
+        0.04,
+      );
       box(0.13, 0.06, 0.05, m, i ? 0.2 : -0.2, 0.86, 2.475, 0.012);
     });
     group.userData.lights = lights;
@@ -460,18 +477,19 @@ export function makeSedan(
       box(0.055, 0.43, 0.065, black, x, 0.68, 2.54, 0.018);
     box(1.22, 0.07, 0.07, black, 0, 0.82, 2.55, 0.018);
     beam(
-      new THREE.Vector3(0.54, 1.61, -0.63),
-      new THREE.Vector3(0.57, 2.12, -0.65),
+      new THREE.Vector3(0.54, roofHeight + 0.01, -0.63),
+      new THREE.Vector3(0.57, roofHeight + 0.52, -0.65),
       0.009,
       black,
     );
     const hp = makePatrolHealthBar();
-    hp.sprite.position.y = 2.7;
+    hp.sprite.position.y = roofHeight + 1.1;
     group.add(hp.sprite);
     group.userData.healthBar = hp;
     box(0.6, 0.018, 0.74, blue, 0, 1.021, 1.55, 0.01);
   }
   if (hatch) group.scale.z = 0.9;
+  if (suv) group.scale.set(1.07, 1, 1.06);
   group.userData.paint = paint;
   group.userData.style = style;
   mergeCarParts(group);
@@ -479,7 +497,7 @@ export function makeSedan(
 }
 
 // Keep moving wheels separate, but batch their spokes and each body's fixed panels by material.
-function mergeCarParts(group) {
+export function mergeCarParts(group) {
   for (const child of group.children) if (child.isGroup) mergeCarParts(child);
   const batches = new Map();
   for (const child of group.children)

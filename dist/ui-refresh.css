@@ -1,0 +1,101 @@
+/* TECHCRUSH HUD: open navigation typography and a round, bearing-correct radar. */
+.route-cue {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+  gap: 16px;
+  top: 100px;
+  color: #fff;
+  text-shadow:
+    0 2px 4px #000,
+    0 0 14px #09101cd9;
+}
+.route-cue > span {
+  font-size: 62px;
+  color: #fff;
+  line-height: 1;
+}
+.route-cue b {
+  font-size: 46px;
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+.route-cue small {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: #fff;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 5px;
+}
+.navigator {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  width: 206px;
+}
+.navigator #map {
+  width: 100%;
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: drop-shadow(0 4px 12px #0009);
+}
+.map-caption {
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  margin-top: 9px;
+  font-size: 12px;
+  text-shadow: 0 2px 4px #000;
+}
+.map-caption span:last-child {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  color: white;
+  font-weight: 800;
+}
+@media (max-width: 650px) {
+  .route-cue {
+    top: 203px;
+    gap: 9px;
+  }
+  .route-cue b {
+    font-size: 34px;
+  }
+  .route-cue > span {
+    font-size: 43px;
+  }
+  .route-cue small {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .navigator {
+    width: 128px;
+  }
+  .map-caption {
+    font-size: 10px;
+  }
+}
+@media (max-height: 500px) {
+  .navigator {
+    width: 102px;
+  }
+  .route-cue {
+    top: 76px;
+  }
+  .route-cue b {
+    font-size: 30px;
+  }
+  .route-cue > span {
+    font-size: 38px;
+  }
+}

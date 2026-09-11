@@ -57,3 +57,11 @@ The supplied Google Street View screenshot of 12 Nikoloz Baratashvili St guided 
 The user's Kartlis Deda photo guided the original model in `kartlis-deda.js`: raised bowl, lowered arm with horizontal sword, paneled dress, headdress and silver surface. The mesh is enlarged for skyline visibility, not a scan. The photo is not redistributed.
 
 Georgian flags, tower, mountains, road furniture, TECHCRUSH signs and game effects are authored in the source. Three.js version 0.180.0 is MIT, with `dist/vendor/THREE-LICENSE.txt`. Model-preparation dependencies are development-only and locked in `package-lock.json`.
+
+## Garage and cover artwork — 12 September 2026
+
+`dist/assets/garage-parts-atlas.png` is an original imagegen-generated 1,254 × 1,254 studio atlas. The first fourteen cells depict the actual upgrade categories; CSS selects cells without altering the source image. Rarity colors, counts and benefits are live UI, not baked into the artwork. The prompt is retained in `docs/assets/garage-parts-prompt.txt`.
+
+`dist/assets/tbilisi-cover.png` is the previously generated 1,672 × 941 TECHCRUSH cover, reused unchanged on the mission card and garage. The prompt is retained in `docs/assets/tbilisi-cover-prompt.txt`. It is illustrative key art, not a screenshot or a promise of pixel-identical game rendering. Generated media and TECHCRUSH marks are separate from the MIT-licensed code; use is subject to applicable generation-service terms and the brand owner's rights.
+
+The new SUV variant, tank, helicopter and inflatable checkpoint arches are original procedural Three.js geometry in `patrol-car.js`, `pursuit-vehicles.js` and `checkpoint-arch.js`. No external vehicle model or new map imagery was used for those additions.

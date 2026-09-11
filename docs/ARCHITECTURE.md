@@ -59,7 +59,7 @@ The simulation input is `{ throttle, steer, brake, boost, rewind }`: throttle/st
 
 The current road graph has 519 nodes and 671 segments in one connected component. The same graph drives NPC routes, checkpoint guidance, minimap lines and recovery positions. The generated road surface joins widened streets into one asphalt polygon containing 46 block islands. Map changes must regenerate both graph and surface.
 
-District data is shared by collision and drawing code. Buildings use rotated rectangular footprints. Car contacts use oriented boxes and multiple separation passes, including NPC-to-NPC collisions. Tree models share their trunk locations with the simulation; decorative furniture generally has no collision body. Ramps share one definition between drawing and flight physics. Bridges use the road datum rather than a multi-level road system.
+District data is shared by collision and drawing code. Buildings use rotated rectangular footprints. Car contacts use oriented boxes and multiple separation passes, including NPC-to-NPC collisions. Tree models share their trunk locations with the simulation; poles, benches, bins, planters and signs share breakable collision bodies. Ramps share one definition between drawing and flight physics. Bridges use the road datum rather than a multi-level road system.
 
 Police combine graph navigation with local steering. Pursuers follow observations, interceptors target an estimated future position, and blockade units stage across a road ahead. Officers share visible sightings rather than continuously reading an unseen player's current position. Stuck detection, reverse recovery, corner braking and local vehicle avoidance work alongside contact physics. Reinforcement and replacement timers are separate so destroying a car and surviving another wave have distinct effects.
 
@@ -92,3 +92,13 @@ Profile schema 2 adds the `classic` equipment slot. Server reads migrate older p
 There is no multiplayer or persistent leaderboard. Runtime assets are local to the deployment; optional Google Fonts have fallbacks. Asset preparation may contact providers but gameplay needs no provider API key. Optional WebMCP controls expose ordinary input actions only when supported by the browser.
 
 [Back to README](../README.md)
+
+## Level routes and mixed pursuit (1.2)
+
+`level-routes.js` deterministically chooses six road-center gates from clear segments near the established districts. Position and order depend on level; the original route remains level 1. Each run owns `sim.checkpoints`, used by scoring, recovery, the road guide, center distance and radar. `hud-math.js` sums route legs and clamps distant radar markers radially. `checkpoint-arch.js` fits each branded arch to its road width.
+
+`air-support.js` owns the helicopter state. A segment/box intersection checks line of sight in three dimensions against rotated building footprints, including thin walls. Roof clearance controls altitude. Ground radio and aircraft sightings use the same last-seen observation contract; neither keeps reading a player after contact is lost. The rewind frame includes helicopter position, rotor phase, observation and tracking state.
+
+`makePolice` assigns sedan/SUV/tank stats. Active tank counts are bounded and reset correctly on restart. `pursuit-vehicles.js` renders the mixed fleet and aircraft; `view.js` replaces meshes when a respawn changes vehicle kind. Larger units use larger static clearance and mass-aware dynamic contacts.
+
+`garage-presentation.js` calculates displayed benefits through the same `upgradedSpec` used by driving physics. Paid next-tier and free-spare previews are distinct. A single part atlas feeds all cards and reward slots. `garage-refresh.css` and `ui-refresh.css` provide responsive presentation without changing server storage or reward probabilities.

@@ -4,15 +4,19 @@ import { NODES, nearestRoad } from "../dist/city-map.js";
 // A full driving smoke test: controller uses the same throttle/steer/brake inputs as a player.
 import {
   ChaseSimulation,
-  CHECKPOINTS,
   routeBetween,
   distance,
   angleDelta,
   clamp,
 } from "../dist/simulation.js";
 const sim = new ChaseSimulation();
-sim.start(process.argv[2] || "gt",{level:Number(process.argv[3]||1),
-  equipment:Object.fromEntries(PARTS.map(p=>[p.id,Number(process.argv[4]||0)]))});
+sim.start(process.argv[2] || "gt", {
+  level: Number(process.argv[3] || 1),
+  equipment: Object.fromEntries(
+    PARTS.map((p) => [p.id, Number(process.argv[4] || 0)]),
+  ),
+});
+const CHECKPOINTS = sim.checkpoints;
 let route = [],
   lastCP = -1,
   escapeLeg = 0,
@@ -81,7 +85,13 @@ for (let frame = 0; frame < 120 * 480 && sim.phase === "running"; frame++) {
   const sprint =
     Math.abs(delta) < 0.1 && futureTurn < 0.14 && d > 50 && p.nitro > 8;
   const desired =
-    Math.abs(delta) > 0.7 ? 11 : Math.min(sim.player.performance.topSpeed+(sprint?sim.player.performance.boostSpeed:0), brakingSpeed);
+    Math.abs(delta) > 0.7
+      ? 11
+      : Math.min(
+          sim.player.performance.topSpeed +
+            (sprint ? sim.player.performance.boostSpeed : 0),
+          brakingSpeed,
+        );
   const throttle = p.speed > desired + 2 ? -1 : p.speed < desired ? 1 : 0;
   sim.update(1 / 120, {
     throttle,

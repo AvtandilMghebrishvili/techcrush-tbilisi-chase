@@ -1,4 +1,5 @@
 import { ROADS } from "./city-map.js";
+import { radarPoint, routeDistance } from "./hud-math.js";
 import { ProfileClient } from "./profile-client.js";
 import { GarageUI } from "./garage-ui.js";
 import { upgradedSpec } from "./progression.js";
@@ -393,9 +394,9 @@ function updateHUD() {
   $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
   $("score").textContent = Math.floor(sim.score).toString().padStart(6, "0");
   $("progress").textContent = sim.checkpoint + " / 6";
-  $("dots").innerHTML = CHECKPOINTS.map(
-    (_, i) => `<i class="${i < sim.checkpoint ? "done" : ""}"></i>`,
-  ).join("");
+  $("dots").innerHTML = sim.checkpoints
+    .map((_, i) => `<i class="${i < sim.checkpoint ? "done" : ""}"></i>`)
+    .join("");
   $("speed").textContent = Math.round(Math.abs(p.speed) * 3.6);
   $("health").textContent = Math.ceil(p.health) + "%";
   $("health-bar").style.width = p.health + "%";
@@ -447,7 +448,8 @@ function updateHUD() {
   $("heat").textContent =
     sim.police.filter((c) => !c.destroyed).length +
     " UNITS · HEAT " +
-    sim.heatLevel;
+    sim.heatLevel +
+    (sim.helicopter ? " · AIR" : "");
   const escape = sim.checkpoint === 6;
   $("bust-bar").style.width =
     (escape ? sim.escape / 8 : sim.bust / 4) * 100 + "%";
@@ -456,16 +458,20 @@ function updateHUD() {
   $("pursuit-text").textContent =
     sim.bust > 1
       ? "BOXED IN — ACCELERATE!"
-      : escape
-        ? sim.escape > 0
-          ? "Losing them… " + Math.ceil(8 - sim.escape) + "s"
-          : "Break line of sight and pull away."
-        : sim.roadblockAhead
-          ? "ROADBLOCK AHEAD — FIND A GAP"
-          : sim.police.length < sim.difficulty.maxUnits
-            ? "REINFORCEMENTS IN " + Math.ceil(sim.nextWaveAt - sim.time) + "s"
-            : `MAXIMUM PURSUIT — ${sim.difficulty.maxUnits} UNITS`;
-  const cp = CHECKPOINTS[sim.checkpoint];
+      : sim.helicopter?.tracking
+        ? "AIR SUPPORT HAS VISUAL — BREAK SIGHT"
+        : escape
+          ? sim.escape > 0
+            ? "Losing them… " + Math.ceil(8 - sim.escape) + "s"
+            : "Break line of sight and pull away."
+          : sim.roadblockAhead
+            ? "ROADBLOCK AHEAD — FIND A GAP"
+            : sim.police.length < sim.difficulty.maxUnits
+              ? "REINFORCEMENTS IN " +
+                Math.ceil(sim.nextWaveAt - sim.time) +
+                "s"
+              : `MAXIMUM PURSUIT — ${sim.difficulty.maxUnits} UNITS`;
+  const cp = sim.checkpoints[sim.checkpoint];
   $("objective").textContent = cp
     ? "Reach " + cp.name
     : "Lose the police for 8 seconds";
@@ -482,7 +488,7 @@ function updateHUD() {
           : delta > 0
             ? "←"
             : "→";
-    $("distance").textContent = Math.round(distance(p, cp)) + " M";
+    $("distance").textContent = Math.round(routeDistance(p, route)) + " M";
   } else {
     $("direction").textContent = "↗";
     $("distance").textContent = "ESCAPE";
@@ -498,6 +504,10 @@ function drawMap() {
     ox = 115 + sim.player.x * s,
     oz = 115 + sim.player.z * s;
   c.clearRect(0, 0, 230, 230);
+  c.save();
+  c.beginPath();
+  c.arc(115, 115, 112, 0, Math.PI * 2);
+  c.clip();
   c.fillStyle = "#112531";
   c.fillRect(0, 0, 230, 230);
   c.fillStyle = "#204853";
@@ -516,7 +526,7 @@ function drawMap() {
     c.lineTo(ox - road.end.x * s, oz - road.end.z * s);
     c.stroke();
   }
-  const cp = CHECKPOINTS[sim.checkpoint];
+  const cp = sim.checkpoints[sim.checkpoint];
   if (cp) {
     c.strokeStyle = "#73e6ed";
     c.lineWidth = 1.6;
@@ -529,14 +539,14 @@ function drawMap() {
     c.setLineDash([]);
     c.fillStyle = "#73e6ed";
     c.beginPath();
-    c.arc(
-      Math.max(9, Math.min(221, ox - cp.x * s)),
-      Math.max(9, Math.min(221, oz - cp.z * s)),
-      5,
-      0,
-      Math.PI * 2,
-    );
+    const marker = radarPoint(ox - cp.x * s, oz - cp.z * s);
+    c.arc(marker.x, marker.y, 5, 0, Math.PI * 2);
     c.fill();
+    c.strokeStyle = "#ffffffaa";
+    c.lineWidth = 1;
+    c.beginPath();
+    c.arc(marker.x, marker.y, 8, 0, Math.PI * 2);
+    c.stroke();
   }
   c.fillStyle = "#d3b37a";
   c.fillRect(ox - TOWER.x * s - 2, oz - TOWER.z * s - 2, 4, 4);
@@ -557,6 +567,24 @@ function drawMap() {
     c.arc(ox - cop.x * s, oz - cop.z * s, 3, 0, Math.PI * 2);
     c.fill();
   }
+  if (sim.helicopter) {
+    const h = radarPoint(
+      ox - sim.helicopter.x * s,
+      oz - sim.helicopter.z * s,
+      98,
+    );
+    c.strokeStyle = sim.helicopter.tracking ? "#ffdf56" : "#aaaee5";
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(h.x - 5, h.y);
+    c.lineTo(h.x + 5, h.y);
+    c.moveTo(h.x, h.y - 5);
+    c.lineTo(h.x, h.y + 5);
+    c.stroke();
+    c.beginPath();
+    c.arc(h.x, h.y, 7, 0, Math.PI * 2);
+    c.stroke();
+  }
   c.save();
   c.translate(ox - sim.player.x * s, oz - sim.player.z * s);
   c.rotate(-sim.player.angle);
@@ -568,6 +596,17 @@ function drawMap() {
   c.lineTo(-4, 5);
   c.fill();
   c.restore();
+  c.restore();
+  c.strokeStyle = "#e9f4f688";
+  c.lineWidth = 1.5;
+  c.beginPath();
+  c.arc(115, 115, 112, 0, Math.PI * 2);
+  c.stroke();
+  c.strokeStyle = "#f22446";
+  c.lineWidth = 3;
+  c.beginPath();
+  c.arc(115, 115, 112, -Math.PI * 0.65, -Math.PI * 0.35);
+  c.stroke();
 }
 function frame(now) {
   const dt = Math.min((now - last) / 1000 || 0, 0.05);

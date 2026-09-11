@@ -1,0 +1,409 @@
+/* Photographic parts, clear rarity and measurable upgrade previews. */
+.mission-card {
+  overflow: hidden;
+}
+.mission-cover {
+  width: calc(100% + 46px);
+  max-width: none;
+  height: 156px;
+  object-fit: cover;
+  margin: -23px -23px 20px;
+  display: block;
+}
+.workshop {
+  background: #11151c;
+  border: 1px solid #48515e;
+  border-radius: 18px;
+  padding: 28px;
+  width: 1240px;
+}
+.workshop-header {
+  border-bottom: 1px solid #ffffff17;
+  margin-bottom: 12px;
+}
+.workshop h2 {
+  font-size: 46px;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+.icon-close {
+  background: #ffffff09;
+  border-color: #ffffff30;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.icon-close:hover {
+  background: #ed143b;
+}
+.garage-wallet {
+  border: 0;
+  padding-bottom: 12px;
+}
+.garage-wallet strong {
+  color: #ffe34c;
+}
+.workshop-cars {
+  margin: 12px 0 20px;
+  gap: 6px;
+}
+.workshop-cars button {
+  background: #1c222c;
+  border-color: #303947;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.workshop-cars button[aria-pressed="true"] {
+  background: #ee123c;
+  color: #fff;
+  border-color: #ee123c;
+}
+.garage-showcase {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  border: 1px solid #343e4c;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background: #1a202a;
+}
+.garage-build {
+  padding: 24px;
+}
+.garage-build h3 {
+  font:
+    italic 800 34px "Barlow Condensed",
+    sans-serif;
+  margin: 7px 0 24px;
+}
+.garage-cover {
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  object-fit: cover;
+}
+.garage-stats {
+  gap: 12px;
+}
+.garage-stats div {
+  padding-left: 10px;
+  border-color: #ed143b;
+}
+.garage-stats small {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.garage-stats strong {
+  font-size: 23px;
+  white-space: nowrap;
+}
+.garage-stats em {
+  display: block;
+  color: #93ddc2;
+  font-size: 10px;
+  font-style: normal;
+  margin-top: 5px;
+}
+.level-threat {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #ced3de;
+  margin: 20px 0 0;
+}
+.box-bench {
+  background: linear-gradient(110deg, #281c23, #151d2d);
+  border-color: #513547;
+  padding: 22px 24px;
+}
+.box-bench h3 {
+  font-style: italic;
+  font-size: 27px;
+}
+.box-bench .primary {
+  background: #ffe34c;
+  color: #191913;
+  border-color: #ffe34c;
+}
+.parts-heading {
+  margin-top: 30px;
+}
+.parts-heading h3 {
+  font-size: 19px;
+}
+.part-filters {
+  display: flex;
+  gap: 8px;
+  margin: 17px 0;
+  flex-wrap: wrap;
+}
+.part-filters button {
+  cursor: pointer;
+  padding: 9px 17px;
+  border-radius: 30px;
+  border: 1px solid #3a4556;
+  color: #adb9c9;
+  background: transparent;
+  font: 700 11px inherit;
+  letter-spacing: 1px;
+}
+.part-filters button[aria-pressed="true"] {
+  color: #12161d;
+  border-color: #eef1f7;
+  background: #eef1f7;
+}
+.part-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+}
+.part-card {
+  padding: 0;
+  gap: 0;
+  border: 1px solid #34404e;
+  border-radius: 10px;
+  background: #1a2029;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.part-card:hover {
+  border-color: var(--tier);
+  transform: translateY(-2px);
+}
+.part-photo {
+  position: relative;
+  background: #111419;
+  border-bottom: 2px solid var(--tier);
+}
+.part-art {
+  background-image: url("./assets/garage-parts-atlas.png");
+  background-size: 400% 400%;
+  background-position: var(--art-x) var(--art-y);
+  aspect-ratio: 1;
+  width: 100%;
+}
+.part-quality {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  border: 1px solid color-mix(in srgb, var(--tier) 45%, transparent);
+  background: #0d101ae6;
+  color: var(--tier);
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 5px 7px;
+  text-transform: uppercase;
+}
+.part-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  padding: 17px;
+}
+.part-title {
+  justify-content: space-between;
+  gap: 6px;
+}
+.part-title h3 {
+  font-size: 18px;
+}
+.part-title span {
+  font-size: 11px;
+}
+.part-level {
+  font:
+    700 20px "Barlow Condensed",
+    sans-serif;
+  color: #8996a9;
+}
+.part-card p {
+  font-size: 12px;
+  min-height: 36px;
+  color: #b5bfcc;
+}
+.upgrade-preview {
+  padding: 10px;
+  background: #0d121a;
+  border-radius: 5px;
+  min-height: 65px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.upgrade-preview small {
+  color: #9ba9bc;
+  font-size: 9px;
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+}
+.upgrade-preview span {
+  color: #d7f1df;
+  font-size: 12px;
+}
+.upgrade-preview .spare-preview {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid #ffffff18;
+  color: var(--tier);
+}
+.tier-track {
+  gap: 3px;
+}
+.tier-track > span {
+  padding: 5px 1px;
+  font-size: 9px;
+  border-color: #3a4452;
+  border-radius: 3px;
+  opacity: 0.85;
+}
+.tier-track small {
+  font-size: 11px;
+}
+.part-actions {
+  gap: 7px;
+}
+.part-actions button {
+  background: #ffe34c;
+  border: 1px solid #ffe34c;
+  min-height: 39px;
+  border-radius: 5px;
+  color: #1c1c12;
+  font-size: 11px;
+}
+.part-actions button.install {
+  background: #c2f0dd;
+  color: #143a2c;
+  border-color: #c2f0dd;
+}
+.part-actions button.sell {
+  border-color: #424c5d;
+  font-size: 10px;
+}
+.part-actions button:disabled {
+  opacity: 1;
+  background: #282f3a;
+  border-color: #3a4350;
+  color: #7e8c9e;
+}
+.workshop button:focus-visible,
+.loot-dialog button:focus-visible,
+.part-card:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+.loot-dialog {
+  background: radial-gradient(ellipse at top, #382335, #10151f 80%);
+  border-color: #8a546e;
+  padding: 30px;
+}
+.loot-dialog h2 {
+  font-size: 43px;
+}
+.loot-slot {
+  overflow: hidden;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0 0 20px;
+  background: #11161e;
+  border-radius: 10px;
+  box-shadow: 0 0 30px color-mix(in srgb, var(--tier) 10%, transparent);
+}
+.loot-slot .part-art {
+  border-bottom: 1px solid var(--tier);
+  margin-bottom: 6px;
+}
+.loot-slot strong {
+  font-size: 20px;
+}
+.loot-slot span {
+  font-size: 12px;
+}
+@media (max-width: 1000px) {
+  .garage-showcase {
+    grid-template-columns: 1.6fr 1fr;
+  }
+  .garage-stats {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 18px;
+  }
+  .part-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .workshop {
+    padding: 18px;
+    height: 94vh;
+  }
+  .garage-showcase {
+    grid-template-columns: 1fr;
+  }
+  .garage-cover {
+    min-height: 0;
+    height: 160px;
+    order: -1;
+    object-position: center 60%;
+  }
+  .garage-build {
+    padding: 20px;
+  }
+  .workshop-cars {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .part-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .part-body {
+    padding: 12px;
+  }
+  .part-title h3 {
+    font-size: 15px;
+  }
+  .part-filters button {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+  .tier-track > span {
+    font-size: 8px;
+  }
+  .loot-dialog {
+    padding: 16px;
+  }
+  .loot-dialog h2 {
+    font-size: 30px;
+  }
+  .loot-slot {
+    min-height: 0;
+    padding-bottom: 12px;
+  }
+  .loot-slot strong {
+    font-size: 13px;
+  }
+  .loot-slot span {
+    font-size: 10px;
+  }
+  .mission-cover {
+    height: 125px;
+  }
+}
+@media (max-width: 420px) {
+  .part-grid {
+    grid-template-columns: 1fr;
+  }
+  .part-photo .part-art {
+    width: min(100%, 245px);
+    margin-inline: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .part-card {
+    transition: none;
+  }
+  .part-card:hover {
+    transform: none;
+  }
+}

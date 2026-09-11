@@ -1,0 +1,13 @@
+Use case: product-mockup.
+Asset type: one square 4 by 4 sprite atlas of premium automotive performance-parts photographs for a racing game's garage. Generate exactly one image, ideally 2048 x 2048 pixels or larger.
+Scene/backdrop: perfectly uniform near-black charcoal #0b1018 across the whole image, no environment, no display stands, no ground plane, no visible grid lines or cell borders.
+Composition/framing: precisely sixteen equal square cells arranged in a perfectly regular 4-column by 4-row grid. Cell centers are at 12.5%, 37.5%, 62.5%, 87.5% horizontally and vertically. Place exactly one part in each cell. Every part is centered, fully contained inside its own cell with generous safe padding: fit inside the middle 72% of its cell. Objects must never touch or cross an invisible cell boundary. Uniform three-quarter camera view and apparent scale. Crisp high-end studio product photography, physically realistic engineered objects and plausible materials.
+Exact row-major contents:
+Row 1, left to right: (1) exposed engine block; (2) standalone ECU electronic tuning module with connector ports and no printing; (3) metal automotive turbocharger; (4) nitrous oxide bottle with valve, unprinted.
+Row 2, left to right: (5) automotive intercooler radiator; (6) gearbox transmission assembly; (7) single performance rubber tire without wheel; (8) standalone forged alloy wheel without tire.
+Row 3, left to right: (9) carbon fiber rear spoiler wing; (10) brake disc with red brake caliper; (11) tubular steel reinforcement roll cage assembly; (12) coilover suspension.
+Row 4, left to right: (13) sport exhaust pipes and muffler assembly; (14) carbon fiber hood body panel; (15) car battery with visible terminal posts and no printing; (16) clutch assembly.
+Lighting/mood: premium automotive catalog photography, soft studio illumination with crisp metallic detail, restrained red and ice-blue edge highlights. Rich blacks with enough contrast to read every object clearly.
+Materials/textures: realistically machined metal, aluminum castings, polished steel, treaded rubber, woven carbon fiber, subtly worn plastic, accurate physical shapes.
+Constraints: photo-real parts, one standalone part or named connected assembly per cell, all sixteen specified parts exactly once, strict row-major ordering, no perspective distortion to the grid itself, no overlap, no crop, consistent solid background. This is a sprite sheet asset, not a UI screenshot.
+Avoid: text, labels, logos, brand marks, watermarks, numerals, cards, buttons, frames, borders, divider lines, UI, people, vehicles, decorative props, smoke, gradients, floor reflections, colored background patches.

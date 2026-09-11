@@ -8,6 +8,11 @@ import {
   pursuitTuning,
 } from "./progression.js";
 import { CARS, carSpec } from "./config.js";
+import {
+  partArtwork,
+  partCategory,
+  upgradeBenefits,
+} from "./garage-presentation.js";
 const $ = (id) => document.getElementById(id);
 export class GarageUI {
   constructor(store, onCar) {
@@ -15,6 +20,13 @@ export class GarageUI {
     this.onCar = onCar;
     this.car = store.profile.selectedCar;
     this.rolling = false;
+    this.filter = "all";
+    $("part-filters").onclick = (event) => {
+      const button = event.target.closest("[data-filter]");
+      if (!button) return;
+      this.filter = button.dataset.filter;
+      this.render();
+    };
     $("workshop-close").onclick = () => this.close();
     $("workshop").addEventListener("cancel", (e) => {
       if (this.rolling) e.preventDefault();
@@ -59,9 +71,12 @@ export class GarageUI {
     }
   }
   render() {
+    const focus = document.activeElement?.closest("[data-part]")?.dataset.part;
     const p = this.store.profile;
     if (!p) return;
     const spec = upgradedSpec(carSpec(this.car), p.cars[this.car]);
+    $("garage-selected-car").textContent = carSpec(this.car).name;
+    const stock = upgradedSpec(carSpec(this.car));
     $("garage-level").textContent = `LEVEL ${String(p.level).padStart(2, "0")}`;
     $("garage-credits").textContent = p.credits.toLocaleString() + " CR";
     $("garage-boxes").textContent =
@@ -85,37 +100,84 @@ export class GarageUI {
         this.render();
       };
     $("garage-stats").innerHTML = [
-      ["TOP SPEED", Math.round(spec.topSpeed * 3.6) + " km/h"],
+      [
+        "TOP SPEED",
+        Math.round(spec.topSpeed * 3.6) + " km/h",
+        Math.round((spec.topSpeed - stock.topSpeed) * 3.6) + " km/h",
+      ],
       [
         "WITH TURBO",
         Math.round((spec.topSpeed + spec.boostSpeed) * 3.6) + " km/h",
+        Math.round(
+          (spec.topSpeed +
+            spec.boostSpeed -
+            stock.topSpeed -
+            stock.boostSpeed) *
+            3.6,
+        ) + " km/h",
       ],
-      ["TURBO TIME", (100 / spec.nitroDrain).toFixed(1) + " s"],
-      ["HANDLING", Math.round(spec.handling * 100) + "%"],
+      [
+        "TURBO TIME",
+        (100 / spec.nitroDrain).toFixed(1) + " s",
+        (100 / spec.nitroDrain - 100 / stock.nitroDrain).toFixed(1) + " s",
+      ],
+      [
+        "HANDLING",
+        Math.round(spec.handling * 100) + "%",
+        Math.round((spec.handling - stock.handling) * 100) + "%",
+      ],
     ]
-      .map(([k, v]) => `<div><small>${k}</small><strong>${v}</strong></div>`)
+      .map(
+        ([k, v, delta]) =>
+          `<div><small>${k}</small><strong>${v}</strong><em>${parseFloat(delta) > 0 ? "+" + delta + " vs stock" : "STOCK SPEC"}</em></div>`,
+      )
       .join("");
     const difficulty = pursuitTuning(p.level);
     $("level-threat").textContent =
-      `Next chase: ${difficulty.initialUnits} starting patrols · reinforcements every ${Math.round(difficulty.waveInterval)}s${difficulty.flank ? " · coordinated flanking" : ""}`;
-    $("part-grid").innerHTML = PARTS.map((part) => {
-      const tier = p.cars[this.car][part.id] || 0;
-      const owned = [1, 2, 3, 4].filter(
-        (t) => (p.inventory[partKey(part.id, t)] || 0) > 0,
-      );
-      const best = Math.max(0, ...owned),
-        canEquip = best > tier;
-      return `<article class="part-card" style="--tier:${TIERS[tier].color}"><div class="part-title"><i>${part.icon}</i><div><h3>${part.name}</h3><span>${TIERS[tier].name} installed</span></div></div><p>${part.effect}</p>
+      `LEVEL ${p.level} · ${difficulty.initialUnits} patrols · ${p.level >= 3 ? "SUVs + tanks + helicopter" : p.level >= 2 ? "SUVs + helicopter" : "sedan pursuit"} · new routes each level`;
+    for (const b of $("part-filters").querySelectorAll("button"))
+      b.setAttribute("aria-pressed", String(b.dataset.filter === this.filter));
+    const visibleParts = PARTS.filter(
+      (part) => this.filter === "all" || partCategory(part.id) === this.filter,
+    );
+    $("parts-count").textContent = `${visibleParts.length} PARTS`;
+    $("part-grid").innerHTML = visibleParts
+      .map((part) => {
+        const tier = p.cars[this.car][part.id] || 0;
+        const owned = [1, 2, 3, 4].filter(
+          (t) => (p.inventory[partKey(part.id, t)] || 0) > 0,
+        );
+        const best = Math.max(0, ...owned),
+          canEquip = best > tier;
+        const previewTier = Math.min(4, tier + 1);
+        const benefits =
+          tier === 4
+            ? []
+            : upgradeBenefits(
+                carSpec(this.car),
+                p.cars[this.car],
+                part,
+                previewTier,
+              );
+        const spareBenefits =
+          canEquip && best !== previewTier
+            ? upgradeBenefits(carSpec(this.car), p.cars[this.car], part, best)
+            : [];
+        return `<article class="part-card" tabindex="-1" data-part="${part.id}" style="--tier:${TIERS[canEquip ? best : tier].color}">
+        <div class="part-photo">${partArtwork(part)}<span class="part-quality">${canEquip ? TIERS[best].name + " AVAILABLE" : TIERS[tier].name + " FITTED"}</span></div>
+        <div class="part-body"><div class="part-title"><div><h3>${part.name}</h3><span>${TIERS[tier].name} installed</span></div><b class="part-level">${tier}/4</b></div><p>${part.effect}</p>
+        <div class="upgrade-preview"><small>${tier === 4 ? "FULLY UPGRADED" : TIERS[previewTier].name.toUpperCase() + " UPGRADE BENEFITS"}</small>${benefits.map((x) => `<span>${x}</span>`).join("")}${spareBenefits.length ? `<small class="spare-preview">FREE ${TIERS[best].name.toUpperCase()} INSTALL</small>${spareBenefits.map((x) => `<span>${x}</span>`).join("")}` : ""}</div>
         <div class="tier-track">${TIERS.slice(1)
           .map(
             (t, i) =>
-              `<span class="${i + 1 <= tier ? "lit" : ""}" style="--rarity:${t.color}" title="${t.name}">${t.name.slice(0, 1)}<small>×${p.inventory[partKey(part.id, i + 1)] || 0}</small></span>`,
+              `<span class="${i + 1 === tier ? "lit" : ""}" style="--rarity:${t.color}" title="${t.name}: ${p.inventory[partKey(part.id, i + 1)] || 0} spare parts">${t.name}<small>×${p.inventory[partKey(part.id, i + 1)] || 0}</small></span>`,
           )
           .join("")}</div>
         <div class="part-actions"><button data-upgrade="${part.id}" ${tier === 4 || p.credits < upgradeCost(tier + 1) ? "disabled" : ""}>${tier === 4 ? "MAXED" : `UPGRADE · ${upgradeCost(tier + 1).toLocaleString()} CR`}</button>
         ${canEquip ? `<button class="install" data-equip="${part.id}" data-tier="${best}">INSTALL ${TIERS[best].name.toUpperCase()} · FREE</button>` : ""}
-        ${best ? `<button class="sell" data-sell="${part.id}" data-tier="${best}">SELL SPARE · +${salvageValue(best)} CR</button>` : ""}</div></article>`;
-    }).join("");
+        ${best ? `<button class="sell" data-sell="${part.id}" data-tier="${best}">SELL SPARE · +${salvageValue(best)} CR</button>` : ""}</div></div></article>`;
+      })
+      .join("");
     for (const button of $("part-grid").querySelectorAll("button")) {
       if (this.store.busy || this.store.pending) button.disabled = true;
       button.onclick = () => {
@@ -148,6 +210,10 @@ export class GarageUI {
           )
           .join(" · ")
       : "One welcome box is waiting. Earn another by completing a level.";
+    if (focus)
+      $("part-grid")
+        .querySelector(`[data-part="${focus}"]`)
+        ?.focus({ preventScroll: true });
   }
   async openBox() {
     if (this.rolling) return;
@@ -158,10 +224,11 @@ export class GarageUI {
         this.store.mutate({ type: "open-box" }),
       );
       const results = profile.lastBox.items;
+      $("loot-summary").textContent = "Opening your three rewards…";
       $("loot-slots").innerHTML = results
         .map(
           () =>
-            '<div class="loot-slot spinning"><i>◈</i><strong>ROLLING</strong><span>PARTS DROP</span></div>',
+            `<div class="loot-slot spinning">${partArtwork(PARTS[2])}<strong>ROLLING</strong><span>PARTS DROP</span></div>`,
         )
         .join("");
       $("loot-done").disabled = true;
@@ -171,7 +238,7 @@ export class GarageUI {
       const show = (slot, reward, done) => {
         const part = PARTS.find((x) => x.id === reward.part);
         slot.style.setProperty("--tier", TIERS[reward.tier].color);
-        slot.innerHTML = `<i>${part.icon}</i><strong>${part.name}</strong><span>${TIERS[reward.tier].name}</span>`;
+        slot.innerHTML = `${partArtwork(part)}<strong>${part.name}</strong><span>${TIERS[reward.tier].name}</span>`;
         slot.classList.toggle("spinning", !done);
       };
       await new Promise((resolve) => {

@@ -2,6 +2,15 @@ import * as THREE from "./vendor/three.module.js";
 import { updateBreakables } from "./breakable-props.js";
 import { makeOriginalSportsCar } from "./car-models.js";
 import { CHECKPOINTS } from "./simulation.js";
+import {
+  makeCheckpointArch,
+  positionCheckpointArch,
+} from "./checkpoint-arch.js";
+import {
+  makePoliceVehicle,
+  makeHelicopter,
+  updateHelicopterMesh,
+} from "./pursuit-vehicles.js";
 import { carSpec, CAMERAS } from "./config.js";
 import { updateScenery } from "./scenery.js";
 import { buildRealisticCity } from "./realistic-city.js";
@@ -211,46 +220,7 @@ export class SceneView {
       batch.receiveShadow = true;
       this.scene.add(batch);
     }
-    this.gate = new THREE.Group();
-    const cyan = material("#74f6f0", {
-      emissive: "#40e8ea",
-      emissiveIntensity: 2.3,
-    });
-    for (const x of [-12, 12])
-      this.box(0.32, 7, 0.32, cyan, x, 3.5, 0, this.gate);
-    this.box(24, 0.28, 0.32, cyan, 0, 7, 0, this.gate);
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(24, 4),
-      new THREE.MeshBasicMaterial({
-        color: "#54dbe4",
-        transparent: true,
-        opacity: 0.25,
-        depthWrite: false,
-        side: THREE.DoubleSide,
-      }),
-    );
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0.1;
-    this.gate.add(floor);
-    const labelCanvas = document.createElement("canvas");
-    labelCanvas.width = 512;
-    labelCanvas.height = 96;
-    const c = labelCanvas.getContext("2d");
-    c.fillStyle = "#0a2330";
-    c.fillRect(0, 0, 512, 96);
-    c.fillStyle = "#9ffbf1";
-    c.font = "bold 37px Arial";
-    c.textAlign = "center";
-    c.fillText("CHECKPOINT", 256, 61);
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({
-        map: new THREE.CanvasTexture(labelCanvas),
-        depthTest: true,
-      }),
-    );
-    sprite.position.y = 9;
-    sprite.scale.set(13, 2.45, 1);
-    this.gate.add(sprite);
+    this.gate = makeCheckpointArch();
     this.scene.add(this.gate);
     this.updateGate(0);
     this.skids = [];
@@ -274,15 +244,15 @@ export class SceneView {
     this.renderer.shadowMap.autoUpdate = true;
     this.renderer.shadowMap.needsUpdate = true;
   }
-  updateGate(index) {
-    const cp = CHECKPOINTS[index];
-    this.gate.visible = !!cp;
-    if (cp) {
-      this.gate.position.set(cp.x, 0, cp.z);
-      this.gate.rotation.y = cp.angle;
-    }
+  updateGate(index, checkpoints = this.checkpoints || CHECKPOINTS) {
+    const cp = checkpoints[index];
+    if (this.gateCheckpoint === cp) return;
+    this.gateCheckpoint = cp;
+    positionCheckpointArch(this.gate, cp);
   }
   startGame(sim) {
+    this.checkpoints = sim.checkpoints;
+    this.helicopterMesh = null;
     resetTireSmoke(this.tireSmoke);
     this.lastTirePositions = null;
     for (const child of [...this.scene.children])
@@ -343,6 +313,8 @@ export class SceneView {
     return CAMERAS[this.cameraMode];
   }
   resetPreview() {
+    this.checkpoints = CHECKPOINTS;
+    this.helicopterMesh = null;
     resetTireSmoke(this.tireSmoke);
     for (const child of [...this.scene.children])
       if (
@@ -391,10 +363,23 @@ export class SceneView {
       }
       this.wasRewinding = sim.phase === "rewinding";
       while (this.policeMeshes.length < sim.police.length) {
-        const m = this.makeCar("#18232b", true);
+        const m = makePoliceVehicle(this, sim.police[this.policeMeshes.length]);
         this.scene.add(m);
         this.policeMeshes.push(m);
       }
+      sim.police.forEach((cop, i) => {
+        if (this.policeMeshes[i].userData.kind !== cop.kind) {
+          disposeGroup(this.scene, this.policeMeshes[i]);
+          this.policeMeshes[i] = makePoliceVehicle(this, cop);
+          this.scene.add(this.policeMeshes[i]);
+        }
+      });
+      if (sim.helicopter && !this.helicopterMesh) {
+        this.helicopterMesh = makeHelicopter();
+        this.scene.add(this.helicopterMesh);
+      }
+      if (this.helicopterMesh)
+        updateHelicopterMesh(this.helicopterMesh, sim.helicopter, sim.time);
       for (let i = sim.police.length; i < this.policeMeshes.length; i++)
         this.policeMeshes[i].visible = false;
       for (const [cars, meshes] of [
@@ -406,7 +391,12 @@ export class SceneView {
             !car.destroyed && Math.hypot(car.x - p.x, car.z - p.z) < 330;
           if (car.destroyed) return;
           if (meshes[i].userData.healthBar)
-            updatePatrolHealthBar(meshes[i].userData.healthBar, car.health);
+            updatePatrolHealthBar(
+              meshes[i].userData.healthBar,
+              car.health,
+              car.maxHealth,
+              car.kind,
+            );
           if (meshes[i].userData.healthBar)
             meshes[i].userData.healthBar.sprite.visible =
               Math.hypot(
@@ -426,7 +416,7 @@ export class SceneView {
                   Math.sin(sim.time * 19 + j * Math.PI) > 0 ? 6 : 0.3),
             );
         });
-      this.updateGate(sim.checkpoint);
+      this.updateGate(sim.checkpoint, sim.checkpoints);
       const mode = CAMERAS[this.cameraMode].id;
       const interior = mode === "cockpit",
         hood = mode === "hood";

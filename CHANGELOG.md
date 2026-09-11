@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0 — 2026-09-12
+
+- Circular, clipped radar with bearing-correct edge markers and an air-support marker. Remove the dark center navigation panel and measure road-route distance.
+- Use illustrated TECHCRUSH cover art on the mission card and garage showcase.
+- Redesign the garage with a 14-part photographic-style atlas, rarity borders and labels, category filters, stock comparisons, and separate paid/free upgrade previews. Preserve all existing saves and reward odds.
+- Change six legal checkpoint positions and visiting order per level. Replace rectangular gates with thick translucent branded arches and two-sided wordmarks/logo badges.
+- Add larger 145-HP police SUVs from level 2 and 220-HP tracked blockade tanks from level 3. Give them distinct mass, clearance, acceleration and steering; cap tanks to preserve a mixed pursuit fleet.
+- Add level-2 air support with animated rotors, searchlight, height-aware building occlusion, shared sightings, last-seen searching, roof clearance and limited pursuit speed. Rewind restores its observations and position.
+- Add regression coverage for twenty levels of clear routes, fleet progression, bounded tanks, air visibility/escape/rewind, circular radar and every upgrade preview.
+
 ## 1.1.1 — 2026-09-11
 
 - Restore the detailed Original 458 as a fourth selectable car; preserve existing garages, credits and installed parts when migrating profiles.

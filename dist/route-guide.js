@@ -64,16 +64,18 @@ export function makeRouteGuide(scene) {
 }
 
 export function updateRouteGuide(guide, sim) {
-  const cp = CHECKPOINTS[sim.checkpoint];
+  const cp = sim.checkpoints[sim.checkpoint];
   guide.group.visible = !!cp && ["running", "paused"].includes(sim.phase);
   if (!guide.group.visible) return;
   if (
     sim.checkpoint !== guide.checkpoint ||
+    sim.level !== guide.level ||
     sim.time >= guide.refreshAt ||
     sim.time < guide.refreshAt - 0.3
   ) {
     guide.points = sampleRoute(sim.player, routeBetween(sim.player, cp));
     guide.checkpoint = sim.checkpoint;
+    guide.level = sim.level;
     guide.refreshAt = sim.time + 0.2;
   }
   guide.arrows.forEach((mesh, i) => {

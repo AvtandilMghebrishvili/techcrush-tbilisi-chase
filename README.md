@@ -8,6 +8,10 @@ Play directly in your browser — no installation or sign-in required. Share the
 
 [Download complete source](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/archive/refs/heads/main.zip) · [Releases](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases)
 
+![Illustrated TECHCRUSH Tbilisi Chase cover](dist/assets/tbilisi-cover.png)
+
+_Illustrated key art. The browser game uses the 3D environment shown during play._
+
 A single-player browser 3D chase through central Tbilisi. Clear six checkpoints, dodge mixed traffic, ram patrols and break contact for eight seconds. Complete levels to earn credits and three-part reward boxes, then build a faster car in your saved garage.
 
 ## Play and save
@@ -70,7 +74,11 @@ Each box draws exactly three independent parts. Duplicates count separately. Per
 
 Install an owned better part free, or buy the next tier for **600 / 1,500 / 3,600 / 7,800 CR**. Replaced parts become spares. Sell them for **75 / 180 / 420 / 960 CR**. Equipment belongs to the selected car; money and loose parts are shared within its garage.
 
-Each level increases police speed, acceleration, observation range and decision frequency. Waves arrive sooner and unit limits grow. From level 3, pursuers flank; interceptors anticipate your route and blockade units stage ahead. Growth is bounded for playability.
+The garage shows photographic-style part artwork, colored rarity labels, category filters, current-car statistics and the exact benefit of the next paid tier or a free spare installation. Each car keeps its own equipment.
+
+Each level changes checkpoint locations and visiting order across connected city roads. A circular radar preserves distant checkpoint bearings; the open center HUD shows distance along the road route. Thick, translucent TECHCRUSH arches mark each gate.
+
+Each level increases police speed, acceleration, observation range and decision frequency. Waves arrive sooner and unit limits grow. **Level 2 adds larger SUVs and a helicopter; level 3 adds tracked blockade tanks and flanking.** SUVs have 145 HP; tanks have 220 HP, greater mass and slower steering. Active tanks are capped at two on levels 3–6 and three thereafter. The helicopter has rotating rotors and a searchlight, shares actual sightings, searches its last observed position, and can be evaded behind buildings or outrun. Escape requires losing both ground and air contact. Growth is bounded for playability.
 
 ## City and action
 
