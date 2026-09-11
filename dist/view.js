@@ -1,4 +1,6 @@
 import * as THREE from "./vendor/three.module.js";
+import { updateVehicleDamage, prepareVehicleDamage } from "./vehicle-damage.js";
+import { EXPLOSION_LIFETIME, IMPACT_LIFETIME } from "./damage-state.js";
 import { updateBreakables } from "./breakable-props.js";
 import { makeOriginalSportsCar } from "./car-models.js";
 import { CHECKPOINTS } from "./simulation.js";
@@ -33,6 +35,8 @@ import { applyTechcrushBrand } from "./landmarks.js";
 import {
   createExplosion,
   animateExplosion,
+  createImpactBurst,
+  animateImpactBurst,
   disposeGroup,
   makePatrolHealthBar,
   updatePatrolHealthBar,
@@ -57,6 +61,8 @@ export class SceneView {
     this.renderer.toneMappingExposure = 0.94;
     this.camera = new THREE.PerspectiveCamera(56, 1, 0.06, 4800);
     this.scene.add(new THREE.HemisphereLight("#dce8f3", "#78776b", 0.75));
+    this.blastLight = new THREE.PointLight("#ff9736", 0, 19, 2);
+    this.scene.add(this.blastLight);
     const sun = new THREE.DirectionalLight("#fff3d9", 2.3);
     sun.position.set(START.x - 75, 145, START.z - 95);
     this.scene.add(sun.target);
@@ -295,6 +301,7 @@ export class SceneView {
         ? sportsCar(this, spec.color, false, spec.id, equipment)
         : makeOriginalSportsCar(spec.id, spec.color, equipment);
     addTurboExhaust(this.player);
+    prepareVehicleDamage(this.player);
     if (previous) {
       this.player.position.copy(previous.position);
       this.player.rotation.copy(previous.rotation);
@@ -313,6 +320,8 @@ export class SceneView {
     return CAMERAS[this.cameraMode];
   }
   resetPreview() {
+    this.blastLight.intensity = 0;
+    updateVehicleDamage(this.player, { health: 100 });
     this.checkpoints = CHECKPOINTS;
     this.helicopterMesh = null;
     resetTireSmoke(this.tireSmoke);
@@ -345,7 +354,8 @@ export class SceneView {
       this.player.position.set(p.x, p.y || 0, p.z);
       this.player.rotation.order = "YXZ";
       this.player.rotation.set(p.pitch || 0, p.angle, p.roll || 0, "YXZ");
-      animateWheels(this.player, p.speed, dt, p.steering);
+      updateVehicleDamage(this.player, p);
+      animateWheels(this.player, p.health <= 0 ? 0 : p.speed, dt, p.steering);
       updateTurboExhaust(this.player, p, sim.time);
       updateTireSmoke(
         this.tireSmoke,
@@ -387,9 +397,15 @@ export class SceneView {
         [sim.police, this.policeMeshes],
       ])
         cars.forEach((car, i) => {
-          meshes[i].visible =
-            !car.destroyed && Math.hypot(car.x - p.x, car.z - p.z) < 330;
-          if (car.destroyed) return;
+          meshes[i].visible = Math.hypot(car.x - p.x, car.z - p.z) < 330;
+          meshes[i].position.set(car.x, 0, car.z);
+          meshes[i].rotation.y = car.angle;
+          if (meshes[i].visible) updateVehicleDamage(meshes[i], car);
+          if (car.destroyed) {
+            if (meshes[i].userData.healthBar)
+              meshes[i].userData.healthBar.sprite.visible = false;
+            return;
+          }
           if (meshes[i].userData.healthBar)
             updatePatrolHealthBar(
               meshes[i].userData.healthBar,
@@ -477,16 +493,38 @@ export class SceneView {
           (1 - Math.exp(-dt * 5));
       }
       this.camera.updateProjectionMatrix();
+      // Finish the destruction burst behind the game-over UI. Pause and rewind
+      // continue to use authoritative simulation time.
+      const terminal = ["wrecked", "busted", "won"].includes(sim.phase);
+      this.effectTime = terminal
+        ? Math.max(sim.time, this.effectTime || 0) + dt
+        : sim.time;
       for (const e of sim.explosions) {
-        if (!this.fx.has(e.id))
+        if (!this.fx.has(e.id) && this.effectTime - e.born < EXPLOSION_LIFETIME)
           this.fx.set(e.id, createExplosion(this.scene, e));
       }
+      for (const e of sim.impacts || [])
+        if (!this.fx.has(e.id) && this.effectTime - e.born < IMPACT_LIFETIME) {
+          const fx = createImpactBurst(this.scene, e);
+          fx.isImpact = true;
+          this.fx.set(e.id, fx);
+        }
       for (const [id, fx] of this.fx) {
-        if (sim.time - fx.born >= 2.2 || fx.born > sim.time) {
+        if (this.effectTime - fx.born >= fx.lifetime || fx.born > sim.time) {
           disposeGroup(this.scene, fx.group);
           this.fx.delete(id);
-        } else animateExplosion(fx, sim.time);
+        } else if (fx.isImpact) animateImpactBurst(fx, this.effectTime);
+        else animateExplosion(fx, this.effectTime);
       }
+      const flashes = [...this.fx.values()]
+        .filter((fx) => fx.light?.intensity > 0)
+        .sort(
+          (a, b) =>
+            a.group.position.distanceToSquared(this.player.position) -
+            b.group.position.distanceToSquared(this.player.position),
+        );
+      this.blastLight.intensity = flashes[0]?.light.intensity || 0;
+      if (flashes[0]) this.blastLight.position.copy(flashes[0].group.position);
       if (this.shake > 0) {
         this.camera.position.x += (Math.random() - 0.5) * this.shake;
         this.camera.position.y += (Math.random() - 0.5) * this.shake;

@@ -163,7 +163,7 @@ test("explosion particles expand and fade before disposal", () => {
   animateExplosion(fx, 0.2);
   assert(fx.flash.visible);
   assert(fx.particles.some((p) => p.mesh.position.length() > 1));
-  animateExplosion(fx, 2.2);
+  animateExplosion(fx, fx.lifetime);
   assert.equal(fx.flash.visible, false);
   assert(fx.particles.every((p) => p.mesh.material.opacity === 0));
   disposeGroup(scene, fx.group);

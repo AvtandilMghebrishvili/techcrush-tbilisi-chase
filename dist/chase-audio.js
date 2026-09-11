@@ -330,6 +330,7 @@ export class ChaseAudio {
       attack = 0.003,
       fade = 0.06,
       delay = 0,
+      filterEnd,
     } = {},
   ) {
     if (!buffer || this.voices.size >= 28) {
@@ -349,6 +350,10 @@ export class ChaseAudio {
     low.frequency.value = filter;
     const length = duration || Math.min(2.5, buffer.duration / rate),
       end = t + length;
+    if (filterEnd) {
+      low.frequency.setValueAtTime(filter, t);
+      low.frequency.exponentialRampToValueAtTime(filterEnd, end);
+    }
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(
       volume,
@@ -447,19 +452,46 @@ export class ChaseAudio {
       return;
     }
     if (event.kind === "explosion") {
-      this.play(this.buffers.metal, { ...opt, volume: v * 0.7, rate: 0.58 });
-      this.play(this.noise, {
-        volume: v * 0.45,
-        pan,
-        filter: 700,
-        duration: 1.15,
-        fade: 0.22,
+      this.play(this.buffers.metal2, {
+        ...opt,
+        volume: v * 0.95,
+        rate: 0.62,
+        filter: 2600,
       });
-      this.thump(65, v * 0.65, pan, 0.65);
+      this.thump(115, v * 0.95, pan, 0.8);
+      this.play(this.noise, {
+        volume: v * 0.85,
+        pan,
+        filter: 2100,
+        filterEnd: 180,
+        duration: 1.65,
+        fade: 0.3,
+      });
+      this.play(this.buffers.glass, {
+        ...opt,
+        volume: v * 0.35,
+        rate: 0.72,
+        delay: 0.09,
+      });
+      this.play(this.buffers.stone, {
+        ...opt,
+        volume: v * 0.38,
+        rate: 0.65,
+        delay: 0.19,
+        filter: 1500,
+      });
       return;
     }
     this.play(this.buffers[Math.random() > 0.5 ? "metal" : "metal2"], opt);
-    this.thump(85, v * 0.55, pan, 0.18);
+    this.thump(85, v * 0.65, pan, 0.23);
+    if (event.impact > 16)
+      this.play(this.buffers.metal2, {
+        ...opt,
+        volume: v * 0.6,
+        rate: 0.63,
+        delay: 0.027,
+        filter: 2400,
+      });
     if (event.impact > 22)
       this.play(this.buffers.glass, { ...opt, volume: v * 0.18, rate: 0.8 });
   }

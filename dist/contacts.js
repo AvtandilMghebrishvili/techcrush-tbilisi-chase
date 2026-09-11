@@ -30,15 +30,18 @@ export function vehicleContact(a, b, resolve = true) {
     }
   }
   if (!resolve) return { touching: true, depth, normal, impact: 0 };
-  const ia = 1 / (a.mass || 1),
-    ib = 1 / (b.mass || 1),
+  const ia = a.destroyed ? 0 : 1 / (a.mass || 1),
+    ib = b.destroyed ? 0 : 1 / (b.mass || 1),
     total = ia + ib;
+  if (!total) return { touching: true, impact: 0 };
   a.x += (normal.x * (depth + 0.001) * ia) / total;
   a.z += (normal.z * (depth + 0.001) * ia) / total;
   b.x -= (normal.x * (depth + 0.001) * ib) / total;
   b.z -= (normal.z * (depth + 0.001) * ib) / total;
   const vn = (a.vx - b.vx) * normal.x + (a.vz - b.vz) * normal.z;
   if (vn >= 0) return { touching: true, impact: 0 };
+  a.impactNormal = { ...normal };
+  b.impactNormal = { x: -normal.x, z: -normal.z };
   const impulse = (-vn * 1.18) / total;
   a.vx += normal.x * impulse * ia;
   a.vz += normal.z * impulse * ia;
@@ -82,6 +85,7 @@ export function treeContact(car, tree, time = 0) {
   const vn = car.vx * nx + car.vz * nz;
   if (vn >= 0) return 0;
   const impact = -vn;
+  car.impactNormal = { x: nx, z: nz };
   if (impact >= (tree.breakSpeed || 12)) {
     tree.broken = true;
     tree.fallenAt = time;

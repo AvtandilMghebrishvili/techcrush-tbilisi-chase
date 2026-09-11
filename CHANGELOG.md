@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0 — 2026-09-12
+
+- Add directional, bounded body deformation to all player cars, patrols and traffic: compressed panels, local creases, scuffs and projected glass cracks. Keep lamps/exhaust aligned and exclude rotating wheel/steering parts.
+- Safely separate interleaved GLB position/normal attributes before deformation; preserve shared templates and restore exact rest vertices on repair/rewind. Prepare player damage geometry before driving.
+- Keep charred wrecks solid until existing replacement timers expire; nearby traffic/patrol avoidance and recovery now account for wrecks. Prevent repeated wreck rewards.
+- Add same-step material fragments and sparks; replace geometric fire blocks with soft fire/smoke sprites, brief light, bent metal fragments and gravity/bounce. Expand explosion duration to 3.8 seconds.
+- Add one player destruction burst that finishes behind the game-over screen. Pause and rewind retain authoritative effect timing.
+- Strengthen metal crumple and explosion sounds with layered transients, descending bass, filtered blast air and debris. Preserve the existing sound toggle.
+- Add seven regression cases for deformation, original-asset isolation, repair/rewind, solid wrecks, single destruction events and deterministic effect cleanup.
+
 ## 1.3.0 — 2026-09-12
 
 - Replace the single oscillator engine with four per-car hybrid voices: recorded engine texture, combustion harmonics, load-sensitive intake and smooth RPM/gear changes. Use the same gear telemetry in the HUD.

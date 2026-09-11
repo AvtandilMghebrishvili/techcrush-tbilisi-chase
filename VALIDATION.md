@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Damage and destruction 1.4.0 — 12 September 2026
+
+`npm test`: **85 passed, 0 failed**. Seven added cases cover contact-direction damage at four headings, bounded damage/cooldowns, healing, finite deformed meshes, fixed wheel/steering pivots, aligned headlights, exact rest-vertex restoration, private deformation of the actual licensed GLB, same-step tree fragments, rewind, immovable wreck contacts, clean patrol replacements, one player explosion, bounded effect history and deterministic particle playback/cleanup. The older explosion test now uses the shared 3.8-second lifetime.
+
+Chromium visual checks compared intact and heavily dented Original 458 and Vector V12 bodies, repaired geometry, projected window cracks, patrol wrecks and staged explosion fire/debris. The first original-model check exposed an interleaved-attribute bug; positions and normals were separated into packed private buffers, a bounded-displacement regression was added, and the repaired model was visually rechecked. Player deformation preparation happens during selection, and a permanent flash-light slot avoids changing the scene light count during explosions.
+
+An ordinary-input browser run reached checkpoint 1 at 100 HP after a four-second turbo input (302 km/h observed before pausing). A subsequent turn into a wall reduced HP to 67 and produced front damage 0.65, a visible contact burst and impact audio. Holding rewind restored 100 HP, zero body damage and the earlier checkpoint state. The browser reported eight decoded audio assets, ten played effects, no dropped effects and no errors during that run. Fixtures used for close-up visual inspection are not shipped.
+
+The real mixer was rendered again in Chromium OfflineAudioContext. The revised material/explosion sequence peaked at **0.511 full scale or below**, with finite samples, eight decoded assets, zero drops and at most six concurrent effect voices in that sequence. This is sampled signal validation, not a human listening panel or an every-device performance guarantee. Conservative arcade collision shapes are retained while body dents remain visual; wrecks are solid but explosion fragments do not add area damage.
+
 ## Driving audio 1.3.0 — 12 September 2026
 
 `npm test`: **78 passed, 0 failed**. Nine new cases cover distinct engine profiles, idle/load/redline, audible shift RPM drops and gear hysteresis, reverse, coordinate-correct stereo, relative-speed pass detection, same-step material cues including gentle tree contact, vehicle/wall contacts, single police explosions, bounded/deduplicated events, rewind clearing, muted/paused event consumption, asset hashes, fast attacks and loop continuity.

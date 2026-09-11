@@ -16,6 +16,7 @@ const scalars = [
   "stuntScore",
   "runCash",
   "trafficWrecks",
+  "nextImpactId",
 ];
 export class RewindTimeline {
   constructor() {
@@ -40,6 +41,7 @@ export class RewindTimeline {
       radioContact: clone(sim.radioContact),
       helicopter: clone(sim.helicopter),
       explosions: clone(sim.explosions),
+      impacts: clone(sim.impacts),
       broken: sim.trees.flatMap((t, i) =>
         t.broken ? [[i, t.fallenAt, t.fallAngle]] : [],
       ),
@@ -65,6 +67,7 @@ export class RewindTimeline {
       "radioContact",
       "helicopter",
       "explosions",
+      "impacts",
     ])
       sim[k] = clone(f[k]);
     for (const t of sim.trees) {
