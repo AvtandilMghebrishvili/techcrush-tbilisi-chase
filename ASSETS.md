@@ -1,6 +1,10 @@
 # Higgsfield asset provenance
 
-All assets were generated for this game through the connected Higgsfield plugin on 2026-09-11 with `gpt_image_2`, 1k resolution. No third-party car brands or logos were requested.
+## User-supplied TECHCRUSH branding
+
+`dist/assets/techcrush-logo.jpg` and `dist/assets/techcrush-wordmark.png` are unchanged copies of the user's `Techcrush LOGO.jpg` and `Techcrush Font.png`. The provided portrait logo appears in the header, favicon, and garage signs. The lettering is displayed from the supplied PNG, with its surrounding interface cropped only at display time. These user-supplied brand assets are not included in the source-code MIT license.
+
+The environment assets listed below were generated for this game through the connected Higgsfield plugin on 2026-09-11 with `gpt_image_2`, 1k resolution. No third-party car brands or logos were requested for those generations.
 
 | File                             | Generation job                       | Use                                                                                                                       |
 | -------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |

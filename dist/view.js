@@ -4,6 +4,7 @@ import { carSpec, CAMERAS } from "./config.js";
 import { buildGeorgianCity, updateScenery } from "./scenery.js";
 import { makeCockpit, updateCockpit } from "./cockpit.js";
 import { makeRouteGuide, updateRouteGuide } from "./route-guide.js";
+import { applyTechcrushBrand } from "./landmarks.js";
 import {
   createExplosion,
   animateExplosion,
@@ -164,11 +165,23 @@ export class SceneView {
   }
   async loadTextures() {
     const loader = new THREE.TextureLoader();
-    const [road, facade, paint, oldTown] = await Promise.all(
-      ["asphalt", "building", "paint", "old-tbilisi"].map((name) =>
-        loader.loadAsync("./assets/" + name + ".png"),
-      ),
+    const [road, facade, paint, oldTown, logo, wordmark] = await Promise.all(
+      [
+        "asphalt.png",
+        "building.png",
+        "paint.png",
+        "old-tbilisi.png",
+        "techcrush-logo.jpg",
+        "techcrush-wordmark.png",
+      ].map((name) => loader.loadAsync("./assets/" + name)),
     );
+    applyTechcrushBrand(this, logo.image, wordmark.image);
+    this.garageSignTexture.anisotropy = Math.min(
+      8,
+      this.renderer.capabilities.getMaxAnisotropy(),
+    );
+    logo.dispose();
+    wordmark.dispose();
     for (const tex of [road, facade, paint, oldTown]) {
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;

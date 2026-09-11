@@ -178,6 +178,8 @@ export function buildTechcrushGarage(v) {
   c.fillText("TBILISI  /  NIGHT RUN GARAGE", 512, 202);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
+  v.garageSignCanvas = canvas;
+  v.garageSignTexture = texture;
   const mat = new THREE.MeshBasicMaterial({
     map: texture,
     side: THREE.DoubleSide,
@@ -191,10 +193,32 @@ export function buildTechcrushGarage(v) {
     sign.position.set(x, 8, z);
     sign.rotation.y = angle;
     v.decor.add(sign);
-    const bar = stone("#b8f48e", {
-      emissive: "#b8f48e",
+    const bar = stone("#ff1644", {
+      emissive: "#ff1644",
       emissiveIntensity: 1.8,
     });
     v.box(0.2, 0.22, 31, bar, x, 12, z, v.decor);
   }
+}
+
+export function applyTechcrushBrand(v, logo, wordmark) {
+  const c = v.garageSignCanvas.getContext("2d");
+  c.fillStyle = "#14151b";
+  c.fillRect(0, 0, 1024, 256);
+  c.strokeStyle = "#ff1644";
+  c.lineWidth = 6;
+  c.strokeRect(12, 12, 1000, 232);
+  c.save();
+  c.beginPath();
+  c.arc(128, 128, 88, 0, Math.PI * 2);
+  c.clip();
+  c.drawImage(logo, 40, 40, 176, 176);
+  c.restore();
+  // Use the supplied lettering directly; omit the screenshot's surrounding UI and close icon.
+  c.drawImage(wordmark, 211, 112, 310, 70, 248, 45, 730, 165);
+  c.fillStyle = "#c9d5d9";
+  c.textAlign = "center";
+  c.font = "bold 25px Arial";
+  c.fillText("TBILISI  /  NIGHT RUN GARAGE", 615, 221);
+  v.garageSignTexture.needsUpdate = true;
 }

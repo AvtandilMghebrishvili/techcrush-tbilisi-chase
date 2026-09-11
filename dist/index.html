@@ -11,11 +11,7 @@
       name="description"
       content="Take the wheel. Hit six checkpoints, dodge downtown traffic, and lose the police in a playable 3D city chase."
     />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1420'/%3E%3Cpath d='M8 25V7h5l7 11V7h4v18h-5L12 14v11z' fill='%23e8ff76'/%3E%3C/svg%3E"
-    />
+    <link rel="icon" type="image/jpeg" href="./assets/techcrush-logo.jpg" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
@@ -23,12 +19,20 @@
       <canvas id="world" aria-label="3D car chase city"></canvas>
       <div class="vignette"></div>
       <header>
-        <a class="brand" href="./" aria-label="Nightshift home"
-          ><span class="brand-icon">N</span> NIGHTSHIFT<span
-            class="brand-divider"
-            >/</span
-          ><span class="brand-sub">TBILISI RUN 🇬🇪</span></a
-        >
+        <a class="brand" href="./" aria-label="TECHCRUSH Nightshift home">
+          <img
+            class="brand-logo"
+            src="./assets/techcrush-logo.jpg"
+            alt=""
+            width="40"
+            height="40"
+          />
+          <span class="brand-wordmark" aria-hidden="true"
+            ><img src="./assets/techcrush-wordmark.png" alt=""
+          /></span>
+          <span class="brand-divider">/</span
+          ><span class="brand-sub">NIGHTSHIFT</span>
+        </a>
         <div class="top-actions">
           <button
             id="camera-toggle"

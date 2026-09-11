@@ -143,15 +143,28 @@ header {
   letter-spacing: 2px;
   font-size: 18px;
 }
-.brand-icon {
-  font-style: italic;
-  color: var(--ink);
-  background: var(--lime);
-  display: grid;
-  place-items: center;
-  width: 29px;
-  height: 29px;
-  transform: skew(-9deg);
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.brand-wordmark {
+  position: relative;
+  display: block;
+  width: 155px;
+  aspect-ratio: 310 / 70;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.brand-wordmark img {
+  position: absolute;
+  width: 192.90323%;
+  max-width: none;
+  height: auto;
+  left: -68.06452%;
+  top: -160%;
 }
 .brand-divider {
   color: #627181;
@@ -867,9 +880,12 @@ kbd {
   .brand {
     font-size: 12px;
   }
-  .brand-icon {
-    width: 24px;
-    height: 26px;
+  .brand-logo {
+    width: 30px;
+    height: 30px;
+  }
+  .brand-wordmark {
+    width: 107px;
   }
   .top-actions {
     gap: 4px;

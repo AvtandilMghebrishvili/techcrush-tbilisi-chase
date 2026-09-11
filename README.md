@@ -6,6 +6,8 @@ The expanded city has an 8×8 block grid, mostly low-rise buildings with Higgsfi
 
 TECHCRUSH garage signs now appear along the first avenue, with faceted mountain ranges and a stylized Kartlis Deda monument on the distant ridge. Animated cyan arrows follow the streets and turns to the next checkpoint and disappear once the escape phase begins.
 
+The header, favicon, and garage signs use the user-supplied TECHCRUSH portrait logo and original lettering. The supplied files are included unchanged in `dist/assets`; the lettering's surrounding screenshot interface is excluded at display time.
+
 ## Cars and cameras
 
 Choose the yellow Rustaveli GT (180 km/h), teal Mtatsminda Rally (169 km/h, sharper handling), or red Caucasus 4×4 (155 km/h, stronger body). Each has a distinct model and driving characteristics. Pause and select **CHANGE CAR** to return to the garage and begin a new run.

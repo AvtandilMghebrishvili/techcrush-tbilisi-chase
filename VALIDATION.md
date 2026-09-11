@@ -22,4 +22,8 @@ During review, corrected transparent road arrows rendering over the cockpit dash
 
 ## Limits
 
+### Supplied logo follow-up
+
+Verified the supplied portrait logo and lettering in the header and 3D garage signs at desktop size and 390×844. The mobile header fits alongside camera, sound and pause controls. Both copied assets match their supplied originals by SHA-256. JavaScript syntax and local HTTP checks pass; browser console errors/warnings are empty. This follow-up changes branding only; the previously recorded 23 mechanics tests and driving results are unchanged.
+
 Tested with desktop Chromium, not every GPU/browser or physical phone. WebGL2 is required. Mountain and landmark geometry is a fictional stylized interpretation. Single-player arcade game without multiplayer or persistent leaderboard.
