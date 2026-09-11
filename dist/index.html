@@ -27,10 +27,18 @@
           ><span class="brand-icon">N</span> NIGHTSHIFT<span
             class="brand-divider"
             >/</span
-          ><span class="brand-sub">CITY CHASE</span></a
+          ><span class="brand-sub">TBILISI RUN 🇬🇪</span></a
         >
         <div class="top-actions">
-          <span class="live-label">DOWNTOWN · 21:04</span
+          <button
+            id="camera-toggle"
+            class="icon-button"
+            aria-label="Camera: CHASE; click to switch"
+            title="Change camera (C)"
+          >
+            C · CHASE
+          </button>
+          <span class="live-label">TBILISI · 21:04</span
           ><button
             id="sound"
             class="icon-button"
@@ -49,16 +57,24 @@
         </div>
       </header>
       <section id="intro" class="intro">
-        <div class="eyebrow"><span></span> AFTER HOURS. FULL THROTTLE.</div>
+        <div class="eyebrow"><span></span> GEORGIA AFTER DARK. 🇬🇪</div>
         <h1>NIGHT<br /><em>SHIFT.</em></h1>
         <p class="intro-copy">
-          Six checkpoints. A city on your tail.<br />Make your getaway.
+          Six checkpoints. Tbilisi on your tail.<br />Choose your ride. Make
+          your getaway.
         </p>
+        <div
+          id="garage"
+          class="garage"
+          role="group"
+          aria-label="Choose your car"
+        ></div>
+        <p id="car-details" class="car-details"></p>
         <button id="start" class="primary">
           START YOUR ENGINE <span>↗</span>
         </button>
         <div class="intro-meta">
-          <span>01 / DOWNTOWN RUN</span><span>3D ARCADE CHASE</span>
+          <span>02 / TBILISI RUN</span><span>3D ARCADE CHASE</span>
         </div>
       </section>
       <section class="mission-card" id="mission-card">
@@ -75,15 +91,17 @@
         <div class="mission-row">
           <b>02</b>
           <div>
-            <strong>Keep it in one piece</strong>
-            <p>Dodge traffic. Watch your car's condition.</p>
+            <strong>Fight back</strong>
+            <p>
+              Ram patrol cars to drain their HP. Reinforcements will follow.
+            </p>
           </div>
         </div>
         <div class="mission-row">
           <b>03</b>
           <div>
             <strong>Lose the heat</strong>
-            <p>Break away from police to escape.</p>
+            <p>Break away from police to escape. Press C for cockpit view.</p>
           </div>
         </div>
       </section>
@@ -94,7 +112,10 @@
             <span>CHECKPOINTS</span><b id="progress">0 / 6</b>
           </div>
           <div class="checkpoint-dots" id="dots"></div>
-          <p id="objective">Reach Canal Avenue</p>
+          <p id="objective">Reach Rustaveli Avenue</p>
+          <div class="takedown-count">
+            PATROLS TAKEN DOWN <b id="takedowns">0</b>
+          </div>
         </div>
         <div class="pursuit-panel">
           <div>
@@ -143,6 +164,7 @@
           <button id="resume" class="primary">
             BACK TO THE CHASE <span>↗</span></button
           ><button id="restart" class="secondary">RESTART RUN</button>
+          <button id="garage-back" class="secondary">CHANGE CAR</button>
         </div>
       </section>
       <footer>
@@ -152,6 +174,7 @@
             <span>DRIVE</span></span
           ><span><kbd>SPACE</kbd> <span>HANDBRAKE</span></span
           ><span><kbd>SHIFT</kbd> <span>NITRO</span></span
+          ><span><kbd>C</kbd> <span>CAMERA</span></span
           ><span><kbd>P</kbd> <span>PAUSE</span></span
           ><span><kbd>R</kbd> <span>RESET CAR</span></span>
         </div>

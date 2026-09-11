@@ -1,5 +1,14 @@
 import { SceneView } from "./view.js";
 import {
+  CARS,
+  CAMERAS,
+  carSpec,
+  GRID_RADIUS,
+  MAP_SIZE,
+  TOWER,
+} from "./config.js";
+import { normalizeKey, drivingInput } from "./controls.js";
+import {
   ChaseSimulation,
   CHECKPOINTS,
   distance,
@@ -22,13 +31,14 @@ let sim,
   uiTime = 0;
 const touch = matchMedia("(pointer: coarse)").matches || innerWidth < 650;
 let agentInput = null;
+let selectedCar = "gt";
 if (document.modelContext?.registerTool) {
   try {
     Promise.resolve(
       document.modelContext.registerTool({
         name: "drive_chase_car",
         description:
-          "Drive the running car with throttle and steering for up to five seconds. Uses the same controls as the keyboard; keyboard input takes priority.",
+          "Drive with throttle and steering for up to five seconds. Negative steer turns left, positive turns right. Keyboard input takes priority.",
         inputSchema: {
           type: "object",
           properties: {
@@ -81,16 +91,58 @@ if (document.modelContext?.registerTool) {
 }
 function input() {
   if (agentInput && keys.size === 0) return agentInput;
-  return {
-    throttle:
-      (keys.has("w") || keys.has("ArrowUp") ? 1 : 0) -
-      (keys.has("s") || keys.has("ArrowDown") ? 1 : 0),
-    steer:
-      (keys.has("d") || keys.has("ArrowRight") ? 1 : 0) -
-      (keys.has("a") || keys.has("ArrowLeft") ? 1 : 0),
-    brake: keys.has(" "),
-    boost: keys.has("Shift"),
+  return drivingInput(keys);
+}
+function chooseCar(id) {
+  selectedCar = carSpec(id).id;
+  sim.selectedCar = selectedCar;
+  sim.player.carId = selectedCar;
+  view.selectCar(selectedCar);
+  for (const button of document.querySelectorAll("[data-car]"))
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.car === selectedCar),
+    );
+  const c = carSpec(id);
+  $("car-details").textContent =
+    c.description + " · " + Math.round(c.topSpeed * 3.6) + " km/h";
+}
+function setupGarage() {
+  const garage = $("garage");
+  garage.innerHTML = CARS.map(
+    (c) =>
+      `<button type="button" data-car="${c.id}" aria-pressed="${c.id === selectedCar}"><i style="background:${c.color}"></i><b>${c.name}</b><small>${c.type}</small></button>`,
+  ).join("");
+  for (const button of garage.querySelectorAll("button"))
+    button.onclick = () => chooseCar(button.dataset.car);
+  chooseCar(selectedCar);
+  $("garage-back").onclick = () => {
+    keys.clear();
+    agentInput = null;
+    sim.reset();
+    $("modal").hidden = true;
+    $("hud").hidden = true;
+    $("intro").hidden = false;
+    $("mission-card").hidden = false;
+    $("touch-controls").hidden = true;
+    document.body.classList.remove("playing");
+    view.player.visible = true;
+    view.cockpit.root.visible = false;
+    view.camera.position.set(11, 7.5, -49);
+    view.camera.lookAt(-5, 2, -4);
+    chooseCar(selectedCar);
+    view.player.position.set(4, 0, -30);
+    view.player.rotation.set(0, 0, 0);
+    view.resetPreview();
   };
+}
+function switchCamera(id) {
+  const mode = id ? view.setCamera(id) : view.cycleCamera();
+  $("camera-toggle").textContent = "C · " + mode.label;
+  $("camera-toggle").setAttribute(
+    "aria-label",
+    "Camera: " + mode.label + "; click to switch",
+  );
 }
 function initAudio() {
   if (audio) return;
@@ -140,7 +192,8 @@ function audioTick() {
 }
 function start() {
   keys.clear();
-  sim.start();
+  agentInput = null;
+  sim.start(selectedCar);
   view.startGame(sim);
   $("intro").hidden = true;
   $("mission-card").hidden = true;
@@ -213,6 +266,7 @@ function updateHUD() {
   $("health-bar").style.width = p.health + "%";
   $("health-bar").style.background = p.health < 30 ? "#ff796e" : "#e8ff76";
   $("nitro-bar").style.width = p.nitro + "%";
+  $("takedowns").textContent = String(sim.takedowns);
   $("heat").textContent = sim.police.length === 3 ? "● ● ●" : "● ● ○";
   const escape = sim.checkpoint === 6;
   $("bust-bar").style.width =
@@ -242,8 +296,8 @@ function updateHUD() {
         : Math.abs(delta) > 2.4
           ? "↶"
           : delta > 0
-            ? "→"
-            : "←";
+            ? "←"
+            : "→";
     $("distance").textContent = Math.round(distance(p, cp)) + " M";
   } else {
     $("direction").textContent = "↗";
@@ -256,7 +310,7 @@ function updateHUD() {
 }
 function drawMap() {
   const c = $("map").getContext("2d"),
-    s = 230 / 1020,
+    s = 230 / MAP_SIZE,
     ox = 115,
     oz = 115;
   c.clearRect(0, 0, 230, 230);
@@ -264,7 +318,7 @@ function drawMap() {
   c.fillRect(0, 0, 230, 230);
   c.strokeStyle = "#344954";
   c.lineWidth = 6;
-  for (let i = -3; i <= 3; i++) {
+  for (let i = -GRID_RADIUS; i <= GRID_RADIUS; i++) {
     c.beginPath();
     c.moveTo(ox + i * 140 * s, 5);
     c.lineTo(ox + i * 140 * s, 225);
@@ -278,25 +332,28 @@ function drawMap() {
     c.lineWidth = 1.6;
     c.setLineDash([4, 3]);
     c.beginPath();
-    c.moveTo(ox + sim.player.x * s, oz - sim.player.z * s);
+    c.moveTo(ox - sim.player.x * s, oz - sim.player.z * s);
     for (const q of routeBetween(sim.player, cp))
-      c.lineTo(ox + q.x * s, oz - q.z * s);
+      c.lineTo(ox - q.x * s, oz - q.z * s);
     c.stroke();
     c.setLineDash([]);
     c.fillStyle = "#73e6ed";
     c.beginPath();
-    c.arc(ox + cp.x * s, oz - cp.z * s, 5, 0, Math.PI * 2);
+    c.arc(ox - cp.x * s, oz - cp.z * s, 5, 0, Math.PI * 2);
     c.fill();
   }
+  c.fillStyle = "#d3b37a";
+  c.fillRect(ox - TOWER.x * s - 2, oz - TOWER.z * s - 2, 4, 4);
   for (const cop of sim.police) {
+    if (cop.destroyed) continue;
     c.fillStyle = "#ff706a";
     c.beginPath();
-    c.arc(ox + cop.x * s, oz - cop.z * s, 3, 0, Math.PI * 2);
+    c.arc(ox - cop.x * s, oz - cop.z * s, 3, 0, Math.PI * 2);
     c.fill();
   }
   c.save();
-  c.translate(ox + sim.player.x * s, oz - sim.player.z * s);
-  c.rotate(sim.player.angle);
+  c.translate(ox - sim.player.x * s, oz - sim.player.z * s);
+  c.rotate(-sim.player.angle);
   c.fillStyle = "#e8ff76";
   c.beginPath();
   c.moveTo(0, -7);
@@ -338,6 +395,40 @@ function registerTools() {
   addEventListener("pagehide", () => life.abort(), { once: true });
   const tools = [
     {
+      name: "select_chase_car",
+      description:
+        "Select a car before starting a run. Read current choices from the garage.",
+      inputSchema: {
+        type: "object",
+        properties: { car: { type: "string", enum: CARS.map((c) => c.id) } },
+        required: ["car"],
+        additionalProperties: false,
+      },
+      execute: ({ car }) => {
+        if (!CARS.some((c) => c.id === car)) throw Error("Unknown car");
+        if (sim.phase !== "ready")
+          throw Error("Finish this run or return to the garage first");
+        chooseCar(car);
+        return { car: selectedCar };
+      },
+    },
+    {
+      name: "set_chase_camera",
+      description: "Change the game camera: chase, cockpit, hood, or aerial.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          camera: { type: "string", enum: CAMERAS.map((c) => c.id) },
+        },
+        required: ["camera"],
+        additionalProperties: false,
+      },
+      execute: ({ camera }) => {
+        switchCamera(camera);
+        return { camera: CAMERAS[view.cameraMode].id };
+      },
+    },
+    {
       name: "get_chase_status",
       description:
         "Read the current Nightshift run score, checkpoint progress, speed, condition, and chase state.",
@@ -347,7 +438,10 @@ function registerTools() {
         additionalProperties: false,
       },
       annotations: { readOnlyHint: true },
-      execute: () => sim.snapshot(),
+      execute: () => ({
+        ...sim.snapshot(),
+        camera: CAMERAS[view.cameraMode].id,
+      }),
     },
     {
       name: "start_chase_run",
@@ -396,7 +490,9 @@ try {
   await view.loadTextures();
   view.setupGame(sim);
   $("loading").hidden = true;
+  setupGarage();
   $("start").onclick = start;
+  $("camera-toggle").onclick = () => switchCamera();
   $("pause").onclick = pause;
   $("pause").disabled = true;
   $("resume").onclick = pause;
@@ -418,9 +514,10 @@ try {
     "r",
     "m",
     "Enter",
+    "c",
   ];
   addEventListener("keydown", (e) => {
-    let k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    const k = normalizeKey(e);
     if (!relevant.includes(k)) return;
     if ([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(k))
       e.preventDefault();
@@ -429,12 +526,11 @@ try {
       if (k === "p" || k === "Escape") pause();
       if (k === "r") sim.recover();
       if (k === "m") toggleSound();
+      if (k === "c") switchCamera();
       if (k === "Enter" && sim.phase === "ready") start();
     }
   });
-  addEventListener("keyup", (e) =>
-    keys.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key),
-  );
+  addEventListener("keyup", (e) => keys.delete(normalizeKey(e)));
   addEventListener("blur", () => {
     keys.clear();
     if (sim.phase === "running") pause();

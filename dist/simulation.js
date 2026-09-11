@@ -1,13 +1,20 @@
 // Deterministic, renderer-independent simulation. Distances are metres, time is seconds.
-export const GRID = 140,
-  LIMIT = 478;
+import {
+  GRID,
+  GRID_RADIUS,
+  LIMIT,
+  ROAD_EDGE,
+  TOWER,
+  carSpec,
+} from "./config.js";
+export { GRID, LIMIT } from "./config.js";
 export const CHECKPOINTS = [
-  { x: 4, z: 100, name: "Canal Avenue", axis: "z" },
-  { x: 112, z: 140, name: "East Exchange", axis: "x" },
-  { x: 140, z: -70, name: "Market Street", axis: "z" },
-  { x: -112, z: -140, name: "West Junction", axis: "x" },
-  { x: -140, z: 112, name: "Foundry Row", axis: "z" },
-  { x: 0, z: 280, name: "Northside Exit", axis: "z" },
+  { x: 4, z: 100, name: "Rustaveli Avenue", axis: "z" },
+  { x: 112, z: 140, name: "Freedom Square", axis: "x" },
+  { x: 280, z: -70, name: "Abanotubani", axis: "z" },
+  { x: -252, z: -280, name: "Old Tbilisi", axis: "x" },
+  { x: -140, z: 252, name: "Mtatsminda Tower", axis: "z" },
+  { x: 0, z: 420, name: "Georgian Highway", axis: "z" },
 ];
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const angleDelta = (a, b) =>
@@ -15,14 +22,24 @@ export const angleDelta = (a, b) =>
 export const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function blocks() {
   const out = [];
-  for (let x = -3; x < 3; x++)
-    for (let z = -3; z < 3; z++)
+  for (let x = -GRID_RADIUS; x < GRID_RADIUS; x++)
+    for (let z = -GRID_RADIUS; z < GRID_RADIUS; z++) {
+      if (x === -1 && z === 1) {
+        out.push({
+          minX: TOWER.x - 13,
+          maxX: TOWER.x + 13,
+          minZ: TOWER.z - 13,
+          maxZ: TOWER.z + 13,
+        });
+        continue;
+      }
       out.push({
         minX: x * GRID + 22,
         maxX: (x + 1) * GRID - 22,
         minZ: z * GRID + 22,
         maxZ: (z + 1) * GRID - 22,
       });
+    }
   return out;
 }
 export function vehicle(x = 4, z = -30, angle = 0) {
@@ -80,7 +97,8 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
     steer = clamp(input.steer || 0, -1, 1);
   const boosting =
     !!input.boost && throttle > 0 && forward > 5 && car.nitro > 1;
-  let accel = throttle * (throttle * forward < -0.5 ? 30 : 16);
+  const spec = carSpec(car.carId);
+  let accel = throttle * (throttle * forward < -0.5 ? 30 : spec.acceleration);
   if (boosting) {
     accel += 19;
     car.nitro = Math.max(0, car.nitro - dt * 25);
@@ -89,9 +107,10 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
   forward *= Math.exp(-dt * (0.13 + 0.0038 * Math.abs(forward)));
   if (!throttle && Math.abs(forward) < 0.15) forward = 0;
   if (input.brake) forward *= Math.exp(-dt * 0.8);
-  forward = clamp(forward, -10, boosting ? 65 : 50);
+  forward = clamp(forward, -10, boosting ? spec.topSpeed + 15 : spec.topSpeed);
   const turn =
-    steer *
+    -steer *
+    spec.handling *
     Math.min(Math.abs(forward) / 10, 1) *
     (1.25 - 0.006 * Math.abs(forward)) *
     (input.brake ? 1.5 : 1) *
@@ -117,7 +136,10 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
   }
   car.speed = car.vx * Math.sin(car.angle) + car.vz * Math.cos(car.angle);
   if (isPlayer && car.impact > 5 && car.invulnerable <= 0) {
-    car.health = Math.max(0, car.health - (car.impact - 3) * 0.65);
+    car.health = Math.max(
+      0,
+      car.health - (car.impact - 3) * 0.65 * spec.damageScale,
+    );
     car.invulnerable = 0.7;
   }
   car.boosting = boosting;
@@ -148,8 +170,8 @@ export function collideVehicles(a, b) {
   return 0;
 }
 function roadProjection(p) {
-  const x = clamp(Math.round(p.x / GRID) * GRID, -420, 420),
-    z = clamp(Math.round(p.z / GRID) * GRID, -420, 420);
+  const x = clamp(Math.round(p.x / GRID) * GRID, -ROAD_EDGE, ROAD_EDGE),
+    z = clamp(Math.round(p.z / GRID) * GRID, -ROAD_EDGE, ROAD_EDGE);
   return Math.abs(p.x - x) < Math.abs(p.z - z)
     ? { x, z: p.z, vertical: true }
     : { x: p.x, z, vertical: false };
@@ -170,10 +192,10 @@ export function routeBetween(from, to) {
     p.vertical
       ? [Math.floor(p.z / GRID), Math.ceil(p.z / GRID)].map((k) => ({
           x: p.x,
-          z: clamp(k * GRID, -420, 420),
+          z: clamp(k * GRID, -ROAD_EDGE, ROAD_EDGE),
         }))
       : [Math.floor(p.x / GRID), Math.ceil(p.x / GRID)].map((k) => ({
-          x: clamp(k * GRID, -420, 420),
+          x: clamp(k * GRID, -ROAD_EDGE, ROAD_EDGE),
           z: p.z,
         }));
   let best = null,
@@ -229,6 +251,7 @@ export class ChaseSimulation {
   }
   reset() {
     this.player = vehicle();
+    this.player.carId = this.selectedCar || "gt";
     this.time = 0;
     this.score = 0;
     this.checkpoint = 0;
@@ -236,14 +259,18 @@ export class ChaseSimulation {
     this.bust = 0;
     this.escape = 0;
     this.events = [];
+    this.explosions = [];
+    this.takedowns = 0;
+    this.nextCopId = 1;
     this.police = [this.makePolice(-5, -90), this.makePolice(7, -125)];
     this.traffic = [];
     const rng = random(440);
-    for (let i = 0; i < 32; i++) {
+    for (let i = 0; i < 40; i++) {
       const vertical = i % 2 === 0,
-        lane = ((Math.floor(i / 2) % 7) - 3) * GRID,
+        lane =
+          ((Math.floor(i / 2) % (GRID_RADIUS * 2 + 1)) - GRID_RADIUS) * GRID,
         dir = i % 4 < 2 ? 1 : -1;
-      let pos = -450 + rng() * 900;
+      let pos = -ROAD_EDGE + rng() * ROAD_EDGE * 2;
       if (lane === 0 && Math.abs(pos + 30) < 70) pos = 220;
       const car = vehicle(
         vertical ? lane + dir * 7 : pos,
@@ -270,16 +297,58 @@ export class ChaseSimulation {
   makePolice(x, z) {
     return {
       ...vehicle(x, z),
+      id: this.nextCopId++,
+      health: 100,
+      hitCooldown: 0,
+      destroyed: false,
+      respawnAt: 0,
       path: [],
       repath: 0,
       stuck: 0,
       lastSeen: { x: 4, z: -30 },
     };
   }
-  start() {
+  start(carId = this.selectedCar || "gt") {
+    this.selectedCar = carSpec(carId).id;
     this.reset();
     this.phase = "running";
     this.events.push("CHASE ON — HIT THE CYAN GATES");
+  }
+  damagePolice(cop, impact) {
+    if (cop.destroyed || cop.hitCooldown > 0 || impact < 5) return false;
+    cop.health = Math.max(0, cop.health - clamp(impact * 1.5, 22, 44));
+    cop.hitCooldown = 0.9;
+    this.events.push("PATROL HIT");
+    if (cop.health > 0) return false;
+    cop.destroyed = true;
+    cop.vx = cop.vz = 0;
+    cop.respawnAt = this.time + 5;
+    this.takedowns++;
+    this.score += 750;
+    this.explosions.push({ id: cop.id, x: cop.x, z: cop.z, born: this.time });
+    this.events.push("PATROL DESTROYED  +750");
+    return true;
+  }
+  respawnPolice(cop) {
+    const p = this.player;
+    // Replacements enter on a road well behind the player, never on top of them.
+    let spawn = roadProjection({
+      x: clamp(p.x - Math.sin(p.angle) * 170, -ROAD_EDGE, ROAD_EDGE),
+      z: clamp(p.z - Math.cos(p.angle) * 170, -ROAD_EDGE, ROAD_EDGE),
+    });
+    if (distance(spawn, p) < 110) {
+      const candidates = [
+        { x: -ROAD_EDGE, z: p.z },
+        { x: ROAD_EDGE, z: p.z },
+        { x: p.x, z: -ROAD_EDGE },
+        { x: p.x, z: ROAD_EDGE },
+      ].map(roadProjection);
+      spawn = candidates.sort((a, b) => distance(b, p) - distance(a, p))[0];
+    }
+    Object.assign(cop, this.makePolice(spawn.x, spawn.z));
+    cop.lastSeen = { x: p.x, z: p.z };
+    cop.angle = Math.atan2(p.x - cop.x, p.z - cop.z);
+    this.events.push("NEW PATROL INBOUND");
   }
   recover() {
     if (this.phase !== "running") return;
@@ -296,6 +365,7 @@ export class ChaseSimulation {
     if (this.phase !== "running") return;
     dt = clamp(dt, 0, 0.05);
     this.time += dt;
+    this.explosions = this.explosions.filter((e) => this.time - e.born < 2.2);
     const p = this.player;
     const before = { x: p.x, z: p.z };
     stepVehicle(p, input, dt, this.obstacles);
@@ -317,16 +387,21 @@ export class ChaseSimulation {
       t.vz = direction.z * cruise;
       t.x += t.vx * dt;
       t.z += t.vz * dt;
-      if (t.vertical && Math.abs(t.z) > 490) {
-        t.z = -Math.sign(t.z) * 490;
+      if (t.vertical && Math.abs(t.z) > LIMIT + 12) {
+        t.z = -Math.sign(t.z) * (LIMIT + 12);
         t.nearMiss = false;
       }
-      if (!t.vertical && Math.abs(t.x) > 490) {
-        t.x = -Math.sign(t.x) * 490;
+      if (!t.vertical && Math.abs(t.x) > LIMIT + 12) {
+        t.x = -Math.sign(t.x) * (LIMIT + 12);
         t.nearMiss = false;
       }
     }
     for (const cop of this.police) {
+      if (cop.destroyed) {
+        if (this.time >= cop.respawnAt) this.respawnPolice(cop);
+        else continue;
+      }
+      cop.hitCooldown = Math.max(0, cop.hitCooldown - dt);
       cop.repath -= dt;
       const visible =
         distance(cop, p) < 190 && lineOfSight(cop, p, this.obstacles);
@@ -370,15 +445,21 @@ export class ChaseSimulation {
     }
     let closest = Infinity;
     for (const t of [...this.traffic, ...this.police]) {
+      if (t.destroyed) continue;
       const d = distance(t, p);
       const impact = collideVehicles(p, t);
       if (impact > 4 && p.invulnerable <= 0) {
-        p.health = Math.max(0, p.health - impact * 0.55);
+        p.health = Math.max(
+          0,
+          p.health - impact * 0.55 * carSpec(p.carId).damageScale,
+        );
         p.invulnerable = 0.8;
         this.events.push("COLLISION");
       }
-      if (this.police.includes(t)) closest = Math.min(closest, d);
-      else if (d > 4 && d < 7 && Math.abs(p.speed) > 20 && !t.nearMiss) {
+      if (this.police.includes(t)) {
+        this.damagePolice(t, impact);
+        if (!t.destroyed) closest = Math.min(closest, d);
+      } else if (d > 4 && d < 7 && Math.abs(p.speed) > 20 && !t.nearMiss) {
         this.score += 150;
         t.nearMiss = true;
         this.events.push("NEAR MISS  +150");
@@ -419,6 +500,7 @@ export class ChaseSimulation {
     if (this.checkpoint === 6) {
       const unseen = this.police.every(
         (c) =>
+          c.destroyed ||
           distance(c, p) > 100 ||
           (!lineOfSight(c, p, this.obstacles) && distance(c, p) > 60),
       );
@@ -448,6 +530,14 @@ export class ChaseSimulation {
         health: Math.ceil(this.player.health),
       },
       police: this.police.length,
+      activePolice: this.police.filter((c) => !c.destroyed).length,
+      policeHealth: this.police.map((c) => ({
+        id: c.id,
+        hp: Math.ceil(c.health),
+        destroyed: c.destroyed,
+      })),
+      car: this.player.carId,
+      takedowns: this.takedowns,
       escape: Number(this.escape.toFixed(1)),
       bust: Number(this.bust.toFixed(1)),
     };

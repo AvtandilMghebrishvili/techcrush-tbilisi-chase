@@ -10,3 +10,9 @@ All assets were generated for this game through the connected Higgsfield plugin 
 | `dist/assets/city-reference.png` | 64598333-b303-4873-9776-9210f11a4869 | Dusk city chase reference showing yellow coupe, police lights, office buildings, road markings, and cyan checkpoint gate. |
 
 These are generation outputs, not photographs of real people or real cities. Reference artwork is supplied separately from actual gameplay. Consult the account's applicable Higgsfield terms for generated-asset rights.
+
+## Georgian city update
+
+`dist/assets/old-tbilisi.png` was generated with Higgsfield `gpt_image_2` at 1k resolution on 2026-09-11. Generation job: `dbd9eba3-f1d8-465b-a565-884a2df51493`. The ochre plaster, carved turquoise balcony, window, and terracotta details are mapped to the new low-rise buildings.
+
+The five-cross Georgian flag texture, fictional tower geometry inspired by Mtatsminda, car model variations, cockpit, health bars, and particle effects are authored in the project source. The map does not reproduce real Tbilisi street geography.

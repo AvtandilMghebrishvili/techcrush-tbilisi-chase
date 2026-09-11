@@ -1,12 +1,22 @@
 import * as THREE from "./vendor/three.module.js";
 import { CHECKPOINTS } from "./simulation.js";
+import { carSpec, CAMERAS } from "./config.js";
+import { buildGeorgianCity, updateScenery } from "./scenery.js";
+import { makeCockpit, updateCockpit } from "./cockpit.js";
+import {
+  createExplosion,
+  animateExplosion,
+  disposeGroup,
+  makePatrolHealthBar,
+  updatePatrolHealthBar,
+} from "./effects.js";
 const material = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.7, ...extra });
 export class SceneView {
   constructor(canvas) {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color("#526778");
-    this.scene.fog = new THREE.FogExp2("#526778", 0.0032);
+    this.scene.fog = new THREE.FogExp2("#526778", 0.0015);
     this.renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
@@ -34,7 +44,12 @@ export class SceneView {
     sun.shadow.bias = -0.0003;
     this.scene.add(sun);
     this.sun = sun;
-    this.buildCity();
+    buildGeorgianCity(this);
+    this.cameraMode = 0;
+    this.cockpit = makeCockpit();
+    this.camera.add(this.cockpit.root);
+    this.scene.add(this.camera);
+    this.fx = new Map();
     this.player = this.makeCar("#eecb39");
     this.player.position.set(4, 0, -30);
     this.scene.add(this.player);
@@ -56,99 +71,7 @@ export class SceneView {
     parent.add(mesh);
     return mesh;
   }
-  buildCity() {
-    const road = material("#293846"),
-      concrete = material("#71818b"),
-      line = material("#d2d0b4"),
-      dark = material("#253441");
-    this.roadMaterial = road;
-    this.buildingMaterials = [];
-    this.box(1100, 0.3, 1100, material("#33414a"), 0, -0.6, 0);
-    for (let i = -3; i <= 3; i++) {
-      this.box(30, 0.12, 1010, road, i * 140, -0.05, 0);
-      this.box(1010, 0.12, 30, road, 0, -0.045, i * 140);
-      for (let j = -480; j < 500; j += 14) {
-        if (Math.abs(j / 140 - Math.round(j / 140)) * 140 > 19) {
-          this.box(0.16, 0.015, 6, line, i * 140, 0.03, j);
-          this.box(6, 0.015, 0.16, line, j, 0.035, i * 140);
-        }
-      }
-    }
-    let seed = 12;
-    const rand = () => {
-      seed = (seed * 1664525 + 1013904223) >>> 0;
-      return seed / 4294967296;
-    };
-    for (let gx = -3; gx < 3; gx++)
-      for (let gz = -3; gz < 3; gz++) {
-        const cx = gx * 140 + 70,
-          cz = gz * 140 + 70;
-        this.box(106, 0.5, 106, concrete, cx, 0, cz);
-        for (let a = 0; a < 2; a++)
-          for (let b = 0; b < 2; b++) {
-            const w = 36 + rand() * 9,
-              d = 36 + rand() * 9,
-              h = 18 + rand() * 75;
-            const x = cx + (a - 0.5) * 51,
-              z = cz + (b - 0.5) * 51;
-            const m = material(
-              new THREE.Color().setHSL(0.59, 0.14, 0.18 + rand() * 0.15),
-            );
-            this.buildingMaterials.push(m);
-            this.box(w, h, d, m, x, h / 2 + 0.3, z);
-            this.box(w + 1, 0.7, d + 1, dark, x, h + 0.8, z);
-            const wm = material("#dce2c7", {
-              emissive: "#cbb688",
-              emissiveIntensity: 0.55,
-            });
-            const count = Math.floor(h / 4.7) * Math.floor(w / 5) * 2;
-            const geo = new THREE.BoxGeometry(1.65, 2.1, 0.08);
-            const windows = new THREE.InstancedMesh(geo, wm, count);
-            let n = 0;
-            const matrix = new THREE.Matrix4();
-            for (let y = 3; y < h - 2; y += 4.7)
-              for (let xx = -w / 2 + 3; xx < w / 2 - 2; xx += 5) {
-                if (rand() > 0.32) {
-                  matrix.makeTranslation(x + xx, y, z - d / 2 - 0.05);
-                  windows.setMatrixAt(n++, matrix);
-                  matrix.makeTranslation(x + xx, y, z + d / 2 + 0.05);
-                  windows.setMatrixAt(n++, matrix);
-                }
-              }
-            windows.count = n;
-            this.scene.add(windows);
-            this.box(w * 0.35, 3, d * 0.32, dark, x + 4, h + 2, z);
-          }
-      }
-    const lamp = material("#303d45"),
-      glow = material("#fff0c9", { emissive: "#ffdaa0", emissiveIntensity: 3 });
-    for (let g = -2; g <= 2; g++)
-      for (let z = -390; z < 420; z += 52) {
-        if (Math.abs(z / 140 - Math.round(z / 140)) * 140 < 20) continue;
-        for (const side of [-1, 1]) {
-          const x = g * 140 + side * 17;
-          this.box(0.3, 9, 0.3, lamp, x, 4.5, z);
-          this.box(3, 0.25, 0.35, lamp, x - side * 1.3, 9, z);
-          this.box(1.7, 0.12, 0.7, glow, x - side * 2, 8.8, z);
-        }
-      }
-    for (let x = -280; x <= 280; x += 140)
-      for (let z = -280; z <= 280; z += 140) {
-        for (let p = -11; p <= 11; p += 3) {
-          this.box(1.4, 0.015, 4, line, x + p, 0.04, z - 19);
-          this.box(4, 0.015, 1.4, line, x - 19, 0.04, z + p);
-        }
-      }
-    for (let i = 0; i < 16; i++) {
-      const c = this.makeCar(
-        ["#dce0db", "#446274", "#854c44", "#b4ada0"][i % 4],
-      );
-      c.position.set(i % 2 ? 7 : -7, 0, (i - 7) * 48);
-      c.rotation.y = i % 2 ? 0 : Math.PI;
-      this.scene.add(c);
-    }
-  }
-  makeCar(color, police = false) {
+  makeCar(color, police = false, carId = "gt") {
     const group = new THREE.Group();
     const paint = material(color, { metalness: 0.45, roughness: 0.32 });
     const rubber = material("#10171d"),
@@ -204,18 +127,47 @@ export class SceneView {
       this.box(0.68, 0.22, 0.45, blue, 0.42, 2.33, -0.2, group);
       group.userData.lights = [red, blue];
     }
+    if (!police && carId === "rally") {
+      group.scale.set(1, 0.95, 0.87);
+      this.box(2.45, 0.16, 0.55, rubber, 0, 2.03, -1.92, group);
+      for (const x of [-0.33, 0.33])
+        this.box(0.17, 0.02, 1.2, material("#f4f0df"), x, 1.45, 1.2, group);
+    } else if (!police && carId === "suv") {
+      group.scale.set(1.12, 1.25, 1.08);
+      this.box(2.15, 0.2, 2.4, rubber, 0, 2.33, -0.25, group);
+      this.box(2.5, 0.25, 0.25, rubber, 0, 0.9, 2.4, group);
+      for (const x of [-0.8, 0, 0.8])
+        this.box(0.32, 0.2, 0.18, head, x, 2.51, 0.93, group);
+    }
+    if (!police && this.georgiaFlag) {
+      const flag = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.68, 0.44),
+        new THREE.MeshBasicMaterial({
+          map: this.georgiaFlag,
+          side: THREE.DoubleSide,
+        }),
+      );
+      flag.rotation.x = -Math.PI / 2;
+      flag.position.set(0, 1.447, 1.55);
+      group.add(flag);
+    }
+    if (police) {
+      const bar = makePatrolHealthBar();
+      group.add(bar.sprite);
+      group.userData.healthBar = bar;
+    }
     group.userData.paint = paint;
     group.userData.wheels = wheels;
     return group;
   }
   async loadTextures() {
     const loader = new THREE.TextureLoader();
-    const [road, facade, paint] = await Promise.all(
-      ["asphalt", "building", "paint"].map((name) =>
+    const [road, facade, paint, oldTown] = await Promise.all(
+      ["asphalt", "building", "paint", "old-tbilisi"].map((name) =>
         loader.loadAsync("./assets/" + name + ".png"),
       ),
     );
-    for (const tex of [road, facade, paint]) {
+    for (const tex of [road, facade, paint, oldTown]) {
       tex.colorSpace = THREE.SRGBColorSpace;
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
       tex.anisotropy = Math.min(
@@ -223,7 +175,14 @@ export class SceneView {
         this.renderer.capabilities.getMaxAnisotropy(),
       );
     }
-    road.repeat.set(2, 55);
+    road.repeat.set(2, 70);
+    this.paintTexture = paint;
+    for (const m of this.oldTownMaterials) {
+      m.map = oldTown;
+      m.emissiveMap = oldTown;
+      m.emissiveIntensity = 0.25;
+      m.needsUpdate = true;
+    }
     this.roadMaterial.map = road;
     this.roadMaterial.color.set("#9aabbd");
     this.roadMaterial.needsUpdate = true;
@@ -364,9 +323,12 @@ export class SceneView {
       if (
         child.type === "Group" &&
         child !== this.player &&
-        child !== this.gate
+        child !== this.gate &&
+        !child.userData.environment
       )
-        this.scene.remove(child);
+        disposeGroup(this.scene, child);
+    this.fx.clear();
+    this.selectCar(sim.player.carId);
     this.trafficMeshes = [];
     this.policeMeshes = [];
     for (const car of sim.traffic) {
@@ -382,6 +344,54 @@ export class SceneView {
     this.camera.position.set(4, 8, -47);
     this.cameraLook.set(4, 1.5, -15);
     for (const m of this.skids) m.visible = false;
+  }
+  selectCar(id) {
+    const spec = carSpec(id),
+      previous = this.player;
+    this.player = this.makeCar(spec.color, false, spec.id);
+    if (spec.id === "gt" && this.paintTexture) {
+      this.player.userData.paint.map = this.paintTexture;
+      this.player.userData.paint.color.set("#ffffff");
+    }
+    if (previous) {
+      this.player.position.copy(previous.position);
+      this.player.rotation.copy(previous.rotation);
+      for (const beam of this.headlightBeams || []) this.player.add(beam);
+      disposeGroup(this.scene, previous);
+    }
+    this.scene.add(this.player);
+  }
+  setCamera(id) {
+    const index = CAMERAS.findIndex((c) => c.id === id);
+    if (index < 0) throw Error("Unknown camera");
+    this.cameraMode = index;
+    return CAMERAS[index];
+  }
+  cycleCamera() {
+    this.cameraMode = (this.cameraMode + 1) % CAMERAS.length;
+    return CAMERAS[this.cameraMode];
+  }
+  resetPreview() {
+    for (const child of [...this.scene.children])
+      if (
+        child.type === "Group" &&
+        child !== this.player &&
+        child !== this.gate &&
+        !child.userData.environment
+      )
+        disposeGroup(this.scene, child);
+    this.fx.clear();
+    this.trafficMeshes = [];
+    this.policeMeshes = [];
+    this.player.visible = true;
+    this.cockpit.root.visible = false;
+    this.player.position.set(4, 0, -30);
+    this.player.rotation.set(0, 0, 0);
+    this.camera.position.set(11, 7.5, -49);
+    this.camera.lookAt(-5, 2, -4);
+    this.camera.fov = 56;
+    this.camera.updateProjectionMatrix();
+    this.updateGate(0);
   }
   render(sim, dt, input) {
     const ready = sim.phase === "ready";
@@ -401,6 +411,10 @@ export class SceneView {
         [sim.police, this.policeMeshes],
       ])
         cars.forEach((car, i) => {
+          meshes[i].visible = !car.destroyed;
+          if (car.destroyed) return;
+          if (meshes[i].userData.healthBar)
+            updatePatrolHealthBar(meshes[i].userData.healthBar, car.health);
           meshes[i].position.set(car.x, 0, car.z);
           meshes[i].rotation.y = car.angle;
           if (meshes[i].userData.lights)
@@ -411,40 +425,70 @@ export class SceneView {
             );
         });
       this.updateGate(sim.checkpoint);
-      const ahead = p.speed < -2 ? -1 : 1;
-      const zoom = p.boosting ? 20 : 16;
-      const target = new THREE.Vector3(
-        p.x - Math.sin(p.angle) * zoom * ahead,
-        8.5,
-        p.z - Math.cos(p.angle) * zoom * ahead,
+      const mode = CAMERAS[this.cameraMode].id;
+      const interior = mode === "cockpit",
+        hood = mode === "hood";
+      this.player.visible = !interior && !hood;
+      this.cockpit.root.visible = interior;
+      updateCockpit(this.cockpit, p, input.steer);
+      const forward = new THREE.Vector3(
+        Math.sin(p.angle),
+        0,
+        Math.cos(p.angle),
       );
-      if (
-        sim.obstacles.some(
-          (o) =>
-            target.x > o.minX - 2 &&
-            target.x < o.maxX + 2 &&
-            target.z > o.minZ - 2 &&
-            target.z < o.maxZ + 2,
-        )
-      ) {
-        target.x = p.x - Math.sin(p.angle) * 7 * ahead;
-        target.z = p.z - Math.cos(p.angle) * 7 * ahead;
-        target.y = 12;
+      if (interior || hood) {
+        const seat = mode === "cockpit" ? 0.2 : 1.8;
+        this.camera.position.set(
+          p.x + forward.x * seat,
+          interior ? (p.carId === "suv" ? 2.48 : 1.87) : 1.5,
+          p.z + forward.z * seat,
+        );
+        this.camera.lookAt(
+          p.x + forward.x * 60,
+          this.camera.position.y - 0.1,
+          p.z + forward.z * 60,
+        );
+        this.camera.fov = interior ? 76 : 70;
+      } else {
+        const zoom = mode === "aerial" ? 29 : p.boosting ? 20 : 16;
+        const target = new THREE.Vector3(
+          p.x - forward.x * zoom,
+          mode === "aerial" ? 27 : 8.5,
+          p.z - forward.z * zoom,
+        );
+        if (
+          sim.obstacles.some(
+            (o) =>
+              target.x > o.minX - 2 &&
+              target.x < o.maxX + 2 &&
+              target.z > o.minZ - 2 &&
+              target.z < o.maxZ + 2,
+          )
+        ) {
+          target.x = p.x - forward.x * 7;
+          target.z = p.z - forward.z * 7;
+          target.y = mode === "aerial" ? 32 : 16;
+        }
+        this.camera.position.lerp(target, 1 - Math.exp(-dt * 7));
+        this.cameraLook.lerp(
+          new THREE.Vector3(p.x + forward.x * 10, 1.5, p.z + forward.z * 10),
+          1 - Math.exp(-dt * 10),
+        );
+        this.camera.lookAt(this.cameraLook);
+        this.camera.fov +=
+          ((p.boosting ? 65 : 56) - this.camera.fov) * Math.min(dt * 3, 1);
       }
-      this.camera.position.lerp(target, 1 - Math.exp(-dt * 5));
-      this.cameraLook.lerp(
-        new THREE.Vector3(
-          p.x + Math.sin(p.angle) * 10,
-          1.5,
-          p.z + Math.cos(p.angle) * 10,
-        ),
-        1 - Math.exp(-dt * 8),
-      );
-      this.camera.lookAt(this.cameraLook);
-      this.camera.fov +=
-        (p.boosting ? 65 - this.camera.fov : 56 - this.camera.fov) *
-        Math.min(dt * 3, 1);
       this.camera.updateProjectionMatrix();
+      for (const e of sim.explosions) {
+        if (!this.fx.has(e.id))
+          this.fx.set(e.id, createExplosion(this.scene, e));
+      }
+      for (const [id, fx] of this.fx) {
+        if (sim.time - fx.born >= 2.2) {
+          disposeGroup(this.scene, fx.group);
+          this.fx.delete(id);
+        } else animateExplosion(fx, sim.time);
+      }
       if (this.shake > 0) {
         this.camera.position.x += (Math.random() - 0.5) * this.shake;
         this.camera.position.y += (Math.random() - 0.5) * this.shake;
@@ -470,6 +514,7 @@ export class SceneView {
         }
       }
     }
+    updateScenery(this, sim.time || performance.now() / 1000);
     this.renderer.render(this.scene, this.camera);
   }
 }

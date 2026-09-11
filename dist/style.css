@@ -6,6 +6,60 @@
   --ink: #0c1420;
   --muted: #b1beca;
 }
+.garage {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 440px;
+  max-width: 100%;
+  margin: 15px 0 8px;
+}
+.garage button {
+  padding: 10px 11px;
+  text-align: left;
+  border: 1px solid #b5c8d34d;
+  background: #101f2de0;
+  color: #f5f5ed;
+  min-width: 0;
+}
+.garage button[aria-pressed="true"] {
+  border-color: var(--lime);
+  background: #26372be8;
+  box-shadow: inset 0 -2px var(--lime);
+}
+.garage i {
+  display: block;
+  height: 4px;
+  width: 26px;
+  margin-bottom: 8px;
+}
+.garage b {
+  display: block;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.garage small {
+  font-size: 9px;
+  letter-spacing: 1.1px;
+  color: #b7c4ce;
+}
+.car-details {
+  font-size: 12px !important;
+  color: #b9cbd8;
+  margin: 8px 0 15px;
+  min-height: 18px;
+}
+.takedown-count {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #a8bdc7;
+  margin-top: 17px;
+  display: flex;
+  justify-content: space-between;
+}
+.takedown-count b {
+  color: #e8ff76;
+}
 * {
   box-sizing: border-box;
 }
@@ -778,6 +832,116 @@ kbd {
   }
   .playing footer {
     display: none;
+  }
+}
+.intro {
+  top: 15%;
+}
+.intro h1 {
+  font-size: clamp(80px, 8.4vw, 124px);
+  margin: 18px 0;
+}
+.intro-copy {
+  margin-bottom: 12px;
+}
+@media (max-width: 650px) {
+  .intro {
+    top: 15%;
+  }
+  .intro h1 {
+    font-size: 94px;
+  }
+  .garage {
+    gap: 5px;
+  }
+  .garage button {
+    padding: 9px 7px;
+  }
+  .garage b {
+    font-size: 11px;
+  }
+  .garage small {
+    font-size: 8px;
+    letter-spacing: 0.3px;
+  }
+  .brand {
+    font-size: 12px;
+  }
+  .brand-icon {
+    width: 24px;
+    height: 26px;
+  }
+  .top-actions {
+    gap: 4px;
+  }
+  .icon-button {
+    font-size: 9px;
+    padding: 0 6px;
+  }
+  .top-actions .live-label {
+    display: none;
+  }
+  .car-details {
+    font-size: 11px !important;
+  }
+  .takedown-count {
+    font-size: 9px;
+  }
+}
+@media (max-height: 600px) {
+  .intro {
+    top: 18%;
+  }
+  .intro h1 {
+    font-size: 70px;
+    margin: 14px 0;
+  }
+  .intro-copy {
+    font-size: 14px;
+  }
+  .garage button {
+    padding: 7px;
+  }
+  .car-details {
+    margin: 6px 0 10px;
+  }
+  .intro-meta {
+    display: none;
+  }
+}
+@media (max-height: 500px) {
+  .intro {
+    top: 21%;
+    width: 440px;
+  }
+  .intro h1 {
+    font-size: 52px;
+    margin: 9px 0;
+  }
+  .garage {
+    margin-top: 10px;
+  }
+  .garage small {
+    display: none;
+  }
+  .garage i {
+    margin-bottom: 4px;
+  }
+  .car-details {
+    font-size: 10px !important;
+  }
+  .intro .primary {
+    padding: 12px 18px;
+  }
+  .modal-card {
+    padding: 20px;
+  }
+  .modal h2 {
+    font-size: 42px;
+    margin: 10px 0;
+  }
+  .modal .primary {
+    margin-top: 15px;
   }
 }
 @media (max-height: 500px) {

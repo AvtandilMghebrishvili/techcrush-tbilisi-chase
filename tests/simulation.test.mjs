@@ -35,11 +35,11 @@ test("steering responds in both directions and reverses while backing up", () =>
     r = vehicle(0, 0);
   drive(l, { throttle: 1, steer: -0.4 }, 2);
   drive(r, { throttle: 1, steer: 0.4 }, 2);
-  assert(l.x < 0 && r.x > 0);
+  assert(l.x > 0 && r.x < 0);
   assert(Math.abs(l.x + r.x) < 0.001);
   const reverse = vehicle(0, 0);
   drive(reverse, { throttle: -1, steer: 1 }, 2);
-  assert(reverse.angle < 0);
+  assert(reverse.angle > 0);
 });
 test("physics stays consistent at 60 and 120Hz", () => {
   const a = vehicle(0, 0),
@@ -56,7 +56,7 @@ test("handbrake tightens a turn and sheds speed", () => {
   drive(a, { steer: 0.6 }, 1);
   drive(b, { steer: 0.6, brake: true }, 1);
   assert(b.speed < a.speed);
-  assert(b.angle > a.angle);
+  assert(Math.abs(b.angle) > Math.abs(a.angle));
 });
 test("nitro increases top speed, depletes, and recharges", () => {
   const a = vehicle(),

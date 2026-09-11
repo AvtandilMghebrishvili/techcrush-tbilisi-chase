@@ -8,17 +8,17 @@ import {
   clamp,
 } from "../dist/simulation.js";
 const sim = new ChaseSimulation();
-sim.start();
+sim.start(process.argv[2] || "gt");
 let route = [],
   lastCP = -1,
   escapeLeg = 0;
 const escapeRoute = [
-  { x: 0, z: 420 },
-  { x: 420, z: 420 },
-  { x: 420, z: -420 },
-  { x: -420, z: -420 },
+  { x: 0, z: 560 },
+  { x: 560, z: 560 },
+  { x: 560, z: -560 },
+  { x: -560, z: -560 },
 ];
-for (let frame = 0; frame < 120 * 230 && sim.phase === "running"; frame++) {
+for (let frame = 0; frame < 120 * 300 && sim.phase === "running"; frame++) {
   const p = sim.player;
   if (
     sim.checkpoint === 6 &&
@@ -41,7 +41,7 @@ for (let frame = 0; frame < 120 * 230 && sim.phase === "running"; frame++) {
   const throttle = p.speed > desired + 2 ? -1 : p.speed < desired ? 1 : 0;
   sim.update(1 / 120, {
     throttle,
-    steer: clamp(delta * 1.9, -1, 1),
+    steer: clamp(-delta * 1.9, -1, 1),
     brake: Math.abs(delta) > 1.3,
     boost: sim.checkpoint === 6 && Math.abs(delta) < 0.15 && d > 100,
   });
