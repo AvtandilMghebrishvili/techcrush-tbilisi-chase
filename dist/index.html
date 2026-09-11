@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>NIGHTSHIFT — City Chase</title>
+    <meta
+      name="description"
+      content="Take the wheel. Hit six checkpoints, dodge downtown traffic, and lose the police in a playable 3D city chase."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c1420'/%3E%3Cpath d='M8 25V7h5l7 11V7h4v18h-5L12 14v11z' fill='%23e8ff76'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main id="game">
+      <canvas id="world" aria-label="3D car chase city"></canvas>
+      <div class="vignette"></div>
+      <header>
+        <a class="brand" href="./" aria-label="Nightshift home"
+          ><span class="brand-icon">N</span> NIGHTSHIFT<span
+            class="brand-divider"
+            >/</span
+          ><span class="brand-sub">CITY CHASE</span></a
+        >
+        <div class="top-actions">
+          <span class="live-label">DOWNTOWN · 21:04</span
+          ><button
+            id="sound"
+            class="icon-button"
+            aria-label="Enable sound"
+            title="Toggle sound (M)"
+          >
+            SOUND OFF</button
+          ><button
+            id="pause"
+            class="icon-button"
+            aria-label="Pause game"
+            title="Pause (P)"
+          >
+            Ⅱ
+          </button>
+        </div>
+      </header>
+      <section id="intro" class="intro">
+        <div class="eyebrow"><span></span> AFTER HOURS. FULL THROTTLE.</div>
+        <h1>NIGHT<br /><em>SHIFT.</em></h1>
+        <p class="intro-copy">
+          Six checkpoints. A city on your tail.<br />Make your getaway.
+        </p>
+        <button id="start" class="primary">
+          START YOUR ENGINE <span>↗</span>
+        </button>
+        <div class="intro-meta">
+          <span>01 / DOWNTOWN RUN</span><span>3D ARCADE CHASE</span>
+        </div>
+      </section>
+      <section class="mission-card" id="mission-card">
+        <div class="card-heading">
+          <span>THE GETAWAY</span><span class="tag">01—06</span>
+        </div>
+        <div class="mission-row">
+          <b>01</b>
+          <div>
+            <strong>Hit the checkpoints</strong>
+            <p>Follow the cyan gates through the city.</p>
+          </div>
+        </div>
+        <div class="mission-row">
+          <b>02</b>
+          <div>
+            <strong>Keep it in one piece</strong>
+            <p>Dodge traffic. Watch your car's condition.</p>
+          </div>
+        </div>
+        <div class="mission-row">
+          <b>03</b>
+          <div>
+            <strong>Lose the heat</strong>
+            <p>Break away from police to escape.</p>
+          </div>
+        </div>
+      </section>
+      <section id="hud" class="hud" hidden>
+        <div class="score-panel">
+          <span class="label">RUN SCORE</span><strong id="score">000000</strong>
+          <div class="checkpoint-heading">
+            <span>CHECKPOINTS</span><b id="progress">0 / 6</b>
+          </div>
+          <div class="checkpoint-dots" id="dots"></div>
+          <p id="objective">Reach Canal Avenue</p>
+        </div>
+        <div class="pursuit-panel">
+          <div>
+            <span class="label" id="heat-label">POLICE PURSUIT</span
+            ><strong id="heat">● ● ○</strong>
+          </div>
+          <div class="bar heat-bar"><i id="bust-bar"></i></div>
+          <p id="pursuit-text">Keep moving. Don't get boxed in.</p>
+        </div>
+        <div class="navigator">
+          <canvas
+            id="map"
+            width="230"
+            height="230"
+            aria-label="City minimap showing player, police, and next checkpoint"
+          ></canvas>
+          <div class="map-caption">
+            <span id="district">DOWNTOWN</span><span>N ↑</span>
+          </div>
+        </div>
+        <div class="speed-panel">
+          <div class="speed-value">
+            <strong id="speed">0</strong><span>KM/H</span>
+          </div>
+          <div class="condition">
+            <span>CONDITION</span><b id="health">100%</b>
+          </div>
+          <div class="bar"><i id="health-bar"></i></div>
+          <div class="nitro">
+            <span>SHIFT / NITRO</span>
+            <div class="bar"><i id="nitro-bar"></i></div>
+          </div>
+        </div>
+        <div id="toast" class="toast" aria-live="polite"></div>
+        <div id="route-cue" class="route-cue">
+          <span id="direction">↑</span>
+          <div><b id="distance">120 M</b><small>NEXT CHECKPOINT</small></div>
+        </div>
+      </section>
+      <section id="modal" class="modal" hidden>
+        <div class="modal-card">
+          <span class="eyebrow" id="modal-kicker">TAKE A BREATHER</span>
+          <h2 id="modal-title">PAUSED.</h2>
+          <p id="modal-copy">Your getaway can wait.</p>
+          <div id="result-score"></div>
+          <button id="resume" class="primary">
+            BACK TO THE CHASE <span>↗</span></button
+          ><button id="restart" class="secondary">RESTART RUN</button>
+        </div>
+      </section>
+      <footer>
+        <div class="controls">
+          <span
+            ><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+            <span>DRIVE</span></span
+          ><span><kbd>SPACE</kbd> <span>HANDBRAKE</span></span
+          ><span><kbd>SHIFT</kbd> <span>NITRO</span></span
+          ><span><kbd>P</kbd> <span>PAUSE</span></span
+          ><span><kbd>R</kbd> <span>RESET CAR</span></span>
+        </div>
+        <span class="footer-note">STAY FAST. STAY FREE.</span>
+      </footer>
+      <div id="touch-controls" hidden>
+        <div>
+          <button data-key="a" aria-label="Steer left">◀</button
+          ><button data-key="d" aria-label="Steer right">▶</button>
+        </div>
+        <div>
+          <button data-key=" " aria-label="Handbrake">DRIFT</button
+          ><button data-key="s" aria-label="Brake and reverse">↓</button
+          ><button data-key="w" aria-label="Accelerate">↑</button
+          ><button data-key="Shift" aria-label="Nitro">N₂O</button>
+        </div>
+      </div>
+      <div id="loading">WARMING UP THE ENGINE…</div>
+      <div id="error" hidden role="alert"></div>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

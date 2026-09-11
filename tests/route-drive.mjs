@@ -1,0 +1,50 @@
+// A full driving smoke test: controller uses the same throttle/steer/brake inputs as a player.
+import {
+  ChaseSimulation,
+  CHECKPOINTS,
+  routeBetween,
+  distance,
+  angleDelta,
+  clamp,
+} from "../dist/simulation.js";
+const sim = new ChaseSimulation();
+sim.start();
+let route = [],
+  lastCP = -1,
+  escapeLeg = 0;
+const escapeRoute = [
+  { x: 0, z: 420 },
+  { x: 420, z: 420 },
+  { x: 420, z: -420 },
+  { x: -420, z: -420 },
+];
+for (let frame = 0; frame < 120 * 230 && sim.phase === "running"; frame++) {
+  const p = sim.player;
+  if (
+    sim.checkpoint === 6 &&
+    distance(p, escapeRoute[escapeLeg % escapeRoute.length]) < 17
+  ) {
+    escapeLeg++;
+    lastCP = -1;
+  }
+  const cp =
+    CHECKPOINTS[sim.checkpoint] || escapeRoute[escapeLeg % escapeRoute.length];
+  if (sim.checkpoint !== lastCP) {
+    route = routeBetween(p, cp);
+    lastCP = sim.checkpoint;
+  }
+  while (route.length > 1 && distance(p, route[0]) < 13) route.shift();
+  const target = route[0] || cp,
+    delta = angleDelta(Math.atan2(target.x - p.x, target.z - p.z), p.angle),
+    d = distance(p, target);
+  const desired = Math.abs(delta) > 0.5 ? 12 : d < 48 ? 17 : 43;
+  const throttle = p.speed > desired + 2 ? -1 : p.speed < desired ? 1 : 0;
+  sim.update(1 / 120, {
+    throttle,
+    steer: clamp(delta * 1.9, -1, 1),
+    brake: Math.abs(delta) > 1.3,
+    boost: sim.checkpoint === 6 && Math.abs(delta) < 0.15 && d > 100,
+  });
+}
+console.log(JSON.stringify(sim.snapshot(), null, 2));
+if (sim.phase !== "won") process.exitCode = 1;
