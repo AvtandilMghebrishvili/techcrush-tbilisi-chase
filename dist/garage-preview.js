@@ -72,7 +72,9 @@ export class GaragePreview {
   studio() {
     const scene = new THREE.Scene();
     // Share the source HDR pixels; render-target PMREM textures belong to their renderer.
-    if (this.source.scene.background?.isTexture)
+    if (this.source.daylightHDR?.isTexture)
+      scene.environment = this.source.daylightHDR;
+    else if (this.source.scene.background?.isTexture)
       scene.environment = this.source.scene.background;
     scene.environmentIntensity = 0.8;
     scene.add(new THREE.HemisphereLight("#dcecff", "#34303a", 0.8));

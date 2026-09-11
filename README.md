@@ -49,6 +49,12 @@ Ceilings are on-road values; acceleration time, charge, turns and collisions aff
 
 Physical key codes support Georgian keyboard layouts. Touch buttons are included; a desktop keyboard and WebGL2-capable computer are recommended.
 
+## City lighting
+
+The top **AUTO / NIGHT / DAY / DUSK** button cycles lighting modes. Auto starts at dusk, reaches night after about two minutes, then returns through dawn and daylight over a ten-minute cycle. The moon, occupied windows, street lamps and stronger player headlights appear after dark. Pause freezes the automatic cycle and rewind rolls it back with the chase. Your lighting choice is a local display preference; it does not alter your garage or difficulty.
+
+The racing loading gauge follows asset preparation and shader warm-up. It adds no artificial wait. Lighting reuses existing assets, caps real street lights at three without additional shadows, and uses two instanced batches for nearby lamp glow. Garage previews keep their own studio lighting in every mode.
+
 ## Driving audio
 
 Press **M** or the top-right **SOUND** button to enable sound. The four cars have separate V8, flat-six, V12 and W16-inspired engine profiles. Throttle changes the engine load; acceleration raises RPM, automatic shifts drop it, and boost adds intake air and a release sound. These are game-designed hybrid voices, not recordings of the named production cars.

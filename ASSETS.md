@@ -84,3 +84,7 @@ Run `python scripts/prepare-audio.py` from the repository root with Python 3 and
 ## Garage studio and customization (1.5.0)
 
 `dist/workshop-parts.js` and `dist/customization.js` author 56 original part-grade assemblies, replacement wheel/brake kits and wing geometry. `dist/garage-preview.js` renders these assemblies with the existing CC0 HDR into per-session cached images; no new photos or external dependencies were downloaded. The earlier parts atlas is retained only as a renderer fallback. `dist/interior-detail.js` adds original instrument artwork, trim, controls and upholstery details; the Original 458 attribution remains unchanged.
+
+## Evening lighting and racing interface (1.6.0)
+
+`dist/city-lighting.js` reuses `daylight.hdr` for the sky and reflections and derives five 512 × 512 emission masks from the actual window panes of the existing `limestone.png`. The masks are generated once in memory; their source image attribution above remains applicable. The moon, sparse stars and soft 64 × 64 lamp falloff are original runtime shader/texture code. No new photos, videos, models, fonts or audio files were downloaded. `dist/motorsport.css` reuses the existing TECHCRUSH marks, cover image and Barlow font families.

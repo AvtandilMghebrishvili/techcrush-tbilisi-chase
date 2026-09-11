@@ -17,6 +17,7 @@ export async function loadSportsAssets(view, { legacy = true } = {}) {
   pmrem.dispose();
   view.scene.environmentIntensity = 0.85;
   view.scene.background = hdr;
+  view.daylightHDR = hdr;
   view.scene.backgroundIntensity = 0.62;
   view.scene.backgroundBlurriness = 0.045;
   // The original licensed 458 is available alongside the three procedural models.

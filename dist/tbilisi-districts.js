@@ -330,10 +330,20 @@ export function buildTbilisiDistricts(v) {
         lamp.position.set(wx, 0, wz);
         lamp.rotation.y = angle;
         root.add(lamp);
-        registerBreakable(v, lamp, wx, wz, 8.7);
+        const prop = registerBreakable(v, lamp, wx, wz, 8.7);
         beam([0, 0.3, 0], [0, 8, 0], 0.09, metal, lamp);
         beam([0, 8, 0], [-side * 3, 8.7, 0], 0.08, metal, lamp);
-        box(1.25, 0.16, 0.5, white, -side * 3, 8.65, 0, lamp);
+        const head = box(
+          1.25,
+          0.16,
+          0.5,
+          v.streetLampMaterials[0],
+          -side * 3,
+          8.65,
+          0,
+          lamp,
+        );
+        v.streetLamps.push({ head, propId: prop.definition.id });
       }
     }
     for (const z of [-length * 0.28, length * 0.28])

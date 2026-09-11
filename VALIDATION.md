@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Evening lighting and racing interface 1.6.0 — 12 September 2026
+
+`npm test`: **96 passed, 0 failed**. Three new cases cover continuous/deterministic day-night progression, mode overrides, bounded nearest-intact-lamp selection, same-frame broken-lamp cutoff, rewind restoration, zero daylight lamp intensity and fixed scene/light allocation over repeated updates. Existing navigation, driving, destruction, pursuit and saved-garage tests remain passing.
+
+Local Chromium review covered dusk and night menus, the visible moon, aligned occupied-window emission, street lighting, daylight restoration, nighttime chase and Original 458 cockpit views, the independently lit garage studio, upgrade buttons and the three-part reward dialog. A four-second ordinary turbo input crossed checkpoint 1 with 100 HP; the tool reported 318 km/h before capture. The lighting preference survived reload, and the selector was returned to Auto. No browser rendering errors or warnings were observed in the final check.
+
+At 390 × 844 the menu exposed all car choices and the Start button, the header controls wrapped into a separate row, upgrade comparisons were corrected to a single column, and mobile navigation/rewind were moved clear of the other HUD readouts. The reward dialog showed all three results, and its return action worked. The final compact cockpit layout was visually reviewed and the viewport override reset. Custom DOM measurement calls timed out after viewport changes, so these are visual layout checks rather than measured overflow assertions. No physical-phone or Safari verification is claimed.
+
+The diagnostic local fixture reported 899 registered lamps, 64 active nearby effect instances and exactly 3 real local lights. The design adds no media downloads, per-window meshes, shadow maps or bloom passes; the five emission masks and one falloff texture are generated once. This is a bounded rendering-cost check, not a measured FPS or low-end-device performance guarantee. QA records and the isolated reward/profile database remain under ignored `artifacts/` and are excluded from publishing.
+
 ## Navigation scale 1.5.1 — 12 September 2026
 
 `npm test`: **93 passed, 0 failed**. Added coverage verifies sub-200 ms route updates, stable arrow size/height during light animation, paused effects, finite positions after time reversal, near-windshield clearance, depth testing and bounded projected widths for all four cameras at landscape and portrait aspect ratios. The existing street-route, checkpoint, driving, rewind, collision, pursuit and garage cases remain passing.

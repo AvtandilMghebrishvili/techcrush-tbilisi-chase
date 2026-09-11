@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.0 — 2026-09-12
+
+- Add a ten-minute automatic dusk/night/day cycle driven by simulation time, with a moon, subtle stars/clouds, warm occupied windows, streetlight halos and soft pools of light. Pause and rewind preserve the cycle.
+- Add an Auto / Night / Day / Dusk control with a local display preference. Raise player headlight output after dark and retain daytime illumination for the garage studio.
+- Reuse the existing HDR and facade assets. Limit street illumination to three shadowless local lights and two instanced effect batches of at most 64 lamps. Broken lamp bulbs, glows and illumination turn off on contact and return on rewind.
+- Restyle the menu, car choices, garage, parts inspector, reward dialog, pause screen, touch controls and HUD with graphite surfaces, red TECHCRUSH accents and racing typography. Keep compact navigation and distinct part-grade colors.
+- Replace the plain loading message with milestone-based preparation progress and a racing-strip gauge; warm shader programs before dismissing it. No artificial loading delay or added media downloads.
+- Add narrow-screen header rows, readable single-column upgrade comparisons and a compact rewind control above the touch buttons. Respect reduced-motion preferences.
+
 ## 1.5.1 — 2026-09-12
 
 - Reduce cockpit street chevrons from 3.7 m to at most 2 m wide, with separate hood, chase and aerial sizes and a projected-width limit for narrow screens.

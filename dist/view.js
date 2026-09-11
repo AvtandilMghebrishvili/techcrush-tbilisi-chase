@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { CityLighting, windowGlow } from "./city-lighting.js";
 import { updateVehicleDamage, prepareVehicleDamage } from "./vehicle-damage.js";
 import { EXPLOSION_LIFETIME, IMPACT_LIFETIME } from "./damage-state.js";
 import { updateBreakables } from "./breakable-props.js";
@@ -62,7 +63,8 @@ export class SceneView {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.94;
     this.camera = new THREE.PerspectiveCamera(56, 1, 0.06, 4800);
-    this.scene.add(new THREE.HemisphereLight("#dce8f3", "#78776b", 0.75));
+    this.hemisphere = new THREE.HemisphereLight("#dce8f3", "#78776b", 0.75);
+    this.scene.add(this.hemisphere);
     this.blastLight = new THREE.PointLight("#ff9736", 0, 19, 2);
     this.scene.add(this.blastLight);
     const sun = new THREE.DirectionalLight("#fff3d9", 2.3);
@@ -117,7 +119,8 @@ export class SceneView {
     for (const light of model.userData.headlights) light.visible = false;
     return model;
   }
-  async loadTextures() {
+  async loadTextures(progress = () => {}) {
+    progress(12, "LOADING STREETS & FACADES");
     const loader = new THREE.TextureLoader();
     const [road, facade, logo, wordmark] = await Promise.all(
       [
@@ -141,10 +144,14 @@ export class SceneView {
     this.roadMaterial.bumpMap = road;
     this.roadMaterial.bumpScale = 0.018;
     this.roadMaterial.needsUpdate = true;
-    for (const m of this.buildingMaterials) {
+    for (const [i, m] of this.buildingMaterials.entries()) {
       m.map = facade;
+      m.emissive.set("#ffffff");
+      m.emissiveMap = windowGlow(facade.image, i);
+      m.emissiveIntensity = 0;
       m.needsUpdate = true;
     }
+    progress(38, "SHAPING THE TBILISI SKYLINE");
     const [hill, hillNormal] = await Promise.all(
       ["hills-diff.jpg", "hills-nor_gl.jpg"].map((n) =>
         loader.loadAsync("./assets/" + n),
@@ -179,8 +186,16 @@ export class SceneView {
         "#include <map_fragment>\ndiffuseColor.rgb=mix(diffuseColor.rgb,vec3(.29,.31,.23),.72);",
       );
     };
-    await Promise.all([loadTrees(this), loadSportsAssets(this)]);
+    progress(57, "PREPARING CARS & TREES");
+    let complete = 0;
+    await Promise.all(
+      [loadTrees(this), loadSportsAssets(this)].map((p) =>
+        p.then(() => progress(57 + ++complete * 17, "PREPARING CARS & TREES")),
+      ),
+    );
     this.selectCar("gt");
+    this.lighting = new CityLighting(this);
+    progress(94, "CONNECTING YOUR GARAGE");
   }
   setupGame(sim) {
     sim.propDefinitions = (this.breakableProps || []).map((p) => p.definition);
@@ -586,6 +601,7 @@ export class SceneView {
       CAMERAS[this.cameraMode].id,
       this.camera,
     );
+    this.lighting?.update(sim);
     this.sun.position.set(
       this.player.position.x - 75,
       145,

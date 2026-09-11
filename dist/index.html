@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="./ui-refresh.css" />
     <link rel="stylesheet" href="./garage-refresh.css" />
     <link rel="stylesheet" href="./workshop-studio.css" />
+    <link rel="stylesheet" href="./motorsport.css" />
     <script type="importmap">
       {
         "imports": {
@@ -66,8 +67,16 @@
           >
             C · CHASE
           </button>
-          <span class="live-label">TBILISI · DAY RUN</span
-          ><button
+          <button
+            id="lighting-toggle"
+            class="icon-button"
+            aria-label="Lighting: automatic cycle; click to switch"
+            title="Lighting: Auto / Night / Day / Dusk"
+            disabled
+          >
+            AUTO · DUSK
+          </button>
+          <button
             id="sound"
             class="icon-button"
             aria-label="Enable sound"
@@ -371,7 +380,33 @@
           ><button data-key="Shift" aria-label="Nitro">N₂O</button>
         </div>
       </div>
-      <div id="loading">WARMING UP THE ENGINE…</div>
+      <div id="loading" role="status" aria-live="polite">
+        <div class="boot-card">
+          <img
+            src="./assets/techcrush-logo.jpg"
+            alt=""
+            width="56"
+            height="56"
+          />
+          <span class="boot-brand">TECHCRUSH <em>NIGHTSHIFT</em></span>
+          <h2>GET READY<br /><em>TO RUN.</em></h2>
+          <div class="boot-status">
+            <span id="loading-stage">PREPARING THE CITY</span
+            ><b id="loading-percent">0%</b>
+          </div>
+          <div
+            class="boot-track"
+            role="progressbar"
+            aria-label="Game preparation"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <i id="loading-fill"></i>
+          </div>
+          <small>TBILISI / STREET DIVISION <span>WASD TO DRIVE</span></small>
+        </div>
+      </div>
       <div id="error" hidden role="alert"></div>
       <button
         id="rewind"

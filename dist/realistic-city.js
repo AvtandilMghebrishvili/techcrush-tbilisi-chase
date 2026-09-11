@@ -96,6 +96,8 @@ function clockBuilding(v, facade) {
     cornice = mat("#ded5bf"),
     window = mat("#283336", { metalness: 0.4, roughness: 0.19 }),
     bronze = mat("#777b70", { metalness: 0.55 });
+  window.emissive.set("#ffc57b");
+  v.nightWindowMaterials = [window];
   const box = (w, h, d, m, x, y, z) => v.box(w, h, d, m, x, y, z, g);
   box(27, 31, 34, facade, 0, 15.5, -9);
   box(25, 1.2, 34, cornice, 0, 31.5, -9);
@@ -262,6 +264,8 @@ function streetDetails(v, line) {
   const metal = mat("#424c4b", { metalness: 0.7, roughness: 0.4 }),
     bark = mat("#625e4e");
   const lamp = mat("#eae1c8", { emissive: "#fff4d8", emissiveIntensity: 0.3 });
+  v.streetLamps = [];
+  v.streetLampMaterials = [lamp];
   const trees = [];
   for (const r of ROADS) {
     const fx = Math.sin(r.angle),
@@ -274,9 +278,9 @@ function streetDetails(v, line) {
           z = r.start.z + fz * t + rz * (r.width / 2 + 2.4) * side;
         if (nearestRoad({ x, z }).distance < r.width / 2 + 1) continue;
         const pole = new THREE.Group();
-        pole.position.set(x,0,z);
+        pole.position.set(x, 0, z);
         v.decor.add(pole);
-        registerBreakable(v,pole,x,z);
+        const prop = registerBreakable(v, pole, x, z);
         v.box(0.15, 8, 0.15, metal, 0, 4, 0, pole);
         const arm = v.box(
           2.5,
@@ -300,6 +304,7 @@ function streetDetails(v, line) {
           pole,
         );
         light.rotation.y = r.angle;
+        v.streetLamps.push({ head: light, propId: prop.definition.id });
         trees.push({
           x: x + fx * 12,
           z: z + fz * 12,
@@ -336,10 +341,10 @@ function streetDetails(v, line) {
   sign.position.set(p.x - 8, 5, p.z - 14);
   sign.rotation.y = -Math.PI / 2;
   const post = new THREE.Group();
-  post.position.set(sign.position.x,0,sign.position.z);
-  sign.position.set(0,5,0);
+  post.position.set(sign.position.x, 0, sign.position.z);
+  sign.position.set(0, 5, 0);
   post.add(sign);
   v.decor.add(post);
-  v.box(0.12,5,0.12,metal,0,2.5,0,post);
-  registerBreakable(v,post,post.position.x,post.position.z,5);
+  v.box(0.12, 5, 0.12, metal, 0, 2.5, 0, post);
+  registerBreakable(v, post, post.position.x, post.position.z, 5);
 }

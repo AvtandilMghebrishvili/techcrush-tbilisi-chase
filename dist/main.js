@@ -1,4 +1,5 @@
 import { ChaseAudio } from "./chase-audio.js";
+import { LIGHTING_MODES } from "./city-lighting.js";
 import { ROADS } from "./city-map.js";
 import { radarPoint, routeDistance } from "./hud-math.js";
 import { ProfileClient } from "./profile-client.js";
@@ -191,6 +192,33 @@ function switchCamera(id) {
     "aria-label",
     "Camera: " + mode.label + "; click to switch",
   );
+}
+function switchLighting() {
+  const modes = LIGHTING_MODES,
+    lighting = view.lighting;
+  lighting.setMode(modes[(modes.indexOf(lighting.mode) + 1) % modes.length]);
+  try {
+    localStorage.setItem("techcrush-lighting", lighting.mode);
+  } catch {}
+  lighting.update(sim);
+  updateLightingLabel();
+}
+function updateLightingLabel() {
+  const lighting = view.lighting;
+  if (!lighting) return;
+  const label =
+    (lighting.mode === "auto" ? "AUTO · " : "") + lighting.level.label;
+  $("lighting-toggle").textContent = label;
+  $("lighting-toggle").setAttribute(
+    "aria-label",
+    `Lighting: ${lighting.mode === "auto" ? "automatic cycle" : lighting.mode}; ${lighting.level.label.toLowerCase()}; click to switch`,
+  );
+}
+function loadingProgress(amount, stage) {
+  $("loading-stage").textContent = stage;
+  $("loading-percent").textContent = amount + "%";
+  $("loading-fill").style.width = amount + "%";
+  $("loading-fill").parentElement.setAttribute("aria-valuenow", String(amount));
 }
 async function toggleSound() {
   try {
@@ -557,6 +585,7 @@ function frame(now) {
     view.render(sim, dt, input());
   uiTime += dt;
   if (uiTime > 0.08) {
+    updateLightingLabel();
     if (sim.phase !== "ready") updateHUD();
     uiTime = 0;
   }
@@ -686,11 +715,17 @@ function registerTools() {
   }
 }
 try {
+  loadingProgress(3, "BUILDING THE CITY");
+  await new Promise(requestAnimationFrame);
   sim = new ChaseSimulation();
   view = new SceneView($("world"));
-  await Promise.all([view.loadTextures(), career.init()]);
+  await Promise.all([view.loadTextures(loadingProgress), career.init()]);
   view.setupGame(sim);
-  $("loading").hidden = true;
+  try {
+    view.lighting.setMode(localStorage.getItem("techcrush-lighting"));
+  } catch {}
+  view.lighting.update(sim);
+  loadingProgress(97, "WARMING UP THE LIGHTS");
   selectedCar = career.profile.selectedCar;
   setupGarage();
   workshop = new GarageUI(career, chooseCar, view);
@@ -701,6 +736,9 @@ try {
   };
   $("start").onclick = start;
   $("camera-toggle").onclick = () => switchCamera();
+  $("lighting-toggle").disabled = false;
+  $("lighting-toggle").onclick = switchLighting;
+  updateLightingLabel();
   $("pause").onclick = pause;
   $("pause").disabled = true;
   $("resume").onclick = pause;
@@ -767,6 +805,10 @@ try {
       });
   }
   registerTools();
+  await view.renderer.compileAsync(view.scene, view.camera);
+  loadingProgress(100, "READY TO RACE");
+  $("loading").hidden = true;
+  document.body.classList.add("loaded");
   requestAnimationFrame(frame);
 } catch (e) {
   $("loading").hidden = true;
