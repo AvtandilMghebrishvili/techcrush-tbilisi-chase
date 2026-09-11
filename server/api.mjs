@@ -1,4 +1,8 @@
-import { newProfile, applyProgressAction } from "../dist/progression.js";
+import {
+  newProfile,
+  migrateProfile,
+  applyProgressAction,
+} from "../dist/progression.js";
 const json = (value, status = 200) =>
   new Response(JSON.stringify(value), {
     status,
@@ -76,7 +80,7 @@ export async function handleApi(request, DB) {
         },
         404,
       );
-    let profile = JSON.parse(row.profile),
+    let profile = migrateProfile(JSON.parse(row.profile)),
       version = row.version;
     if (url.pathname === "/api/action") {
       let body;

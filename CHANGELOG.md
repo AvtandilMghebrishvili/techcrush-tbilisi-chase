@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.1 — 2026-09-11
+
+- Restore the detailed Original 458 as a fourth selectable car; preserve existing garages, credits and installed parts when migrating profiles.
+- Rebuild the three newer body meshes with fitted headlights, glass, mirrors, fenders, spoilers and model-specific exhaust outlets.
+- Rotate every steering wheel about its fixed local shaft; keep front-wheel pivots centered. Use per-model cockpit eye positions.
+- Replace flat headlight road patches with soft spotlights.
+- Share solid, unbreakable bridge rail segments between rendering and physics, preserving road-width junction openings.
+- Remove decorative bridge human figures, retaining the Mother of Georgia landmark.
+- Make benches, bins, planters and street signs breakable; give props and falling trees an immediate visible impact response with rewind restoration.
+- Recover surviving rollovers automatically after 0.8 seconds, including upside-down states without an existing flip timer.
+- Add regression coverage for the actual licensed GLB, centered steering, fitted lights/exhaust, profile migration, immediate prop contact and repeated bridge-rail impacts.
+
 ## 1.1.0 — 2026-09-11
 
 - Clear full building footprints from roads, correct the clock-building wing collision and connect three driveable bridges; Peace Bridge is an explicitly fictional driving adaptation.

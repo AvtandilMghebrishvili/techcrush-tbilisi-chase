@@ -73,12 +73,16 @@ test("car selection persists across retries and changes driving and protection",
     sim.start();
     assert.equal(sim.player.carId, c.id);
   }
-  const speeds = CARS.map((spec) => {
+  const speeds = ["gt", "rally", "suv"].map((id) => {
+    const spec = carSpec(id);
     const c = { ...vehicle(0, 0), carId: spec.id };
     for (let i = 0; i < 1200; i++) stepVehicle(c, { throttle: 1 }, 1 / 120);
     return c.speed;
   });
-  assert(speeds[2] > speeds[1] && speeds[1] > speeds[0], 'Veyra, Vector and Apex have increasing performance');
+  assert(
+    speeds[2] > speeds[1] && speeds[1] > speeds[0],
+    "Veyra, Vector and Apex have increasing performance",
+  );
   assert(carSpec("suv").damageScale < carSpec("gt").damageScale);
   assert(carSpec("rally").handling > carSpec("gt").handling);
 });

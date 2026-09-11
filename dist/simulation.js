@@ -1,4 +1,5 @@
 import { TREES } from "./world-props.js";
+import { BRIDGE_BARRIERS } from "./bridge-data.js";
 import { vehicleContact, treeContact } from "./contacts.js";
 import { RewindTimeline } from "./rewind.js";
 import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
@@ -30,7 +31,7 @@ export const angleDelta = (a, b) =>
   Math.atan2(Math.sin(a - b), Math.cos(a - b));
 export const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function blocks() {
-  return BUILDINGS;
+  return [...BUILDINGS, ...BRIDGE_BARRIERS];
 }
 export function vehicle(x = 0, z = 0, angle = 0) {
   return {
@@ -528,8 +529,21 @@ export class ChaseSimulation {
     this.explosions = this.explosions.filter((e) => this.time - e.born < 2.2);
     const p = this.player;
     const before = { x: p.x, z: p.z };
+    if (
+      !p.airborne &&
+      !p.flipped &&
+      p.health > 0 &&
+      Math.cos(p.roll || 0) * Math.cos(p.pitch || 0) < 0.3
+    ) {
+      p.flipped = true;
+      p.flipTimer = 0.8;
+      p.y = 1.38;
+    }
     if (p.flipped) {
-      p.flipTimer -= dt;
+      p.flipTimer = Math.max(
+        0,
+        (Number.isFinite(p.flipTimer) ? p.flipTimer : 0.8) - dt,
+      );
       p.vx *= Math.exp(-dt * 5);
       p.vz *= Math.exp(-dt * 5);
       p.x += p.vx * dt;
@@ -824,6 +838,7 @@ export class ChaseSimulation {
         cop.repath = 0;
       }
     }
+    if (p.flipped) p.invulnerable = Math.max(p.invulnerable, 0.1);
     const allCars = [
       p,
       ...this.traffic.filter((c) => !c.destroyed),
@@ -875,10 +890,10 @@ export class ChaseSimulation {
       if (car.destroyed) continue;
       for (const tree of breakables) {
         if (
-          (car.y || 0) > 2.5 ||
+          (car.y || 0) > Math.min(2.5, tree.h || 8) ||
           tree.broken ||
-          Math.abs(tree.x - car.x) > 4 ||
-          Math.abs(tree.z - car.z) > 4
+          Math.abs(tree.x - car.x) > 4 + (tree.radius || 0) ||
+          Math.abs(tree.z - car.z) > 4 + (tree.radius || 0)
         )
           continue;
         const impact = treeContact(car, tree, this.time);

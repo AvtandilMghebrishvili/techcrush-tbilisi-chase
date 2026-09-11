@@ -93,7 +93,12 @@ export class SceneView {
   }
   makeCar(color, police = false, carId = "gt") {
     if (police) return makeSedan(this, true);
-    return makeOriginalSportsCar(carId, color);
+    if (carId === "classic" && this.carTemplate)
+      return sportsCar(this, color, false, carId);
+    const model = makeOriginalSportsCar(carId, color);
+    // Only the player's headlights illuminate the city; distant traffic uses lenses.
+    for (const light of model.userData.headlights) light.visible = false;
+    return model;
   }
   async loadTextures() {
     const loader = new THREE.TextureLoader();
@@ -266,22 +271,6 @@ export class SceneView {
     this.skidTimer = 0;
     this.lastTirePositions = null;
     this.tireSmoke = createTireSmoke(this.scene);
-    const beamMat = new THREE.MeshBasicMaterial({
-      color: "#f8eabb",
-      transparent: true,
-      opacity: 0.065,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    });
-    this.headlightBeams = [];
-    for (const x of [-0.85, 0.85]) {
-      const geo = new THREE.PlaneGeometry(3, 13);
-      const m = new THREE.Mesh(geo, beamMat);
-      m.rotation.x = -Math.PI / 2;
-      m.position.set(x, 0.08, 8.5);
-      this.player.add(m);
-      this.headlightBeams.push(m);
-    }
     this.renderer.shadowMap.autoUpdate = true;
     this.renderer.shadowMap.needsUpdate = true;
   }
@@ -331,12 +320,14 @@ export class SceneView {
   selectCar(id, equipment = {}) {
     const spec = carSpec(id),
       previous = this.player;
-    this.player = makeOriginalSportsCar(spec.id, spec.color, equipment);
+    this.player =
+      spec.id === "classic"
+        ? sportsCar(this, spec.color, false, spec.id, equipment)
+        : makeOriginalSportsCar(spec.id, spec.color, equipment);
     addTurboExhaust(this.player);
     if (previous) {
       this.player.position.copy(previous.position);
       this.player.rotation.copy(previous.rotation);
-      for (const beam of this.headlightBeams || []) this.player.add(beam);
       disposeGroup(this.scene, previous);
     }
     this.scene.add(this.player);
@@ -450,11 +441,16 @@ export class SceneView {
         Math.cos(p.angle),
       );
       if (interior || hood) {
-        const seat = mode === "cockpit" ? -0.28 : 1.8;
-        const driverOffset = interior ? -0.36 : 0;
+        const cabin = this.player.userData.cockpitSeat || {
+          x: 0.36,
+          y: 1.08,
+          z: -0.28,
+        };
+        const seat = interior ? cabin.z : 1.8;
+        const driverOffset = interior ? cabin.x : 0;
         this.camera.position.set(
           p.x + forward.x * seat + forward.z * driverOffset,
-          (p.y || 0) + (interior ? 1.08 : 0.97),
+          (p.y || 0) + (interior ? cabin.y : 0.97),
           p.z + forward.z * seat - forward.x * driverOffset,
         );
         this.camera.lookAt(

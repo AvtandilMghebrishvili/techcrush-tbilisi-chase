@@ -1,5 +1,6 @@
 import * as THREE from "./vendor/three.module.js";
 import { registerBreakable } from "./breakable-props.js";
+import { BRIDGE_DECKS, BRIDGE_BARRIERS } from "./bridge-data.js";
 import { RETAINING_WALLS } from "./district-data.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import {
@@ -171,7 +172,17 @@ export function buildTbilisiDistricts(v) {
     );
     return mesh;
   };
-  const label = (text, w, h, x, y, z, angle = 0, color = "#174644") => {
+  const label = (
+    text,
+    w,
+    h,
+    x,
+    y,
+    z,
+    angle = 0,
+    color = "#174644",
+    parent = root,
+  ) => {
     const c = document.createElement("canvas");
     c.width = 1024;
     c.height = 192;
@@ -189,7 +200,7 @@ export function buildTbilisiDistricts(v) {
     t.colorSpace = THREE.SRGBColorSpace;
     const mat = material("#fff", { map: t });
     for (const side of [0, Math.PI]) {
-      const m = add(new THREE.PlaneGeometry(w, h), mat, x, y, z);
+      const m = add(new THREE.PlaneGeometry(w, h), mat, x, y, z, parent);
       m.rotation.y = angle + side;
       m.position.x += Math.sin(angle + side) * 0.025;
       m.position.z += Math.cos(angle + side) * 0.025;
@@ -296,16 +307,13 @@ export function buildTbilisiDistricts(v) {
     }
   }
   // Baratashvili is a broad driving deck, with proper sidewalk edges and bridge railings.
-  const bridges = [
-    ["BARATASHVILI BRIDGE", { x: -770.57, z: -237.75 }, -1.45, 145, 31],
-    ...ROADS.filter((r) => r.name === "Metekhi Bridge").map((r) => [
-      "METEKHI BRIDGE",
-      { x: (r.start.x + r.end.x) / 2, z: (r.start.z + r.end.z) / 2 },
-      r.angle,
-      r.length + 1,
-      r.width + 2,
-    ]),
-  ];
+  const bridges = BRIDGE_DECKS.map((b) => [
+    b.name,
+    b,
+    b.angle,
+    b.length,
+    b.width,
+  ]);
   for (const [name, p, angle, length, width] of bridges) {
     const g = new THREE.Group();
     g.position.set(p.x, 0, p.z);
@@ -314,9 +322,6 @@ export function buildTbilisiDistricts(v) {
     box(width, 1.2, length, stone, 0, -0.65, 0, g);
     for (const side of [-1, 1]) {
       box(2.8, 0.25, length, cream, side * (width / 2 - 1.4), 0.2, 0, g);
-      box(0.14, 0.13, length, metal, side * (width / 2 - 0.2), 1.35, 0, g);
-      for (let z = -length / 2 + 1; z < length / 2; z += 1.8)
-        box(0.08, 1.18, 0.08, metal, side * (width / 2 - 0.2), 0.77, z, g);
       for (let z = -length / 2 + 8; z < length / 2; z += 25) {
         const localX = side * (width / 2 - 1),
           lamp = new THREE.Group();
@@ -329,14 +334,6 @@ export function buildTbilisiDistricts(v) {
         beam([0, 0.3, 0], [0, 8, 0], 0.09, metal, lamp);
         beam([0, 8, 0], [-side * 3, 8.7, 0], 0.08, metal, lamp);
         box(1.25, 0.16, 0.5, white, -side * 3, 8.65, 0, lamp);
-      }
-      // Small patinated figure silhouettes echo the sculptures on the supplied bridge reference.
-      const patina = material("#4b796d", { metalness: 0.5 });
-      for (const z of [-38, 34]) {
-        const x = side * (width / 2 - 0.75);
-        orb(0.24, 0.27, 0.23, patina, x, 2.65, z, g);
-        beam([x, 1.15, z], [x + 0.25 * side, 2.35, z], 0.14, patina, g);
-        beam([x, 2.1, z], [x + side * 0.7, 1.6, z - 0.45], 0.065, patina, g);
       }
     }
     for (const z of [-length * 0.28, length * 0.28])
@@ -405,11 +402,22 @@ export function buildTbilisiDistricts(v) {
     for (const x of [-42, 42])
       for (const z of [-4, 4])
         beam([x, 0, z], [x * 0.86, 12, z * 1.8], 0.35, white, g);
-    for (const z of [-3.6, 3.6]) {
-      beam([-65, 1.5, z], [65, 1.5, z], 0.08, silver, g);
-      for (let x = -64; x < 65; x += 3)
-        beam([x, 0.5, z], [x, 1.5, z], 0.05, silver, g);
-    }
+  }
+  for (const rail of BRIDGE_BARRIERS) {
+    const curb = box(rail.w, 0.35, rail.d, stone, rail.x, 0.2, rail.z);
+    curb.rotation.y = rail.angle;
+    const top = box(0.14, 0.13, rail.d, metal, rail.x, 1.35, rail.z);
+    top.rotation.y = rail.angle;
+    for (let t = -rail.d / 2 + 0.1; t < rail.d / 2; t += 1.8)
+      box(
+        0.08,
+        1.18,
+        0.08,
+        metal,
+        rail.x + Math.sin(rail.angle) * t,
+        0.77,
+        rail.z + Math.cos(rail.angle) * t,
+      );
   }
   // Rike's lawns, pale paths, red paving panels, fountain and amphitheatre.
   const park = L.rike;
@@ -900,6 +908,8 @@ export function buildTbilisiDistricts(v) {
       g.position.set(x, 0.2, z);
       g.rotation.y = r.angle;
       root.add(g);
+      for (const px of [-1, 0, 1])
+        registerBreakable(v, g, x + rx * px, z + rz * px, 1.4, 0.45);
       for (const px of [-1.1, 1.1]) {
         box(0.11, 0.6, 0.8, metal, px, 0.3, 0, g);
         box(0.09, 1, 0.1, metal, px, 0.6, -0.32, g);
@@ -908,20 +918,40 @@ export function buildTbilisiDistricts(v) {
         box(2.7, 0.07, 0.14, wood, 0, 0.62, -0.3 + j * 0.19, g);
       for (let j = 0; j < 3; j++)
         box(2.7, 0.13, 0.06, wood, 0, 0.9 + j * 0.17, -0.34, g);
+      const propAt = (offset) => {
+        const p = new THREE.Group();
+        p.position.set(x + rx * offset, 0.2, z + rz * offset);
+        p.rotation.y = r.angle;
+        root.add(p);
+        return p;
+      };
+      const bin = propAt(2.3),
+        planter = propAt(-2.7);
+      registerBreakable(v, bin, bin.position.x, bin.position.z, 1.1, 0.36);
+      registerBreakable(
+        v,
+        planter,
+        planter.position.x,
+        planter.position.z,
+        1.5,
+        0.8,
+      );
       add(
         new THREE.CylinderGeometry(0.34, 0.3, 0.85, 10),
         metal,
-        2.3,
+        0,
         0.43,
         0,
-        g,
+        bin,
       );
-      box(0.7, 0.15, 0.7, metal, 2.3, 0.91, 0, g);
-      box(1.6, 0.55, 1.6, stone, -2.7, 0.3, 0, g);
-      orb(0.8, 0.65, 0.7, hedge, -2.7, 0.9, 0, g);
+      box(0.7, 0.15, 0.7, metal, 0, 0.91, 0, bin);
+      box(1.6, 0.55, 1.6, stone, 0, 0.3, 0, planter);
+      orb(0.8, 0.65, 0.7, hedge, 0, 0.9, 0, planter);
       if (r.id % 3 === 0) {
-        label(r.name.toUpperCase(), 7, 0.85, x, 3.8, z, r.angle);
-        box(0.1, 3.7, 0.1, metal, x, 1.85, z);
+        const sign = propAt(4);
+        label(r.name.toUpperCase(), 7, 0.85, 0, 3.8, 0, 0, "#174644", sign);
+        box(0.1, 3.7, 0.1, metal, 0, 1.85, 0, sign);
+        registerBreakable(v, sign, sign.position.x, sign.position.z, 4.2, 0.12);
       }
     }
   }

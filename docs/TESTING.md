@@ -8,19 +8,20 @@ Tests use Node's built-in test runner. They import simulation and geometry modul
 npm test
 ```
 
-The current suite contains **57 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/stunts-rewind.test.mjs`.
+The current suite contains **63 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/stunts-rewind.test.mjs`.
 
 `career.test.mjs` covers full-footprint road clearance, all three bridges in both directions, thin-wall tunneling, distinct car geometry, 14 parts/four tiers, integrated upgrade physics, duplicate rewards, currency settlement, level difficulty, wreck-credit rewind and breakable poles. `save-api.test.mjs` checks isolated profiles, request retries/conflicts, box idempotency and actual SQLite close/reopen persistence.
 
-| File                     | Main coverage                                                                              |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| `simulation.test.mjs`    | Driving, collisions, checkpoint and end-state rules                                        |
-| `upgrade.test.mjs`       | Car variants, keyboard steering, checkpoint routes, police damage and explosion effects    |
-| `pursuit.test.mjs`       | Pursuit/roadblock roles, contacts, drift and breakable trees                               |
-| `polish.test.mjs`        | Turbo transitions, recovery, road surfaces and camera clearance                            |
-| `navigation.test.mjs`    | Route guidance, pursuit speed and shared radio observations                                |
-| `stunts-rewind.test.mjs` | Ramp flight, rollover recovery, full-world rewind, history branching and reinforcement cap |
-| `assets.test.mjs`        | Local module imports, including transitive Three.js loaders                                |
+| File                     | Main coverage                                                                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `simulation.test.mjs`    | Driving, collisions, checkpoint and end-state rules                                                                                                            |
+| `upgrade.test.mjs`       | Car variants, keyboard steering, checkpoint routes, police damage and explosion effects                                                                        |
+| `pursuit.test.mjs`       | Pursuit/roadblock roles, contacts, drift and breakable trees                                                                                                   |
+| `polish.test.mjs`        | Turbo transitions, recovery, road surfaces and camera clearance                                                                                                |
+| `navigation.test.mjs`    | Route guidance, pursuit speed and shared radio observations                                                                                                    |
+| `stunts-rewind.test.mjs` | Ramp flight, rollover recovery, full-world rewind, history branching and reinforcement cap                                                                     |
+| `assets.test.mjs`        | Local module imports, including transitive Three.js loaders                                                                                                    |
+| `refinements.test.mjs`   | Actual licensed GLB loading, steering shaft/center invariants, fitted lights/exhaust, profile migration, same-frame prop response and unbreakable bridge rails |
 
 Test names in the files provide the precise assertions. Tests do not prove realistic appearance, stable FPS on every GPU, or enjoyable first-time difficulty.
 
@@ -28,6 +29,7 @@ Test names in the files provide the precise assertions. Tests do not prove reali
 
 ```sh
 node tests/route-drive.mjs gt
+node tests/route-drive.mjs classic
 node tests/route-drive.mjs rally
 node tests/route-drive.mjs suv
 node tests/route-drive.mjs suv 4 2
@@ -43,7 +45,7 @@ For diagnosis, set the optional `TRACE` environment variable to `1` before runni
 
 Start `npm start` and open http://127.0.0.1:4173/. Use ordinary controls to verify:
 
-1. **Load and garage:** assets finish loading, all three trims select correctly, Start works, and there are no module/asset failures in browser developer tools.
+1. **Load and garage:** assets finish loading, all four cars select correctly, Start works, and there are no module/asset failures in browser developer tools. Existing saves retain their credits and equipment.
 2. **Driving:** W accelerates, S brakes then reverses, A/D turn the expected way, and releasing input behaves correctly. Repeat with a Georgian keyboard layout.
 3. **Turbo and drift:** Shift changes acceleration, charge, exhaust, FOV and audio together; empty nitro must recharge before reuse. Space with steering produces a controllable slide and trails.
 4. **Contacts:** buildings stop the car; slow tree contacts deflect/stop it; hard hits break a tree. Patrols and civilians separate instead of passing through each other.

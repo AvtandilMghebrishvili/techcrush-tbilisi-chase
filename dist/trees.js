@@ -102,7 +102,7 @@ export function updateTrees(
       dummy.rotation.set(0, i * 2.399, 0);
       if (t.broken) {
         const age = Math.max(0, time - t.fallenAt),
-          angle = Math.min(1.49, age * age * 1.6);
+          angle = Math.min(1.49, 0.12 + age * 2.8);
         dummy.quaternion.premultiply(
           new THREE.Quaternion().setFromAxisAngle(
             new THREE.Vector3(Math.cos(t.fallAngle), 0, -Math.sin(t.fallAngle)),

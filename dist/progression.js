@@ -106,22 +106,28 @@ export const PARTS = [
     stats: { acceleration: 0.6, topSpeed: 1 },
   },
 ];
-export const CAR_IDS = ["gt", "rally", "suv"];
+export const CAR_IDS = ["classic", "gt", "rally", "suv"];
 export const upgradeCost = (tier) => [0, 600, 1500, 3600, 7800][tier] || 0;
 export const salvageValue = (tier) => [0, 75, 180, 420, 960][tier] || 0;
 export const partKey = (id, tier) => `${id}:${tier}`;
 export function newProfile() {
   return {
-    schema: 1,
+    schema: 2,
     credits: 1000,
     level: 1,
     boxes: 1,
     inventory: {},
-    cars: { gt: {}, rally: {}, suv: {} },
-    selectedCar: "gt",
+    cars: { classic: {}, gt: {}, rally: {}, suv: {} },
+    selectedCar: "classic",
     settled: [],
     lastBox: null,
   };
+}
+export function migrateProfile(profile) {
+  const p = structuredClone(profile);
+  p.schema = 2;
+  for (const id of CAR_IDS) p.cars[id] ||= {};
+  return p;
 }
 export function upgradedSpec(base, equipment = {}) {
   const spec = {

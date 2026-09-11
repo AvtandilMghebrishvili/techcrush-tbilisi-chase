@@ -2,11 +2,11 @@
 
 ## Sports car
 
-The career edition's selectable Apex R, Vector V12 and Veyra W16 are original unbadged procedural models in `dist/car-models.js`, with separate bodies, cabins, wheel layouts and upgrade geometry. No manufacturer model or trademark is represented by these new meshes. The earlier licensed 458 files remain in the complete source for historical reproducibility.
+The selectable Apex R, Vector V12 and Veyra W16 are original unbadged procedural models in `dist/car-models.js`, with separate bodies, cabins, wheel layouts and upgrade geometry. No manufacturer model or trademark is represented by these new meshes. Version 1.1.1 restores the licensed 458 as the fourth selectable car, named Original 458.
 
 `dist/assets/ferrari.glb`: Ferrari 458 model by [vicent091036](https://sketchfab.com/models/57bf6cc56931426e87494f554df1dab6), provided through the [official Three.js car example](https://threejs.org/examples/webgl_materials_car.html), attributed under CC BY 4.0. The [WorldCoder provenance table](https://huggingface.co/datasets/shuolucs/WorldCoder-Bench) also identifies this file as CC BY 4.0. The original Sketchfab detail endpoint was unavailable during this update.
 
-`dist/assets/sports-car.glb` is the earlier decoded, welded and simplified derivative: approximately 307,393 triangles versus 358,788 originally. Version 1.0 used this base for all three trims. The original input and loader are retained for reproducibility. Vehicle names/marks are not project-authored assets and do not imply manufacturer endorsement.
+`dist/assets/sports-car.glb` is the decoded, welded and simplified derivative: approximately 307,393 triangles versus 358,788 originally. Version 1.0 used this base for all three trims; version 1.1.1 makes it independently selectable with paint, rim/wing upgrades and corrected steering animation. The original input is retained for reproducibility. Vehicle names/marks are not project-authored assets and do not imply manufacturer endorsement.
 
 The police sedan and civilian modern sedan, classic 1980s/1990s sedans, wagon and hatchback are original unbranded geometry in `dist/patrol-car.js`. Georgian police panels, emergency lighting, push bar, mirrors, wheel details and chrome trim are authored in code. Occasional sports traffic now uses the original procedural sports-car geometry.
 

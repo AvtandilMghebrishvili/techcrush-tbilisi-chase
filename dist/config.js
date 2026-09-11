@@ -6,6 +6,22 @@ export const MAP_SIZE = (LIMIT + 32) * 2;
 export const TOWER = { x: 1070, z: -430, y: 278 };
 export const CARS = [
   {
+    id: "classic",
+    name: "Original 458",
+    type: "HERITAGE",
+    color: "#eac735",
+    topSpeed: 64,
+    acceleration: 25,
+    width: 1.98,
+    length: 4.65,
+    handling: 1.06,
+    damageScale: 0.85,
+    description: "The original detailed 458 · restored alongside the new cars",
+    speedRating: 4,
+    gripRating: 4,
+    armorRating: 3,
+  },
+  {
     id: "gt",
     name: "Apex R",
     type: "STREET SPEC",
@@ -55,7 +71,7 @@ export const CARS = [
   },
 ];
 export function carSpec(id) {
-  return CARS.find((c) => c.id === id) || CARS[0];
+  return CARS.find((c) => c.id === id) || CARS.find((c) => c.id === "gt");
 }
 export const CAMERAS = [
   { id: "chase", label: "CHASE" },

@@ -9,13 +9,15 @@ export function addTurboExhaust(car) {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
-  for (const x of [-0.28, 0, 0.28]) {
+  for (const p of car.userData.exhaustPositions ||
+    [-0.28, 0, 0.28].map((x) => ({ x, y: 0.41, z: -2.25 }))) {
     const flame = new THREE.Mesh(
       new THREE.ConeGeometry(0.11, 1.25, 12),
       material,
     );
     flame.rotation.x = -Math.PI / 2;
-    flame.position.set(x, 0.41, -2.87);
+    flame.position.set(p.x, p.y, p.z - 0.625);
+    flame.userData.nozzleZ = p.z;
     root.add(flame);
     const core = new THREE.Mesh(
       new THREE.ConeGeometry(0.05, 0.7, 10),
@@ -28,7 +30,8 @@ export function addTurboExhaust(car) {
       }),
     );
     core.rotation.x = -Math.PI / 2;
-    core.position.set(x, 0.41, -2.6);
+    core.position.set(p.x, p.y, p.z - 0.35);
+    core.userData.nozzleZ = p.z;
     root.add(core);
   }
   car.add(root);
@@ -40,7 +43,8 @@ export function updateTurboExhaust(car, p, time) {
   root.visible = p.boosting && p.boostStrength > 0.12;
   root.children.forEach((m, i) => {
     m.scale.y = (0.65 + Math.sin(time * 47 + i * 2) * 0.15) * p.boostStrength;
-    m.position.z = -2.25 - m.geometry.parameters.height * m.scale.y * 0.5;
+    m.position.z =
+      m.userData.nozzleZ - m.geometry.parameters.height * m.scale.y * 0.5;
     m.material.opacity = 0.5 + p.boostStrength * 0.35;
   });
 }

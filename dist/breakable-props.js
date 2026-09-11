@@ -17,7 +17,7 @@ export function registerBreakable(view, root, x, z, height = 8, radius = 0.18) {
       z,
       h: height,
       radius,
-      breakSpeed: 7,
+      breakSpeed: 0.5,
       linked: root.userData.breakableIds,
     },
   };
@@ -34,9 +34,10 @@ export function updateBreakables(view, sim) {
     entry.root.position.copy(entry.position);
     entry.root.quaternion.copy(entry.base);
     if (state?.broken) {
-      const amount = Math.min(1, age / 1.1);
+      // An immediate kick makes contact visible in the very same simulation frame.
+      const amount = Math.min(1, 0.09 + age / 0.55);
       axis.set(Math.cos(state.fallAngle), 0, -Math.sin(state.fallAngle));
-      fall.setFromAxisAngle(axis, amount * amount * Math.PI * 0.49);
+      fall.setFromAxisAngle(axis, amount * Math.PI * 0.49);
       entry.root.quaternion.premultiply(fall);
     }
   }

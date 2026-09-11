@@ -1,5 +1,24 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Vehicle and contact refinements 1.1.1 — 11 September 2026
+
+`npm test`: **63 passed, 0 failed**.
+
+The release adds six regression cases to the existing 57. Coverage loads the actual restored 458 GLB, verifies that steering hub positions and shaft normals remain fixed for left/center/right inputs, raycasts fitted details against the actual new body meshes, and checks each animated exhaust base against its model outlet. It also checks old-profile migration, same-timestamp prop response and rewind restoration, repeated high-speed impacts against both sides of bridge railings, and timer-independent rollover recovery.
+
+The existing suite continues to drive every segment of all three bridges in both directions and verifies clear center routes across the entire map. Rendering and collision now share railing segments; deliberate road-width junction openings keep exits accessible.
+
+Browser review used the local game in Codex's Chromium browser at 1280 × 720. All four garage choices loaded. A restored-458 run accelerated with turbo, reached checkpoint 1 at 100 HP and showed 301 km/h during boost. The original cockpit rendered correctly in the city; no warning/error messages were returned by the browser log check. A temporary isolated model viewer was used for front detail checks on all four cars, hypercar rear fittings, and left/right steering checks in the original and procedural cabins. That fixture was removed before release. These observations are visual checks, not a photorealism or FPS claim.
+
+Full-route controller results with ordinary controls, traffic, pursuit, tree contacts and normal recovery enabled:
+
+| Model        | Result                   | Gates |    Time |  Score |  HP | Takedowns |
+| ------------ | ------------------------ | ----- | ------: | -----: | --: | --------: |
+| Original 458 | Captured after all gates | 6/6   | 198.5 s | 25,334 |  56 |         6 |
+| Apex R       | Won                      | 6/6   | 221.7 s | 33,912 |  26 |        11 |
+
+The original-car controller reached all gates but did not escape; this is not recorded as a passing full-route run. The controller has ideal route knowledge and is not a human difficulty assessment. No new physical-phone, Safari or measured GPU-performance claim is made.
+
 ## Career edition 1.1.0 — 11 September 2026
 
 `npm test`: **57 passed, 0 failed**. New coverage includes full-footprint clearance for every building against all road widths, three bridges driven both ways, high-speed thin-wall collisions, distinct finite car meshes, 14 parts/four tiers, integrated engine/brake/turbo effects, repeatable three-slot rewards, wallet/part operations, level scaling, wreck-credit rewind, breakable poles and durable SQLite saves. The API suite verifies two isolated profiles, conflicts, retries, box/level idempotency and closing/reopening the database.
@@ -8,11 +27,11 @@ The regenerated road graph contains **519 nodes and 671 segments**, with a conne
 
 Observed level-1 controller runs, with ordinary driving inputs and recovery:
 
-| Model | Result | Gates | Time | Score | HP | Takedowns |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| Apex R | Won | 6/6 | 220 s | 32,384 | 54 | 9 |
-| Vector V12 | Won | 6/6 | 211 s | 29,473 | 85 | 4 |
-| Veyra W16 | Won | 6/6 | 218.1 s | 32,417 | 88 | 6 |
+| Model      | Result | Gates |    Time |  Score |  HP | Takedowns |
+| ---------- | ------ | ----- | ------: | -----: | --: | --------: |
+| Apex R     | Won    | 6/6   |   220 s | 32,384 |  54 |         9 |
+| Vector V12 | Won    | 6/6   |   211 s | 29,473 |  85 |         4 |
+| Veyra W16  | Won    | 6/6   | 218.1 s | 32,417 |  88 |         6 |
 
 The initial Veyra controller was artificially capped at the previous car's speed; it reached all six gates but wrecked before escape. Updating the controller to use the selected car's speed envelope produced the recorded win. A level-4 Veyra fixture with all Silver parts reached all six gates but wrecked during escape at 290 s with 14 police slots; it demonstrates tougher pursuit, not successful completion or human difficulty calibration. No checkpoints, immunity or health were granted during those runs. The test controller does not intentionally jump or rewind; dedicated tests cover those mechanics.
 

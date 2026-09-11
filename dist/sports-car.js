@@ -2,7 +2,12 @@ import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
 import { makePatrolHealthBar } from "./effects.js";
-export async function loadSportsAssets(view, { legacy = false } = {}) {
+import {
+  bindSteering,
+  turnSteering,
+  addHeadlights,
+} from "./vehicle-details.js";
+export async function loadSportsAssets(view, { legacy = true } = {}) {
   const hdr = await new HDRLoader().loadAsync("./assets/daylight.hdr");
   hdr.mapping = THREE.EquirectangularReflectionMapping;
   const pmrem = new THREE.PMREMGenerator(view.renderer);
@@ -12,7 +17,7 @@ export async function loadSportsAssets(view, { legacy = false } = {}) {
   view.scene.background = hdr;
   view.scene.backgroundIntensity = 0.62;
   view.scene.backgroundBlurriness = 0.045;
-  // Retain the licensed historical model path without downloading it for new cars.
+  // The original licensed 458 is available alongside the three procedural models.
   if (!legacy) return;
   const [gltf, ao] = await Promise.all([
     new GLTFLoader().loadAsync("./assets/sports-car.glb"),
@@ -23,7 +28,13 @@ export async function loadSportsAssets(view, { legacy = false } = {}) {
   const box = new THREE.Box3().setFromObject(view.carTemplate);
   view.carTemplateBounds = box;
 }
-export function sportsCar(view, color, police = false, carId = "gt") {
+export function sportsCar(
+  view,
+  color,
+  police = false,
+  carId = "classic",
+  equipment = {},
+) {
   const group = new THREE.Group(),
     body = view.carTemplate.clone(true),
     clones = new Map();
@@ -63,7 +74,9 @@ export function sportsCar(view, color, police = false, carId = "gt") {
     const m = body.getObjectByName(name);
     if (m)
       m.material = new THREE.MeshStandardMaterial({
-        color: carId === "rally" ? "#353738" : "#b4bcc0",
+        color: ["#b4bcc0", "#bd8b59", "#d5e2e8", "#dfc15e", "#8cdeec"][
+          equipment.rims || 0
+        ],
         metalness: 0.95,
         roughness: 0.24,
       });
@@ -80,10 +93,20 @@ export function sportsCar(view, color, police = false, carId = "gt") {
     roughness: 0.5,
     metalness: 0.4,
   });
-  if (carId === "rally" && !police) {
-    view.box(1.75, 0.1, 0.45, black, 0, 1.25, -1.9, group);
+  if (equipment.spoiler && !police) {
+    const height = 1.12 + equipment.spoiler * 0.08;
+    view.box(1.75, 0.08, 0.36, black, 0, height, -1.82, group);
     for (const x of [-0.65, 0.65])
-      view.box(0.07, 0.32, 0.1, black, x, 1.06, -1.87, group);
+      view.box(
+        0.06,
+        height - 0.82,
+        0.1,
+        black,
+        x,
+        (height + 0.82) / 2,
+        -1.82,
+        group,
+      );
   }
   if (police) {
     const bar = view.box(1.15, 0.07, 0.36, black, 0, 1.35, -0.18, group);
@@ -149,6 +172,30 @@ export function sportsCar(view, color, police = false, carId = "gt") {
     .map((n) => body.getObjectByName(n))
     .filter(Boolean);
   group.userData.body = body;
+  group.userData.glass = glass?.material;
+  group.userData.cockpitSeat = { x: 0.35, y: 1.06, z: -0.3 };
+  group.userData.exhaustPositions = [-0.28, 0, 0.28].map((x) => ({
+    x,
+    y: 0.41,
+    z: -2.25,
+  }));
+  const steering = body.getObjectByName("steering_wheel");
+  if (steering) bindSteering(group, steering, new THREE.Vector3(0, 1, 0));
+  group.userData.wheelSteering = [];
+  for (const name of ["wheel_fl", "wheel_fr"]) {
+    const wheel = body.getObjectByName(name);
+    if (!wheel) continue;
+    const pivot = new THREE.Group();
+    pivot.position.copy(wheel.position);
+    wheel.parent.add(pivot);
+    wheel.position.set(0, 0, 0);
+    pivot.add(wheel);
+    group.userData.wheelSteering.push(pivot);
+  }
+  addHeadlights(group, [
+    { x: -0.67, y: 0.65, z: 2.12 },
+    { x: 0.67, y: 0.65, z: 2.12 },
+  ]);
   return group;
 }
 export function animateWheels(group, speed, dt, steer = 0) {
@@ -156,6 +203,5 @@ export function animateWheels(group, speed, dt, steer = 0) {
     wheel.rotation.x -= (speed * dt) / 0.34;
   for (const pivot of group.userData.wheelSteering || [])
     pivot.rotation.y = -steer * 0.4;
-  const wheel = group.userData.body?.getObjectByName("steering_wheel");
-  if (wheel) wheel.rotation.z = steer * 0.45;
+  turnSteering(group, steer);
 }
