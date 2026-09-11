@@ -49,6 +49,12 @@ Ceilings are on-road values; acceleration time, charge, turns and collisions aff
 
 Physical key codes support Georgian keyboard layouts. Touch buttons are included; a desktop keyboard and WebGL2-capable computer are recommended.
 
+## Driving audio
+
+Press **M** or the top-right **SOUND** button to enable sound. The four cars have separate V8, flat-six, V12 and W16-inspired engine profiles. Throttle changes the engine load; acceleration raises RPM, automatic shifts drop it, and boost adds intake air and a release sound. These are game-designed hybrid voices, not recordings of the named production cars.
+
+Nearby traffic and patrols make a stereo pass-by whoosh based on relative speed and which side they pass. Wood cracks, metal impacts, stone debris, glass, heavy crashes and explosions follow actual contacts. Tires, drifting, wind, nearby sirens and the helicopter complete the mix; cockpit view softens exterior sound. Pause, rewind and mute silence the mix without replaying old collision sounds afterward.
+
 ## Career and garage
 
 Completing a level grants **one box**, **1,800 + 250 × completed level CR**, and the next level. Separate run earnings are **150 CR per checkpoint, 350 CR per player-caused patrol takedown, 120 CR per civilian wreck and 800 CR for escape**. NPC-only crashes do not give free player rewards.

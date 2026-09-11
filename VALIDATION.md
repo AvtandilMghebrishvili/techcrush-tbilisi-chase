@@ -1,5 +1,13 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Driving audio 1.3.0 — 12 September 2026
+
+`npm test`: **78 passed, 0 failed**. Nine new cases cover distinct engine profiles, idle/load/redline, audible shift RPM drops and gear hysteresis, reverse, coordinate-correct stereo, relative-speed pass detection, same-step material cues including gentle tree contact, vehicle/wall contacts, single police explosions, bounded/deduplicated events, rewind clearing, muted/paused event consumption, asset hashes, fast attacks and loop continuity.
+
+Chromium rendered the actual Web Audio mixer through OfflineAudioContext at stereo 32 kHz: seven seconds for each car, seven seconds for material impacts/passing, and four seconds for pause/rewind/mute. All eight WAVs decoded, every output sample was finite and no asset/effect drops occurred. Engine runs peaked between 0.292 and 0.352 full scale; the material sequence peaked at 0.392 or below. These sampled fixtures did not clip. Opposite-side pass windows correctly favored opposite stereo channels. Samples taken half a second after pause, rewind and mute were silent. Offline fixtures are excluded from distribution. These are signal and behavior checks, not a subjective listening panel or a guarantee for every device/output level.
+
+A live Chromium run enabled audio through the Sound button, decoded eight files, accelerated the Original 458 under turbo to 281 km/h, and displayed seven-speed engine telemetry. The run crossed checkpoint 1, registered a moving pass and vehicle impact effects, then was captured. Twenty effects played with zero drops and no browser errors observed. Cockpit selection and rewind remained functional. This is an audio integration check, not a successful full-route escape. The existing physics and save regression suite remains passing.
+
 ## Interface and pursuit expansion 1.2.0 — 12 September 2026
 
 `npm test`: **69 passed, 0 failed**. The six added cases check twenty levels of deterministic clear checkpoint positions, connected routes, SUV/air/tank unlocks, capped tanks and restart behavior, heavier vehicle contacts and HP, three-dimensional air sight through rotated/thin walls, lost-contact searching, escape and helicopter rewind, radial radar bearings, road distance, and finite positive previews for all fourteen parts at four tiers. Existing vehicle, bridge, collision and save tests continue to pass.

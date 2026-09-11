@@ -17,7 +17,7 @@ flowchart LR
   View --> Canvas[WebGL canvas]
 ```
 
-`main.js` accumulates animation-frame time and calls `sim.update(1 / 120, input)` at a fixed rate. Incoming frame time is capped at 0.05 seconds to limit catch-up after interruptions. Rendering occurs once per animation frame; HUD/audio updates are throttled to roughly 0.08 seconds. The simulation owns positions, velocities, damage, scoring and pursuit decisions. The renderer reads that state and maintains transient visual effects.
+`main.js` accumulates animation-frame time and calls `sim.update(1 / 120, input)` at a fixed rate. Incoming frame time is capped at 0.05 seconds to limit catch-up after interruptions. Rendering and audio update once per animation frame; HUD text updates are throttled to roughly 0.08 seconds. The simulation owns positions, velocities, damage, scoring and pursuit decisions. The renderer reads that state and maintains transient visual effects.
 
 ## Module guide
 
@@ -25,7 +25,7 @@ All paths below are relative to `dist/`.
 
 | Module                                                    | Responsibility                                                                                                |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `main.js`, `index.html`, `style.css`                      | Garage, controls, loop, pause/end screens, HUD, minimap, synthesized audio and optional browser tools         |
+| `main.js`, `index.html`, `style.css`                      | Garage, controls, loop, pause/end screens, HUD, minimap, audio coordination and optional browser tools         |
 | `controls.js`, `config.js`                                | Physical keyboard normalization, input values, car trims and camera identifiers                               |
 | `simulation.js`                                           | Player integration, traffic, police AI, damage, reinforcement waves, checkpoints, recovery and end conditions |
 | `contacts.js`                                             | Oriented vehicle contact detection, separation and mass-weighted impulses                                     |
@@ -102,3 +102,11 @@ There is no multiplayer or persistent leaderboard. Runtime assets are local to t
 `makePolice` assigns sedan/SUV/tank stats. Active tank counts are bounded and reset correctly on restart. `pursuit-vehicles.js` renders the mixed fleet and aircraft; `view.js` replaces meshes when a respawn changes vehicle kind. Larger units use larger static clearance and mass-aware dynamic contacts.
 
 `garage-presentation.js` calculates displayed benefits through the same `upgradedSpec` used by driving physics. Paid next-tier and free-spare previews are distinct. A single part atlas feeds all cards and reward slots. `garage-refresh.css` and `ui-refresh.css` provide responsive presentation without changing server storage or reward probabilities.
+
+## Audio pipeline
+
+`audio-model.js` computes presentation RPM, hysteretic automatic gears, engine load, listener-relative stereo and relative-speed pass detection. It never changes vehicle physics. `chase-audio.js` combines a looped engine recording with per-car harmonic waves, filtered intake/road/wind noise and bounded one-shot voices. The HUD reads its gear label. Cockpit filtering affects continuous exterior sound.
+
+Physics emits material-tagged `soundEvents` immediately after contacts at 120 Hz. Each cue includes world position, impact, breakage and simulation time; source cooldowns suppress solver duplicates. The renderer-frame audio update drains these independently of the 80 ms HUD update. Sounds beyond 125 metres are rejected before queuing, the queue is capped at 48 and the mixer at 28 one-shot voices. Stereo, distance attenuation, attack/release envelopes and a compressor control the mix.
+
+AudioContext and eight small WAV assets are initialized only after the user enables sound. Missing recordings fail softly while procedural engine/air layers continue. Pause, rewind and mute consume queued effects, clear pass history as appropriate, and silence active voices. Sound queues/cooldowns are transient and explicitly cleared on rewind restoration; they are not save data. The checked-in CC0 inputs, processing script and per-file hashes are described in ASSETS.md and data/audio-sources.json.

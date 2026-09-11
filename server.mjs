@@ -13,6 +13,7 @@ const types = {
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".zip": "application/zip",
+  ".wav": "audio/wav",
 };
 http
   .createServer(async (req, res) => {

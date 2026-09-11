@@ -1,0 +1,73 @@
+{
+  "license": "CC0-1.0",
+  "engine": {
+    "author": "domasx2",
+    "page": "https://opengameart.org/content/racing-car-engine-sound-loops"
+  },
+  "impacts": {
+    "author": "Kenney",
+    "page": "https://kenney.nl/assets/impact-sounds",
+    "pack": "Impact Sounds 1.0"
+  },
+  "downloads": [
+    {
+      "url": "https://opengameart.org/sites/default/files/loop_0.wav",
+      "sha256": "69d74b106509037ce547429e4c3f9ae906b0fffe88d0bb8b3b5a8b0cfc239048"
+    },
+    {
+      "url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    }
+  ],
+  "processing": "Mono 24 kHz PCM16; 35 Hz high-pass; leading silence removed from impacts; peak normalization; 40 ms engine loop crossfade and DC removal.",
+  "files": [
+    {
+      "file": "engine-bed.wav",
+      "source": "engine-source.wav",
+      "seconds": 0.8241,
+      "sha256": "41f5f0b5cee54c71a402179a89fd27377a06074d22076bbef847f0bc7b4cdaf0"
+    },
+    {
+      "file": "metal-hit.wav",
+      "source": "impactMetal_heavy_000.ogg",
+      "seconds": 0.1648,
+      "sha256": "899e4ec04ab42edc03949ad121af12eceddba4d9f8e70a772cec338c99206cc2"
+    },
+    {
+      "file": "metal-hit-2.wav",
+      "source": "impactMetal_heavy_001.ogg",
+      "seconds": 0.3564,
+      "sha256": "68da726d092f14c94dd8881e8f319508cad0a9cadddfbf14b46446a94c157390"
+    },
+    {
+      "file": "wood-hit.wav",
+      "source": "impactWood_heavy_000.ogg",
+      "seconds": 0.3101,
+      "sha256": "2ab57cb541a4534be130cfd46dff8b75bfd8ee80104f49d014e5598377f03ee7"
+    },
+    {
+      "file": "wood-hit-2.wav",
+      "source": "impactWood_heavy_001.ogg",
+      "seconds": 0.3101,
+      "sha256": "79d47af7d7f527cc2d7dde08890c5f4981db1d617f8fa9b0005ed051f9129cf8"
+    },
+    {
+      "file": "wood-snap.wav",
+      "source": "impactPlank_medium_000.ogg",
+      "seconds": 0.779,
+      "sha256": "2df5add59ca53dbd4724a05d5eb5987d122ce55a2b0c266f0cc6ecffb19e5180"
+    },
+    {
+      "file": "stone-hit.wav",
+      "source": "impactMining_000.ogg",
+      "seconds": 0.9375,
+      "sha256": "b0a5a579c1ac94f039e6f669fcae271b2837ca8b2822085febe9f8e830520250"
+    },
+    {
+      "file": "glass-hit.wav",
+      "source": "impactGlass_heavy_000.ogg",
+      "seconds": 0.2383,
+      "sha256": "27dea4510d1fe9f36aec772d239234c765484449ffdc61d90436115b3888a7b5"
+    }
+  ]
+}

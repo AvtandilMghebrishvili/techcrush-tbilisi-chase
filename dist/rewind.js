@@ -81,6 +81,8 @@ export class RewindTimeline {
         f.poles?.[i] || { broken: false, fallenAt: 0, fallAngle: 0 },
       );
     sim.events.length = 0;
+    sim.soundEvents.length = 0;
+    sim.soundCooldowns.clear();
     this.lastApplied = index;
   }
   back(sim, dt) {

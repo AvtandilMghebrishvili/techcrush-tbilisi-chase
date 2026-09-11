@@ -909,7 +909,7 @@ export function buildTbilisiDistricts(v) {
       g.rotation.y = r.angle;
       root.add(g);
       for (const px of [-1, 0, 1])
-        registerBreakable(v, g, x + rx * px, z + rz * px, 1.4, 0.45);
+        registerBreakable(v, g, x + rx * px, z + rz * px, 1.4, 0.45, "wood");
       for (const px of [-1.1, 1.1]) {
         box(0.11, 0.6, 0.8, metal, px, 0.3, 0, g);
         box(0.09, 1, 0.1, metal, px, 0.6, -0.32, g);
@@ -935,6 +935,7 @@ export function buildTbilisiDistricts(v) {
         planter.position.z,
         1.5,
         0.8,
+        "stone",
       );
       add(
         new THREE.CylinderGeometry(0.34, 0.3, 0.85, 10),

@@ -281,6 +281,8 @@ export class ChaseSimulation {
     this.bust = 0;
     this.escape = 0;
     this.events = [];
+    this.soundEvents = [];
+    this.soundCooldowns = new Map();
     this.explosions = [];
     this.takedowns = 0;
     this.driftScore = 0;
@@ -431,6 +433,27 @@ export class ChaseSimulation {
           : "CHASE ON — HIT THE TECHCRUSH ARCHES",
     );
   }
+  emitSound(kind, source, impact, key, broken = false) {
+    if (
+      impact < 0.45 ||
+      distance(source, this.player) > 125 ||
+      this.time - (this.soundCooldowns.get(key) ?? -100) < 0.14
+    )
+      return;
+    this.soundCooldowns.set(key, this.time);
+    if (this.soundCooldowns.size > 80)
+      for (const [id, at] of this.soundCooldowns)
+        if (this.time - at > 1) this.soundCooldowns.delete(id);
+    if (this.soundEvents.length < 48)
+      this.soundEvents.push({
+        kind,
+        x: source.x,
+        z: source.z,
+        impact,
+        broken,
+        time: this.time,
+      });
+  }
   damagePolice(cop, impact, credit = true) {
     if (cop.destroyed || cop.hitCooldown > 0 || impact < 5) return false;
     cop.health = Math.max(0, cop.health - clamp(impact * 1.5, 22, 44));
@@ -446,6 +469,7 @@ export class ChaseSimulation {
       this.runCash += 350;
     }
     this.explosions.push({ id: cop.id, x: cop.x, z: cop.z, born: this.time });
+    this.emitSound("explosion", cop, 40, `explosion:${cop.id}`);
     this.events.push(credit ? "PATROL DESTROYED  +750" : "PATROL WRECKED");
     return true;
   }
@@ -466,6 +490,7 @@ export class ChaseSimulation {
         born: this.time,
       });
       this.events.push("TRAFFIC WRECK  +120 CR");
+      this.emitSound("explosion", car, 35, `explosion:${car.id}`);
     }
   }
   respawnPolice(cop) {
@@ -610,7 +635,14 @@ export class ChaseSimulation {
         this.obstacles,
         resolveCircleRect,
       );
+      if (p.impact > 2) this.emitSound("collision", p, p.impact, "wall");
       if (landed) {
+        this.emitSound(
+          "collision",
+          p,
+          Math.max(8, landed.damage * 2),
+          "landing",
+        );
         const bonus = landed.flipped
           ? 50
           : Math.round(150 + landed.distance * 4);
@@ -624,6 +656,7 @@ export class ChaseSimulation {
       }
     } else {
       stepVehicle(p, input, dt, this.obstacles);
+      if (p.impact > 2) this.emitSound("collision", p, p.impact, "wall");
       if (driveRamp(p, input, dt, this.ramps) === "launch")
         this.events.push("AIRBORNE — A / D TO ROLL");
     }
@@ -930,6 +963,13 @@ export class ChaseSimulation {
           )
             continue;
           const impact = collideVehicles(a, b);
+          if (impact > 2)
+            this.emitSound(
+              "metal",
+              { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 },
+              impact,
+              `cars:${a.id ?? "player"}:${b.id ?? "player"}`,
+            );
           if (impact <= 4) continue;
           const playerHit = a === p || b === p;
           if (playerHit && p.invulnerable <= 0) {
@@ -967,6 +1007,14 @@ export class ChaseSimulation {
         )
           continue;
         const impact = treeContact(car, tree, this.time);
+        if (impact > 0.45)
+          this.emitSound(
+            tree.soundMaterial || (tree.breakSpeed ? "metal" : "wood"),
+            tree,
+            impact,
+            `prop:${tree.breakSpeed ? "p" : "t"}:${tree.linked?.[0] ?? tree.id}`,
+            tree.broken,
+          );
         if (tree.broken && tree.linked)
           for (const id of tree.linked) {
             const sibling = this.poles[id];

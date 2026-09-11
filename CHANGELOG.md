@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 — 2026-09-12
+
+- Replace the single oscillator engine with four per-car hybrid voices: recorded engine texture, combustion harmonics, load-sensitive intake and smooth RPM/gear changes. Use the same gear telemetry in the HUD.
+- Add immediate contact-driven wood, metal, stone, glass, landing and explosion effects, using eight compact CC0 audio assets with reproducible preparation and provenance.
+- Add relative-speed stereo pass-by sounds for traffic and patrols; refine turbo spool/release, tire/road wind, drift, nearby sirens and air-support sound. Soften exterior audio in cockpit view.
+- Run audio each rendering frame, deduplicate contact cues, bound effect voices, and clear transient sounds during pause, mute and rewind. Preserve the existing M/Sound control and browser gesture requirement.
+- Add nine regression tests and validate the real mixer with Chromium audio rendering and a live driving check. No physics, economy or save format changes.
+
 ## 1.2.0 — 2026-09-12
 
 - Circular, clipped radar with bearing-correct edge markers and an air-support marker. Remove the dark center navigation panel and measure road-route distance.

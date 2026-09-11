@@ -1,6 +1,14 @@
 import * as THREE from "./vendor/three.module.js";
 
-export function registerBreakable(view, root, x, z, height = 8, radius = 0.18) {
+export function registerBreakable(
+  view,
+  root,
+  x,
+  z,
+  height = 8,
+  radius = 0.18,
+  soundMaterial = "metal",
+) {
   view.breakableProps ||= [];
   root.userData.dynamic = true;
   root.userData.environment = true;
@@ -18,6 +26,7 @@ export function registerBreakable(view, root, x, z, height = 8, radius = 0.18) {
       h: height,
       radius,
       breakSpeed: 0.5,
+      soundMaterial,
       linked: root.userData.breakableIds,
     },
   };

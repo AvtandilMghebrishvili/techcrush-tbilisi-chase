@@ -1,3 +1,4 @@
+import { ChaseAudio } from "./chase-audio.js";
 import { ROADS } from "./city-map.js";
 import { radarPoint, routeDistance } from "./hud-math.js";
 import { ProfileClient } from "./profile-client.js";
@@ -32,11 +33,6 @@ const $ = (id) => document.getElementById(id),
 let sim,
   view,
   muted = true,
-  audio,
-  engine,
-  engineGain,
-  siren,
-  sirenGain,
   last = 0,
   accumulator = 0,
   toastUntil = 0,
@@ -44,11 +40,7 @@ let sim,
 const touch = matchMedia("(pointer: coarse)").matches || innerWidth < 650;
 let agentInput = null;
 let selectedCar = "gt";
-let turboGain,
-  turboWhine,
-  turboWhineGain,
-  boostWasOn = false,
-  releaseUntil = 0;
+const soundscape = new ChaseAudio();
 if (document.modelContext?.registerTool) {
   try {
     Promise.resolve(
@@ -200,92 +192,22 @@ function switchCamera(id) {
     "Camera: " + mode.label + "; click to switch",
   );
 }
-function initAudio() {
-  if (audio) return;
-  audio = new AudioContext();
-  engine = audio.createOscillator();
-  engine.type = "sawtooth";
-  engineGain = audio.createGain();
-  engineGain.gain.value = 0;
-  const lowpass = audio.createBiquadFilter();
-  lowpass.type = "lowpass";
-  lowpass.frequency.value = 450;
-  engine.connect(lowpass).connect(engineGain).connect(audio.destination);
-  engine.start();
-  siren = audio.createOscillator();
-  siren.type = "sine";
-  sirenGain = audio.createGain();
-  sirenGain.gain.value = 0;
-  siren.connect(sirenGain).connect(audio.destination);
-  siren.start();
-  const noiseBuffer = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
-  const noiseData = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < noiseData.length; i++)
-    noiseData[i] = (Math.random() * 2 - 1) * 0.5;
-  const noise = audio.createBufferSource();
-  noise.buffer = noiseBuffer;
-  noise.loop = true;
-  const filter = audio.createBiquadFilter();
-  filter.type = "bandpass";
-  filter.frequency.value = 2300;
-  filter.Q.value = 0.65;
-  turboGain = audio.createGain();
-  turboGain.gain.value = 0;
-  noise.connect(filter).connect(turboGain).connect(audio.destination);
-  noise.start();
-  turboWhine = audio.createOscillator();
-  turboWhine.type = "sine";
-  turboWhineGain = audio.createGain();
-  turboWhineGain.gain.value = 0;
-  turboWhine.connect(turboWhineGain).connect(audio.destination);
-  turboWhine.start();
+async function toggleSound() {
+  try {
+    if (!(await soundscape.unlock())) throw Error("Web Audio unavailable");
+    muted = !muted;
+    soundscape.setMuted(muted);
+    $("sound").textContent = muted ? "SOUND OFF" : "SOUND ON";
+    $("sound").setAttribute(
+      "aria-label",
+      muted ? "Enable sound" : "Mute sound",
+    );
+  } catch {
+    $("sound").textContent = "AUDIO UNAVAILABLE";
+  }
 }
-function toggleSound() {
-  initAudio();
-  audio.resume();
-  muted = !muted;
-  $("sound").textContent = muted ? "SOUND OFF" : "SOUND ON";
-  $("sound").setAttribute("aria-label", muted ? "Enable sound" : "Mute sound");
-}
-function audioTick() {
-  if (!audio) return;
-  const active = !muted && sim.phase === "running";
-  const p = sim.player;
-  if (active && boostWasOn && !p.boosting)
-    releaseUntil = audio.currentTime + 0.34;
-  boostWasOn = active && p.boosting;
-  const release = Math.max(0, (releaseUntil - audio.currentTime) / 0.34);
-  turboGain.gain.setTargetAtTime(
-    active ? (p.boosting ? p.boostStrength * 0.025 : release * 0.045) : 0,
-    audio.currentTime,
-    0.045,
-  );
-  turboWhine.frequency.setTargetAtTime(
-    620 + p.boostStrength * 1100,
-    audio.currentTime,
-    0.1,
-  );
-  turboWhineGain.gain.setTargetAtTime(
-    active && p.boosting ? p.boostStrength * 0.006 : 0,
-    audio.currentTime,
-    0.06,
-  );
-  engine.frequency.setTargetAtTime(
-    42 + Math.abs(sim.player.speed) * 3.8,
-    audio.currentTime,
-    0.12,
-  );
-  engineGain.gain.setTargetAtTime(active ? 0.024 : 0, audio.currentTime, 0.08);
-  siren.frequency.setTargetAtTime(
-    600 + Math.sin(sim.time * 5) * 230,
-    audio.currentTime,
-    0.03,
-  );
-  sirenGain.gain.setTargetAtTime(
-    active ? Math.max(0, 1 - (sim.closestPolice || 100) / 100) * 0.016 : 0,
-    audio.currentTime,
-    0.1,
-  );
+function audioTick(dt = 0) {
+  soundscape.update(sim, input(), dt, CAMERAS[view.cameraMode].id);
 }
 async function start() {
   if (transitioning || $("workshop").open || $("loot-dialog").open) return;
@@ -440,10 +362,7 @@ function updateHUD() {
     "turbo-active",
     sim.phase === "running" && p.boosting,
   );
-  $("gear").textContent =
-    p.speed < -0.4
-      ? "R"
-      : String(Math.min(5, Math.floor((Math.max(0, p.speed) * 3.6) / 46) + 1));
+  $("gear").textContent = soundscape.telemetry.gearLabel || "1";
   $("takedowns").textContent = String(sim.takedowns);
   $("heat").textContent =
     sim.police.filter((c) => !c.destroyed).length +
@@ -629,11 +548,11 @@ function frame(now) {
     for (const event of sim.events.splice(0)) toast(event);
     if (sim.time > toastUntil) $("toast").classList.remove("visible");
   }
+  audioTick(dt);
   view.render(sim, dt, input());
   uiTime += dt;
   if (uiTime > 0.08) {
     if (sim.phase !== "ready") updateHUD();
-    audioTick();
     uiTime = 0;
   }
   requestAnimationFrame(frame);

@@ -65,3 +65,14 @@ Georgian flags, tower, mountains, road furniture, TECHCRUSH signs and game effec
 `dist/assets/tbilisi-cover.png` is the previously generated 1,672 × 941 TECHCRUSH cover, reused unchanged on the mission card and garage. The prompt is retained in `docs/assets/tbilisi-cover-prompt.txt`. It is illustrative key art, not a screenshot or a promise of pixel-identical game rendering. Generated media and TECHCRUSH marks are separate from the MIT-licensed code; use is subject to applicable generation-service terms and the brand owner's rights.
 
 The new SUV variant, tank, helicopter and inflatable checkpoint arches are original procedural Three.js geometry in `patrol-car.js`, `pursuit-vehicles.js` and `checkpoint-arch.js`. No external vehicle model or new map imagery was used for those additions.
+
+## Driving audio — 12 September 2026
+
+The eight files in `dist/assets/audio/` are processed CC0 audio:
+
+- `engine-bed.wav`: loop 0 from [Racing car engine sound loops](https://opengameart.org/content/racing-car-engine-sound-loops), **domasx2**, CC0. The source page describes a remade public-domain sample.
+- Metal hits (two), wood hits (two), plank snap, mining/stone impact and glass impact: [Impact Sounds 1.0](https://kenney.nl/assets/impact-sounds), **Kenney**, CC0. Source member names and hashes are in `data/audio-sources.json`.
+
+Run `python scripts/prepare-audio.py` from the repository root with Python 3 and FFmpeg installed to reproduce the derivatives. The script verifies the reviewed download hashes, converts to mono 24 kHz PCM16, removes leading silence from impacts, normalizes peaks and crossfades the engine loop. Output encoding may vary slightly with FFmpeg versions; checked-in assets and their hashes identify this release. Total runtime audio is 188,524 bytes. [CC0 public-domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
+
+`audio-model.js` and `chase-audio.js` add original synthesis, filtering, playback-rate modulation, stereo positioning and mixing. V8, flat-six, V12 and W16 describe fictional game sound profiles; no claim is made that these are recordings of four specific production cars. Wind, passing air, turbo air, sirens and rotor texture are generated at runtime.
