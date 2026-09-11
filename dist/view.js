@@ -14,6 +14,8 @@ import {
   updateHelicopterMesh,
 } from "./pursuit-vehicles.js";
 import { carSpec, CAMERAS } from "./config.js";
+import { updateInterior } from "./interior-detail.js";
+import { paintColor } from "./customization.js";
 import { updateScenery } from "./scenery.js";
 import { buildRealisticCity } from "./realistic-city.js";
 import { loadTrees, updateTrees } from "./trees.js";
@@ -298,8 +300,18 @@ export class SceneView {
       previous = this.player;
     this.player =
       spec.id === "classic"
-        ? sportsCar(this, spec.color, false, spec.id, equipment)
-        : makeOriginalSportsCar(spec.id, spec.color, equipment);
+        ? sportsCar(
+            this,
+            paintColor(equipment, spec.color),
+            false,
+            spec.id,
+            equipment,
+          )
+        : makeOriginalSportsCar(
+            spec.id,
+            paintColor(equipment, spec.color),
+            equipment,
+          );
     addTurboExhaust(this.player);
     prepareVehicleDamage(this.player);
     if (previous) {
@@ -441,6 +453,7 @@ export class SceneView {
       this.player.visible = !hood;
       this.cockpit.root.visible = false;
       updateCockpit(this.cockpit, p, input.steer);
+      updateInterior(this.player, p, sim.phase === "running" ? dt : 0, input);
       const forward = new THREE.Vector3(
         Math.sin(p.angle),
         0,
@@ -567,7 +580,11 @@ export class SceneView {
     updateScenery(this, worldTime);
     animateDistricts(this, worldTime);
     updateTrees(this, sim.player, worldTime, sim.trees);
-    updateRouteGuide(this.routeGuide, sim);
+    updateRouteGuide(
+      this.routeGuide,
+      sim,
+      CAMERAS[this.cameraMode].id === "cockpit",
+    );
     this.sun.position.set(
       this.player.position.x - 75,
       145,

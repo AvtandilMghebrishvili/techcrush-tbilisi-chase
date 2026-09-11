@@ -194,6 +194,14 @@ export function applyProgressAction(profile, action, rng = Math.random) {
   if (action.type === "select") {
     if (!CAR_IDS.includes(action.car)) throw Error("Unknown car");
     p.selectedCar = car;
+  } else if (action.type === "paint") {
+    if (
+      !CAR_IDS.includes(action.car) ||
+      typeof action.color !== "string" ||
+      !/^#[0-9a-f]{6}$/i.test(action.color)
+    )
+      throw Error("Choose a valid paint color and car.");
+    p.cars[car].paint = action.color.toLowerCase();
   } else if (action.type === "open-box") {
     if (p.boxes < 1) throw Error("Complete a level to earn another box.");
     p.boxes--;

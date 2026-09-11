@@ -1,5 +1,13 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Garage studio and cabins 1.5.0 — 12 September 2026
+
+`npm test`: **91 passed, 0 failed**. Six added cases cover validated independent per-car paint, serialization, unchanged performance/currency on repaint, 56 finite and geometrically distinct part grades, fixed wheel centers/radii/calipers, fitted wing assemblies, original GLB hub alignment/template isolation, exact non-mutating performance comparisons, and cockpit guide positioning/reset. Existing driving, collision, body damage, steering, rewind, pursuit, map and save tests remain green. `npm run build` produced the Worker, client assets and existing database migrations successfully.
+
+The real Chromium garage was tested against an isolated local save database. Electric paint was saved and retained across reload. A Bronze engine purchase charged 600 CR and raised the Original 458 ceiling from 230.4 to 237.6 km/h. All four rim purchases produced the matching tier geometry, returned replaced parts and showed animated comparisons. A Gold spoiler was previewed and installed from inventory for free. Changing a preview quality did not spend credits. Original and Vector exterior/cabin views, the corrected mounted instrument binnacle, the final raised/tilted road arrows and completed three-part box artwork were visually reviewed. The engine/gear display uses the same telemetry calculation as audio. An ordinary 1.5-second throttle input was tested in the revised Vector cockpit; 123 km/h and 100 HP were observed when paused after capture. No complete-route or new difficulty claim is made for this release.
+
+At 390 × 844 the garage dialog's measured content and client widths were both 357 px (no horizontal overflow), with paint controls wrapping and the car preview visible. The temporary viewport override was reset. No browser errors or warnings were observed in the final garage/reward checks. Test funding, diagnostic controls and databases live only under ignored `artifacts/`; no production garage was modified by the agent. These checks do not constitute physical-phone, Safari or measured-FPS testing.
+
 ## Damage and destruction 1.4.0 — 12 September 2026
 
 `npm test`: **85 passed, 0 failed**. Seven added cases cover contact-direction damage at four headings, bounded damage/cooldowns, healing, finite deformed meshes, fixed wheel/steering pivots, aligned headlights, exact rest-vertex restoration, private deformation of the actual licensed GLB, same-step tree fragments, rewind, immovable wreck contacts, clean patrol replacements, one player explosion, bounded effect history and deterministic particle playback/cleanup. The older explosion test now uses the shared 3.8-second lifetime.

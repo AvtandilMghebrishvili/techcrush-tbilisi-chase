@@ -63,7 +63,7 @@ export function makeRouteGuide(scene) {
   return { group, arrows, points: [], checkpoint: -1, refreshAt: -1 };
 }
 
-export function updateRouteGuide(guide, sim) {
+export function updateRouteGuide(guide, sim, interior = false) {
   const cp = sim.checkpoints[sim.checkpoint];
   guide.group.visible = !!cp && ["running", "paused"].includes(sim.phase);
   if (!guide.group.visible) return;
@@ -80,13 +80,15 @@ export function updateRouteGuide(guide, sim) {
   }
   guide.arrows.forEach((mesh, i) => {
     const p = guide.points[i];
-    mesh.visible = !!p;
+    mesh.visible = !!p && (!interior || p.along >= 18);
     if (!p) return;
     const wave = (Math.sin(p.along * 0.11 - sim.time * 5) + 1) / 2;
-    mesh.position.set(p.x, 0.18 + wave * 0.12, p.z);
-    mesh.rotation.y = p.angle;
+    // Tilt the road chevrons toward the driver so they retain a visible face at eye level.
+    mesh.position.set(p.x, interior ? 1.05 : 0.18 + wave * 0.12, p.z);
+    mesh.rotation.set(interior ? -0.38 : 0, p.angle, 0, "YXZ");
     mesh.material.opacity =
-      (0.38 + wave * 0.57) * Math.min(1, (185 - p.along) / 35);
-    mesh.scale.setScalar(0.9 + wave * 0.12);
+      (interior ? 0.82 : 0.38 + wave * 0.57) *
+      Math.min(1, (185 - p.along) / 35);
+    mesh.scale.setScalar(interior ? 0.74 : 0.9 + wave * 0.12);
   });
 }

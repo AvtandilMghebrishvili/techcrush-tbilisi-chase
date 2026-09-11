@@ -1,3 +1,5 @@
+import { addCabinDetails } from "./interior-detail.js";
+import { installWheelKits, addExteriorKit } from "./customization.js";
 import * as THREE from "./vendor/three.module.js";
 import {
   bindSteering,
@@ -209,7 +211,16 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
         [a, a + 1, a + cols + 1],
         [a + 1, a + cols + 2, a + cols + 1],
       ]) {
-        indices.push(...tri);
+        // Leave a real opening under the cabin rather than a painted body surface
+        // passing through the footwell, seats and driver camera.
+        const center = tri.reduce(
+          (sum, k) => sum.map((v, i) => v + positions[k][i] / 3),
+          [0, 0, 0],
+        );
+        if (
+          !(Math.abs(center[0]) < 0.64 && center[2] > -1.04 && center[2] < 0.64)
+        )
+          indices.push(...tri);
       }
     }
   for (const row of [0, skin.sections.length - 1]) {
@@ -265,9 +276,6 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     [0, 0.91, 0.4],
   );
   dash.rotation.z = Math.PI / 2;
-  box(0.32, 0.13, 0.07, dark, 0.36, 0.98, 0.47);
-  for (const x of [0.285, 0.43])
-    add(new THREE.TorusGeometry(0.037, 0.004, 6, 24), chrome, [x, 0.98, 0.429]);
   box(0.17, 0.1, 0.012, glass, -0.08, 0.94, 0.25);
   box(0.14, 0.035, 0.58, dark, 0, 0.66, -0.1);
   const rotor = makeSteering(group, dark, chrome, 0.36, 0.98, 0.2);
@@ -335,19 +343,6 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
         patch(x + (i - 1.5) * 0.113, z, 0.071, 0.15, lens);
     lamps.push({ x, y: skin.top(x, z), z });
     box(0.57, 0.065, 0.012, tail, s * 0.49, 0.65, rearZ - 0.006);
-    const socketY = skin.top(s * 0.53, rearZ + 0.4);
-    if (equipment.spoiler || id === "rally") {
-      const height = 1.02 + (equipment.spoiler || 0) * 0.08;
-      box(
-        0.06,
-        height - socketY,
-        0.12,
-        dark,
-        s * 0.53,
-        (height + socketY) / 2,
-        rearZ + 0.4,
-      );
-    }
     const pipe = add(
       new THREE.CylinderGeometry(0.071, 0.071, 0.22, 24),
       chrome,
@@ -370,16 +365,6 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
   }
   for (let i = 0; i < 5; i++)
     patch(0, -1.38 - i * 0.095, id === "rally" ? 1.0 : 0.68, 0.038, dark);
-  if (equipment.spoiler || id === "rally")
-    box(
-      1.6 + (equipment.spoiler || 0) * 0.055,
-      0.055,
-      0.32,
-      dark,
-      0,
-      1.02 + (equipment.spoiler || 0) * 0.08,
-      rearZ + 0.4,
-    );
   const wheels = [],
     pivots = [],
     rimTier = equipment.rims || 0;
@@ -466,7 +451,7 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     glass,
     shape: id,
     equipment: { ...equipment },
-    cockpitSeat: { x: 0.36, y: shape.roof - 0.16, z: -0.39 },
+    cockpitSeat: { x: 0.36, y: shape.roof - 0.13, z: -0.15 },
     exhaustPositions: [-0.57, 0.57].map((x) => ({
       x,
       y: 0.4,
@@ -474,6 +459,9 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     })),
     bodySurface: skin,
   });
+  installWheelKits(group, equipment);
+  addExteriorKit(group, equipment, id);
   addHeadlights(group, lamps);
+  addCabinDetails(group, id);
   return group;
 }

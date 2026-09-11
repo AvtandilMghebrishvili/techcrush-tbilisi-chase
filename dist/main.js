@@ -390,6 +390,10 @@ function updateHUD() {
                 Math.ceil(sim.nextWaveAt - sim.time) +
                 "s"
               : `MAXIMUM PURSUIT — ${sim.difficulty.maxUnits} UNITS`;
+  document.body.classList.toggle(
+    "cockpit-mode",
+    CAMERAS[view.cameraMode].id === "cockpit",
+  );
   const cp = sim.checkpoints[sim.checkpoint];
   $("objective").textContent = cp
     ? "Reach " + cp.name
@@ -549,7 +553,8 @@ function frame(now) {
     if (sim.time > toastUntil) $("toast").classList.remove("visible");
   }
   audioTick(dt);
-  view.render(sim, dt, input());
+  if (!$("workshop").open && !$("loot-dialog").open)
+    view.render(sim, dt, input());
   uiTime += dt;
   if (uiTime > 0.08) {
     if (sim.phase !== "ready") updateHUD();
@@ -688,7 +693,8 @@ try {
   $("loading").hidden = true;
   selectedCar = career.profile.selectedCar;
   setupGarage();
-  workshop = new GarageUI(career, chooseCar);
+  workshop = new GarageUI(career, chooseCar, view);
+  $("workshop-open").disabled = false;
   $("workshop-open").onclick = () => {
     workshop.car = selectedCar;
     workshop.open();

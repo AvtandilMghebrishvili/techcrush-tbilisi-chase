@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="./garage.css" />
     <link rel="stylesheet" href="./ui-refresh.css" />
     <link rel="stylesheet" href="./garage-refresh.css" />
+    <link rel="stylesheet" href="./workshop-studio.css" />
     <script type="importmap">
       {
         "imports": {
@@ -98,7 +99,7 @@
         ></div>
         <p id="car-details" class="car-details"></p>
         <p id="intro-career" class="career-line"></p>
-        <button id="workshop-open" class="secondary workshop-link">
+        <button id="workshop-open" class="secondary workshop-link" disabled>
           GARAGE · UPGRADES & BOXES
         </button>
         <button id="start" class="primary">
@@ -247,12 +248,46 @@
             <div id="garage-stats" class="garage-stats"></div>
             <p id="level-threat" class="level-threat"></p>
           </div>
-          <img
-            class="garage-cover"
-            src="./assets/tbilisi-cover.png"
-            alt="TECHCRUSH Tbilisi Chase key art"
-          />
+          <div class="studio-column">
+            <div id="garage-preview" class="garage-preview">
+              <span id="preview-label">YOUR INSTALLED BUILD</span
+              ><small>DRAG TO ROTATE · SCROLL TO ZOOM</small>
+            </div>
+            <div
+              id="preview-angles"
+              class="preview-angles"
+              aria-label="Preview camera"
+            >
+              <button data-angle="front">FRONT</button
+              ><button data-angle="rear">REAR</button
+              ><button data-angle="wheels">WHEELS</button
+              ><button data-angle="cabin">INTERIOR</button>
+              <button id="preview-fitted">SHOW FITTED</button>
+            </div>
+            <div class="paint-bench">
+              <span>PAINT · FREE</span>
+              <div id="paint-swatches"></div>
+              <label title="Choose custom paint"
+                >CUSTOM
+                <input
+                  id="paint-custom"
+                  type="color"
+                  aria-label="Custom car paint"
+              /></label>
+            </div>
+          </div>
         </section>
+        <section
+          id="part-inspector"
+          class="part-inspector"
+          aria-label="Upgrade comparison"
+        ></section>
+        <p
+          id="upgrade-feedback"
+          class="upgrade-feedback"
+          role="status"
+          aria-live="polite"
+        ></p>
         <section class="box-bench">
           <div>
             <h3>YOUR NEXT UPGRADE STARTS HERE.</h3>

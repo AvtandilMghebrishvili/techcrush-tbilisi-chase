@@ -1,3 +1,6 @@
+import { GaragePreview } from "./garage-preview.js";
+import { PAINTS, paintColor } from "./customization.js";
+import { PART_DETAILS, comparisonRows } from "./garage-presentation.js";
 import {
   PARTS,
   TIERS,
@@ -15,7 +18,10 @@ import {
 } from "./garage-presentation.js";
 const $ = (id) => document.getElementById(id);
 export class GarageUI {
-  constructor(store, onCar) {
+  constructor(store, onCar, view) {
+    this.view = view;
+    this.inspection = null;
+    this.artReady = false;
     this.store = store;
     this.onCar = onCar;
     this.car = store.profile.selectedCar;
@@ -27,6 +33,16 @@ export class GarageUI {
       this.filter = button.dataset.filter;
       this.render();
     };
+    $("workshop").addEventListener("close", () => this.preview?.stop());
+    $("preview-angles").onclick = (e) => {
+      const b = e.target.closest("[data-angle]");
+      if (b) this.preview?.angle(b.dataset.angle);
+    };
+    $("preview-fitted").onclick = () => {
+      this.inspection = null;
+      this.render();
+    };
+    $("paint-custom").onchange = (e) => this.setPaint(e.target.value);
     $("workshop-close").onclick = () => this.close();
     $("workshop").addEventListener("cancel", (e) => {
       if (this.rolling) e.preventDefault();
@@ -50,8 +66,15 @@ export class GarageUI {
     if (store.lastError) $("save-error").textContent = store.lastError;
   }
   open() {
-    this.render();
     $("workshop").showModal();
+    try {
+      this.preview ||= new GaragePreview($("garage-preview"), this.view);
+    } catch {
+      $("preview-label").textContent = "3D PREVIEW UNAVAILABLE";
+    }
+    this.artReady = true;
+    this.render();
+    this.preview?.start();
   }
   close() {
     if (this.rolling) return;
@@ -59,16 +82,134 @@ export class GarageUI {
   }
   async run(fn) {
     $("save-error").textContent = "";
+    const before = structuredClone(this.store.profile.cars[this.car]);
+    let completed = false;
     try {
       const value = await fn();
+      this.inspection = null;
       this.onCar(this.car);
+      completed = true;
       return value;
     } catch (error) {
       $("save-error").textContent = error.message;
       throw error;
     } finally {
       this.render();
+      if (completed)
+        this.animateUpgrade(before, this.store.profile.cars[this.car]);
     }
+  }
+  setPaint(color) {
+    if (this.store.busy || this.store.pending) return;
+    void this.run(() =>
+      this.store.mutate({ type: "paint", car: this.car, color }),
+    ).catch(() => {});
+  }
+  inspect(part, tier) {
+    this.inspection = { part, tier };
+    this.render();
+    this.preview?.angle(
+      part === "spoiler"
+        ? "rear"
+        : ["rims", "tires", "brakes"].includes(part)
+          ? "wheels"
+          : "front",
+    );
+    document
+      .querySelector(".garage-showcase")
+      .scrollIntoView({
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+        block: "start",
+      });
+  }
+  animateUpgrade(before, after) {
+    const changed = PARTS.filter(
+      (p) => (after[p.id] || 0) > (before[p.id] || 0),
+    );
+    if (!changed.length) {
+      if (before.paint !== after.paint)
+        $("upgrade-feedback").textContent =
+          "Paint saved. Your car is ready to drive.";
+      return;
+    }
+    const part = changed[0],
+      tier = after[part.id];
+    $("upgrade-feedback").textContent =
+      `${TIERS[tier].name} ${part.name} fitted to ${carSpec(this.car).name}. ${upgradeBenefits(carSpec(this.car), before, part, tier).join(" · ")}`;
+    const rows = comparisonRows(carSpec(this.car), before, part, tier);
+    this.renderInspector(part, tier, before, true);
+    this.preview?.hydrate($("part-inspector"));
+    const section = $("part-inspector");
+    section.classList.remove("just-fitted");
+    void section.offsetWidth;
+    section.classList.add("just-fitted");
+    const duration = matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? 0
+        : 900,
+      start = performance.now();
+    cancelAnimationFrame(this.statFrame);
+    const tick = (now) => {
+      const t = duration ? Math.min(1, (now - start) / duration) : 1,
+        ease = 1 - (1 - t) ** 3;
+      for (const row of rows) {
+        const node = section.querySelector(`[data-after="${row.key}"]`);
+        if (node)
+          node.textContent = (
+            row.before +
+            (row.after - row.before) * ease
+          ).toFixed(row.unit === "s" ? 2 : 1);
+      }
+      if (t < 1) this.statFrame = requestAnimationFrame(tick);
+    };
+    tick(start);
+  }
+  renderInspector(
+    part,
+    tier,
+    equipment = this.store.profile.cars[this.car],
+    installed = false,
+  ) {
+    const current = equipment[part.id] || 0,
+      rows = comparisonRows(carSpec(this.car), equipment, part, tier);
+    const actual = this.store.profile.cars[this.car][part.id] || 0,
+      next = Math.min(4, actual + 1),
+      busy = this.store.busy || this.store.pending;
+    const canInstall =
+      tier > actual &&
+      (this.store.profile.inventory[partKey(part.id, tier)] || 0) > 0;
+    $("part-inspector").style.setProperty("--tier", TIERS[tier].color);
+    $("part-inspector").innerHTML =
+      `<div class="inspector-art">${partArtwork(part, "", tier)}<span>${TIERS[tier].name} · ${installed ? "FITTED" : "PREVIEW"}</span></div><div class="inspector-copy"><small>${installed ? "UPGRADE COMPLETE" : "INSPECT YOUR NEXT UPGRADE"}</small><h3>${part.name}</h3><p>${PART_DETAILS[part.id]}</p><div class="quality-picker">${TIERS.slice(
+        1,
+      )
+        .map(
+          (q, i) =>
+            `<button data-quality="${i + 1}" style="--quality:${q.color}" aria-pressed="${tier === i + 1}">${q.name}</button>`,
+        )
+        .join(
+          "",
+        )}</div><small class="preview-disclaimer">${installed ? "Saved to this car. Ready for the next chase." : tier > current ? "Preview only. Buy the next tier or install an owned part for free." : "This is a visual comparison. Your fitted part is unchanged."}</small><div class="inspector-actions"><button data-inspector-buy ${busy || actual === 4 || this.store.profile.credits < upgradeCost(next) ? "disabled" : ""}>${actual === 4 ? "FULLY UPGRADED" : `UPGRADE TO ${TIERS[next].name.toUpperCase()} · ${upgradeCost(next).toLocaleString()} CR`}</button>${canInstall ? `<button data-inspector-install ${busy ? "disabled" : ""}>INSTALL ${TIERS[tier].name.toUpperCase()} · FREE</button>` : ""}</div></div><div class="comparison-meters">${rows.map((r) => `<div class="comparison-row"><span>${r.label} ${r.lower ? "↓ better" : "↑ better"}</span><div class="comparison-numbers"><b>${r.before.toFixed(r.unit === "s" ? 2 : 1)}</b><span>→</span><strong data-after="${r.key}">${r.after.toFixed(r.unit === "s" ? 2 : 1)}</strong><small>${r.unit}</small></div><div class="meter" style="--from:${Math.min(100, (r.before / r.max) * 100)}%;--to:${Math.min(100, (r.after / r.max) * 100)}%"><i></i><b></b></div></div>`).join("")}</div>`;
+    $("part-inspector").querySelector("[data-inspector-buy]").onclick = () =>
+      void this.run(() =>
+        this.store.mutate({ type: "upgrade", car: this.car, part: part.id }),
+      ).catch(() => {});
+    const install = $("part-inspector").querySelector(
+      "[data-inspector-install]",
+    );
+    if (install)
+      install.onclick = () =>
+        void this.run(() =>
+          this.store.mutate({
+            type: "equip",
+            car: this.car,
+            part: part.id,
+            tier,
+          }),
+        ).catch(() => {});
+    for (const b of $("part-inspector").querySelectorAll("[data-quality]"))
+      b.onclick = () => this.inspect(part.id, Number(b.dataset.quality));
   }
   render() {
     const focus = document.activeElement?.closest("[data-part]")?.dataset.part;
@@ -91,11 +232,12 @@ export class GarageUI {
       `LEVEL ${p.level} · ${p.credits.toLocaleString()} CR · ${p.boxes} BOX${p.boxes === 1 ? "" : "ES"}`;
     $("workshop-cars").innerHTML = CARS.map(
       (c) =>
-        `<button data-choice="${c.id}" aria-pressed="${c.id === this.car}">${c.name}</button>`,
+        `<button data-choice="${c.id}" ${this.store.busy || this.store.pending ? "disabled" : ""} aria-pressed="${c.id === this.car}">${c.name}</button>`,
     ).join("");
     for (const b of $("workshop-cars").querySelectorAll("button"))
       b.onclick = () => {
         this.car = b.dataset.choice;
+        this.inspection = null;
         this.onCar(this.car);
         this.render();
       };
@@ -132,6 +274,28 @@ export class GarageUI {
           `<div><small>${k}</small><strong>${v}</strong><em>${parseFloat(delta) > 0 ? "+" + delta + " vs stock" : "STOCK SPEC"}</em></div>`,
       )
       .join("");
+    const color = paintColor(p.cars[this.car], carSpec(this.car).color);
+    $("paint-custom").value = color;
+    $("paint-custom").disabled = this.store.busy || !!this.store.pending;
+    $("paint-swatches").innerHTML = PAINTS.map(
+      ([name, c]) =>
+        `<button title="${name}" aria-label="${name} paint" aria-pressed="${c === color}" data-paint="${c}" style="--paint:${c}" ${this.store.busy || this.store.pending ? "disabled" : ""}></button>`,
+    ).join("");
+    for (const b of $("paint-swatches").children)
+      b.onclick = () => this.setPaint(b.dataset.paint);
+    const equipment = { ...p.cars[this.car] };
+    if (this.inspection) equipment[this.inspection.part] = this.inspection.tier;
+    this.preview?.setCar(this.car, equipment);
+    $("preview-label").textContent = this.inspection
+      ? `${TIERS[this.inspection.tier].name.toUpperCase()} ${PARTS.find((x) => x.id === this.inspection.part).name.toUpperCase()} · PREVIEW ONLY`
+      : "YOUR INSTALLED BUILD";
+    const inspected =
+      PARTS.find((x) => x.id === this.inspection?.part) || PARTS[0];
+    this.renderInspector(
+      inspected,
+      this.inspection?.tier ||
+        Math.min(4, (p.cars[this.car][inspected.id] || 0) + 1),
+    );
     const difficulty = pursuitTuning(p.level);
     $("level-threat").textContent =
       `LEVEL ${p.level} · ${difficulty.initialUnits} patrols · ${p.level >= 3 ? "SUVs + tanks + helicopter" : p.level >= 2 ? "SUVs + helicopter" : "sedan pursuit"} · new routes each level`;
@@ -163,8 +327,8 @@ export class GarageUI {
           canEquip && best !== previewTier
             ? upgradeBenefits(carSpec(this.car), p.cars[this.car], part, best)
             : [];
-        return `<article class="part-card" tabindex="-1" data-part="${part.id}" style="--tier:${TIERS[canEquip ? best : tier].color}">
-        <div class="part-photo">${partArtwork(part)}<span class="part-quality">${canEquip ? TIERS[best].name + " AVAILABLE" : TIERS[tier].name + " FITTED"}</span></div>
+        return `<article class="part-card" tabindex="-1" data-part="${part.id}" style="--tier:${TIERS[tier || 1].color}">
+        <div class="part-photo">${partArtwork(part, "", tier || 1)}<span class="part-quality">${tier ? TIERS[tier].name + " FITTED" : "BRONZE UPGRADE"}</span></div>
         <div class="part-body"><div class="part-title"><div><h3>${part.name}</h3><span>${TIERS[tier].name} installed</span></div><b class="part-level">${tier}/4</b></div><p>${part.effect}</p>
         <div class="upgrade-preview"><small>${tier === 4 ? "FULLY UPGRADED" : TIERS[previewTier].name.toUpperCase() + " UPGRADE BENEFITS"}</small>${benefits.map((x) => `<span>${x}</span>`).join("")}${spareBenefits.length ? `<small class="spare-preview">FREE ${TIERS[best].name.toUpperCase()} INSTALL</small>${spareBenefits.map((x) => `<span>${x}</span>`).join("")}` : ""}</div>
         <div class="tier-track">${TIERS.slice(1)
@@ -173,12 +337,17 @@ export class GarageUI {
               `<span class="${i + 1 === tier ? "lit" : ""}" style="--rarity:${t.color}" title="${t.name}: ${p.inventory[partKey(part.id, i + 1)] || 0} spare parts">${t.name}<small>×${p.inventory[partKey(part.id, i + 1)] || 0}</small></span>`,
           )
           .join("")}</div>
-        <div class="part-actions"><button data-upgrade="${part.id}" ${tier === 4 || p.credits < upgradeCost(tier + 1) ? "disabled" : ""}>${tier === 4 ? "MAXED" : `UPGRADE · ${upgradeCost(tier + 1).toLocaleString()} CR`}</button>
+        <div class="part-actions"><button class="inspect-part" data-inspect="${part.id}" data-tier="${previewTier}">INSPECT & COMPARE ↗</button><button data-upgrade="${part.id}" ${tier === 4 || p.credits < upgradeCost(tier + 1) ? "disabled" : ""}>${tier === 4 ? "MAXED" : `UPGRADE · ${upgradeCost(tier + 1).toLocaleString()} CR`}</button>
         ${canEquip ? `<button class="install" data-equip="${part.id}" data-tier="${best}">INSTALL ${TIERS[best].name.toUpperCase()} · FREE</button>` : ""}
         ${best ? `<button class="sell" data-sell="${part.id}" data-tier="${best}">SELL SPARE · +${salvageValue(best)} CR</button>` : ""}</div></div></article>`;
       })
       .join("");
     for (const button of $("part-grid").querySelectorAll("button")) {
+      if (button.dataset.inspect) {
+        button.onclick = () =>
+          this.inspect(button.dataset.inspect, Number(button.dataset.tier));
+        continue;
+      }
       if (this.store.busy || this.store.pending) button.disabled = true;
       button.onclick = () => {
         const type = button.dataset.upgrade
@@ -210,6 +379,10 @@ export class GarageUI {
           )
           .join(" · ")
       : "One welcome box is waiting. Earn another by completing a level.";
+    if (this.artReady) {
+      this.preview?.hydrate($("part-grid"));
+      this.preview?.hydrate($("part-inspector"));
+    }
     if (focus)
       $("part-grid")
         .querySelector(`[data-part="${focus}"]`)
@@ -238,8 +411,9 @@ export class GarageUI {
       const show = (slot, reward, done) => {
         const part = PARTS.find((x) => x.id === reward.part);
         slot.style.setProperty("--tier", TIERS[reward.tier].color);
-        slot.innerHTML = `${partArtwork(part)}<strong>${part.name}</strong><span>${TIERS[reward.tier].name}</span>`;
+        slot.innerHTML = `${partArtwork(part, "", reward.tier)}<strong>${part.name}</strong><span>${TIERS[reward.tier].name}</span>`;
         slot.classList.toggle("spinning", !done);
+        if (done) this.preview?.hydrate(slot);
       };
       await new Promise((resolve) => {
         const begin = performance.now();

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.5.0 — 2026-09-12
+
+- Add an interactive studio with selected-car orbit/zoom, front/rear/wheel/interior views and explicitly labeled no-cost preview fits.
+- Save free per-car preset/custom paint through the existing versioned, idempotent server API. Preserve all previous garage progress.
+- Add 56 original 3D part-grade assemblies with distinct machining and material finishes, cached studio renders, detailed explanations, direct inspector purchase/install actions and animated exact before/after statistics.
+- Fit tier-specific forged rims, tread/slick tires, stationary calipers and body-mounted wing assemblies to all four player models; keep stock Original 458 wheels and Vector wing.
+- Refine cabins with a true body opening, footwell, headliner, upholstery/bolsters, model-specific instruments, trim and a Vector flat-bottom wheel. Preserve the original licensed cabin and shaft-centered steering.
+- Use shared engine telemetry for cabin instruments; improve cockpit camera framing and raised, tilted, smaller street guidance without the nearest obstructing arrow.
+- Suspend the world render behind the garage and stop the studio loop on close.
+
 ## 1.4.0 — 2026-09-12
 
 - Add directional, bounded body deformation to all player cars, patrols and traffic: compressed panels, local creases, scuffs and projected glass cracks. Keep lamps/exhaust aligned and exclude rotating wheel/steering parts.

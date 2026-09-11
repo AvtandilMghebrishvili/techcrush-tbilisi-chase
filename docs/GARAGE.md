@@ -1,0 +1,37 @@
+# Garage customization
+
+Open **GARAGE · UPGRADES & BOXES** before a run or return to it after banking a completed run. Select the car you want to modify at the top. Each car has independent equipment and paint; the inventory and credits belong to the driver.
+
+## See the actual car
+
+The studio uses the same vehicle factories as the driving scene. Drag the car to orbit, scroll to zoom, or choose **Front**, **Rear**, **Wheels**, or **Interior**. **Show fitted** restores the installed build after experimenting. The game world stops rendering behind the open garage, and the studio stops rendering when the garage closes.
+
+Select **Inspect & Compare** on a part. Bronze, Silver, Gold and Diamond buttons preview that grade without spending credits or inventory. Wheels and spoilers are also previewed on the car. The yellow preview label distinguishes a trial fit from saved equipment. Engine, ECU and other concealed components have a studio assembly view; their internal installation is not an exposed engine-bay model.
+
+## Buy, install and compare
+
+The inspector explains the part, displays current and proposed values, and animates the change after installation. Purchase upgrades one tier at a time: **600 / 1,500 / 3,600 / 7,800 CR**. The purchase button names the next tier even if you are inspecting a later one. An owned higher-grade part can be installed directly for free. Replaced parts return to shared inventory under the existing garage rules.
+
+Top speed is the simulation ceiling, not a guaranteed speed on every road. Acceleration/braking are simulation rates. Steering is a response rating; a gain of four points means a rating of 100 becomes 104. Lower damage-received and recovery-delay values are better. Comparisons use the same `upgradedSpec` function as live driving and include the car's other fitted parts. A bar's gray mark shows the old value and its colored section shows the new value.
+
+## Exterior changes
+
+- **Rims:** tier-specific five-, seven-, ten- and split-spoke designs, with Bronze, Silver, Gold or Diamond finishes.
+- **Tires:** wider tire sections, different tread density, semi-slicks and Diamond track slicks, plus sidewall quality bands. Rolling radius remains consistent.
+- **Brakes:** colored stationary calipers and increasingly drilled discs. Calipers steer with the hub but do not spin with the wheel.
+- **Spoiler:** body-mounted feet, progressively taller/wider wings, colored trailing edges/end plates, and a double-element Diamond wing. The Vector keeps its stock wing before upgrading.
+- **Paint:** eight free presets and a custom hex color. Paint is saved to the selected car on the server and appears on that car in the next chase. Paint does not change performance or cost credits.
+
+The original 458 keeps its original wheels while stock; fitting wheel, tire or brake upgrades replaces their visible assemblies at the actual source-model hubs. All cars retain their steering shaft, lamp and exhaust positions. Repair and rewind continue to restore damage independently of installed parts.
+
+## Cabins and navigation
+
+The four cars have model-specific instrument styles and trim. Procedural cabins have a genuine opening in the body surface, floor, headliner, door inserts, bolsters, trim and controls; the Vector has a flat-bottom steering rim. The restored 458 retains its licensed interior and gains a fitted instrument binnacle and dark upholstery. Speed/RPM/gear displays use the shared engine telemetry calculation; the steering wheel rotates around its shaft.
+
+In cockpit view, street chevrons are raised and tilted toward the driver, smaller, and omitted in the nearest 18 metres to avoid filling the windshield. They still follow the computed street route and depth-test against the world. The transparent HUD retains a larger direction arrow and checkpoint distance. **C** cycles camera modes.
+
+## Save and compatibility
+
+Paint is an optional `cars[carId].paint` field in the existing saved profile. Old garages need no reset or database migration. The server validates both the car ID and six-digit hex color. The existing version checks, idempotent operations and private garage backup cover paint as well as upgrades. No paid currency, account requirement or new third-party service is introduced.
+
+The 56 part-grade assemblies are original procedural 3D models rendered into cached studio images. Geometry, machining and materials vary by grade; these are illustrative part assemblies, not manufacturer photographs. The existing photographic atlas remains as a fallback when the studio renderer is unavailable. The studio needs WebGL; gameplay requirements are unchanged.

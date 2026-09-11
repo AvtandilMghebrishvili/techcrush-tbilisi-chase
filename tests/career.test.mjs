@@ -105,7 +105,8 @@ test("three car choices have different geometry, dimensions and real upgrade vis
   const stock = makeOriginalSportsCar("gt", "#ff0000"),
     up = makeOriginalSportsCar("gt", "#ff0000", { spoiler: 4, rims: 4 });
   assert(
-    up.children.length > stock.children.length,
+    up.getObjectByName("rear-wing").children.length >
+      stock.getObjectByName("rear-wing").children.length,
     "A visible spoiler is fitted",
   );
   assert(

@@ -80,3 +80,7 @@ Run `python scripts/prepare-audio.py` from the repository root with Python 3 and
 ## Damage and destruction — 12 September 2026
 
 `vehicle-damage.js`, `damage-state.js` and `crash-effects.js` are original code. Panel deformation operates on private runtime copies of existing car geometry; the licensed original GLB and other source assets remain unchanged. Glass cracks and scuffs are line geometry projected onto each model. Fire/smoke opacity is an original procedural DataTexture, and debris consists of original bent polygon fragments. No additional downloaded imagery, vehicle models or audio files were introduced. The revised crash/explosion mix continues using the CC0 recordings and original synthesis credited above.
+
+## Garage studio and customization (1.5.0)
+
+`dist/workshop-parts.js` and `dist/customization.js` author 56 original part-grade assemblies, replacement wheel/brake kits and wing geometry. `dist/garage-preview.js` renders these assemblies with the existing CC0 HDR into per-session cached images; no new photos or external dependencies were downloaded. The earlier parts atlas is retained only as a renderer fallback. `dist/interior-detail.js` adds original instrument artwork, trim, controls and upholstery details; the Original 458 attribution remains unchanged.

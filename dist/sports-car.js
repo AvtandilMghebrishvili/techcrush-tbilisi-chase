@@ -1,3 +1,5 @@
+import { addCabinDetails } from "./interior-detail.js";
+import { installWheelKits, addExteriorKit } from "./customization.js";
 import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
@@ -93,21 +95,6 @@ export function sportsCar(
     roughness: 0.5,
     metalness: 0.4,
   });
-  if (equipment.spoiler && !police) {
-    const height = 1.12 + equipment.spoiler * 0.08;
-    view.box(1.75, 0.08, 0.36, black, 0, height, -1.82, group);
-    for (const x of [-0.65, 0.65])
-      view.box(
-        0.06,
-        height - 0.82,
-        0.1,
-        black,
-        x,
-        (height + 0.82) / 2,
-        -1.82,
-        group,
-      );
-  }
   if (police) {
     const bar = view.box(1.15, 0.07, 0.36, black, 0, 1.35, -0.18, group);
     const lights = ["#ef2649", "#1c78ff"].map(
@@ -192,10 +179,15 @@ export function sportsCar(
     pivot.add(wheel);
     group.userData.wheelSteering.push(pivot);
   }
+  if (!police) {
+    installWheelKits(group, equipment, { classic: true });
+    addExteriorKit(group, equipment, carId);
+  }
   addHeadlights(group, [
     { x: -0.67, y: 0.65, z: 2.12 },
     { x: 0.67, y: 0.65, z: 2.12 },
   ]);
+  if (!police) addCabinDetails(group, carId);
   return group;
 }
 export function animateWheels(group, speed, dt, steer = 0) {

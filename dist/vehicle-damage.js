@@ -54,7 +54,8 @@ export function prepareVehicleDamage(root) {
     glass = [];
   root.traverse((m) => {
     if (!m.isMesh || !m.geometry?.attributes.position) return;
-    for (let a = m; a && a !== root; a = a.parent) if (skip.has(a)) return;
+    for (let a = m; a && a !== root; a = a.parent)
+      if (skip.has(a) || !a.visible || a.name === "cabin-instruments") return;
     const mats = Array.isArray(m.material) ? m.material : [m.material];
     if (mats.every((mat) => mat.isMeshBasicMaterial)) return; // contact shadow, glow and displays
     const matrix = new THREE.Matrix4().multiplyMatrices(inverse, m.matrixWorld);
