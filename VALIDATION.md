@@ -1,31 +1,41 @@
-# Validation — TECHCRUSH chase update, 11 September 2026
+# Validation — Tbilisi daylight edition, 11 September 2026
 
-## Automated mechanics
+## Automated checks
 
-`npm test`: **23 passed, 0 failed**. The 19 previous physics, controls, cars, collisions, patrol health, explosion and mission checks still pass. Four new tests cover legal street arrow placement around turns, guide animation/checkpoint changes/restart/escape visibility, pursuit of a moving car, and sharing observations without tracking through buildings after contact is lost.
+`npm test`: **24 passed, 0 failed**. Checks cover acceleration/braking/reverse, fixed-step consistency, handbrake and nitro, left/right steering from every camera heading, Georgian keyboard physical keys, rotated building and vehicle collisions, car configuration, police routing/radio/chase, patrol HP/explosion/replacement, checkpoint order, repair, escape/capture/restart states, animated navigation and all static module imports including transitive Three.js loaders.
 
-Full driving runs use normal controls with traffic and police active. The controller uses nitro on clear straights and the normal R recovery action, including its score penalty, if pinned. It does not grant checkpoint completion, health, or immunity.
+The OSM-derived map has 373 nodes and 498 segments. Connectivity tests visit every node, check road centers with the player collision radius against building footprints, and verify connected, unobstructed routes between all six gates.
 
-| Car              | Result  | Checkpoints | Time    | Score  | Condition | Patrol takedowns |
-| ---------------- | ------- | ----------- | ------- | ------ | --------- | ---------------- |
-| Rustaveli GT     | Escaped | 6/6         | 189.4 s | 30,128 | 1%        | 6                |
-| Mtatsminda Rally | Escaped | 6/6         | 96.6 s  | 24,230 | 92%       | 5                |
-| Caucasus 4×4     | Escaped | 6/6         | 206.2 s | 32,170 | 52%       | 7                |
+## Complete driving runs
 
-Reproduce with `node tests/route-drive.mjs`, `node tests/route-drive.mjs rally`, and `node tests/route-drive.mjs suv`.
+The deterministic controller uses ordinary throttle, steering, braking, nitro and the same R recovery action available to the player, including its score penalty. Traffic and police remain active. It does not grant checkpoints, condition or immunity. Controller recovery and ideal route knowledge mean these runs establish that the game is completable, not an estimate of first-time human difficulty.
 
-## Browser review
+| Car          | Result  | Gates | Simulation time | Score  | Condition | Patrol takedowns |
+| ------------ | ------- | ----- | --------------- | ------ | --------- | ---------------- |
+| 458 Stradale | Escaped | 6/6   | 112 s           | 25,852 | 80%       | 6                |
+| 458 Track    | Escaped | 6/6   | 136 s           | 27,271 | 61%       | 6                |
+| 458 Touring  | Escaped | 6/6   | 129 s           | 26,882 | 88%       | 6                |
 
-The subsequent photo-reference statue revision was inspected in front and three-quarter close-up views, then in the actual game skyline and cockpit view. Confirmed the raised bowl, horizontal sword, straight dress and headdress, successful start/driving, and an empty browser error/warning log. The temporary model-review page was removed before packaging. This change affects scenery only; the mechanics results below remain those of the prior tested simulation.
+Reproduce with `node tests/route-drive.mjs gt`, `node tests/route-drive.mjs rally`, and `node tests/route-drive.mjs suv`. These results use the final simulation and map.
 
-Verified the TECHCRUSH title and garage signs, distant mountains, mounted Kartlis Deda statue, animated road arrows, normal driving and checkpoint progress, and cockpit navigation. Browser console checks returned no errors or warnings. The prior desktop and phone viewport layout checks remain applicable; this update adds no new HUD panels.
+## Browser inspection
 
-During review, corrected transparent road arrows rendering over the cockpit dashboard by placing the interior in the final transparent overlay pass. Balanced the stronger pursuit with patrol ram recovery, capped ram damage, and 20 condition repair per checkpoint. The GT escape remains demanding, as shown by its low remaining condition in the controller run.
+Inspected the initial garage, detailed sports car, TECHCRUSH branding, limestone facades, asphalt, tree billboards, mountain/tower backdrop, checkpoint arrows and driving HUD in local desktop Chromium. The modeled cockpit shows the steering wheel, dashboard and windshield pillars with the road visible ahead. A normal two-second acceleration test reached 95 km/h with full condition. Three seconds of an earlier cockpit drive advanced approximately three seconds of simulation; this is a short functional check, not a GPU benchmark.
+
+The final contact-shadow shader renders without a rectangular white matte. Tree pale-matte removal was inspected in the scene. Browser error/warning logs were empty after loading and driving. The default browser panel was also observed at a narrow desktop width; a physical phone, Safari and low-end GPUs were not tested in this update.
+
+## Issues corrected during the update
+
+- Vendored HDRLoader's transitive imports so loading does not stall on a missing module; added an import-graph check.
+- Kept AI, checkpoint guidance, minimap and building collisions on the same connected geographic map.
+- Restored the Lagidze connection and adjusted gate positions to avoid awkward checkpoint turns.
+- Made traffic retain ram momentum instead of immediately overwriting collision velocity.
+- Used patrol recovery, capped police ram damage and 30 condition repair at gates to balance the stronger pursuit.
+- Converted the car contact-shadow grayscale to opacity and removed the pale tree background in the material shader.
+- Hid close patrol HP sprites when they would obscure the driving camera.
 
 ## Limits
 
-### Supplied logo follow-up
+This is a simplified playable reconstruction using OSM street center lines, widened roads, approximate buildings, original terrain and the user's visual references. It is not Google Maps photogrammetry or an exact street survey. The three configurations share one detailed 458 model with different appearance and driving characteristics. Photographic tree billboards are flat crossed planes. Detailed models and textures increase loading and GPU cost compared with the earlier stylized edition.
 
-Verified the supplied portrait logo and lettering in the header and 3D garage signs at desktop size and 390×844. The mobile header fits alongside camera, sound and pause controls. Both copied assets match their supplied originals by SHA-256. JavaScript syntax and local HTTP checks pass; browser console errors/warnings are empty. This follow-up changes branding only; the previously recorded 23 mechanics tests and driving results are unchanged.
-
-Tested with desktop Chromium, not every GPU/browser or physical phone. WebGL2 is required. Mountain and landmark geometry is a fictional stylized interpretation. Single-player arcade game without multiplayer or persistent leaderboard.
+WebGL2 and a modern browser are required. No cross-browser or physical-device performance guarantee is made. Single-player arcade game; no multiplayer or persistent leaderboard. Asset credits and licenses are in `ASSETS.md` and the in-game Credits page.

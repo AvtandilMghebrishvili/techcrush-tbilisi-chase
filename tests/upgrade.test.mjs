@@ -1,3 +1,11 @@
+import {
+  START,
+  NODES,
+  ROADS,
+  nearestRoad,
+  CHECKPOINTS,
+  containsPoint,
+} from "../dist/city-map.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "../dist/vendor/three.module.js";
@@ -74,27 +82,35 @@ test("car selection persists across retries and changes driving and protection",
   assert(carSpec("suv").damageScale < carSpec("gt").damageScale);
   assert(carSpec("rally").handling > carSpec("gt").handling);
 });
-test("expanded city has connected roads and an accessible tower plaza", () => {
-  assert.equal(GRID_RADIUS, 4);
-  assert(LIMIT > 600);
-  const route = routeBetween(
-    { x: ROAD_EDGE, z: 200 },
-    { x: -ROAD_EDGE, z: -350 },
-  );
-  let prior = { x: ROAD_EDGE, z: 200 };
-  for (const p of route) {
-    assert(lineOfSight(prior, p, blocks()));
-    prior = p;
+test("Tbilisi streets are connected and all six gates have unobstructed road routes", () => {
+  assert(LIMIT > 1000);
+  assert(new Set(ROADS.map((r) => r.name)).size >= 20);
+  let prior = START;
+  for (const cp of CHECKPOINTS) {
+    assert(nearestRoad(cp).distance < 0.01);
+    for (const p of routeBetween(prior, cp)) {
+      assert(lineOfSight(prior, p, blocks()));
+      prior = p;
+    }
   }
-  assert(
-    !blocks().some(
-      (b) =>
-        TOWER.x - 30 > b.minX &&
-        TOWER.x - 30 < b.maxX &&
-        TOWER.z > b.minZ &&
-        TOWER.z < b.maxZ,
-    ),
-  );
+  for (const r of ROADS)
+    for (let t = 0; t <= 1; t += 0.1) {
+      const x = r.start.x + (r.end.x - r.start.x) * t,
+        z = r.start.z + (r.end.z - r.start.z) * t;
+      assert(
+        !blocks().some((b) => containsPoint(b, x, z, 2.2)),
+        `road ${r.id} is blocked`,
+      );
+    }
+  const visited = new Set([0]),
+    todo = [0];
+  while (todo.length)
+    for (const e of NODES[todo.pop()].links)
+      if (!visited.has(e.node)) {
+        visited.add(e.node);
+        todo.push(e.node);
+      }
+  assert.equal(visited.size, NODES.length);
 });
 test("patrol HP takes several hits, awards one explosion, and replaces the destroyed officer away from the player", () => {
   const sim = new ChaseSimulation();
@@ -130,8 +146,9 @@ test("actual ram collision reduces patrol HP", () => {
   const sim = new ChaseSimulation();
   sim.start();
   sim.traffic = [];
+  sim.player.angle = 0;
   sim.player.vz = 30;
-  const cop = sim.makePolice(4, -26.4);
+  const cop = sim.makePolice(sim.player.x, sim.player.z + 3.6);
   sim.police = [cop];
   sim.update(1 / 120, { throttle: 1 });
   assert(cop.health < 100);

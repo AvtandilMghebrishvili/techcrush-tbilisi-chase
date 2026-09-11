@@ -1,28 +1,41 @@
-# Higgsfield asset provenance
+# Asset provenance — daylight edition, 11 September 2026
 
-## User-supplied TECHCRUSH branding
+## Sports car
 
-`dist/assets/techcrush-logo.jpg` and `dist/assets/techcrush-wordmark.png` are unchanged copies of the user's `Techcrush LOGO.jpg` and `Techcrush Font.png`. The provided portrait logo appears in the header, favicon, and garage signs. The lettering is displayed from the supplied PNG, with its surrounding interface cropped only at display time. These user-supplied brand assets are not included in the source-code MIT license.
+`dist/assets/ferrari.glb`: Ferrari 458 model by [vicent091036](https://sketchfab.com/models/57bf6cc56931426e87494f554df1dab6), provided through the [official Three.js car example](https://threejs.org/examples/webgl_materials_car.html), attributed under CC BY 4.0. The [WorldCoder provenance table](https://huggingface.co/datasets/shuolucs/WorldCoder-Bench) also identifies this file as CC BY 4.0. The original Sketchfab detail endpoint was unavailable during this update.
 
-The environment assets listed below were generated for this game through the connected Higgsfield plugin on 2026-09-11 with `gpt_image_2`, 1k resolution. No third-party car brands or logos were requested for those generations.
+`dist/assets/sports-car.glb` is the decoded, welded and simplified derivative: approximately 307,393 triangles versus 358,788 originally. The original input is retained for reproducibility. Custom paint, track spoiler, police equipment, animation and fictional game tuning are applied at runtime. All three trims share this base model. Vehicle names/marks are not project-authored assets and do not imply manufacturer endorsement.
 
-| File                             | Generation job                       | Use                                                                                                                       |
-| -------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `dist/assets/building.png`       | dae972ad-71bf-4ba7-be75-5740856a85d7 | Repeating dark office facade with warm illuminated windows; mapped to buildings.                                          |
-| `dist/assets/asphalt.png`        | 7b3617d5-a2f4-43e1-93d4-d188f56ba0c9 | Seamless dark asphalt without painted markings; mapped to street meshes.                                                  |
-| `dist/assets/paint.png`          | 64443110-fc69-4b18-814f-235571110a6f | Fine metallic golden paint; mapped to the player vehicle.                                                                 |
-| `dist/assets/city-reference.png` | 64598333-b303-4873-9776-9210f11a4869 | Dusk city chase reference showing yellow coupe, police lights, office buildings, road markings, and cyan checkpoint gate. |
+`ferrari_ao.png` is the contact-shadow texture from the same example. Its grayscale is interpreted as shadow opacity by the renderer. The original image is unchanged.
 
-These are generation outputs, not photographs of real people or real cities. Reference artwork is supplied separately from actual gameplay. Consult the account's applicable Higgsfield terms for generated-asset rights.
+## Sky and mountain materials
 
-## Georgian city update
+`daylight.hdr`: [Kloofendal 48d Partly Cloudy](https://polyhaven.com/a/kloofendal_48d_partly_cloudy), Greg Zaal / Poly Haven, CC0, 1K. Used for sky and environmental lighting; it is not a photograph of Tbilisi.
 
-`dist/assets/old-tbilisi.png` was generated with Higgsfield `gpt_image_2` at 1k resolution on 2026-09-11. Generation job: `dbd9eba3-f1d8-465b-a565-884a2df51493`. The ochre plaster, carved turquoise balcony, window, and terracotta details are mapped to the new low-rise buildings.
+`hills-diff.jpg` and `hills-nor_gl.jpg`: [Aerial Rocks 02](https://polyhaven.com/a/aerial_rocks_02), Rob Tuytel / Poly Haven, CC0, 1K. Mapped to original Tbilisi-inspired terrain geometry.
 
-The five-cross Georgian flag texture, fictional tower geometry inspired by Mtatsminda, car model variations, cockpit, health bars, and particle effects are authored in the project source. The map does not reproduce real Tbilisi street geography.
+## Street geography
 
-## TECHCRUSH and skyline update
+`dist/road-data.js` and `data/*.json`: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Overpass snapshot: 2026-09-11. Adaptations: local metre coordinates, simplified junctions, selected connected roads, widened lanes, bidirectional game traffic and reopened construction roads. The derived database is downloadable from the public credits page. Source responses are included in the complete code archive.
 
-The TECHCRUSH garage signs, faceted mountain geometry, and stylized Kartlis Deda model are authored in `dist/landmarks.js`. The statue's bowl and sword arrangement was checked against [Georgia Travel's Kartlis Deda reference](https://georgia.travel/kartlis-deda). It is an original simplified game model, deliberately enlarged for visibility on the skyline, not a scan or accurate reconstruction. No new generated image assets were required for this update; the existing Higgsfield textures remain in use.
+## Higgsfield images
 
-The Kartlis Deda model was subsequently rebuilt in `dist/kartlis-deda.js` using the user's supplied `images (5).jpg` as its visual reference. The revised original mesh has a straight paneled dress, a bent left arm holding a bowl at shoulder height, a lowered right arm holding a horizontal sword across the waist, a braided headdress and veil, and a silver material. The photo is used only as a reference and is not copied into the published game. The mesh remains a stylized interpretation, not an accurate scan.
+Generated through the connected Higgsfield plugin, GPT Image 2, 1K, on 11 September 2026. Generated assets remain subject to the account's applicable Higgsfield terms.
+
+| File             | Generation ID                          | Use                                                                                                                                                       |
+| ---------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `limestone.png`  | `1948130f-bf8a-482b-baf0-291215852f7f` | Four-floor repeating limestone facade                                                                                                                     |
+| `road-day.png`   | `a0cad2a4-3ecf-476e-a92b-dab7edf06dbd` | Worn daylight asphalt, diffuse and subtle bump shading                                                                                                    |
+| `plane-tree.png` | `08475ffc-e484-4b55-9f13-5a32bb602957` | Photographic-style tree billboard. The returned RGB image has a pale matte; the game shader discards pale background pixels. The source PNG is unchanged. |
+
+Historical generated artwork is retained: `building.png` (`dae972ad-71bf-4ba7-be75-5740856a85d7`), `asphalt.png` (`7b3617d5-a2f4-43e1-93d4-d188f56ba0c9`), `paint.png` (`64443110-fc69-4b18-814f-235571110a6f`), `city-reference.png` (`64598333-b303-4873-9776-9210f11a4869`) and `old-tbilisi.png` (`dbd9eba3-f1d8-465b-a565-884a2df51493`). These are not images of current gameplay.
+
+## User assets and original geometry
+
+`techcrush-logo.jpg` and `techcrush-wordmark.png` are unchanged copies of the user's logo and lettering, excluded from the code's MIT license. Surrounding screenshot UI is omitted only at display time.
+
+The supplied Google Street View screenshot of 12 Nikoloz Baratashvili St guided the clock, pale stone, cornices and broad-street appearance. It is not copied into the game. The clock building is an original approximate 3D interpretation; no Google Maps imagery or 3D tiles are redistributed.
+
+The user's Kartlis Deda photo guided the original model in `kartlis-deda.js`: raised bowl, lowered arm with horizontal sword, paneled dress, headdress and silver surface. The mesh is enlarged for skyline visibility, not a scan. The photo is not redistributed.
+
+Georgian flags, tower, mountains, road furniture, TECHCRUSH signs and game effects are authored in the source. Three.js version 0.180.0 is MIT, with `dist/vendor/THREE-LICENSE.txt`. Model-preparation dependencies are development-only and locked in `package-lock.json`.

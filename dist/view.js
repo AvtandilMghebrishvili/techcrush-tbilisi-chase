@@ -1,7 +1,10 @@
 import * as THREE from "./vendor/three.module.js";
 import { CHECKPOINTS } from "./simulation.js";
 import { carSpec, CAMERAS } from "./config.js";
-import { buildGeorgianCity, updateScenery } from "./scenery.js";
+import { updateScenery } from "./scenery.js";
+import { buildRealisticCity, applyTreeTexture } from "./realistic-city.js";
+import { START, containsPoint } from "./city-map.js";
+import { loadSportsAssets, sportsCar, animateWheels } from "./sports-car.js";
 import { makeCockpit, updateCockpit } from "./cockpit.js";
 import { makeRouteGuide, updateRouteGuide } from "./route-guide.js";
 import { applyTechcrushBrand } from "./landmarks.js";
@@ -17,8 +20,8 @@ const material = (color, extra = {}) =>
 export class SceneView {
   constructor(canvas) {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color("#526778");
-    this.scene.fog = new THREE.FogExp2("#526778", 0.0015);
+    this.scene.background = new THREE.Color("#b4c1c8");
+    this.scene.fog = new THREE.FogExp2("#b8c1c5", 0.00052);
     this.renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
@@ -29,24 +32,25 @@ export class SceneView {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.12;
-    this.camera = new THREE.PerspectiveCamera(56, 1, 0.2, 3200);
-    this.scene.add(new THREE.HemisphereLight("#a6c6ef", "#373e43", 2.1));
-    const sun = new THREE.DirectionalLight("#ffe2b1", 2.2);
-    sun.position.set(-120, 170, -200);
+    this.renderer.toneMappingExposure = 0.94;
+    this.camera = new THREE.PerspectiveCamera(56, 1, 0.06, 4800);
+    this.scene.add(new THREE.HemisphereLight("#dce8f3", "#78776b", 0.75));
+    const sun = new THREE.DirectionalLight("#fff3d9", 2.3);
+    sun.position.set(START.x - 75, 145, START.z - 95);
+    this.scene.add(sun.target);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     Object.assign(sun.shadow.camera, {
-      left: -220,
-      right: 220,
-      top: 220,
-      bottom: -220,
+      left: -85,
+      right: 85,
+      top: 85,
+      bottom: -85,
       far: 650,
     });
     sun.shadow.bias = -0.0003;
     this.scene.add(sun);
     this.sun = sun;
-    buildGeorgianCity(this);
+    buildRealisticCity(this);
     this.cameraMode = 0;
     this.cockpit = makeCockpit();
     this.camera.add(this.cockpit.root);
@@ -54,10 +58,10 @@ export class SceneView {
     this.fx = new Map();
     this.routeGuide = makeRouteGuide(this.scene);
     this.player = this.makeCar("#eecb39");
-    this.player.position.set(4, 0, -30);
+    this.player.position.set(START.x, 0, START.z);
     this.scene.add(this.player);
-    this.camera.position.set(11, 7.5, -49);
-    this.camera.lookAt(-5, 2, -4);
+    this.camera.position.set(START.x - 12, 5.2, START.z + 6);
+    this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
     this.resize = () => {
       this.camera.aspect = innerWidth / innerHeight;
       this.camera.updateProjectionMatrix();
@@ -75,156 +79,73 @@ export class SceneView {
     return mesh;
   }
   makeCar(color, police = false, carId = "gt") {
-    const group = new THREE.Group();
-    const paint = material(color, { metalness: 0.45, roughness: 0.32 });
-    const rubber = material("#10171d"),
-      glass = material("#1b394b", { metalness: 0.6, roughness: 0.18 });
-    this.box(2.4, 0.68, 4.6, paint, 0, 0.85, 0, group);
-    this.box(2.18, 0.3, 4.1, paint, 0, 1.28, 0, group);
-    this.box(1.94, 0.73, 2.12, glass, 0, 1.72, -0.18, group);
-    this.box(1.98, 0.11, 1.82, police ? rubber : paint, 0, 2.13, -0.25, group);
-    this.box(2.3, 0.15, 0.2, rubber, 0, 1.47, -2.26, group);
-    this.box(2.28, 0.27, 0.18, rubber, 0, 0.7, 2.28, group);
-    const wheels = [];
-    for (const x of [-1.2, 1.2])
-      for (const z of [-1.43, 1.43]) {
-        const mesh = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.46, 0.46, 0.3, 14),
-          rubber,
-        );
-        mesh.rotation.z = Math.PI / 2;
-        mesh.position.set(x, 0.5, z);
-        group.add(mesh);
-        wheels.push(mesh);
-        const hub = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.24, 0.24, 0.32, 8),
-          material("#828c8f", { metalness: 0.8 }),
-        );
-        hub.rotation.z = Math.PI / 2;
-        hub.position.copy(mesh.position);
-        group.add(hub);
-      }
-    const head = material("#f9f6d2", {
-      emissive: "#f9f6d2",
-      emissiveIntensity: 2,
-    });
-    const tail = material("#ee3c38", {
-      emissive: "#ff3322",
-      emissiveIntensity: 2,
-    });
-    for (const x of [-0.8, 0.8]) {
-      this.box(0.58, 0.18, 0.08, head, x, 1.08, 2.31, group);
-      this.box(0.6, 0.18, 0.08, tail, x, 1.09, -2.31, group);
-    }
-    if (police) {
-      this.box(2.42, 0.38, 2.35, material("#d4dfdf"), 0, 0.95, 0, group);
-      const red = material("#ff2342", {
-          emissive: "#ff1635",
-          emissiveIntensity: 4,
-        }),
-        blue = material("#359aff", {
-          emissive: "#126dff",
-          emissiveIntensity: 4,
-        });
-      this.box(0.68, 0.22, 0.45, red, -0.42, 2.33, -0.2, group);
-      this.box(0.68, 0.22, 0.45, blue, 0.42, 2.33, -0.2, group);
-      group.userData.lights = [red, blue];
-    }
-    if (!police && carId === "rally") {
-      group.scale.set(1, 0.95, 0.87);
-      this.box(2.45, 0.16, 0.55, rubber, 0, 2.03, -1.92, group);
-      for (const x of [-0.33, 0.33])
-        this.box(0.17, 0.02, 1.2, material("#f4f0df"), x, 1.45, 1.2, group);
-    } else if (!police && carId === "suv") {
-      group.scale.set(1.12, 1.25, 1.08);
-      this.box(2.15, 0.2, 2.4, rubber, 0, 2.33, -0.25, group);
-      this.box(2.5, 0.25, 0.25, rubber, 0, 0.9, 2.4, group);
-      for (const x of [-0.8, 0, 0.8])
-        this.box(0.32, 0.2, 0.18, head, x, 2.51, 0.93, group);
-    }
-    if (!police && this.georgiaFlag) {
-      const flag = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.68, 0.44),
-        new THREE.MeshBasicMaterial({
-          map: this.georgiaFlag,
-          side: THREE.DoubleSide,
-        }),
-      );
-      flag.rotation.x = -Math.PI / 2;
-      flag.position.set(0, 1.447, 1.55);
-      group.add(flag);
-    }
-    if (police) {
-      const bar = makePatrolHealthBar();
-      group.add(bar.sprite);
-      group.userData.healthBar = bar;
-    }
-    group.userData.paint = paint;
-    group.userData.wheels = wheels;
-    return group;
+    return this.carTemplate
+      ? sportsCar(this, color, police, carId)
+      : new THREE.Group();
   }
   async loadTextures() {
     const loader = new THREE.TextureLoader();
-    const [road, facade, paint, oldTown, logo, wordmark] = await Promise.all(
+    const [road, facade, logo, wordmark] = await Promise.all(
       [
-        "asphalt.png",
-        "building.png",
-        "paint.png",
-        "old-tbilisi.png",
+        "road-day.png",
+        "limestone.png",
         "techcrush-logo.jpg",
         "techcrush-wordmark.png",
-      ].map((name) => loader.loadAsync("./assets/" + name)),
+      ].map((n) => loader.loadAsync("./assets/" + n)),
     );
     applyTechcrushBrand(this, logo.image, wordmark.image);
-    this.garageSignTexture.anisotropy = Math.min(
-      8,
-      this.renderer.capabilities.getMaxAnisotropy(),
-    );
     logo.dispose();
     wordmark.dispose();
-    for (const tex of [road, facade, paint, oldTown]) {
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.anisotropy = Math.min(
-        8,
-        this.renderer.capabilities.getMaxAnisotropy(),
-      );
-    }
-    road.repeat.set(2, 70);
-    this.paintTexture = paint;
-    for (const m of this.oldTownMaterials) {
-      m.map = oldTown;
-      m.emissiveMap = oldTown;
-      m.emissiveIntensity = 0.25;
-      m.needsUpdate = true;
+    for (const t of [road, facade]) {
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
     }
     this.roadMaterial.map = road;
-    this.roadMaterial.color.set("#9aabbd");
+    this.roadMaterial.color.set("#a7aaa5");
+    this.roadMaterial.roughness = 0.96;
+    this.roadMaterial.bumpMap = road;
+    this.roadMaterial.bumpScale = 0.018;
     this.roadMaterial.needsUpdate = true;
     for (const m of this.buildingMaterials) {
       m.map = facade;
-      m.color.set("#889ba7");
-      m.emissive.set("#7890a0");
-      m.emissiveMap = facade;
-      m.emissiveIntensity = 0.35;
       m.needsUpdate = true;
     }
-    this.player.userData.paint.map = paint;
-    this.player.userData.paint.color.set("#ffffff");
-    this.player.userData.paint.needsUpdate = true;
+    const [hill, hillNormal] = await Promise.all(
+      ["hills-diff.jpg", "hills-nor_gl.jpg"].map((n) =>
+        loader.loadAsync("./assets/" + n),
+      ),
+    );
+    hill.colorSpace = THREE.SRGBColorSpace;
+    for (const t of [hill, hillNormal]) {
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(16, 14);
+      t.anisotropy = 4;
+    }
+    this.terrainMaterial.map = hill;
+    this.terrainMaterial.normalMap = hillNormal;
+    this.terrainMaterial.normalScale.set(0.6, 0.6);
+    this.terrainMaterial.needsUpdate = true;
+    applyTreeTexture(this, await loader.loadAsync("./assets/plane-tree.png"));
+    await loadSportsAssets(this);
+    this.selectCar("gt");
   }
   setupGame(sim) {
     this.shake = 0;
-    this.camera.position.set(11, 7.5, -49);
-    this.camera.lookAt(-5, 2, -4);
+    this.camera.position.set(START.x - 12, 5.2, START.z + 6);
+    this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
     this.previewCamera = this.camera.position.clone();
-    this.cameraLook = new THREE.Vector3(4, 1.3, -10);
+    this.cameraLook = new THREE.Vector3(START.x, 1.3, START.z);
     this.trafficMeshes = [];
     this.policeMeshes = [];
     // Consolidate repeated static geometry into instanced batches.
     const batches = new Map();
     for (const mesh of [...this.scene.children]) {
-      if (mesh.type !== "Mesh" || mesh.geometry.type !== "BoxGeometry")
+      if (
+        mesh.type !== "Mesh" ||
+        mesh.geometry.type !== "BoxGeometry" ||
+        mesh.userData.preserveUV
+      )
         continue;
       const key = mesh.material.uuid;
       if (!batches.has(key)) batches.set(key, []);
@@ -267,7 +188,7 @@ export class SceneView {
       }),
     );
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0.07;
+    floor.position.y = 0.1;
     this.gate.add(floor);
     const labelCanvas = document.createElement("canvas");
     labelCanvas.width = 512;
@@ -330,7 +251,7 @@ export class SceneView {
     this.gate.visible = !!cp;
     if (cp) {
       this.gate.position.set(cp.x, 0, cp.z);
-      this.gate.rotation.y = cp.axis === "x" ? Math.PI / 2 : 0;
+      this.gate.rotation.y = cp.angle;
     }
   }
   startGame(sim) {
@@ -356,18 +277,18 @@ export class SceneView {
       this.scene.add(m);
     }
     this.updateGate(0);
-    this.camera.position.set(4, 8, -47);
-    this.cameraLook.set(4, 1.5, -15);
+    this.camera.position.set(
+      sim.player.x - Math.sin(sim.player.angle) * 9,
+      4.4,
+      sim.player.z - Math.cos(sim.player.angle) * 9,
+    );
+    this.cameraLook.set(sim.player.x, 1.2, sim.player.z);
     for (const m of this.skids) m.visible = false;
   }
   selectCar(id) {
     const spec = carSpec(id),
       previous = this.player;
     this.player = this.makeCar(spec.color, false, spec.id);
-    if (spec.id === "gt" && this.paintTexture) {
-      this.player.userData.paint.map = this.paintTexture;
-      this.player.userData.paint.color.set("#ffffff");
-    }
     if (previous) {
       this.player.position.copy(previous.position);
       this.player.rotation.copy(previous.rotation);
@@ -400,10 +321,10 @@ export class SceneView {
     this.policeMeshes = [];
     this.player.visible = true;
     this.cockpit.root.visible = false;
-    this.player.position.set(4, 0, -30);
-    this.player.rotation.set(0, 0, 0);
-    this.camera.position.set(11, 7.5, -49);
-    this.camera.lookAt(-5, 2, -4);
+    this.player.position.set(START.x, 0, START.z);
+    this.player.rotation.set(0, START.angle, 0);
+    this.camera.position.set(START.x - 12, 5.2, START.z + 6);
+    this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
     this.camera.fov = 56;
     this.camera.updateProjectionMatrix();
     this.updateGate(0);
@@ -414,6 +335,7 @@ export class SceneView {
       const p = sim.player;
       this.player.position.set(p.x, 0, p.z);
       this.player.rotation.y = p.angle;
+      animateWheels(this.player, p.speed, dt, input.steer);
       this.player.rotation.z =
         -input.steer * Math.min(Math.abs(p.speed) / 50, 1) * 0.035;
       while (this.policeMeshes.length < sim.police.length) {
@@ -426,12 +348,20 @@ export class SceneView {
         [sim.police, this.policeMeshes],
       ])
         cars.forEach((car, i) => {
-          meshes[i].visible = !car.destroyed;
+          meshes[i].visible =
+            !car.destroyed && Math.hypot(car.x - p.x, car.z - p.z) < 330;
           if (car.destroyed) return;
           if (meshes[i].userData.healthBar)
             updatePatrolHealthBar(meshes[i].userData.healthBar, car.health);
+          if (meshes[i].userData.healthBar)
+            meshes[i].userData.healthBar.sprite.visible =
+              Math.hypot(
+                car.x - this.camera.position.x,
+                car.z - this.camera.position.z,
+              ) > 10;
           meshes[i].position.set(car.x, 0, car.z);
           meshes[i].rotation.y = car.angle;
+          animateWheels(meshes[i], Math.hypot(car.vx, car.vz), dt);
           if (meshes[i].userData.lights)
             meshes[i].userData.lights.forEach(
               (m, j) =>
@@ -443,8 +373,8 @@ export class SceneView {
       const mode = CAMERAS[this.cameraMode].id;
       const interior = mode === "cockpit",
         hood = mode === "hood";
-      this.player.visible = !interior && !hood;
-      this.cockpit.root.visible = interior;
+      this.player.visible = !hood;
+      this.cockpit.root.visible = false;
       updateCockpit(this.cockpit, p, input.steer);
       const forward = new THREE.Vector3(
         Math.sin(p.angle),
@@ -452,11 +382,12 @@ export class SceneView {
         Math.cos(p.angle),
       );
       if (interior || hood) {
-        const seat = mode === "cockpit" ? 0.2 : 1.8;
+        const seat = mode === "cockpit" ? -0.28 : 1.8;
+        const driverOffset = interior ? 0.34 : 0;
         this.camera.position.set(
-          p.x + forward.x * seat,
-          interior ? (p.carId === "suv" ? 2.48 : 1.87) : 1.5,
-          p.z + forward.z * seat,
+          p.x + forward.x * seat + forward.z * driverOffset,
+          interior ? 1.08 : 0.97,
+          p.z + forward.z * seat - forward.x * driverOffset,
         );
         this.camera.lookAt(
           p.x + forward.x * 60,
@@ -465,20 +396,14 @@ export class SceneView {
         );
         this.camera.fov = interior ? 76 : 70;
       } else {
-        const zoom = mode === "aerial" ? 29 : p.boosting ? 20 : 16;
+        const zoom = mode === "aerial" ? 27 : p.boosting ? 12 : 9;
         const target = new THREE.Vector3(
           p.x - forward.x * zoom,
-          mode === "aerial" ? 27 : 8.5,
+          mode === "aerial" ? 26 : 4.4,
           p.z - forward.z * zoom,
         );
         if (
-          sim.obstacles.some(
-            (o) =>
-              target.x > o.minX - 2 &&
-              target.x < o.maxX + 2 &&
-              target.z > o.minZ - 2 &&
-              target.z < o.maxZ + 2,
-          )
+          sim.obstacles.some((o) => containsPoint(o, target.x, target.z, 2))
         ) {
           target.x = p.x - forward.x * 7;
           target.z = p.z - forward.z * 7;
@@ -531,6 +456,12 @@ export class SceneView {
     }
     updateScenery(this, sim.time || performance.now() / 1000);
     updateRouteGuide(this.routeGuide, sim);
+    this.sun.position.set(
+      this.player.position.x - 75,
+      145,
+      this.player.position.z - 95,
+    );
+    this.sun.target.position.copy(this.player.position);
     this.renderer.render(this.scene, this.camera);
   }
 }

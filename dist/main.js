@@ -1,3 +1,4 @@
+import { ROADS } from "./city-map.js";
 import { SceneView } from "./view.js";
 import {
   CARS,
@@ -318,12 +319,11 @@ function drawMap() {
   c.fillRect(0, 0, 230, 230);
   c.strokeStyle = "#344954";
   c.lineWidth = 6;
-  for (let i = -GRID_RADIUS; i <= GRID_RADIUS; i++) {
+  for (const road of ROADS) {
+    c.lineWidth = Math.max(1.3, road.width * s);
     c.beginPath();
-    c.moveTo(ox + i * 140 * s, 5);
-    c.lineTo(ox + i * 140 * s, 225);
-    c.moveTo(5, oz - i * 140 * s);
-    c.lineTo(225, oz - i * 140 * s);
+    c.moveTo(ox - road.start.x * s, oz - road.start.z * s);
+    c.lineTo(ox - road.end.x * s, oz - road.end.z * s);
     c.stroke();
   }
   const cp = CHECKPOINTS[sim.checkpoint];

@@ -62,7 +62,7 @@ export function disposeGroup(scene, group) {
     textures = new Set();
   group.traverse((m) => {
     if (m.isMesh || m.isSprite) {
-      m.geometry?.dispose();
+      if (!m.userData.sharedGeometry) m.geometry?.dispose();
       for (const mat of Array.isArray(m.material) ? m.material : [m.material]) {
         materials.add(mat);
         if (mat.map && mat.map.userData.disposable) textures.add(mat.map);

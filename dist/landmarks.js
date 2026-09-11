@@ -104,18 +104,18 @@ export function buildTechcrushGarage(v) {
   });
   // Road-facing signs on opposite blocks are visible from both driving directions.
   for (const [x, z, angle] of [
-    [-22.2, 44.5, Math.PI / 2],
-    [22.2, 95.5, -Math.PI / 2],
+    [-495, -252, -Math.PI / 2],
+    [-550, -297, Math.PI / 2],
   ]) {
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(30, 7.5), mat);
-    sign.position.set(x, 8, z);
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(14, 3.5), mat);
+    sign.position.set(x, 4.8, z);
     sign.rotation.y = angle;
     v.decor.add(sign);
     const bar = stone("#ff1644", {
       emissive: "#ff1644",
       emissiveIntensity: 1.8,
     });
-    v.box(0.2, 0.22, 31, bar, x, 12, z, v.decor);
+    v.box(0.18, 0.12, 14, bar, x, 6.65, z, v.decor);
   }
 }
 

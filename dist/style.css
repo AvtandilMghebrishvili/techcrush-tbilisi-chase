@@ -1001,3 +1001,24 @@ kbd {
     display: none;
   }
 }
+/* Daylight visibility: keep the street and car unobscured. */
+body.playing .vignette {
+  background: linear-gradient(
+    0deg,
+    rgba(5, 13, 20, 0.5),
+    transparent 28%,
+    transparent 84%,
+    rgba(5, 13, 20, 0.4)
+  );
+}
+@media (min-width: 651px) and (max-width: 1050px) {
+  .mission-card {
+    display: none;
+  }
+}
+
+.footer-note a {
+  color: #b8c8c9;
+  text-decoration: none;
+  font-size: 12px;
+}

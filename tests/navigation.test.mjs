@@ -1,3 +1,4 @@
+import { START, containsPoint } from "../dist/city-map.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "../dist/vendor/three.module.js";
@@ -25,7 +26,7 @@ test("road arrows point along both legs of a corner and stay on legal checkpoint
   for (let i = 1; i < sample.length; i++)
     assert.equal(sample[i].along - sample[i - 1].along, 13);
   for (let i = 0; i < CHECKPOINTS.length; i++) {
-    const from = CHECKPOINTS[i - 1] || { x: 4, z: -30 };
+    const from = CHECKPOINTS[i - 1] || START;
     const arrows = sampleRoute(
       from,
       routeBetween(from, CHECKPOINTS[i]),
@@ -33,11 +34,7 @@ test("road arrows point along both legs of a corner and stay on legal checkpoint
       1000,
     );
     for (const p of arrows) {
-      assert(
-        !blocks().some(
-          (b) => p.x > b.minX && p.x < b.maxX && p.z > b.minZ && p.z < b.maxZ,
-        ),
-      );
+      assert(!blocks().some((b) => containsPoint(b, p.x, p.z)));
     }
   }
 });
@@ -70,10 +67,18 @@ test("aggressive patrol gains on a moving car while respecting its speed limit",
   const sim = new ChaseSimulation();
   sim.start();
   sim.traffic = [];
-  Object.assign(sim.player, { x: 0, z: 0 });
-  sim.police = [sim.makePolice(0, -90)];
-  for (let i = 0; i < 1200; i++) {
-    sim.player.vz = 30;
+  sim.obstacles = [];
+  sim.checkpoint = 6;
+  Object.assign(sim.player, {
+    x: START.x + 90,
+    z: START.z,
+    angle: Math.PI / 2,
+  });
+  sim.police = [sim.makePolice(START.x, START.z)];
+  sim.police[0].angle = Math.PI / 2;
+  for (let i = 0; i < 900; i++) {
+    sim.player.vx = 30;
+    sim.player.vz = 0;
     sim.update(1 / 120, {});
   }
   const cop = sim.police[0];
@@ -86,7 +91,8 @@ test("patrol radio shares sightings but cannot track an unseen player through bu
   const sim = new ChaseSimulation();
   sim.start();
   sim.traffic = [];
-  Object.assign(sim.player, { x: 0, z: 10 });
+  sim.obstacles = [{ minX: 40, maxX: 100, minZ: 20, maxZ: 150 }];
+  Object.assign(sim.player, { x: 0, z: 10, angle: 0 });
   const witness = sim.makePolice(0, -80),
     hidden = sim.makePolice(140, 100);
   sim.police = [witness, hidden];

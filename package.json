@@ -12,6 +12,11 @@
     "three": "0.180.0"
   },
   "devDependencies": {
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
+    "draco3dgltf": "^1.5.7",
+    "meshoptimizer": "^1.2.0",
     "prettier": "^3.6.2"
   }
 }

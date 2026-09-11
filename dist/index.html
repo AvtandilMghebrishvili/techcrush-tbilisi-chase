@@ -13,6 +13,14 @@
     />
     <link rel="icon" type="image/jpeg" href="./assets/techcrush-logo.jpg" />
     <link rel="stylesheet" href="./style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js",
+          "three/addons/": "./vendor/addons/"
+        }
+      }
+    </script>
   </head>
   <body>
     <main id="game">
@@ -42,7 +50,7 @@
           >
             C · CHASE
           </button>
-          <span class="live-label">TBILISI · 21:04</span
+          <span class="live-label">TBILISI · DAY RUN</span
           ><button
             id="sound"
             class="icon-button"
@@ -61,11 +69,11 @@
         </div>
       </header>
       <section id="intro" class="intro">
-        <div class="eyebrow"><span></span> TECHCRUSH / TBILISI NIGHTS</div>
-        <h1>NIGHT<br /><em>SHIFT.</em></h1>
+        <div class="eyebrow"><span></span> TECHCRUSH / TBILISI STREETS</div>
+        <h1>TBILISI<br /><em>CHASE.</em></h1>
         <p class="intro-copy">
-          Six checkpoints. Tbilisi on your tail.<br />Choose your ride. Make
-          your getaway.
+          Rustaveli. Baratashvili. Six checkpoints.<br />Pick a sports car and
+          make your getaway.
         </p>
         <div
           id="garage"
@@ -182,7 +190,11 @@
           ><span><kbd>P</kbd> <span>PAUSE</span></span
           ><span><kbd>R</kbd> <span>RESET CAR</span></span>
         </div>
-        <span class="footer-note">STAY FAST. STAY FREE.</span>
+        <span class="footer-note"
+          ><a href="./credits.html" target="_blank" rel="noopener"
+            >© OpenStreetMap · Credits</a
+          ></span
+        >
       </footer>
       <div id="touch-controls" hidden>
         <div>

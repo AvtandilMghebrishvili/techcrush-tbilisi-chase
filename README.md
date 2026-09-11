@@ -1,80 +1,63 @@
-# TECHCRUSH NIGHTSHIFT — Tbilisi Chase
+# TECHCRUSH — Tbilisi Chase
 
-A complete browser 3D arcade car chase made with Three.js. Choose a car, race through a Georgian-themed city, avoid civilian traffic, hit six checkpoints in order, then break contact with the police for eight seconds.
+A complete browser 3D arcade chase through a simplified reconstruction of central Tbilisi. Choose a sports car, dodge traffic, clear six checkpoints, destroy pursuing patrols, then break contact for eight seconds.
 
-The expanded city has an 8×8 block grid, mostly low-rise buildings with Higgsfield-generated Old Tbilisi facades, Georgian flags, and a stylized tower inspired by Mtatsminda. Its playable area is about 67% larger than the original. The layout and landmark are fictional interpretations.
+The daylight edition uses OpenStreetMap street center lines around Rustaveli, Baratashvili and Freedom Square, a detailed Ferrari 458 model, its modeled cockpit, HDR sky/reflections, stone facades, asphalt, photographic tree billboards and textured mountain geometry. TECHCRUSH signs, Georgian flags, the tower and Kartlis Deda remain in the city. The clock building is an original interpretation of the user's Baratashvili reference.
 
-TECHCRUSH garage signs now appear along the first avenue, with faceted mountain ranges and a stylized Kartlis Deda monument on the distant ridge. Animated cyan arrows follow the streets and turns to the next checkpoint and disappear once the escape phase begins.
+This is an arcade reconstruction. Streets are simplified and widened; buildings and terrain are original approximations. Traffic directions and temporary construction closures are adapted for gameplay. The supplied Google Street View image is a visual reference and is not redistributed as a texture.
 
-The header, favicon, and garage signs use the user-supplied TECHCRUSH portrait logo and original lettering. The supplied files are included unchanged in `dist/assets`; the lettering's surrounding screenshot interface is excluded at display time.
+## Run locally
 
-## Cars and cameras
+Requires Node.js 20+ and a modern WebGL2 browser. Run `npm start` in this folder, then open `http://127.0.0.1:4173/`. No installation, API keys or build step are required to play: all game modules, models and textures are checked in. Google Fonts are optional, with local fallbacks.
 
-Choose the yellow Rustaveli GT (180 km/h), teal Mtatsminda Rally (169 km/h, sharper handling), or red Caucasus 4×4 (155 km/h, stronger body). Each has a distinct model and driving characteristics. Pause and select **CHANGE CAR** to return to the garage and begin a new run.
+For development run `npm ci`. Refresh Three.js with `npm run vendor`. Rebuild the optimized model with `node scripts/prepare-car.mjs`. Rebuild the road graph with `python scripts/build-map.py`; the source OSM responses are archived in `data/`.
 
-Press **C** or the camera button to cycle through chase, cockpit, hood, and high chase views. The cockpit includes a steering wheel and live speed display.
+## Cars and controls
 
-## Play locally
+The three configurations share the same detailed 458 base model. These are fictional game trims, not manufacturer performance claims. Legacy internal IDs are retained for compatibility; all three are sports cars.
 
-Install Node.js 20 or newer, then run `npm start` in this folder. Open http://127.0.0.1:4173. The checked-in `dist/vendor` directory includes Three.js, so the playable source needs no installation or build step. To refresh the vendor files, use `npm ci` and `npm run vendor`.
+| Configuration       | Game top speed | Character                                   |
+| ------------------- | -------------- | ------------------------------------------- |
+| 458 Stradale (`gt`) | 180 km/h       | Red street car, fastest straights           |
+| 458 Track (`rally`) | 169 km/h       | Yellow track car, spoiler, sharper handling |
+| 458 Touring (`suv`) | 155 km/h       | Silver-blue GT, stronger body               |
 
-## Controls
+| Key                 | Action                                      |
+| ------------------- | ------------------------------------------- |
+| W / Up              | Accelerate                                  |
+| S / Down            | Brake, then reverse                         |
+| A / Left, D / Right | Steer left / right                          |
+| Space               | Handbrake                                   |
+| Shift               | Rechargeable nitro                          |
+| C                   | Chase / modeled cockpit / hood / high chase |
+| P / Escape          | Pause / resume                              |
+| R                   | Recover to nearest street, costs 200 points |
+| M                   | Sound on / off                              |
 
-| Key        | Action                                          |
-| ---------- | ----------------------------------------------- |
-| W / Up     | Accelerate                                      |
-| S / Down   | Brake, then reverse                             |
-| A / Left   | Steer left                                      |
-| D / Right  | Steer right                                     |
-| C          | Cycle four camera views                         |
-| Space      | Handbrake / tighter drifting turn               |
-| Shift      | Nitro boost; recharges while unused             |
-| P / Escape | Pause / resume                                  |
-| R          | Recover to the nearest street; costs 200 points |
-| M          | Sound on / off                                  |
+Physical keys also work with Georgian keyboard layouts. Steering reverses naturally when backing up. Touch controls appear on phones; landscape gives a wider driving view. The game pauses when its tab loses focus. Pause and choose CHANGE CAR to return to the garage.
 
-Controls use physical key positions, including when the Georgian keyboard layout is active. A and D turn left and right relative to the forward-facing driving camera; steering follows normal reversed vehicle behavior when backing up. Touch controls appear on devices with coarse pointers. Rotate a phone to landscape for a wider view. The game pauses when its tab loses focus. Modern WebGL2 support is required.
+## Rules
 
-## Rules and scoring
+- Six gates award 1,000 points plus a time bonus up to 800, restore 30 condition and 25 nitro. Animated cyan arrows and the minimap follow the connected street graph.
+- Driving awards 1.8 points per metre. Near misses above 72 km/h award 150.
+- Two patrols begin pursuit; a third joins after checkpoint three. They share sightings, route around buildings and ram along clear sightlines. When every officer loses sight, the shared target stops updating.
+- Patrols have 100 HP. Rams deal 22–44 damage with a 0.9-second cooldown. Three to five hits trigger an explosion and award 750 points. A replacement enters after five seconds, at least 110 metres away.
+- Police speed rises from 38 to 41.25 m/s. Patrols slow for 3.2 seconds after ramming. Police collision damage is capped at 8 condition before armor. Civilian traffic preserves collision momentum and can be pushed.
+- After six gates, lose every patrol for eight seconds: beyond 100 metres, or beyond 60 metres with buildings blocking sight. Escape awards 3,000 plus 20 per remaining condition percentage.
+- Four seconds boxed in at low speed ends the run. Zero condition wrecks the car.
 
-- Six cyan checkpoint gates must be reached in sequence. The minimap shows a legal street route to the next gate.
-- Each gate awards 1,000 points plus a speed bonus of up to 800, restores 20 condition, and refills 25 nitro.
-- Driving awards 1.8 points per metre. Near misses above 72 km/h award 150 points, once per traffic vehicle per traversal.
-- Two police cars pursue from the beginning; a third joins at checkpoint three. They use legal street routes and track the last observed position when line of sight is blocked.
-- Patrols now accelerate faster, refresh their routes every 0.55 seconds, share sightings within a 260-metre visual range, and alternate close pursuit with interception. Speed rises from 38 to 41.25 m/s as checkpoints are cleared. When every patrol loses sight, their shared target stops updating. After a ram, a patrol slows for 3.2 seconds. Police collision damage is capped at 12 condition before the chosen car's armor multiplier, while traffic and wall collision rules remain unchanged.
-- Patrol cars have 100 HP and visible health bars. Meaningful rams deal 22–44 damage, with a 0.9-second impact cooldown. Three to five hits destroy a patrol, trigger fire and smoke, and award 750 points. A replacement appears after five seconds on a street at least 110 metres away.
-- After checkpoint six, stay more than 100 metres from every officer, or more than 60 metres with buildings blocking sight, for eight seconds. Renewed contact drains escape progress.
-- A clean escape awards 3,000 points plus 20 points per remaining condition percentage.
-- Four seconds boxed in near police at low speed ends the run. Zero condition wrecks the car.
+## Source and validation
 
-## Source layout
+`dist/main.js`, `index.html`, `style.css`: UI, fixed 120 Hz loop, keyboard/touch input, HUD, audio, minimap and WebMCP. `simulation.js`, `config.js`, `controls.js`: physics, collisions, pursuit, traffic and rules. `city-map.js`, `road-data.js`: OSM-derived graph, shortest paths and shared rotated collision footprints. `view.js`, `sports-car.js`: renderer, sports models, wheels, cockpit and follow cameras. `realistic-city.js`: streets, facades, clock building, hills and trees. `scenery.js`, `landmarks.js`, `kartlis-deda.js`: Georgian landmarks and branding. `route-guide.js`, `effects.js`: navigation, HP and explosions.
 
-- `dist/index.html` — game interface and metadata.
-- `dist/style.css` — responsive HUD, menus, keyboard hints, and touch controls.
-- `dist/main.js` — fixed-timestep game loop, keyboard/touch input, HUD, Web Audio, minimap, and WebMCP tools.
-- `dist/simulation.js` — deterministic physics, static and vehicle collisions, traffic, pursuit, routing, checkpoint and score rules.
-- `dist/view.js` — Three.js city, instanced scenery, textured car models, checkpoint gate, skid marks, and follow camera.
-- `dist/config.js` and `dist/controls.js` — map/car specifications and keyboard input mapping.
-- `dist/scenery.js` — low-rise city, flags, balconies, and tower.
-- `dist/landmarks.js` and `dist/route-guide.js` — TECHCRUSH signs, mountains, Kartlis Deda, and animated street navigation.
-- `dist/kartlis-deda.js` — revised 3D statue modeled from the supplied photograph, with raised bowl, horizontal sword, dress panels, and headdress.
-- `dist/cockpit.js` and `dist/effects.js` — vehicle interior, patrol health labels, explosions, and cleanup.
-- `dist/assets/` — Higgsfield-generated textures and city reference image.
-- `server.mjs` — dependency-free local static server.
-- `tests/` — mechanics tests and a complete driving run.
+`dist/assets/` and `dist/vendor/` contain the runtime assets. `scripts/` and `data/` contain reproducible preparation inputs. `server.mjs` is a dependency-free local server.
 
-## Validation
+Run `npm test` for automated checks. Run `node tests/route-drive.mjs gt` for a full driving controller using ordinary steering, throttle, braking, nitro and R recovery with traffic and police active. Substitute `rally` or `suv`. The controller is a test utility, not an in-game autopilot. See `VALIDATION.md` for observed results and limitations.
 
-Run `npm test` for the 23 deterministic mechanics and regression tests. Run `node tests/route-drive.mjs` for a complete route with the same throttle, steering, brake and boost inputs used during play, with traffic and police active. Append `rally` or `suv` to test the other cars. The controller also uses the ordinary R recovery action with its score penalty if pinned. Each run must clear all six checkpoints and escape successfully. The controller is only a test utility and is not part of the playable game. See `VALIDATION.md` for results.
+Static boxes and tree billboards are instanced. Detailed cars beyond 330 metres are hidden. The optimized model is decoded ahead of time, without runtime Draco workers. The directional shadow area follows the player.
 
-The game uses a 120 Hz fixed simulation timestep and caps catch-up after slow frames. Static geometry is instanced. There are no accounts, network gameplay, purchases, or external gameplay APIs. Score is per run and is not persisted. Google Fonts are optional; local font fallbacks are specified.
+## Hosting and rights
 
-## Assets and licenses
+Serve `dist/` on a static HTTPS host. `.openai/hosting.json` identifies the existing Sites deployment, whose owner-private access remains unchanged. There are no multiplayer, purchases, game accounts, persistent leaderboard or game-server dependencies.
 
-Higgsfield generated the modern building facade, Old Tbilisi facade, asphalt, golden vehicle paint, and the supplied city visual reference on 11 September 2026, using its `gpt_image_2` model. The textures are applied to the 3D meshes. The reference guided the visual direction and is included as `dist/assets/city-reference.png`; it is not a gameplay background. Full provenance is in `ASSETS.md`.
-
-Three.js is MIT licensed; its license is included in `dist/vendor/THREE-LICENSE.txt`. Project-authored source is licensed under the included MIT license. Generated assets remain subject to the applicable Higgsfield terms; this project does not grant additional rights beyond those terms.
-
-## Hosting
-
-Serve `dist/` from any static HTTPS host. `.openai/hosting.json` records the Sites project created for this game. No build step or environment secrets are required. The source package includes the full runnable static game, source, assets, dependency lockfile, and tests.
+Project code and Three.js are MIT. OSM data is ODbL. The car, HDRI, terrain textures, generated artwork and supplied branding retain their respective terms. See `ASSETS.md` and the in-game Credits link. The source package includes runnable assets, code, tests, source data and the dependency lockfile.

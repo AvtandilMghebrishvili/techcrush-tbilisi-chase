@@ -37,7 +37,7 @@ function beam(parent, a, b, r, material) {
   parent.add(mesh);
   return mesh;
 }
-function addFlag(v, x, z, height = 11, scale = 1) {
+export function addFlag(v, x, z, height = 11, scale = 1) {
   const pole = mat("#9caaa7");
   v.box(0.18, height, 0.18, pole, x, height / 2, z, v.decor);
   const geo = new THREE.PlaneGeometry(6 * scale, 4 * scale, 12, 5);
@@ -56,9 +56,9 @@ function addFlag(v, x, z, height = 11, scale = 1) {
   v.decor.add(mesh);
   v.flags.push(mesh);
 }
-function tower(v) {
+export function tower(v) {
   const g = new THREE.Group();
-  g.position.set(TOWER.x, 0, TOWER.z);
+  g.position.set(TOWER.x, TOWER.y || 0, TOWER.z);
   v.decor.add(g);
   const white = mat("#d1c7bc"),
     red = mat("#a63c37"),
@@ -107,7 +107,6 @@ function tower(v) {
   light.position.y = 189;
   g.add(light);
   v.towerLight = light;
-  addFlag(v, TOWER.x - 20, TOWER.z - 20, 17, 1.4);
 }
 export function buildGeorgianCity(v) {
   v.decor = new THREE.Group();

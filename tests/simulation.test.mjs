@@ -1,3 +1,4 @@
+import { START, nearestRoad } from "../dist/city-map.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -147,7 +148,7 @@ test("wreck, capture, pause, recovery, and restart states", () => {
   s.start();
   s.traffic = [];
   s.bust = 3.999;
-  s.police = [s.makePolice(6, -30)];
+  s.police = [s.makePolice(s.player.x + 3, s.player.z)];
   s.update(1 / 120);
   assert.equal(s.phase, "busted");
   s.start();
@@ -160,7 +161,7 @@ test("wreck, capture, pause, recovery, and restart states", () => {
   s.score = 500;
   s.recover();
   assert.equal(s.score, 300);
-  assert(Math.abs(s.player.z) < 0.001);
+  assert(nearestRoad(s.player).distance < 0.001);
   s.start();
   assert.equal(s.score, 0);
   assert.equal(s.checkpoint, 0);

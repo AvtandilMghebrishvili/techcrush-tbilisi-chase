@@ -1,15 +1,15 @@
 export const GRID = 140;
 export const GRID_RADIUS = 4;
-export const ROAD_EDGE = GRID * GRID_RADIUS;
-export const LIMIT = ROAD_EDGE + 58;
+export const ROAD_EDGE = 820;
+export const LIMIT = 1050;
 export const MAP_SIZE = (LIMIT + 32) * 2;
-export const TOWER = { x: -70, z: 210 };
+export const TOWER = { x: 1070, z: -430, y: 278 };
 export const CARS = [
   {
     id: "gt",
-    name: "Rustaveli GT",
-    type: "SPORT COUPE",
-    color: "#eecb39",
+    name: "458 Stradale",
+    type: "STREET SPEC",
+    color: "#c91820",
     topSpeed: 50,
     acceleration: 16,
     handling: 1,
@@ -21,9 +21,9 @@ export const CARS = [
   },
   {
     id: "rally",
-    name: "Mtatsminda Rally",
-    type: "RALLY HATCH",
-    color: "#3dd6ca",
+    name: "458 Track",
+    type: "TRACK SPEC",
+    color: "#eac735",
     topSpeed: 47,
     acceleration: 18,
     handling: 1.18,
@@ -35,9 +35,9 @@ export const CARS = [
   },
   {
     id: "suv",
-    name: "Caucasus 4×4",
-    type: "ARMORED SUV",
-    color: "#cf4945",
+    name: "458 Touring",
+    type: "REINFORCED GT",
+    color: "#8da6bb",
     topSpeed: 43,
     acceleration: 13.5,
     handling: 0.86,

@@ -1,0 +1,2730 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-09-11T17:08:51Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "way",
+  "id": 26344546,
+  "bounds": {
+    "minlat": 41.6988532,
+    "minlon": 44.7931351,
+    "maxlat": 41.7028763,
+    "maxlon": 44.7980055
+  },
+  "nodes": [
+    279300073,
+    12305527759,
+    10795548112,
+    14046344634,
+    280183735,
+    923225511,
+    331127797,
+    313275694,
+    13136714315,
+    2492256425,
+    288630254,
+    311930532,
+    288630443
+  ],
+  "geometry": [
+    { "lat": 41.6988532, "lon": 44.7980055 },
+    { "lat": 41.6989193, "lon": 44.7979485 },
+    { "lat": 41.6989849, "lon": 44.7978848 },
+    { "lat": 41.6990340, "lon": 44.7978275 },
+    { "lat": 41.6991274, "lon": 44.7977185 },
+    { "lat": 41.7003514, "lon": 44.7962297 },
+    { "lat": 41.7011514, "lon": 44.7952524 },
+    { "lat": 41.7017321, "lon": 44.7945529 },
+    { "lat": 41.7018550, "lon": 44.7944027 },
+    { "lat": 41.7023631, "lon": 44.7937819 },
+    { "lat": 41.7026036, "lon": 44.7934914 },
+    { "lat": 41.7027752, "lon": 44.7932737 },
+    { "lat": 41.7028763, "lon": 44.7931351 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk": "separate",
+    "smoothness": "good",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 26399125,
+  "bounds": {
+    "minlat": 41.6925115,
+    "minlon": 44.7987516,
+    "maxlat": 41.6938120,
+    "maxlon": 44.7994517
+  },
+  "nodes": [
+    289204011,
+    11426852037,
+    11426852033,
+    11426852045,
+    11426852041,
+    11426852046,
+    12544926780,
+    3691415190
+  ],
+  "geometry": [
+    { "lat": 41.6925115, "lon": 44.7994517 },
+    { "lat": 41.6929798, "lon": 44.7992129 },
+    { "lat": 41.6930088, "lon": 44.7991972 },
+    { "lat": 41.6931951, "lon": 44.7990966 },
+    { "lat": 41.6933099, "lon": 44.7990350 },
+    { "lat": 41.6933484, "lon": 44.7990145 },
+    { "lat": 41.6936923, "lon": 44.7988248 },
+    { "lat": 41.6938120, "lon": 44.7987516 }
+  ],
+  "tags": {
+    "construction": "residential",
+    "foot": "destination",
+    "highway": "construction",
+    "lanes": "1",
+    "name": "სულხან-საბას ქუჩა",
+    "name:en": "Sulkhan-Saba Street",
+    "name:etymology:wikidata": "Q426170",
+    "name:etymology:wikipedia": "ka:სულხან-საბა ორბელიანი",
+    "name:ka": "სულხან-საბას ქუჩა",
+    "name:ru": "улица Сулхан-Сабы",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "wikidata": "Q59504417",
+    "wikimedia_commons": "Category:Sulkhan-Saba Street, Tbilisi",
+    "wikipedia": "ka:სულხან-საბას ქუჩა"
+  }
+},
+{
+  "type": "way",
+  "id": 28357442,
+  "bounds": {
+    "minlat": 41.6967938,
+    "minlon": 44.8056921,
+    "maxlat": 41.6986170,
+    "maxlon": 44.8069916
+  },
+  "nodes": [
+    8485263143,
+    311482983,
+    1939237851,
+    1640503341,
+    279300277,
+    12305527726,
+    10697978214,
+    12305527735,
+    12305527736,
+    289207460,
+    12305527737,
+    289207461,
+    12305527738,
+    289207481
+  ],
+  "geometry": [
+    { "lat": 41.6986170, "lon": 44.8056921 },
+    { "lat": 41.6984393, "lon": 44.8058671 },
+    { "lat": 41.6973866, "lon": 44.8067861 },
+    { "lat": 41.6972714, "lon": 44.8068585 },
+    { "lat": 41.6971366, "lon": 44.8069469 },
+    { "lat": 41.6970833, "lon": 44.8069762 },
+    { "lat": 41.6970443, "lon": 44.8069869 },
+    { "lat": 41.6970117, "lon": 44.8069916 },
+    { "lat": 41.6969857, "lon": 44.8069909 },
+    { "lat": 41.6969476, "lon": 44.8069822 },
+    { "lat": 41.6969126, "lon": 44.8069601 },
+    { "lat": 41.6968795, "lon": 44.8069205 },
+    { "lat": 41.6968380, "lon": 44.8068628 },
+    { "lat": 41.6967938, "lon": 44.8067696 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed:type": "GE:urban",
+    "name": "სანაპიროს ქუჩა",
+    "name:en": "Sanapiro Street",
+    "name:ka": "სანაპიროს ქუჩა",
+    "name:ru": "улица Санапиро",
+    "oneway": "yes",
+    "parking:lane:right": "perpendicular",
+    "parking:lane:right:perpendicular": "street_side",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 28357468,
+  "bounds": {
+    "minlat": 41.6958398,
+    "minlon": 44.8072511,
+    "maxlat": 41.6963518,
+    "maxlon": 44.8075202
+  },
+  "nodes": [
+    311446473,
+    311482706
+  ],
+  "geometry": [
+    { "lat": 41.6963518, "lon": 44.8072511 },
+    { "lat": 41.6958398, "lon": 44.8075202 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lane_markings": "no",
+    "lanes": "2",
+    "lit": "yes",
+    "name": "დაჩი უჯარმელის ქუჩა",
+    "name:en": "Dachi Ujarmeli Street",
+    "name:etymology:wikidata": "Q2915847",
+    "name:ka": "დაჩი უჯარმელის ქუჩა",
+    "name:ru": "улица Дачи Уджармели",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 28357486,
+  "bounds": {
+    "minlat": 41.6963518,
+    "minlon": 44.8067701,
+    "maxlat": 41.6966656,
+    "maxlon": 44.8072511
+  },
+  "nodes": [
+    311446513,
+    12305527718,
+    7806390565,
+    311446546,
+    12305527719,
+    1567308866,
+    10141267671,
+    10141267670,
+    311446473
+  ],
+  "geometry": [
+    { "lat": 41.6966656, "lon": 44.8067701 },
+    { "lat": 41.6966572, "lon": 44.8068481 },
+    { "lat": 41.6966437, "lon": 44.8069151 },
+    { "lat": 41.6966172, "lon": 44.8069768 },
+    { "lat": 41.6965926, "lon": 44.8070157 },
+    { "lat": 41.6965581, "lon": 44.8070620 },
+    { "lat": 41.6965205, "lon": 44.8071076 },
+    { "lat": 41.6964745, "lon": 44.8071478 },
+    { "lat": 41.6963518, "lon": 44.8072511 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lane_markings": "no",
+    "lanes": "1",
+    "lit": "yes",
+    "name": "დაჩი უჯარმელის ქუჩა",
+    "name:en": "Dachi Ujarmeli Street",
+    "name:etymology:wikidata": "Q2915847",
+    "name:ka": "დაჩი უჯარმელის ქუჩა",
+    "name:ru": "улица Дачи Уджармели",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 28357488,
+  "bounds": {
+    "minlat": 41.6963518,
+    "minlon": 44.8072156,
+    "maxlat": 41.6967302,
+    "maxlon": 44.8073443
+  },
+  "nodes": [
+    311446473,
+    12305527717,
+    311446582,
+    12305527721,
+    5385768326,
+    1969492394,
+    12305527720,
+    7806390564,
+    289206194
+  ],
+  "geometry": [
+    { "lat": 41.6963518, "lon": 44.8072511 },
+    { "lat": 41.6964379, "lon": 44.8072310 },
+    { "lat": 41.6965116, "lon": 44.8072184 },
+    { "lat": 41.6965616, "lon": 44.8072156 },
+    { "lat": 41.6966006, "lon": 44.8072209 },
+    { "lat": 41.6966342, "lon": 44.8072343 },
+    { "lat": 41.6966657, "lon": 44.8072551 },
+    { "lat": 41.6966982, "lon": 44.8072947 },
+    { "lat": 41.6967302, "lon": 44.8073443 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lane_markings": "no",
+    "lanes": "1",
+    "lit": "yes",
+    "name": "დაჩი უჯარმელის ქუჩა",
+    "name:en": "Dachi Ujarmeli Street",
+    "name:etymology:wikidata": "Q2915847",
+    "name:ka": "დაჩი უჯარმელის ქუჩა",
+    "name:ru": "улица Дачи Уджармели",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 28360721,
+  "bounds": {
+    "minlat": 41.6957320,
+    "minlon": 44.8075202,
+    "maxlat": 41.6958398,
+    "maxlon": 44.8078821
+  },
+  "nodes": [
+    311482704,
+    6322572807,
+    311482705,
+    6322572808,
+    5025140662,
+    311482707,
+    12305527716,
+    12305527715,
+    311482706
+  ],
+  "geometry": [
+    { "lat": 41.6958061, "lon": 44.8078821 },
+    { "lat": 41.6957650, "lon": 44.8078566 },
+    { "lat": 41.6957505, "lon": 44.8078378 },
+    { "lat": 41.6957360, "lon": 44.8078016 },
+    { "lat": 41.6957320, "lon": 44.8077621 },
+    { "lat": 41.6957370, "lon": 44.8077165 },
+    { "lat": 41.6957520, "lon": 44.8076735 },
+    { "lat": 41.6957755, "lon": 44.8076165 },
+    { "lat": 41.6958398, "lon": 44.8075202 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lane_markings": "no",
+    "lit": "yes",
+    "name": "დაჩი უჯარმელის ქუჩა",
+    "name:en": "Dachi Ujarmeli Street",
+    "name:etymology:wikidata": "Q2915847",
+    "name:ka": "დაჩი უჯარმელის ქუჩა",
+    "name:ru": "улица Дачи Уджармели",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 28360992,
+  "bounds": {
+    "minlat": 41.6955003,
+    "minlon": 44.8075202,
+    "maxlat": 41.6958398,
+    "maxlon": 44.8077051
+  },
+  "nodes": [
+    311482706,
+    8475149805
+  ],
+  "geometry": [
+    { "lat": 41.6958398, "lon": 44.8075202 },
+    { "lat": 41.6955003, "lon": 44.8077051 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "2",
+    "lit": "yes",
+    "name": "დაჩი უჯარმელის ქუჩა",
+    "name:en": "Dachi Ujarmeli Street",
+    "name:etymology:wikidata": "Q2915847",
+    "name:ka": "დაჩი უჯარმელის ქუჩა",
+    "name:ru": "улица Дачи Уджармели",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "turn:lanes": "left|through;right"
+  }
+},
+{
+  "type": "way",
+  "id": 28396427,
+  "bounds": {
+    "minlat": 41.7029761,
+    "minlon": 44.7919779,
+    "maxlat": 41.7032294,
+    "maxlon": 44.7924896
+  },
+  "nodes": [
+    1794067130,
+    12305527782,
+    11009087188,
+    916939979,
+    1787213318
+  ],
+  "geometry": [
+    { "lat": 41.7032294, "lon": 44.7924896 },
+    { "lat": 41.7031653, "lon": 44.7924493 },
+    { "lat": 41.7030977, "lon": 44.7923741 },
+    { "lat": 41.7030246, "lon": 44.7922200 },
+    { "lat": 41.7029761, "lon": 44.7919779 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary_link",
+    "highway": "construction",
+    "lanes": "1",
+    "lit": "yes",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 28396574,
+  "bounds": {
+    "minlat": 41.7026265,
+    "minlon": 44.7931387,
+    "maxlat": 41.7027823,
+    "maxlon": 44.7932737
+  },
+  "nodes": [
+    311930532,
+    11047049213,
+    9584495041,
+    311930537,
+    9584495043,
+    1787213315,
+    9584495045,
+    5385777900,
+    9584495046,
+    311930538,
+    311930539
+  ],
+  "geometry": [
+    { "lat": 41.7027752, "lon": 44.7932737 },
+    { "lat": 41.7027823, "lon": 44.7932292 },
+    { "lat": 41.7027823, "lon": 44.7932084 },
+    { "lat": 41.7027758, "lon": 44.7931796 },
+    { "lat": 41.7027653, "lon": 44.7931601 },
+    { "lat": 41.7027503, "lon": 44.7931454 },
+    { "lat": 41.7027288, "lon": 44.7931387 },
+    { "lat": 41.7027067, "lon": 44.7931387 },
+    { "lat": 41.7026858, "lon": 44.7931425 },
+    { "lat": 41.7026584, "lon": 44.7931624 },
+    { "lat": 41.7026265, "lon": 44.7931850 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary_link",
+    "highway": "construction",
+    "lanes": "1",
+    "lit": "yes",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "smoothness": "good",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 28396815,
+  "bounds": {
+    "minlat": 41.7027523,
+    "minlon": 44.7927864,
+    "maxlat": 41.7029146,
+    "maxlon": 44.7929355
+  },
+  "nodes": [
+    311928402,
+    5385777903,
+    311931061,
+    11047049214,
+    4784639397,
+    11047049215,
+    621188792
+  ],
+  "geometry": [
+    { "lat": 41.7027523, "lon": 44.7927864 },
+    { "lat": 41.7027758, "lon": 44.7928505 },
+    { "lat": 41.7028035, "lon": 44.7928914 },
+    { "lat": 41.7028258, "lon": 44.7929083 },
+    { "lat": 41.7028498, "lon": 44.7929206 },
+    { "lat": 41.7028749, "lon": 44.7929285 },
+    { "lat": 41.7029146, "lon": 44.7929355 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary_link",
+    "foot": "no",
+    "highway": "construction",
+    "lanes": "1",
+    "lit": "yes",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "sidewalk": "no",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "turn:lanes": "left;through"
+  }
+},
+{
+  "type": "way",
+  "id": 78514277,
+  "bounds": {
+    "minlat": 41.6967162,
+    "minlon": 44.7980524,
+    "maxlat": 41.6986169,
+    "maxlon": 44.7993601
+  },
+  "nodes": [
+    921339737,
+    921339738,
+    921339739,
+    921339710
+  ],
+  "geometry": [
+    { "lat": 41.6986169, "lon": 44.7980524 },
+    { "lat": 41.6982732, "lon": 44.7982893 },
+    { "lat": 41.6974814, "lon": 44.7988306 },
+    { "lat": 41.6967162, "lon": 44.7993601 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 86696581,
+  "bounds": {
+    "minlat": 41.6986169,
+    "minlon": 44.7951904,
+    "maxlat": 41.7010875,
+    "maxlon": 44.7980524
+  },
+  "nodes": [
+    921339725,
+    1793218275,
+    11563593373,
+    11563593379,
+    921339726,
+    11119053659,
+    11408453814,
+    9589804240,
+    2860029720,
+    5041910955,
+    11408453800,
+    12305527758,
+    10795548111,
+    11563593366,
+    921339737
+  ],
+  "geometry": [
+    { "lat": 41.7010875, "lon": 44.7951904 },
+    { "lat": 41.7010104, "lon": 44.7952790 },
+    { "lat": 41.7007845, "lon": 44.7955545 },
+    { "lat": 41.7007435, "lon": 44.7956034 },
+    { "lat": 41.7002109, "lon": 44.7962530 },
+    { "lat": 41.6999902, "lon": 44.7965207 },
+    { "lat": 41.6997602, "lon": 44.7967999 },
+    { "lat": 41.6991939, "lon": 44.7974871 },
+    { "lat": 41.6991601, "lon": 44.7975281 },
+    { "lat": 41.6989676, "lon": 44.7977633 },
+    { "lat": 41.6988948, "lon": 44.7978386 },
+    { "lat": 41.6988592, "lon": 44.7978728 },
+    { "lat": 41.6988144, "lon": 44.7979112 },
+    { "lat": 41.6987477, "lon": 44.7979599 },
+    { "lat": 41.6986169, "lon": 44.7980524 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 86696588,
+  "bounds": {
+    "minlat": 41.7034951,
+    "minlon": 44.7904151,
+    "maxlat": 41.7038116,
+    "maxlon": 44.7907240
+  },
+  "nodes": [
+    1008243354,
+    1008243358,
+    12305527777,
+    1008272116,
+    12305527776,
+    5385768133
+  ],
+  "geometry": [
+    { "lat": 41.7038116, "lon": 44.7904151 },
+    { "lat": 41.7036657, "lon": 44.7905069 },
+    { "lat": 41.7036269, "lon": 44.7905422 },
+    { "lat": 41.7035868, "lon": 44.7905811 },
+    { "lat": 41.7035363, "lon": 44.7906502 },
+    { "lat": 41.7034951, "lon": 44.7907240 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "4",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "smoothness": "good",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "turn:lanes:backward": "right|right",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 123456641,
+  "bounds": {
+    "minlat": 41.7029146,
+    "minlon": 44.7926624,
+    "maxlat": 41.7029404,
+    "maxlon": 44.7929355
+  },
+  "nodes": [
+    621188792,
+    1787213313
+  ],
+  "geometry": [
+    { "lat": 41.7029146, "lon": 44.7929355 },
+    { "lat": 41.7029404, "lon": 44.7926624 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "foot": "no",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk": "no",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 137852017,
+  "bounds": {
+    "minlat": 41.6966415,
+    "minlon": 44.8065247,
+    "maxlat": 41.6967722,
+    "maxlon": 44.8066261
+  },
+  "nodes": [
+    1511736018,
+    9427236765,
+    5385768327,
+    9427236766,
+    5385768325,
+    9427236767,
+    5385768328,
+    1511736016
+  ],
+  "geometry": [
+    { "lat": 41.6966415, "lon": 44.8065516 },
+    { "lat": 41.6966712, "lon": 44.8066087 },
+    { "lat": 41.6966878, "lon": 44.8066214 },
+    { "lat": 41.6967053, "lon": 44.8066261 },
+    { "lat": 41.6967273, "lon": 44.8066235 },
+    { "lat": 41.6967443, "lon": 44.8066100 },
+    { "lat": 41.6967574, "lon": 44.8065872 },
+    { "lat": 41.6967722, "lon": 44.8065247 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "1",
+    "lit": "yes",
+    "oneway": "yes",
+    "smoothness": "excellent",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 153932263,
+  "bounds": {
+    "minlat": 41.6939940,
+    "minlon": 44.8000064,
+    "maxlat": 41.6957575,
+    "maxlon": 44.8010337
+  },
+  "nodes": [
+    921339740,
+    921339741,
+    921339742,
+    921339743,
+    12305527757,
+    12305527756,
+    5385768333,
+    5497586120,
+    921339744,
+    1008739861
+  ],
+  "geometry": [
+    { "lat": 41.6957575, "lon": 44.8000064 },
+    { "lat": 41.6956634, "lon": 44.8000386 },
+    { "lat": 41.6955172, "lon": 44.8000748 },
+    { "lat": 41.6954260, "lon": 44.8001030 },
+    { "lat": 41.6953239, "lon": 44.8001446 },
+    { "lat": 41.6952408, "lon": 44.8001875 },
+    { "lat": 41.6951561, "lon": 44.8002417 },
+    { "lat": 41.6943505, "lon": 44.8008044 },
+    { "lat": 41.6941563, "lon": 44.8009372 },
+    { "lat": 41.6939940, "lon": 44.8010337 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "4",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk": "separate",
+    "smoothness": "excellent",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 163073214,
+  "bounds": {
+    "minlat": 41.6964519,
+    "minlon": 44.7981570,
+    "maxlat": 41.6986488,
+    "maxlon": 44.7996698
+  },
+  "nodes": [
+    3444786732,
+    14046344633,
+    14046344630,
+    313275556,
+    800196889,
+    313273744
+  ],
+  "geometry": [
+    { "lat": 41.6964519, "lon": 44.7996698 },
+    { "lat": 41.6969941, "lon": 44.7992948 },
+    { "lat": 41.6972052, "lon": 44.7991488 },
+    { "lat": 41.6974428, "lon": 44.7989845 },
+    { "lat": 41.6979250, "lon": 44.7986571 },
+    { "lat": 41.6986488, "lon": 44.7981570 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "shared_taxi": "no",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 174306569,
+  "bounds": {
+    "minlat": 41.6940231,
+    "minlon": 44.8011954,
+    "maxlat": 41.6940396,
+    "maxlon": 44.8020101
+  },
+  "nodes": [
+    1849943668,
+    12305527751,
+    1849943647,
+    3444998760
+  ],
+  "geometry": [
+    { "lat": 41.6940396, "lon": 44.8020101 },
+    { "lat": 41.6940261, "lon": 44.8019484 },
+    { "lat": 41.6940231, "lon": 44.8018827 },
+    { "lat": 41.6940350, "lon": 44.8011954 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary_link",
+    "highway": "construction",
+    "lane_markings": "no",
+    "lanes": "2",
+    "lit": "yes",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "smoothness": "intermediate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "sett"
+  }
+},
+{
+  "type": "way",
+  "id": 185448264,
+  "bounds": {
+    "minlat": 41.6899988,
+    "minlon": 44.8065070,
+    "maxlat": 41.6901665,
+    "maxlon": 44.8066483
+  },
+  "nodes": [
+    11307501638,
+    1837481049
+  ],
+  "geometry": [
+    { "lat": 41.6899988, "lon": 44.8065070 },
+    { "lat": 41.6901665, "lon": 44.8066483 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "footway",
+    "highway": "construction",
+    "name": "დავით ბააზოვის ქუჩა",
+    "name:en": "David Baazov Street",
+    "name:ka": "დავით ბააზოვის ქუჩა",
+    "name:ru": "улица Давида Баазова"
+  }
+},
+{
+  "type": "way",
+  "id": 192198877,
+  "bounds": {
+    "minlat": 41.7011438,
+    "minlon": 44.8069259,
+    "maxlat": 41.7013160,
+    "maxlon": 44.8076159
+  },
+  "nodes": [
+    800156742,
+    5824091732,
+    5824091730,
+    2027639101,
+    5824091731,
+    2027639084,
+    2027639080
+  ],
+  "geometry": [
+    { "lat": 41.7013160, "lon": 44.8076159 },
+    { "lat": 41.7012078, "lon": 44.8075072 },
+    { "lat": 41.7011778, "lon": 44.8074643 },
+    { "lat": 41.7011561, "lon": 44.8074151 },
+    { "lat": 41.7011438, "lon": 44.8073367 },
+    { "lat": 41.7011481, "lon": 44.8072568 },
+    { "lat": 41.7011988, "lon": 44.8069259 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lane_markings": "no",
+    "lanes": "1",
+    "lit": "yes",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "surface": "asphalt",
+    "turn": "right"
+  }
+},
+{
+  "type": "way",
+  "id": 207420095,
+  "bounds": {
+    "minlat": 41.7004777,
+    "minlon": 44.7943135,
+    "maxlat": 41.7010875,
+    "maxlon": 44.7951904
+  },
+  "nodes": [
+    921339725,
+    6003179758,
+    621188794
+  ],
+  "geometry": [
+    { "lat": 41.7010875, "lon": 44.7951904 },
+    { "lat": 41.7010139, "lon": 44.7950856 },
+    { "lat": 41.7004777, "lon": 44.7943135 }
+  ],
+  "tags": {
+    "alt_name:en": "Chavchavadze Street",
+    "construction": "residential",
+    "highway": "construction",
+    "lit": "yes",
+    "name": "ალექსანდრე ჭავჭავაძის ქუჩა",
+    "name:en": "Alexander Chavchavadze Street",
+    "name:ka": "ალექსანდრე ჭავჭავაძის ქუჩა",
+    "name:ru": "улица Александра Чавчавадзе",
+    "oneway": "yes",
+    "sidewalk": "both",
+    "surface": "sett",
+    "wikidata": "Q58824690"
+  }
+},
+{
+  "type": "way",
+  "id": 220709391,
+  "bounds": {
+    "minlat": 41.6986488,
+    "minlon": 44.7980055,
+    "maxlat": 41.6988532,
+    "maxlon": 44.7981570
+  },
+  "nodes": [
+    313273744,
+    279300073
+  ],
+  "geometry": [
+    { "lat": 41.6986488, "lon": 44.7981570 },
+    { "lat": 41.6988532, "lon": 44.7980055 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "foot": "yes",
+    "highway": "construction",
+    "lanes": "2",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "shared_taxi": "no",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 220709392,
+  "bounds": {
+    "minlat": 41.6937210,
+    "minlon": 44.8012906,
+    "maxlat": 41.6939369,
+    "maxlon": 44.8015588
+  },
+  "nodes": [
+    2543067043,
+    4393479027
+  ],
+  "geometry": [
+    { "lat": 41.6937210, "lon": 44.8015588 },
+    { "lat": 41.6939369, "lon": 44.8012906 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "თავისუფლების მოედანი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Freedom Square",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:he": "כיכר החירות",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "თავისუფლების მოედანი",
+    "name:ka-Latn": "Rustavelis Gamziri",
+    "name:ru": "площадь Свободы",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "shared_taxi": "no",
+    "sidewalk": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "sett",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 222813421,
+  "bounds": {
+    "minlat": 41.7028009,
+    "minlon": 44.7924426,
+    "maxlat": 41.7029485,
+    "maxlon": 44.7925398
+  },
+  "nodes": [
+    2869924464,
+    2317548429,
+    2317548440,
+    5385777902,
+    2317548442,
+    12305527772,
+    12305527771,
+    2317548432
+  ],
+  "geometry": [
+    { "lat": 41.7028009, "lon": 44.7924426 },
+    { "lat": 41.7028104, "lon": 44.7924922 },
+    { "lat": 41.7028284, "lon": 44.7925244 },
+    { "lat": 41.7028514, "lon": 44.7925392 },
+    { "lat": 41.7028769, "lon": 44.7925398 },
+    { "lat": 41.7028950, "lon": 44.7925318 },
+    { "lat": 41.7029185, "lon": 44.7925157 },
+    { "lat": 41.7029485, "lon": 44.7924688 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary_link",
+    "foot": "no",
+    "highway": "construction",
+    "lanes": "1",
+    "lit": "yes",
+    "maxspeed": "60",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "sidewalk": "no",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "turn:lanes": "left"
+  }
+},
+{
+  "type": "way",
+  "id": 363296229,
+  "bounds": {
+    "minlat": 41.7044884,
+    "minlon": 44.7914578,
+    "maxlat": 41.7045851,
+    "maxlon": 44.7915780
+  },
+  "nodes": [
+    288583768,
+    3674740638,
+    11453900780,
+    3674740639,
+    3674740635,
+    12305216266,
+    12305216267,
+    1004948888
+  ],
+  "geometry": [
+    { "lat": 41.7044884, "lon": 44.7915730 },
+    { "lat": 41.7045103, "lon": 44.7915780 },
+    { "lat": 41.7045347, "lon": 44.7915726 },
+    { "lat": 41.7045533, "lon": 44.7915581 },
+    { "lat": 41.7045674, "lon": 44.7915401 },
+    { "lat": 41.7045816, "lon": 44.7915132 },
+    { "lat": 41.7045851, "lon": 44.7914884 },
+    { "lat": 41.7045795, "lon": 44.7914578 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "1",
+    "lit": "yes",
+    "oneway": "no",
+    "surface": "asphalt",
+    "turn:lanes": "left"
+  }
+},
+{
+  "type": "way",
+  "id": 441608920,
+  "bounds": {
+    "minlat": 41.6937753,
+    "minlon": 44.8010794,
+    "maxlat": 41.6939369,
+    "maxlon": 44.8013013
+  },
+  "nodes": [
+    4393479023,
+    4393479016,
+    9794335183,
+    4393479019,
+    4393479021,
+    4393479022,
+    4393479024,
+    9794335182,
+    4393479026,
+    4393479027
+  ],
+  "geometry": [
+    { "lat": 41.6938853, "lon": 44.8010794 },
+    { "lat": 41.6938183, "lon": 44.8011518 },
+    { "lat": 41.6937952, "lon": 44.8011772 },
+    { "lat": 41.6937798, "lon": 44.8012028 },
+    { "lat": 41.6937753, "lon": 44.8012388 },
+    { "lat": 41.6937859, "lon": 44.8012717 },
+    { "lat": 41.6937982, "lon": 44.8012879 },
+    { "lat": 41.6938218, "lon": 44.8012993 },
+    { "lat": 41.6938498, "lon": 44.8013013 },
+    { "lat": 41.6939369, "lon": 44.8012906 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary_link",
+    "highway": "construction",
+    "lanes": "1",
+    "lit": "yes",
+    "maxspeed:type": "GE:urban",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "sett"
+  }
+},
+{
+  "type": "way",
+  "id": 481611051,
+  "bounds": {
+    "minlat": 41.6931350,
+    "minlon": 44.8018927,
+    "maxlat": 41.6933942,
+    "maxlon": 44.8019191
+  },
+  "nodes": [
+    4745238625,
+    6470217994,
+    4390162964
+  ],
+  "geometry": [
+    { "lat": 41.6931350, "lon": 44.8019191 },
+    { "lat": 41.6933264, "lon": 44.8018927 },
+    { "lat": 41.6933942, "lon": 44.8019139 }
+  ],
+  "tags": {
+    "highway": "secondary_link",
+    "lanes": "2",
+    "lit": "yes",
+    "oneway": "yes",
+    "surface": "sett"
+  }
+},
+{
+  "type": "way",
+  "id": 516490104,
+  "bounds": {
+    "minlat": 41.7003332,
+    "minlon": 44.7974931,
+    "maxlat": 41.7006857,
+    "maxlon": 44.7981103
+  },
+  "nodes": [
+    923229435,
+    10785432762,
+    11801913043,
+    10735617439,
+    923229197
+  ],
+  "geometry": [
+    { "lat": 41.7003332, "lon": 44.7974931 },
+    { "lat": 41.7003819, "lon": 44.7976040 },
+    { "lat": 41.7004601, "lon": 44.7977345 },
+    { "lat": 41.7006563, "lon": 44.7980611 },
+    { "lat": 41.7006857, "lon": 44.7981103 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "residential",
+    "highway": "construction",
+    "lane_markings": "no",
+    "motor_vehicle": "private",
+    "name": "ვასო აბაშიძის ქუჩა",
+    "name:en": "Vaso Abashidze Street",
+    "name:ka": "ვასო აბაშიძის ქუჩა",
+    "name:ru": "улица Васо Абашидзе",
+    "oneway": "no",
+    "sidewalk": "both",
+    "sidewalk:both:surface": "asphalt",
+    "smoothness": "good",
+    "surface": "asphalt",
+    "width": "3.5"
+  }
+},
+{
+  "type": "way",
+  "id": 516490105,
+  "bounds": {
+    "minlat": 41.7003514,
+    "minlon": 44.7962297,
+    "maxlat": 41.7006925,
+    "maxlon": 44.7967378
+  },
+  "nodes": [
+    923225511,
+    1754717997,
+    5041910943,
+    5041910942,
+    923229188
+  ],
+  "geometry": [
+    { "lat": 41.7003514, "lon": 44.7962297 },
+    { "lat": 41.7004259, "lon": 44.7963293 },
+    { "lat": 41.7006572, "lon": 44.7966404 },
+    { "lat": 41.7006906, "lon": 44.7966882 },
+    { "lat": 41.7006925, "lon": 44.7967378 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "residential",
+    "highway": "construction",
+    "lane_markings": "no",
+    "lit": "yes",
+    "motor_vehicle": "private",
+    "name": "ვასო აბაშიძის ქუჩა",
+    "name:en": "Vaso Abashidze Street",
+    "name:ka": "ვასო აბაშიძის ქუჩა",
+    "name:ru": "улица Васо Абашидзе",
+    "sidewalk": "both",
+    "sidewalk:left:surface": "asphalt",
+    "sidewalk:right:surface": "paving_stones",
+    "smoothness": "good",
+    "surface": "asphalt",
+    "width": "6"
+  }
+},
+{
+  "type": "way",
+  "id": 516490106,
+  "bounds": {
+    "minlat": 41.7028009,
+    "minlon": 44.7918338,
+    "maxlat": 41.7029280,
+    "maxlon": 44.7924426
+  },
+  "nodes": [
+    1520842284,
+    1008272123,
+    12305527773,
+    1520842285,
+    2869924464
+  ],
+  "geometry": [
+    { "lat": 41.7029280, "lon": 44.7918338 },
+    { "lat": 41.7028930, "lon": 44.7919410 },
+    { "lat": 41.7028699, "lon": 44.7920336 },
+    { "lat": 41.7028494, "lon": 44.7921456 },
+    { "lat": 41.7028009, "lon": 44.7924426 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 523254379,
+  "bounds": {
+    "minlat": 41.6940350,
+    "minlon": 44.7996698,
+    "maxlat": 41.6964519,
+    "maxlon": 44.8011954
+  },
+  "nodes": [
+    3444998760,
+    12305527752,
+    313274188,
+    12305527753,
+    921339665,
+    12305527754,
+    3695381999,
+    311466135,
+    2026099320,
+    279300074,
+    12305527755,
+    3444786732
+  ],
+  "geometry": [
+    { "lat": 41.6940350, "lon": 44.8011954 },
+    { "lat": 41.6941402, "lon": 44.8011021 },
+    { "lat": 41.6942610, "lon": 44.8010146 },
+    { "lat": 41.6952012, "lon": 44.8003618 },
+    { "lat": 41.6952798, "lon": 44.8003149 },
+    { "lat": 41.6953790, "lon": 44.8002666 },
+    { "lat": 41.6954753, "lon": 44.8002332 },
+    { "lat": 41.6956599, "lon": 44.8001694 },
+    { "lat": 41.6957350, "lon": 44.8001426 },
+    { "lat": 41.6958086, "lon": 44.8001084 },
+    { "lat": 41.6958827, "lon": 44.8000675 },
+    { "lat": 41.6964519, "lon": 44.7996698 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "shared_taxi": "no",
+    "sidewalk": "separate",
+    "smoothness": "excellent",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 523260568,
+  "bounds": {
+    "minlat": 41.7041370,
+    "minlon": 44.7902365,
+    "maxlat": 41.7043157,
+    "maxlon": 44.7912410
+  },
+  "nodes": [
+    1794058601,
+    13483552810,
+    13483552830,
+    13483552828,
+    6365726334,
+    13483552815,
+    13483552816,
+    9589813400,
+    13483552817,
+    13483552818,
+    3674744703,
+    13483552819,
+    13483552820
+  ],
+  "geometry": [
+    { "lat": 41.7041370, "lon": 44.7902365 },
+    { "lat": 41.7041791, "lon": 44.7902445 },
+    { "lat": 41.7042041, "lon": 44.7902660 },
+    { "lat": 41.7042272, "lon": 44.7902982 },
+    { "lat": 41.7042412, "lon": 44.7903404 },
+    { "lat": 41.7042562, "lon": 44.7904189 },
+    { "lat": 41.7043103, "lon": 44.7908668 },
+    { "lat": 41.7043157, "lon": 44.7909494 },
+    { "lat": 41.7043143, "lon": 44.7910056 },
+    { "lat": 41.7043073, "lon": 44.7910465 },
+    { "lat": 41.7042902, "lon": 44.7911203 },
+    { "lat": 41.7042707, "lon": 44.7911820 },
+    { "lat": 41.7042422, "lon": 44.7912410 }
+  ],
+  "tags": {
+    "alt_name:en": "Pirveli Respubliki Square",
+    "alt_name:ru": "площадь Пирвели Республики",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "პირველი რესპუბლიკის მოედანი",
+    "name:de": "Platz der ersten Republik",
+    "name:en": "First Republic Square",
+    "name:etymology:wikidata": "Q245160",
+    "name:ka": "პირველი რესპუბლიკის მოედანი",
+    "name:ru": "Площадь Первой Республики",
+    "old_name:1983-2005": "რესპუბლიკის მოედანი",
+    "old_name:2005-2018-05-25": "ვარდების რევოლუციის მოედანი",
+    "old_name:de:1983-2005": "Platz der Republik",
+    "old_name:de:2005-2018-05-25": "Platz der Rosenrevolution",
+    "old_name:en:1983-2005": "Republic Square",
+    "old_name:en:2005-2018-05-25": "Rose Revolution Square",
+    "old_name:ru:1983-2005": "Площадь Республики",
+    "old_name:ru:2005-2018-05-25": "Площадь Революции Роз",
+    "oneway": "yes",
+    "psv": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 523261691,
+  "bounds": {
+    "minlat": 41.6963423,
+    "minlon": 44.8032982,
+    "maxlat": 41.6964987,
+    "maxlon": 44.8034222
+  },
+  "nodes": [
+    3737486933,
+    12305527739,
+    12305527740,
+    3737486940,
+    6831687036,
+    9427277863,
+    9427277861,
+    5146190076,
+    9427277862,
+    1466694601
+  ],
+  "geometry": [
+    { "lat": 41.6964987, "lon": 44.8034222 },
+    { "lat": 41.6964760, "lon": 44.8033538 },
+    { "lat": 41.6964474, "lon": 44.8033116 },
+    { "lat": 41.6964244, "lon": 44.8032982 },
+    { "lat": 41.6964004, "lon": 44.8032995 },
+    { "lat": 41.6963818, "lon": 44.8033062 },
+    { "lat": 41.6963663, "lon": 44.8033190 },
+    { "lat": 41.6963523, "lon": 44.8033404 },
+    { "lat": 41.6963423, "lon": 44.8033666 },
+    { "lat": 41.6963444, "lon": 44.8034144 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "1",
+    "lit": "yes",
+    "maxspeed": "50",
+    "oneway": "yes",
+    "sidewalk": "right",
+    "sidewalk:right:surface": "paving_stones",
+    "smoothness": "good",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 542773466,
+  "bounds": {
+    "minlat": 41.7027523,
+    "minlon": 44.7924426,
+    "maxlat": 41.7028009,
+    "maxlon": 44.7927864
+  },
+  "nodes": [
+    2869924464,
+    311928402
+  ],
+  "geometry": [
+    { "lat": 41.7028009, "lon": 44.7924426 },
+    { "lat": 41.7027523, "lon": 44.7927864 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 542773471,
+  "bounds": {
+    "minlat": 41.7029404,
+    "minlon": 44.7924896,
+    "maxlat": 41.7032294,
+    "maxlon": 44.7926624
+  },
+  "nodes": [
+    1794067130,
+    7777500134,
+    1787213313
+  ],
+  "geometry": [
+    { "lat": 41.7032294, "lon": 44.7924896 },
+    { "lat": 41.7029948, "lon": 44.7926307 },
+    { "lat": 41.7029404, "lon": 44.7926624 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "psv": "yes",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 546279246,
+  "bounds": {
+    "minlat": 41.6999883,
+    "minlon": 44.7936250,
+    "maxlat": 41.7004777,
+    "maxlon": 44.7943135
+  },
+  "nodes": [
+    621188794,
+    12829898450,
+    12193291524,
+    621188795
+  ],
+  "geometry": [
+    { "lat": 41.7004777, "lon": 44.7943135 },
+    { "lat": 41.7004515, "lon": 44.7942764 },
+    { "lat": 41.7002522, "lon": 44.7939940 },
+    { "lat": 41.6999883, "lon": 44.7936250 }
+  ],
+  "tags": {
+    "construction": "residential",
+    "highway": "construction",
+    "lane_markings": "no",
+    "lit": "yes",
+    "maxspeed": "60",
+    "name": "ალექსანდრე ჭავჭავაძის ქუჩა",
+    "name:en": "Alexander Chavchavadze Street",
+    "name:ka": "ალექსანდრე ჭავჭავაძის ქუჩა",
+    "name:ru": "улица Александра Чавчавадзе",
+    "oneway": "no",
+    "short_name:en": "Chavchavadze Street",
+    "sidewalk": "both",
+    "surface": "sett",
+    "wikidata": "Q58824690"
+  }
+},
+{
+  "type": "way",
+  "id": 558483366,
+  "bounds": {
+    "minlat": 41.6968365,
+    "minlon": 44.8071599,
+    "maxlat": 41.6972363,
+    "maxlon": 44.8074214
+  },
+  "nodes": [
+    289207521,
+    311484132,
+    12305527724,
+    5385768321,
+    1849916668,
+    12305527734,
+    1969456816,
+    12305527725,
+    5385768323,
+    5385768322,
+    12305527723,
+    1969456817
+  ],
+  "geometry": [
+    { "lat": 41.6968365, "lon": 44.8074214 },
+    { "lat": 41.6968684, "lon": 44.8073008 },
+    { "lat": 41.6968905, "lon": 44.8072518 },
+    { "lat": 41.6969221, "lon": 44.8072102 },
+    { "lat": 41.6969621, "lon": 44.8071733 },
+    { "lat": 41.6969902, "lon": 44.8071599 },
+    { "lat": 41.6970302, "lon": 44.8071615 },
+    { "lat": 41.6970638, "lon": 44.8071693 },
+    { "lat": 41.6970973, "lon": 44.8071881 },
+    { "lat": 41.6971360, "lon": 44.8072162 },
+    { "lat": 41.6971799, "lon": 44.8072591 },
+    { "lat": 41.6972363, "lon": 44.8073231 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "2",
+    "lit": "yes",
+    "name": "სანაპიროს ქუჩა",
+    "name:en": "Sanapiro Street",
+    "name:ka": "სანაპიროს ქუჩა",
+    "name:ru": "улица Санапиро",
+    "oneway": "yes",
+    "source": "GPS",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 689950086,
+  "bounds": {
+    "minlat": 41.6937430,
+    "minlon": 44.8052852,
+    "maxlat": 41.6938655,
+    "maxlon": 44.8055038
+  },
+  "nodes": [
+    11907603266,
+    11907603267
+  ],
+  "geometry": [
+    { "lat": 41.6938655, "lon": 44.8055038 },
+    { "lat": 41.6937430, "lon": 44.8052852 }
+  ],
+  "tags": {
+    "check_date": "2024-05-15",
+    "construction": "residential",
+    "highway": "construction",
+    "name": "შოთა ყავლაშვილის ქუჩა",
+    "name:en": "Shota Kavlashvili Street",
+    "name:etymology:wikidata": "Q52158013",
+    "name:ka": "შოთა ყავლაშვილის ქუჩა",
+    "name:ru": "улица Шоты Кавлашвили",
+    "oneway": "yes",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 912334475,
+  "bounds": {
+    "minlat": 41.6954407,
+    "minlon": 44.8077051,
+    "maxlat": 41.6955003,
+    "maxlon": 44.8079125
+  },
+  "nodes": [
+    8475149805,
+    8475149806,
+    8475149812,
+    8475149807,
+    279300285,
+    1969520682
+  ],
+  "geometry": [
+    { "lat": 41.6955003, "lon": 44.8077051 },
+    { "lat": 41.6954716, "lon": 44.8077453 },
+    { "lat": 41.6954566, "lon": 44.8077775 },
+    { "lat": 41.6954506, "lon": 44.8078070 },
+    { "lat": 41.6954463, "lon": 44.8078420 },
+    { "lat": 41.6954407, "lon": 44.8079125 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "1",
+    "name": "დაჩი უჯარმელის ქუჩა",
+    "name:en": "Dachi Ujarmeli Street",
+    "name:etymology:wikidata": "Q2915847",
+    "name:ka": "დაჩი უჯარმელის ქუჩა",
+    "name:ru": "улица Дачи Уджармели",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "turn": "left"
+  }
+},
+{
+  "type": "way",
+  "id": 1016915335,
+  "bounds": {
+    "minlat": 41.6938853,
+    "minlon": 44.8010337,
+    "maxlat": 41.6939940,
+    "maxlon": 44.8010794
+  },
+  "nodes": [
+    1008739861,
+    9794335177,
+    12964330960,
+    4393479023
+  ],
+  "geometry": [
+    { "lat": 41.6939940, "lon": 44.8010337 },
+    { "lat": 41.6939235, "lon": 44.8010644 },
+    { "lat": 41.6939033, "lon": 44.8010723 },
+    { "lat": 41.6938853, "lon": 44.8010794 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "თავისუფლების მოედანი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Freedom Square",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:he": "כיכר החירות",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "თავისუფლების მოედანი",
+    "name:ka-Latn": "Rustavelis Gamziri",
+    "name:ru": "площадь Свободы",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "shoulder": "no",
+    "sidewalk": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "sett",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1218748100,
+  "bounds": {
+    "minlat": 41.6934714,
+    "minlon": 44.8060784,
+    "maxlat": 41.6935916,
+    "maxlon": 44.8065707
+  },
+  "nodes": [
+    916439958,
+    1837481025,
+    11292893460,
+    11292893465,
+    1837481041
+  ],
+  "geometry": [
+    { "lat": 41.6934714, "lon": 44.8060784 },
+    { "lat": 41.6935444, "lon": 44.8063459 },
+    { "lat": 41.6935751, "lon": 44.8064967 },
+    { "lat": 41.6935839, "lon": 44.8065359 },
+    { "lat": 41.6935916, "lon": 44.8065707 }
+  ],
+  "tags": {
+    "check_date": "2025-09-23",
+    "construction": "residential",
+    "highway": "construction",
+    "name": "ანტონ კათალიკოსის ქუჩა",
+    "name:en": "Anton Katalikos Street",
+    "name:etymology:wikidata": "Q590458",
+    "name:ka": "ანტონ კათალიკოსის ქუჩა",
+    "name:ru": "улица Антона Католикоса",
+    "oneway": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 1322924080,
+  "bounds": {
+    "minlat": 41.6952157,
+    "minlon": 44.8077051,
+    "maxlat": 41.6955003,
+    "maxlon": 44.8078183
+  },
+  "nodes": [
+    8475149805,
+    279300279
+  ],
+  "geometry": [
+    { "lat": 41.6955003, "lon": 44.8077051 },
+    { "lat": 41.6952157, "lon": 44.8078183 }
+  ],
+  "tags": {
+    "highway": "primary_link",
+    "lanes": "2",
+    "lit": "yes",
+    "name": "დაჩი უჯარმელის ქუჩა",
+    "name:en": "Dachi Ujarmeli Street",
+    "name:etymology:wikidata": "Q2915847",
+    "name:ka": "დაჩი უჯარმელის ქუჩა",
+    "name:ru": "улица Дачи Уджармели",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "turn": "through;right"
+  }
+},
+{
+  "type": "way",
+  "id": 1330015879,
+  "bounds": {
+    "minlat": 41.6957575,
+    "minlon": 44.7993601,
+    "maxlat": 41.6967162,
+    "maxlon": 44.8000064
+  },
+  "nodes": [
+    921339710,
+    3743860750,
+    2026099321,
+    921339740
+  ],
+  "geometry": [
+    { "lat": 41.6967162, "lon": 44.7993601 },
+    { "lat": 41.6959407, "lon": 44.7999005 },
+    { "lat": 41.6958576, "lon": 44.7999555 },
+    { "lat": 41.6957575, "lon": 44.8000064 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk": "separate",
+    "smoothness": "excellent",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1330015880,
+  "bounds": {
+    "minlat": 41.7023522,
+    "minlon": 44.7931850,
+    "maxlat": 41.7026265,
+    "maxlon": 44.7936345
+  },
+  "nodes": [
+    311930539,
+    12305527761,
+    12305527760,
+    916928544,
+    2869924469
+  ],
+  "geometry": [
+    { "lat": 41.7026265, "lon": 44.7931850 },
+    { "lat": 41.7025671, "lon": 44.7933117 },
+    { "lat": 41.7025115, "lon": 44.7934116 },
+    { "lat": 41.7024479, "lon": 44.7935075 },
+    { "lat": 41.7023522, "lon": 44.7936345 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "4",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "turn:lanes": "merge_to_right|through|through;right|",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1330015881,
+  "bounds": {
+    "minlat": 41.7026265,
+    "minlon": 44.7927864,
+    "maxlat": 41.7027523,
+    "maxlon": 44.7931850
+  },
+  "nodes": [
+    311928402,
+    5835360324,
+    279300039,
+    311930539
+  ],
+  "geometry": [
+    { "lat": 41.7027523, "lon": 44.7927864 },
+    { "lat": 41.7027327, "lon": 44.7928772 },
+    { "lat": 41.7026928, "lon": 44.7929930 },
+    { "lat": 41.7026265, "lon": 44.7931850 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1330015882,
+  "bounds": {
+    "minlat": 41.7029146,
+    "minlon": 44.7929355,
+    "maxlat": 41.7030364,
+    "maxlon": 44.7929523
+  },
+  "nodes": [
+    621188792,
+    3676135656
+  ],
+  "geometry": [
+    { "lat": 41.7029146, "lon": 44.7929355 },
+    { "lat": 41.7030364, "lon": 44.7929523 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary_link",
+    "foot": "no",
+    "highway": "construction",
+    "lit": "yes",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "sidewalk": "no",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 1383976543,
+  "bounds": {
+    "minlat": 41.7030567,
+    "minlon": 44.7907240,
+    "maxlat": 41.7034951,
+    "maxlon": 44.7916520
+  },
+  "nodes": [
+    5385768133,
+    12305527778
+  ],
+  "geometry": [
+    { "lat": 41.7034951, "lon": 44.7907240 },
+    { "lat": 41.7030567, "lon": 44.7916520 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "4",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "smoothness": "good",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1383976550,
+  "bounds": {
+    "minlat": 41.7029280,
+    "minlon": 44.7916520,
+    "maxlat": 41.7030567,
+    "maxlon": 44.7918338
+  },
+  "nodes": [
+    12305527778,
+    1520842284
+  ],
+  "geometry": [
+    { "lat": 41.7030567, "lon": 44.7916520 },
+    { "lat": 41.7029280, "lon": 44.7918338 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "smoothness": "good",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1383976554,
+  "bounds": {
+    "minlat": 41.7029761,
+    "minlon": 44.7916520,
+    "maxlat": 41.7030567,
+    "maxlon": 44.7919779
+  },
+  "nodes": [
+    1787213318,
+    12305527780,
+    12305527779,
+    12305527778
+  ],
+  "geometry": [
+    { "lat": 41.7029761, "lon": 44.7919779 },
+    { "lat": 41.7029896, "lon": 44.7919162 },
+    { "lat": 41.7030086, "lon": 44.7918545 },
+    { "lat": 41.7030567, "lon": 44.7916520 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "turn:lanes": "right|right",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1484009448,
+  "bounds": {
+    "minlat": 41.7029485,
+    "minlon": 44.7919779,
+    "maxlat": 41.7029761,
+    "maxlon": 44.7924688
+  },
+  "nodes": [
+    2317548432,
+    1787213314,
+    1787213318
+  ],
+  "geometry": [
+    { "lat": 41.7029485, "lon": 44.7924688 },
+    { "lat": 41.7029701, "lon": 44.7920383 },
+    { "lat": 41.7029761, "lon": 44.7919779 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "turn:lanes": "right|right",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1485695670,
+  "bounds": {
+    "minlat": 41.6939369,
+    "minlon": 44.8011954,
+    "maxlat": 41.6940350,
+    "maxlon": 44.8012906
+  },
+  "nodes": [
+    4393479027,
+    3444998760
+  ],
+  "geometry": [
+    { "lat": 41.6939369, "lon": 44.8012906 },
+    { "lat": 41.6940350, "lon": 44.8011954 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "თავისუფლების მოედანი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Freedom Square",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:he": "כיכר החירות",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "თავისუფლების მოედანი",
+    "name:ka-Latn": "Rustavelis Gamziri",
+    "name:ru": "площадь Свободы",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "shared_taxi": "no",
+    "sidewalk": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "sett",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1485695671,
+  "bounds": {
+    "minlat": 41.6934181,
+    "minlon": 44.8010794,
+    "maxlat": 41.6938853,
+    "maxlon": 44.8012204
+  },
+  "nodes": [
+    4393479023,
+    921339745,
+    3691440485
+  ],
+  "geometry": [
+    { "lat": 41.6938853, "lon": 44.8010794 },
+    { "lat": 41.6937482, "lon": 44.8011206 },
+    { "lat": 41.6934181, "lon": 44.8012204 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "თავისუფლების მოედანი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Freedom Square",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:he": "כיכר החירות",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "თავისუფლების მოედანი",
+    "name:ka-Latn": "Rustavelis Gamziri",
+    "name:ru": "площадь Свободы",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "shoulder": "no",
+    "sidewalk": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "sett",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1486907566,
+  "bounds": {
+    "minlat": 41.7029404,
+    "minlon": 44.7924688,
+    "maxlat": 41.7029485,
+    "maxlon": 44.7926624
+  },
+  "nodes": [
+    1787213313,
+    2317548432
+  ],
+  "geometry": [
+    { "lat": 41.7029404, "lon": 44.7926624 },
+    { "lat": 41.7029485, "lon": 44.7924688 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "foot": "no",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk": "no",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1486907567,
+  "bounds": {
+    "minlat": 41.7027523,
+    "minlon": 44.7926624,
+    "maxlat": 41.7029404,
+    "maxlon": 44.7927864
+  },
+  "nodes": [
+    1787213313,
+    12305527770,
+    311928402
+  ],
+  "geometry": [
+    { "lat": 41.7029404, "lon": 44.7926624 },
+    { "lat": 41.7028329, "lon": 44.7927303 },
+    { "lat": 41.7027523, "lon": 44.7927864 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "oneway": "yes",
+    "psv": "yes",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt"
+  }
+},
+{
+  "type": "way",
+  "id": 1486907568,
+  "bounds": {
+    "minlat": 41.7028763,
+    "minlon": 44.7929355,
+    "maxlat": 41.7029146,
+    "maxlon": 44.7931351
+  },
+  "nodes": [
+    288630443,
+    12305527762,
+    621188792
+  ],
+  "geometry": [
+    { "lat": 41.7028763, "lon": 44.7931351 },
+    { "lat": 41.7029035, "lon": 44.7930133 },
+    { "lat": 41.7029146, "lon": 44.7929355 }
+  ],
+  "tags": {
+    "access": "no",
+    "construction": "primary",
+    "foot": "no",
+    "highway": "construction",
+    "lanes": "2",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk": "no",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1486907571,
+  "bounds": {
+    "minlat": 41.7010875,
+    "minlon": 44.7936345,
+    "maxlat": 41.7023522,
+    "maxlon": 44.7951904
+  },
+  "nodes": [
+    2869924469,
+    1573607789,
+    1431622643,
+    11563593389,
+    921339725
+  ],
+  "geometry": [
+    { "lat": 41.7023522, "lon": 44.7936345 },
+    { "lat": 41.7022712, "lon": 44.7937468 },
+    { "lat": 41.7018276, "lon": 44.7942913 },
+    { "lat": 41.7016726, "lon": 44.7944768 },
+    { "lat": 41.7010875, "lon": 44.7951904 }
+  ],
+  "tags": {
+    "access": "no",
+    "busway:right": "lane",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lanes:psv": "1",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "შოთა რუსთაველის გამზირი",
+    "name:de": "Rustaweli-Allee",
+    "name:en": "Shota Rustaveli Avenue",
+    "name:etymology:wikidata": "Q132984",
+    "name:etymology:wikipedia": "ka:შოთა რუსთაველი",
+    "name:hy": "Ռուսթավելու պողոտա",
+    "name:it": "Viale Rustaveli",
+    "name:ka": "შოთა რუსთაველის გამზირი",
+    "name:ka-Latn": "Shota Rustavelis Gamziri",
+    "name:ru": "проспект Шота Руставели",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name": "გოლოვინის პროსპექტი",
+    "old_name:ka-Latn": "Golovinis P’rosp’ekt’i",
+    "oneway": "yes",
+    "sidewalk:left": "no",
+    "sidewalk:right": "separate",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "wikidata": "Q1754726",
+    "wikipedia": "ka:რუსთაველის გამზირი"
+  }
+},
+{
+  "type": "way",
+  "id": 1543975166,
+  "bounds": {
+    "minlat": 41.7028763,
+    "minlon": 44.7929523,
+    "maxlat": 41.7030364,
+    "maxlon": 44.7931351
+  },
+  "nodes": [
+    288630443,
+    3676135656
+  ],
+  "geometry": [
+    { "lat": 41.7028763, "lon": 44.7931351 },
+    { "lat": 41.7030364, "lon": 44.7929523 }
+  ],
+  "tags": {
+    "access": "no",
+    "alt_name:en": "Pirveli Respubliki Square",
+    "alt_name:ru": "площадь Пирвели Республики",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "პირველი რესპუბლიკის მოედანი",
+    "name:de": "Platz der ersten Republik",
+    "name:en": "First Republic Square",
+    "name:etymology:wikidata": "Q245160",
+    "name:ka": "პირველი რესპუბლიკის მოედანი",
+    "name:ru": "Площадь Первой Республики",
+    "note": "Rustaveli Avenue and Kostava Street are temporarily closed for reconstruction (July–November 2026). See source.",
+    "old_name:1983-2005": "რესპუბლიკის მოედანი",
+    "old_name:2005-2018-05-25": "ვარდების რევოლუციის მოედანი",
+    "old_name:de:1983-2005": "Platz der Republik",
+    "old_name:de:2005-2018-05-25": "Platz der Rosenrevolution",
+    "old_name:en:1983-2005": "Republic Square",
+    "old_name:en:2005-2018-05-25": "Rose Revolution Square",
+    "old_name:ru:1983-2005": "Площадь Республики",
+    "old_name:ru:2005-2018-05-25": "Площадь Революции Роз",
+    "oneway": "yes",
+    "source": "https://bm.ge/news/dgheidan-rustavelis-gamziri-4-tvit-iketeba-rogorsaidan-imodzravebs-transporti",
+    "surface": "asphalt",
+    "turn:lanes": "right|right|right"
+  }
+},
+{
+  "type": "way",
+  "id": 1544099695,
+  "bounds": {
+    "minlat": 41.7043073,
+    "minlon": 44.7900963,
+    "maxlat": 41.7043457,
+    "maxlon": 44.7906061
+  },
+  "nodes": [
+    1787221820,
+    6365726333,
+    13483552827,
+    13483552829,
+    279299992
+  ],
+  "geometry": [
+    { "lat": 41.7043457, "lon": 44.7906061 },
+    { "lat": 41.7043084, "lon": 44.7902898 },
+    { "lat": 41.7043073, "lon": 44.7902251 },
+    { "lat": 41.7043128, "lon": 44.7901694 },
+    { "lat": 41.7043293, "lon": 44.7900963 }
+  ],
+  "tags": {
+    "alt_name:en": "Pirveli Respubliki Square",
+    "alt_name:ru": "площадь Пирвели Республики",
+    "construction": "primary",
+    "highway": "construction",
+    "lanes": "3",
+    "lit": "yes",
+    "maxspeed": "40",
+    "name": "პირველი რესპუბლიკის მოედანი",
+    "name:de": "Platz der ersten Republik",
+    "name:en": "First Republic Square",
+    "name:etymology:wikidata": "Q245160",
+    "name:ka": "პირველი რესპუბლიკის მოედანი",
+    "name:ru": "Площадь Первой Республики",
+    "old_name:1983-2005": "რესპუბლიკის მოედანი",
+    "old_name:2005-2018-05-25": "ვარდების რევოლუციის მოედანი",
+    "old_name:de:1983-2005": "Platz der Republik",
+    "old_name:de:2005-2018-05-25": "Platz der Rosenrevolution",
+    "old_name:en:1983-2005": "Republic Square",
+    "old_name:en:2005-2018-05-25": "Rose Revolution Square",
+    "old_name:ru:1983-2005": "Площадь Республики",
+    "old_name:ru:2005-2018-05-25": "Площадь Революции Роз",
+    "oneway": "yes",
+    "surface": "asphalt",
+    "turn:lanes": "right|right|right"
+  }
+},
+{
+  "type": "way",
+  "id": 1557982638,
+  "bounds": {
+    "minlat": 41.7047563,
+    "minlon": 44.7896987,
+    "maxlat": 41.7048210,
+    "maxlon": 44.7897946
+  },
+  "nodes": [
+    279299993,
+    1990771178
+  ],
+  "geometry": [
+    { "lat": 41.7047563, "lon": 44.7896987 },
+    { "lat": 41.7048210, "lon": 44.7897946 }
+  ],
+  "tags": {
+    "construction": "residential",
+    "highway": "construction",
+    "lanes": "1",
+    "lit": "yes",
+    "name": "ია ეკალაძის ქუჩა",
+    "name:en": "Ia Ekaladze Street",
+    "name:ka": "ია ეკალაძის ქუჩა",
+    "name:ru": "улица Ии Экаладзе",
+    "surface": "asphalt"
+  }
+}
+
+  ]
+}
