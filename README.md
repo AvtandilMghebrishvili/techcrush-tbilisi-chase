@@ -1,5 +1,9 @@
 # TECHCRUSH — Tbilisi Chase
 
+[![Tests](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/actions/workflows/ci.yml/badge.svg)](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/actions/workflows/ci.yml)
+
+[Download source](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/archive/refs/heads/main.zip) · [Releases](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases) · [Setup guide](docs/GETTING_STARTED.md) · [Hosting guide](docs/DEPLOYMENT.md)
+
 A complete browser 3D arcade chase through a simplified reconstruction of central Tbilisi. Choose a sports car, dodge traffic, clear six checkpoints, destroy pursuing patrols, then break contact for eight seconds.
 
 The expanded daylight edition connects Rustaveli, Baratashvili, the Mtkvari banks, Europe Square, Rike Park and Abanotubani. It adds a driving deck for Baratashvili Bridge, a glass-wave Peace Bridge, Rike's twin steel tubes, lawns and paths, bath domes and the blue Chreli Abano facade, Metekhi, Narikala and moving cable cars. Streets have continuous asphalt, markings, crossings, tiled sidewalks, benches, bins, planted trees and 22 additional two-sided TECHCRUSH billboards. A detailed Ferrari 458 model and modeled cockpit, original Georgian patrol sedans, 1980s/1990s traffic, HDR sky and textured mountains remain.
@@ -10,7 +14,28 @@ This is a reference-guided arcade reconstruction, not a one-to-one scan. Central
 
 Requires Node.js 20+ and a modern WebGL2 browser. Run `npm start` in this folder, then open `http://127.0.0.1:4173/`. No installation, API keys or build step are required to play: all game modules, models and textures are checked in. Google Fonts are optional, with local fallbacks.
 
-For development run `npm ci`. Refresh Three.js with `npm run vendor`. Rebuild the optimized sports car with `node scripts/prepare-car.mjs`. Rebuild the road graph with `python scripts/build-map.py`, then its joined asphalt and sidewalks with `node scripts/build-road-surface.mjs`; source OSM responses are archived in `data/`. `node scripts/prepare-tree.mjs` downloads the CC0 source specified in `data/tree-source.json` and builds both detail levels. Large original tree files are cached locally; runnable optimized GLBs are included.
+```sh
+git clone https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase.git
+cd techcrush-tbilisi-chase
+npm start
+```
+
+For development run `npm ci`. Refresh Three.js with `npm run vendor`. Rebuild the optimized sports car with `node scripts/prepare-car.mjs`. Rebuild the road graph with `python scripts/build-map.py`, then its joined asphalt and sidewalks with `node scripts/build-road-surface.mjs`; source OSM responses are archived in `data/`. `node scripts/prepare-tree.mjs` fetches Poly Haven's current manifest, records it in `data/tree-source.json`, downloads the CC0 source and builds both detail levels. Large original tree files are cached locally; runnable optimized GLBs are included.
+
+## Documentation
+
+| Guide                                          | Contents                                                                        |
+| ---------------------------------------------- | ------------------------------------------------------------------------------- |
+| [Getting started](docs/GETTING_STARTED.md)     | Clone or download, prerequisites, local play, folder layout and troubleshooting |
+| [Cars, controls and rules](#cars-and-controls) | Driving, pursuit, scoring, stunts, recovery and rewind                          |
+| [Architecture](docs/ARCHITECTURE.md)           | Simulation/rendering boundaries, coordinate system, navigation and state        |
+| [Development](docs/DEVELOPMENT.md)             | Change cars, roads, landmarks, police, effects and generated assets             |
+| [Testing](docs/TESTING.md)                     | Automated suite, full driving controller and browser review checklist           |
+| [Validation results](VALIDATION.md)            | Recorded test results and known limitations                                     |
+| [Deployment and access](docs/DEPLOYMENT.md)    | Public game access, Sites, GitHub Pages and Cloudflare Pages                    |
+| [Assets and rights](ASSETS.md)                 | Model, texture, map, branding and reference provenance                          |
+| [Contributing](CONTRIBUTING.md)                | Propose changes, report bugs and prepare pull requests                          |
+| [Changelog](CHANGELOG.md)                      | Release history                                                                 |
 
 ## Cars and controls
 
@@ -71,6 +96,8 @@ Static boxes and 3D trees are instanced. Trees switch from 123,246 triangles nea
 
 ## Hosting and rights
 
-Serve `dist/` on a static HTTPS host. `.openai/hosting.json` identifies the existing Sites deployment, whose owner-private access remains unchanged. There are no multiplayer, purchases, game accounts, persistent leaderboard or game-server dependencies.
+Serve `dist/` on a static HTTPS host. This repository is public: anyone can read, clone or download it. Publishing the source does not grant write access or change the existing game's audience. The existing [Sites deployment](https://nightshift-chase-september.avtandilmghebrishvili.chatgpt.site/) has separate access settings; at the initial GitHub release it remains owner-private. `.openai/hosting.json` identifies that owner's deployment. Forks should configure their own hosting destination.
+
+A manually triggered GitHub Pages workflow is included. It publishes `dist/` only after the owner enables Pages and runs it; it does not automatically create a public game URL when source is pushed. See [Deployment and access](docs/DEPLOYMENT.md) for exact steps and alternatives. There are no multiplayer, purchases, game accounts, persistent leaderboard or game-server dependencies.
 
 Project code and Three.js are MIT. OSM data is ODbL. The car, HDRI, terrain textures, generated artwork and supplied branding retain their respective terms. See `ASSETS.md` and the in-game Credits link. The source package includes runnable assets, code, tests, source data and the dependency lockfile.

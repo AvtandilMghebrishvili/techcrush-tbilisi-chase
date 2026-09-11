@@ -10,7 +10,7 @@ The police sedan and civilian modern sedan, classic 1980s/1990s sedans, wagon an
 
 ## Solid 3D trees
 
-`tree-near.glb` and `tree-far.glb`: [Tree Small 02](https://polyhaven.com/a/tree_small_02) by Rico Cilliers / Poly Haven, [CC0](https://polyhaven.com/license). Original geometry and 1K maps are downloaded by `scripts/prepare-tree.mjs` using the manifest in `data/tree-source.json`. Derivatives have 123,246 and 20,943 triangles; leaf islands are expanded after simplification to retain canopy coverage. Wind, distance switching, trunk collisions, falling and stumps are runtime additions. These replace the earlier flat tree cards; `plane-tree.png` below is retained only as a historical asset.
+`tree-near.glb` and `tree-far.glb`: [Tree Small 02](https://polyhaven.com/a/tree_small_02) by Rico Cilliers / Poly Haven, [CC0](https://polyhaven.com/license). `scripts/prepare-tree.mjs` fetches Poly Haven's current manifest, records it in `data/tree-source.json`, then downloads original geometry and 1K maps. Rebuilding requires network access and may use an updated upstream asset; the checked-in optimized files preserve this release. Derivatives have 123,246 and 20,943 triangles; leaf islands are expanded after simplification to retain canopy coverage. Wind, distance switching, trunk collisions, falling and stumps are runtime additions. These replace the earlier flat tree cards; `plane-tree.png` below is retained only as a historical asset.
 
 `ferrari_ao.png` is the contact-shadow texture from the same example. Its grayscale is interpreted as shadow opacity by the renderer. The original image is unchanged.
 
