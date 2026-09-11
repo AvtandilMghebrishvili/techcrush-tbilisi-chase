@@ -16,3 +16,7 @@ These are generation outputs, not photographs of real people or real cities. Ref
 `dist/assets/old-tbilisi.png` was generated with Higgsfield `gpt_image_2` at 1k resolution on 2026-09-11. Generation job: `dbd9eba3-f1d8-465b-a565-884a2df51493`. The ochre plaster, carved turquoise balcony, window, and terracotta details are mapped to the new low-rise buildings.
 
 The five-cross Georgian flag texture, fictional tower geometry inspired by Mtatsminda, car model variations, cockpit, health bars, and particle effects are authored in the project source. The map does not reproduce real Tbilisi street geography.
+
+## TECHCRUSH and skyline update
+
+The TECHCRUSH garage signs, faceted mountain geometry, and stylized Kartlis Deda model are authored in `dist/landmarks.js`. The statue's bowl and sword arrangement was checked against [Georgia Travel's Kartlis Deda reference](https://georgia.travel/kartlis-deda). It is an original simplified game model, deliberately enlarged for visibility on the skyline, not a scan or accurate reconstruction. No new generated image assets were required for this update; the existing Higgsfield textures remain in use.

@@ -1,27 +1,25 @@
-# Validation — Georgian city update, 11 September 2026
+# Validation — TECHCRUSH chase update, 11 September 2026
 
 ## Automated mechanics
 
-`npm test`: **19 passed, 0 failed**. Covers acceleration and speed limits, braking and reverse, steering, timestep consistency, handbrake, nitro, static and vehicle collisions, routing and occlusion, police pursuit, ordered checkpoints, escape, wreck and capture, pause, recovery, and restart.
+`npm test`: **23 passed, 0 failed**. The 19 previous physics, controls, cars, collisions, patrol health, explosion and mission checks still pass. Four new tests cover legal street arrow placement around turns, guide animation/checkpoint changes/restart/escape visibility, pursuit of a moving car, and sharing observations without tracking through buildings after contact is lost.
 
-New regression checks project the player's motion into the Three.js camera at four cardinal headings: A moves screen-left and D screen-right. They also verify physical keys with a Georgian layout, car statistics and selection, expanded streets and tower plaza, patrol HP/collision cooldown, a real vehicle ram, one explosion per destroyed patrol, replacement at full health away from the player, and explosion cleanup.
+Full driving runs use normal controls with traffic and police active. The controller uses nitro on clear straights and the normal R recovery action, including its score penalty, if pinned. It does not grant checkpoint completion, health, or immunity.
 
-Full runs use normal throttle, steering, braking and boost inputs with traffic and police enabled. The controller does not teleport or grant checkpoints.
-
-| Car              | Result  | Checkpoints | Simulated time | Score  | Condition | Patrol takedowns |
-| ---------------- | ------- | ----------- | -------------- | ------ | --------- | ---------------- |
-| Rustaveli GT     | Escaped | 6/6         | 153.3 s        | 24,198 | 62%       | 1                |
-| Mtatsminda Rally | Escaped | 6/6         | 127.2 s        | 22,400 | 100%      | 0                |
-| Caucasus 4×4     | Escaped | 6/6         | 139.0 s        | 22,331 | 73%       | 1                |
+| Car              | Result  | Checkpoints | Time    | Score  | Condition | Patrol takedowns |
+| ---------------- | ------- | ----------- | ------- | ------ | --------- | ---------------- |
+| Rustaveli GT     | Escaped | 6/6         | 189.4 s | 30,128 | 1%        | 6                |
+| Mtatsminda Rally | Escaped | 6/6         | 96.6 s  | 24,230 | 92%       | 5                |
+| Caucasus 4×4     | Escaped | 6/6         | 206.2 s | 32,170 | 52%       | 7                |
 
 Reproduce with `node tests/route-drive.mjs`, `node tests/route-drive.mjs rally`, and `node tests/route-drive.mjs suv`.
 
-## Browser checks
+## Browser review
 
-Tested in desktop Chromium at 1280×720 and a 390×844 phone viewport. Verified car previews and selection, starting with the selected SUV, new facades, Georgian flags, tower, cockpit speed display and steering wheel, keyboard C camera changes, hood and high chase views, pause, and return to the garage. Corrected cockpit wheel occlusion during visual review. Console checks returned no errors or warnings.
+Verified the TECHCRUSH title and garage signs, distant mountains, mounted Kartlis Deda statue, animated road arrows, normal driving and checkpoint progress, and cockpit navigation. Browser console checks returned no errors or warnings. The prior desktop and phone viewport layout checks remain applicable; this update adds no new HUD panels.
 
-Verified registered WebMCP status, car selection and camera controls against visible state; invalid car/camera inputs were rejected. The previous version's start, drive, pause, scoring, damage, and responsive checks remain covered by the mechanics suite and full driving runs.
+During review, corrected transparent road arrows rendering over the cockpit dashboard by placing the interior in the final transparent overlay pass. Balanced the stronger pursuit with patrol ram recovery, capped ram damage, and 20 condition repair per checkpoint. The GT escape remains demanding, as shown by its low remaining condition in the controller run.
 
 ## Limits
 
-Checks cover desktop Chromium and a simulated phone viewport, not physical mobile hardware or every GPU/browser. WebGL2 is required. This is a single-player arcade game with a finite fictional city, without multiplayer or a persistent leaderboard.
+Tested with desktop Chromium, not every GPU/browser or physical phone. WebGL2 is required. Mountain and landmark geometry is a fictional stylized interpretation. Single-player arcade game without multiplayer or persistent leaderboard.

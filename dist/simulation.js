@@ -293,6 +293,7 @@ export class ChaseSimulation {
       this.traffic.push(car);
     }
     this.lastCheckpointTime = 0;
+    this.radioContact = null;
   }
   makePolice(x, z) {
     return {
@@ -300,6 +301,7 @@ export class ChaseSimulation {
       id: this.nextCopId++,
       health: 100,
       hitCooldown: 0,
+      ramRecovery: 0,
       destroyed: false,
       respawnAt: 0,
       path: [],
@@ -396,33 +398,71 @@ export class ChaseSimulation {
         t.nearMiss = false;
       }
     }
+    // Patrols share observed positions. Once all sightlines are broken the radio goes quiet.
+    const sighted = this.police.some(
+      (cop) =>
+        !cop.destroyed &&
+        distance(cop, p) < 260 &&
+        lineOfSight(cop, p, this.obstacles),
+    );
+    if (sighted)
+      this.radioContact = {
+        x: p.x,
+        z: p.z,
+        vx: p.vx,
+        vz: p.vz,
+        time: this.time,
+      };
     for (const cop of this.police) {
       if (cop.destroyed) {
         if (this.time >= cop.respawnAt) this.respawnPolice(cop);
         else continue;
       }
       cop.hitCooldown = Math.max(0, cop.hitCooldown - dt);
+      cop.ramRecovery = Math.max(0, cop.ramRecovery - dt);
       cop.repath -= dt;
       const visible =
-        distance(cop, p) < 190 && lineOfSight(cop, p, this.obstacles);
-      if (visible) cop.lastSeen = { x: p.x + p.vx * 0.4, z: p.z + p.vz * 0.4 };
+        distance(cop, p) < 260 && lineOfSight(cop, p, this.obstacles);
+      if (sighted) {
+        // One unit stays on the rear bumper, another tries to intercept farther ahead.
+        const lead = cop.id % 2 ? 0.35 : 1.1;
+        const observation = this.radioContact;
+        const predicted = {
+          x: clamp(
+            observation.x + observation.vx * lead,
+            -ROAD_EDGE,
+            ROAD_EDGE,
+          ),
+          z: clamp(
+            observation.z + observation.vz * lead,
+            -ROAD_EDGE,
+            ROAD_EDGE,
+          ),
+        };
+        cop.lastSeen = lineOfSight(observation, predicted, this.obstacles)
+          ? predicted
+          : { x: observation.x, z: observation.z };
+      }
       if (cop.repath <= 0 || !cop.path.length) {
         cop.path = routeBetween(cop, cop.lastSeen);
-        cop.repath = 1.4;
+        cop.repath = 0.55;
       }
       while (cop.path.length > 1 && distance(cop, cop.path[0]) < 10)
         cop.path.shift();
-      const target = cop.path[0] || cop.lastSeen;
+      const target =
+        visible && distance(cop, p) < 32 ? p : cop.path[0] || cop.lastSeen;
       const desired = Math.atan2(target.x - cop.x, target.z - cop.z),
         turn = angleDelta(desired, cop.angle);
-      const max = 34 + Math.min(this.checkpoint, 4) * 1.4;
+      const max =
+        (38 + Math.min(this.checkpoint, 5) * 0.65) *
+        (cop.ramRecovery > 0 ? 0.55 : 1);
       const want =
         distance(cop, target) < 5
           ? 0
-          : max * (Math.abs(turn) > 1 ? 0.3 : Math.abs(turn) > 0.5 ? 0.6 : 1);
+          : max * (Math.abs(turn) > 1 ? 0.34 : Math.abs(turn) > 0.5 ? 0.66 : 1);
       const cs = Math.hypot(cop.vx, cop.vz);
-      cop.angle += clamp(turn, -2.1 * dt, 2.1 * dt);
-      const speed = cs + clamp(want - cs, -24 * dt, 12 * dt);
+      cop.angle += clamp(turn, -2.7 * dt, 2.7 * dt);
+      const speed = cs + clamp(want - cs, -28 * dt, 14.5 * dt);
       cop.vx = Math.sin(cop.angle) * speed;
       cop.vz = Math.cos(cop.angle) * speed;
       cop.x += cop.vx * dt;
@@ -433,7 +473,7 @@ export class ChaseSimulation {
         cop.impact > 1 || speed < 2
           ? cop.stuck + dt
           : Math.max(0, cop.stuck - dt);
-      if (cop.stuck > 2) {
+      if (cop.stuck > 1.4) {
         const road = roadProjection(cop);
         cop.x = road.x;
         cop.z = road.z;
@@ -449,14 +489,18 @@ export class ChaseSimulation {
       const d = distance(t, p);
       const impact = collideVehicles(p, t);
       if (impact > 4 && p.invulnerable <= 0) {
+        const damage = this.police.includes(t)
+          ? Math.min(12, impact * 0.4)
+          : impact * 0.55;
         p.health = Math.max(
           0,
-          p.health - impact * 0.55 * carSpec(p.carId).damageScale,
+          p.health - damage * carSpec(p.carId).damageScale,
         );
         p.invulnerable = 0.8;
         this.events.push("COLLISION");
       }
       if (this.police.includes(t)) {
+        if (impact > 4 && t.ramRecovery <= 0) t.ramRecovery = 3.2;
         this.damagePolice(t, impact);
         if (!t.destroyed) closest = Math.min(closest, d);
       } else if (d > 4 && d < 7 && Math.abs(p.speed) > 20 && !t.nearMiss) {
@@ -484,7 +528,7 @@ export class ChaseSimulation {
         );
       this.score += bonus;
       this.lastCheckpointTime = this.time;
-      p.health = Math.min(100, p.health + 10);
+      p.health = Math.min(100, p.health + 20);
       p.nitro = Math.min(100, p.nitro + 25);
       this.events.push(`CHECKPOINT ${this.checkpoint}/6  +${bonus}`);
       if (this.checkpoint === 3) {

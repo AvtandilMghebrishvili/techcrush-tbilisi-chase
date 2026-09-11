@@ -50,6 +50,8 @@ export function makeCockpit() {
       m.renderOrder = 10;
       m.material.depthTest = false;
       m.material.depthWrite = false;
+      // Interior overlays must draw after transparent road guidance and other world effects.
+      m.material.transparent = true;
     }
   });
   wheel.traverse((m) => {

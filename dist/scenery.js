@@ -1,5 +1,6 @@
 import * as THREE from "./vendor/three.module.js";
 import { GRID, GRID_RADIUS, MAP_SIZE, ROAD_EDGE, TOWER } from "./config.js";
+import { buildDistantLandmarks, buildTechcrushGarage } from "./landmarks.js";
 const mat = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...extra });
 export function flagTexture() {
@@ -252,6 +253,8 @@ export function buildGeorgianCity(v) {
   ])
     addFlag(v, x, z);
   tower(v);
+  buildDistantLandmarks(v);
+  buildTechcrushGarage(v);
 }
 export function updateScenery(v, time) {
   for (const flag of v.flags) {

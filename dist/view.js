@@ -3,6 +3,7 @@ import { CHECKPOINTS } from "./simulation.js";
 import { carSpec, CAMERAS } from "./config.js";
 import { buildGeorgianCity, updateScenery } from "./scenery.js";
 import { makeCockpit, updateCockpit } from "./cockpit.js";
+import { makeRouteGuide, updateRouteGuide } from "./route-guide.js";
 import {
   createExplosion,
   animateExplosion,
@@ -28,7 +29,7 @@ export class SceneView {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.12;
-    this.camera = new THREE.PerspectiveCamera(56, 1, 0.2, 1500);
+    this.camera = new THREE.PerspectiveCamera(56, 1, 0.2, 3200);
     this.scene.add(new THREE.HemisphereLight("#a6c6ef", "#373e43", 2.1));
     const sun = new THREE.DirectionalLight("#ffe2b1", 2.2);
     sun.position.set(-120, 170, -200);
@@ -50,6 +51,7 @@ export class SceneView {
     this.camera.add(this.cockpit.root);
     this.scene.add(this.camera);
     this.fx = new Map();
+    this.routeGuide = makeRouteGuide(this.scene);
     this.player = this.makeCar("#eecb39");
     this.player.position.set(4, 0, -30);
     this.scene.add(this.player);
@@ -515,6 +517,7 @@ export class SceneView {
       }
     }
     updateScenery(this, sim.time || performance.now() / 1000);
+    updateRouteGuide(this.routeGuide, sim);
     this.renderer.render(this.scene, this.camera);
   }
 }
