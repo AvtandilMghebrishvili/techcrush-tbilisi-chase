@@ -24,3 +24,5 @@ The five-cross Georgian flag texture, fictional tower geometry inspired by Mtats
 ## TECHCRUSH and skyline update
 
 The TECHCRUSH garage signs, faceted mountain geometry, and stylized Kartlis Deda model are authored in `dist/landmarks.js`. The statue's bowl and sword arrangement was checked against [Georgia Travel's Kartlis Deda reference](https://georgia.travel/kartlis-deda). It is an original simplified game model, deliberately enlarged for visibility on the skyline, not a scan or accurate reconstruction. No new generated image assets were required for this update; the existing Higgsfield textures remain in use.
+
+The Kartlis Deda model was subsequently rebuilt in `dist/kartlis-deda.js` using the user's supplied `images (5).jpg` as its visual reference. The revised original mesh has a straight paneled dress, a bent left arm holding a bowl at shoulder height, a lowered right arm holding a horizontal sword across the waist, a braided headdress and veil, and a silver material. The photo is used only as a reference and is not copied into the published game. The mesh remains a stylized interpretation, not an accurate scan.

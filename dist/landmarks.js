@@ -1,22 +1,8 @@
 import * as THREE from "./vendor/three.module.js";
+import { makeKartlisDeda } from "./kartlis-deda.js";
 
 const stone = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...extra });
-function link(group, start, end, radius, material) {
-  const a = new THREE.Vector3(...start),
-    b = new THREE.Vector3(...end);
-  const mesh = new THREE.Mesh(
-    new THREE.CylinderGeometry(radius, radius * 1.15, a.distanceTo(b), 8),
-    material,
-  );
-  mesh.position.copy(a).add(b).multiplyScalar(0.5);
-  mesh.quaternion.setFromUnitVectors(
-    new THREE.Vector3(0, 1, 0),
-    b.sub(a).normalize(),
-  );
-  group.add(mesh);
-}
-
 export function buildDistantLandmarks(v) {
   const horizon = new THREE.Group();
   horizon.name = "Sololaki hills and Kartlis Deda";
@@ -76,79 +62,11 @@ export function buildDistantLandmarks(v) {
       ),
     );
   }
-  const statue = new THREE.Group();
-  statue.name = "Kartlis Deda — stylized sword and bowl";
+  const statue = makeKartlisDeda();
   statue.position.set(-190, 155, 915);
   statue.rotation.y = Math.PI;
   statue.scale.setScalar(3.1);
   horizon.add(statue);
-  const silver = stone("#d5dfdc", {
-    metalness: 0.38,
-    roughness: 0.46,
-    emissive: "#788683",
-    emissiveIntensity: 0.23,
-    fog: false,
-  });
-  const pale = stone("#a9b4b3", { metalness: 0.32, fog: false });
-  v.box(14, 4, 12, stone("#7d8580", { fog: false }), 0, 2, 0, statue);
-  const dress = new THREE.Mesh(
-    new THREE.CylinderGeometry(2.5, 4.5, 16, 10),
-    silver,
-  );
-  dress.position.y = 12;
-  dress.scale.z = 0.66;
-  statue.add(dress);
-  const torso = new THREE.Mesh(
-    new THREE.CylinderGeometry(3.2, 2.5, 7.5, 8),
-    silver,
-  );
-  torso.position.y = 22.5;
-  torso.scale.z = 0.62;
-  statue.add(torso);
-  v.box(5.8, 0.65, 3.6, pale, 0, 18.8, 0, statue);
-  link(statue, [0, 25.5, 0], [0, 28, 0], 1.05, silver);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(1.8, 10, 8), silver);
-  head.position.set(0, 29.1, 0.1);
-  head.scale.set(0.78, 1.2, 0.85);
-  statue.add(head);
-  const hair = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.35, 1.65, 5, 8),
-    pale,
-  );
-  hair.position.set(0, 27.8, -0.7);
-  hair.scale.z = 0.65;
-  statue.add(hair);
-  // Left arm offers the bowl; the right holds a downward-pointing sword.
-  link(statue, [2.7, 24.7, 0], [5.7, 22.4, 0.8], 0.95, silver);
-  link(statue, [5.7, 22.4, 0.8], [8.8, 23.4, 2.2], 0.72, silver);
-  const bowl = new THREE.Mesh(
-    new THREE.SphereGeometry(
-      2.1,
-      12,
-      6,
-      0,
-      Math.PI * 2,
-      Math.PI / 2,
-      Math.PI / 2,
-    ),
-    silver,
-  );
-  bowl.position.set(8.8, 24.4, 2.2);
-  bowl.scale.y = 0.5;
-  statue.add(bowl);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.16, 5, 18), silver);
-  rim.rotation.x = Math.PI / 2;
-  rim.position.copy(bowl.position);
-  statue.add(rim);
-  link(statue, [-2.7, 24.7, 0], [-5.1, 20.8, 0], 0.95, silver);
-  link(statue, [-5.1, 20.8, 0], [-5.5, 18.9, 1.1], 0.72, silver);
-  v.box(0.55, 4.2, 0.65, pale, -5.5, 19.4, 1.1, statue);
-  v.box(4, 0.45, 0.7, silver, -5.5, 17.7, 1.1, statue);
-  const blade = new THREE.Mesh(new THREE.ConeGeometry(0.85, 13, 4), silver);
-  blade.rotation.z = Math.PI;
-  blade.position.set(-5.5, 10.9, 1.1);
-  blade.scale.z = 0.28;
-  statue.add(blade);
   // A rocky shoulder connects the monument to the mountain silhouette.
   const hill = new THREE.Mesh(
     new THREE.CylinderGeometry(32, 180, 175, 11),

@@ -16,6 +16,8 @@ Reproduce with `node tests/route-drive.mjs`, `node tests/route-drive.mjs rally`,
 
 ## Browser review
 
+The subsequent photo-reference statue revision was inspected in front and three-quarter close-up views, then in the actual game skyline and cockpit view. Confirmed the raised bowl, horizontal sword, straight dress and headdress, successful start/driving, and an empty browser error/warning log. The temporary model-review page was removed before packaging. This change affects scenery only; the mechanics results below remain those of the prior tested simulation.
+
 Verified the TECHCRUSH title and garage signs, distant mountains, mounted Kartlis Deda statue, animated road arrows, normal driving and checkpoint progress, and cockpit navigation. Browser console checks returned no errors or warnings. The prior desktop and phone viewport layout checks remain applicable; this update adds no new HUD panels.
 
 During review, corrected transparent road arrows rendering over the cockpit dashboard by placing the interior in the final transparent overlay pass. Balanced the stronger pursuit with patrol ram recovery, capped ram damage, and 20 condition repair per checkpoint. The GT escape remains demanding, as shown by its low remaining condition in the controller run.

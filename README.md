@@ -57,6 +57,7 @@ Controls use physical key positions, including when the Georgian keyboard layout
 - `dist/config.js` and `dist/controls.js` — map/car specifications and keyboard input mapping.
 - `dist/scenery.js` — low-rise city, flags, balconies, and tower.
 - `dist/landmarks.js` and `dist/route-guide.js` — TECHCRUSH signs, mountains, Kartlis Deda, and animated street navigation.
+- `dist/kartlis-deda.js` — revised 3D statue modeled from the supplied photograph, with raised bowl, horizontal sword, dress panels, and headdress.
 - `dist/cockpit.js` and `dist/effects.js` — vehicle interior, patrol health labels, explosions, and cleanup.
 - `dist/assets/` — Higgsfield-generated textures and city reference image.
 - `server.mjs` — dependency-free local static server.
