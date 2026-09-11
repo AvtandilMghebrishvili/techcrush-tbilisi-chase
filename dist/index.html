@@ -13,6 +13,7 @@
     />
     <link rel="icon" type="image/jpeg" href="./assets/techcrush-logo.jpg" />
     <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./garage.css" />
     <script type="importmap">
       {
         "imports": {
@@ -84,7 +85,7 @@
         <div class="eyebrow"><span></span> TECHCRUSH / TBILISI STREETS</div>
         <h1>TBILISI<br /><em>CHASE.</em></h1>
         <p class="intro-copy">
-          Rustaveli. Rike. Abanotubani.<br />Six checkpoints. Twelve patrols.
+          Rustaveli. Rike. Abanotubani.<br />Six checkpoints. A city in pursuit.
           One way out.
         </p>
         <div
@@ -94,6 +95,10 @@
           aria-label="Choose your car"
         ></div>
         <p id="car-details" class="car-details"></p>
+        <p id="intro-career" class="career-line"></p>
+        <button id="workshop-open" class="secondary workshop-link">
+          GARAGE · UPGRADES & BOXES
+        </button>
         <button id="start" class="primary">
           START YOUR ENGINE <span>↗</span>
         </button>
@@ -131,6 +136,9 @@
       </section>
       <section id="hud" class="hud" hidden>
         <div class="score-panel">
+          <div class="career-hud">
+            <b id="run-level">LEVEL 1</b><span id="run-cash">0 CR</span>
+          </div>
           <span class="label">RUN SCORE</span><strong id="score">000000</strong>
           <div class="checkpoint-heading">
             <span>CHECKPOINTS</span><b id="progress">0 / 6</b>
@@ -190,12 +198,80 @@
           <h2 id="modal-title">PAUSED.</h2>
           <p id="modal-copy">Your getaway can wait.</p>
           <div id="result-score"></div>
+          <p id="result-reward"></p>
           <button id="resume" class="primary">
             BACK TO THE CHASE <span>↗</span></button
           ><button id="restart" class="secondary">RESTART RUN</button>
           <button id="garage-back" class="secondary">CHANGE CAR</button>
         </div>
       </section>
+      <dialog id="workshop" class="workshop" aria-labelledby="workshop-title">
+        <header class="workshop-header">
+          <div>
+            <span class="eyebrow">TECHCRUSH / PERFORMANCE DIVISION</span>
+            <h2 id="workshop-title">BUILD YOUR GETAWAY.</h2>
+          </div>
+          <button
+            id="workshop-close"
+            class="icon-close"
+            aria-label="Close garage"
+          >
+            ×
+          </button>
+        </header>
+        <div class="garage-wallet">
+          <b id="garage-level">LEVEL 01</b
+          ><strong id="garage-credits">0 CR</strong
+          ><span id="garage-boxes">0 BOXES</span
+          ><small id="garage-save-state">Loading…</small>
+        </div>
+        <div
+          id="workshop-cars"
+          class="workshop-cars"
+          aria-label="Car to upgrade"
+        ></div>
+        <div id="garage-stats" class="garage-stats"></div>
+        <p id="level-threat" class="level-threat"></p>
+        <section class="box-bench">
+          <div>
+            <h3>THREE SLOTS. ANY COMBINATION.</h3>
+            <p>14 parts · four tiers · repeated drops are possible.</p>
+            <small
+              >Bronze 55% · Silver 28% · Gold 13% · Diamond 4% per slot</small
+            >
+          </div>
+          <button id="open-box" class="primary">OPEN A BOX ↗</button>
+        </section>
+        <p id="last-drop" class="last-drop"></p>
+        <p id="save-error" role="status"></p>
+        <button id="save-retry" class="secondary" hidden>RETRY SAVE</button>
+        <div class="parts-heading">
+          <h3>PERFORMANCE PARTS</h3>
+          <span>Earn credits from checkpoints, wrecks and escaping.</span>
+        </div>
+        <div id="part-grid" class="part-grid"></div>
+        <div class="save-footer">
+          <span
+            >Each player has a separate saved garage. Credits are earned in the
+            game.</span
+          ><button id="garage-save-key">BACK UP PRIVATE GARAGE KEY</button
+          ><button id="garage-restore-key">RESTORE GARAGE</button
+          ><input
+            id="garage-key-file"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+      </dialog>
+      <dialog id="loot-dialog" class="loot-dialog" aria-labelledby="loot-title">
+        <span class="eyebrow">TECHCRUSH / SUPPLY DROP</span>
+        <h2 id="loot-title">PARTS INCOMING.</h2>
+        <div id="loot-slots" class="loot-slots"></div>
+        <p id="loot-summary" aria-live="polite">Opening your three rewards…</p>
+        <button id="loot-skip" class="secondary">SKIP ANIMATION</button
+        ><button id="loot-done" class="primary">BACK TO UPGRADES ↗</button>
+      </dialog>
       <footer>
         <div class="controls">
           <span

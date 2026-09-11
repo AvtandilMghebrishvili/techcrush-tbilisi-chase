@@ -103,7 +103,7 @@ export function stepAirborne(p, input, dt, obstacles, resolve) {
   p.airborne = false;
   p.rampCooldown = 1.2;
   const damage = (!upright ? 18 : 0) + Math.max(0, landingSpeed - 13) * 1.2;
-  p.health = Math.max(0, p.health - damage);
+  p.health = Math.max(0, p.health - damage*(p.performance?.landingScale||1));
   if (!upright) {
     p.flipped = true;
     p.y = 1.38;

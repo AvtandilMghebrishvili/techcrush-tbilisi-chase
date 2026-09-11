@@ -4,3 +4,10 @@ artifacts/
 *.zip
 *.tar.gz
 referensi quCebis/
+dist/client/
+dist/server/
+dist/.openai/
+*private-garage-key*.json
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

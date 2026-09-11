@@ -1,4 +1,5 @@
 import { ROAD_DATA } from "./road-data.js";
+import { overlapsRoad, placeOffRoad } from "./map-clearance.js";
 import {
   reservedDistrict,
   DISTRICT_SOLIDS,
@@ -135,7 +136,11 @@ export const START = {
   ...point(41.69657, 44.80615, "Baratashvili"),
   angle: 1.66,
 };
-export const CLOCK_BUILDING = { x: -410, z: -234 };
+export const CLOCK_PARTS = [
+  { x: 7.5, z: 0, w: 38, d: 28, h: 46, angle: 0 },
+  { x: 14, z: -30, w: 26, d: 48, h: 29, angle: 0 },
+];
+export const CLOCK_BUILDING = placeOffRoad({ x: -410, z: -234 }, CLOCK_PARTS);
 export const CHECKPOINTS = [
   point(41.6964, 44.80348, "Baratashvili Avenue"),
   point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
@@ -163,7 +168,7 @@ for (const road of ROADS) {
         z = road.start.z + fz * along + rz * offset * side;
       if (reservedDistrict({ x, z }, Math.max(w, d) / 2)) continue;
       // Reserve the photographed clock building at the Baratashvili fork.
-      if (x > -460 && x < -360 && z > -280 && z < -140) continue;
+      if (Math.hypot(x - CLOCK_BUILDING.x, z - CLOCK_BUILDING.z) < 75) continue;
       let clear = true;
       for (const sx of [-1, 0, 1])
         for (const sz of [-1, 0, 1]) {
@@ -176,6 +181,7 @@ for (const road of ROADS) {
         }
       if (
         !clear ||
+        overlapsRoad({ x, z, w, d, angle: road.angle - Math.PI / 2 }, 3) ||
         BUILDINGS.some(
           (b) =>
             dist({ x, z }, b) < (Math.max(w, d) + Math.max(b.w, b.d)) * 0.48,
@@ -212,24 +218,12 @@ for (let i = BUILDINGS.length - 1; i >= 0; i--) {
 }
 BUILDINGS.push(
   ...DISTRICT_SOLIDS,
-  {
-    x: CLOCK_BUILDING.x + 9,
-    z: CLOCK_BUILDING.z,
-    w: 34,
-    d: 27,
-    h: 31,
-    angle: 0,
+  ...CLOCK_PARTS.map((b) => ({
+    ...b,
+    x: b.x + CLOCK_BUILDING.x,
+    z: b.z + CLOCK_BUILDING.z,
     landmark: true,
-  },
-  {
-    x: CLOCK_BUILDING.x + 14,
-    z: CLOCK_BUILDING.z + 30,
-    w: 25,
-    d: 46,
-    h: 27,
-    angle: 0,
-    landmark: true,
-  },
+  })),
 );
 export function containsPoint(o, x, z, padding = 0) {
   if (o.angle === undefined)

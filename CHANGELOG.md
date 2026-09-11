@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0 — 2026-09-11
+
+- Clear full building footprints from roads, correct the clock-building wing collision and connect three driveable bridges; Peace Bridge is an explicitly fictional driving adaptation.
+- Prevent high-speed wall tunneling; break street, bridge, flag and sign poles with rewind support.
+- Three distinct original sports-car models, higher speeds and visible equipment changes.
+- Career levels with faster, more responsive police, larger waves and coordinated flanking.
+- Server-saved anonymous garages, 14 parts × four tiers, three-slot boxes with duplicate drops, currency, installation, upgrades and salvage.
+- D1/SQLite persistence, generated migration, private-key backup/restore, versioned writes and idempotent retries.
+- Add collision, economy, upgrade-physics and persistence tests. CI now builds the Worker; remove static-only Pages workflow.
+- Expand English documentation for saves, API, deployment and development.
+
 ## 1.0.0 — 2026-09-11
 
 First complete public GitHub source release. This packages the expanded game previously developed through multiple private Sites deployments; the Sites deployment version number is independent of this source release version.

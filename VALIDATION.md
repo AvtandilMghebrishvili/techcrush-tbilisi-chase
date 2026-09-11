@@ -1,4 +1,26 @@
-# Validation — expanded Tbilisi, stunts and rewind, 11 September 2026
+# Validation — TECHCRUSH Tbilisi Chase
+
+## Career edition 1.1.0 — 11 September 2026
+
+`npm test`: **57 passed, 0 failed**. New coverage includes full-footprint clearance for every building against all road widths, three bridges driven both ways, high-speed thin-wall collisions, distinct finite car meshes, 14 parts/four tiers, integrated engine/brake/turbo effects, repeatable three-slot rewards, wallet/part operations, level scaling, wreck-credit rewind, breakable poles and durable SQLite saves. The API suite verifies two isolated profiles, conflicts, retries, box/level idempotency and closing/reopening the database.
+
+The regenerated road graph contains **519 nodes and 671 segments**, with a connected asphalt surface containing **46 block islands**. Peace Bridge has an explicitly fictional driveable connection.
+
+Observed level-1 controller runs, with ordinary driving inputs and recovery:
+
+| Model | Result | Gates | Time | Score | HP | Takedowns |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| Apex R | Won | 6/6 | 220 s | 32,384 | 54 | 9 |
+| Vector V12 | Won | 6/6 | 211 s | 29,473 | 85 | 4 |
+| Veyra W16 | Won | 6/6 | 218.1 s | 32,417 | 88 | 6 |
+
+The initial Veyra controller was artificially capped at the previous car's speed; it reached all six gates but wrecked before escape. Updating the controller to use the selected car's speed envelope produced the recorded win. A level-4 Veyra fixture with all Silver parts reached all six gates but wrecked during escape at 290 s with 14 police slots; it demonstrates tougher pursuit, not successful completion or human difficulty calibration. No checkpoints, immunity or health were granted during those runs. The test controller does not intentionally jump or rewind; dedicated tests cover those mechanics.
+
+Local Chromium review checked all three model selections, welcome-box animation, a free Gold spoiler installation, a 600 CR engine purchase and reload persistence (400 CR remaining, fitted engine/spoiler retained). A Veyra drive reached 316 km/h with turbo after approximately three seconds at 100 HP; holding rewind returned position, speed, score and nitro to the initial state. Cockpit rendering was inspected and its driver offset aligned with the steering wheel. Tests and visuals are local evidence; they do not establish low-end phone performance or a one-to-one reconstruction of Tbilisi.
+
+## Historical expanded-city validation
+
+The remaining sections document version 1.0.0, before the career and model update; their counts and car labels are historical.
 
 ## Automated checks
 

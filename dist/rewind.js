@@ -14,6 +14,8 @@ const scalars = [
   "closestPolice",
   "roadblockAhead",
   "stuntScore",
+  "runCash",
+  "trafficWrecks",
 ];
 export class RewindTimeline {
   constructor() {
@@ -40,6 +42,7 @@ export class RewindTimeline {
       broken: sim.trees.flatMap((t, i) =>
         t.broken ? [[i, t.fallenAt, t.fallAngle]] : [],
       ),
+      poles: (sim.poles||[]).map(p=>({broken:p.broken,fallenAt:p.fallenAt,fallAngle:p.fallAngle})),
     };
     for (const k of scalars) frame[k] = sim[k];
     this.frames.push(frame);
@@ -66,6 +69,7 @@ export class RewindTimeline {
     for (const [i, at, a] of f.broken) {
       Object.assign(sim.trees[i], { broken: true, fallenAt: at, fallAngle: a });
     }
+    for(const [i,p] of (sim.poles||[]).entries())Object.assign(p,f.poles?.[i]||{broken:false,fallenAt:0,fallAngle:0});
     sim.events.length = 0;
     this.lastApplied = index;
   }

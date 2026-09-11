@@ -1,4 +1,6 @@
 import * as THREE from "./vendor/three.module.js";
+import { updateBreakables } from "./breakable-props.js";
+import { makeOriginalSportsCar } from "./car-models.js";
 import { CHECKPOINTS } from "./simulation.js";
 import { carSpec, CAMERAS } from "./config.js";
 import { updateScenery } from "./scenery.js";
@@ -91,9 +93,7 @@ export class SceneView {
   }
   makeCar(color, police = false, carId = "gt") {
     if (police) return makeSedan(this, true);
-    return this.carTemplate
-      ? sportsCar(this, color, police, carId)
-      : new THREE.Group();
+    return makeOriginalSportsCar(carId, color);
   }
   async loadTextures() {
     const loader = new THREE.TextureLoader();
@@ -161,6 +161,13 @@ export class SceneView {
     this.selectCar("gt");
   }
   setupGame(sim) {
+    sim.propDefinitions = (this.breakableProps || []).map((p) => p.definition);
+    sim.poles = sim.propDefinitions.map((p) => ({
+      ...p,
+      broken: false,
+      fallenAt: 0,
+      fallAngle: 0,
+    }));
     this.shake = 0;
     this.camera.position.set(START.x - 12, 5.2, START.z + 6);
     this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
@@ -298,7 +305,7 @@ export class SceneView {
       )
         disposeGroup(this.scene, child);
     this.fx.clear();
-    this.selectCar(sim.player.carId);
+    this.selectCar(sim.player.carId, sim.player.equipment);
     this.trafficMeshes = [];
     this.policeMeshes = [];
     for (const car of sim.traffic) {
@@ -321,10 +328,10 @@ export class SceneView {
     this.cameraLook.set(sim.player.x, 1.2, sim.player.z);
     for (const m of this.skids) m.visible = false;
   }
-  selectCar(id) {
+  selectCar(id, equipment = {}) {
     const spec = carSpec(id),
       previous = this.player;
-    this.player = this.makeCar(spec.color, false, spec.id);
+    this.player = makeOriginalSportsCar(spec.id, spec.color, equipment);
     addTurboExhaust(this.player);
     if (previous) {
       this.player.position.copy(previous.position);
@@ -368,6 +375,7 @@ export class SceneView {
     this.updateGate(0);
   }
   render(sim, dt, input) {
+    updateBreakables(this, sim);
     const ready = sim.phase === "ready";
     if (!ready) {
       const p = sim.player;
@@ -431,6 +439,8 @@ export class SceneView {
       const mode = CAMERAS[this.cameraMode].id;
       const interior = mode === "cockpit",
         hood = mode === "hood";
+      if (this.player.userData.glass)
+        this.player.userData.glass.opacity = interior ? 0.16 : 0.8;
       this.player.visible = !hood;
       this.cockpit.root.visible = false;
       updateCockpit(this.cockpit, p, input.steer);
@@ -441,7 +451,7 @@ export class SceneView {
       );
       if (interior || hood) {
         const seat = mode === "cockpit" ? -0.28 : 1.8;
-        const driverOffset = interior ? 0.34 : 0;
+        const driverOffset = interior ? -0.36 : 0;
         this.camera.position.set(
           p.x + forward.x * seat + forward.z * driverOffset,
           (p.y || 0) + (interior ? 1.08 : 0.97),

@@ -2,13 +2,8 @@ import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { HDRLoader } from "three/addons/loaders/HDRLoader.js";
 import { makePatrolHealthBar } from "./effects.js";
-export async function loadSportsAssets(view) {
-  const loader = new GLTFLoader();
-  const [gltf, hdr, ao] = await Promise.all([
-    loader.loadAsync("./assets/sports-car.glb"),
-    new HDRLoader().loadAsync("./assets/daylight.hdr"),
-    new THREE.TextureLoader().loadAsync("./assets/ferrari_ao.png"),
-  ]);
+export async function loadSportsAssets(view, { legacy = false } = {}) {
+  const hdr = await new HDRLoader().loadAsync("./assets/daylight.hdr");
   hdr.mapping = THREE.EquirectangularReflectionMapping;
   const pmrem = new THREE.PMREMGenerator(view.renderer);
   view.scene.environment = pmrem.fromEquirectangular(hdr).texture;
@@ -17,6 +12,12 @@ export async function loadSportsAssets(view) {
   view.scene.background = hdr;
   view.scene.backgroundIntensity = 0.62;
   view.scene.backgroundBlurriness = 0.045;
+  // Retain the licensed historical model path without downloading it for new cars.
+  if (!legacy) return;
+  const [gltf, ao] = await Promise.all([
+    new GLTFLoader().loadAsync("./assets/sports-car.glb"),
+    new THREE.TextureLoader().loadAsync("./assets/ferrari_ao.png"),
+  ]);
   view.carTemplate = gltf.scene.children[0];
   view.carAO = ao;
   const box = new THREE.Box3().setFromObject(view.carTemplate);

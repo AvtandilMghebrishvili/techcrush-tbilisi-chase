@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { registerBreakable } from "./breakable-props.js";
 import { GRID, GRID_RADIUS, MAP_SIZE, ROAD_EDGE, TOWER } from "./config.js";
 import { buildDistantLandmarks, buildTechcrushGarage } from "./landmarks.js";
 const mat = (color, extra = {}) =>
@@ -39,7 +40,11 @@ function beam(parent, a, b, r, material) {
 }
 export function addFlag(v, x, z, height = 11, scale = 1) {
   const pole = mat("#9caaa7");
-  v.box(0.18, height, 0.18, pole, x, height / 2, z, v.decor);
+  const root=new THREE.Group();
+  root.position.set(x,0,z);
+  v.decor.add(root);
+  registerBreakable(v,root,x,z,height);
+  v.box(0.18, height, 0.18, pole, 0, height / 2, 0, root);
   const geo = new THREE.PlaneGeometry(6 * scale, 4 * scale, 12, 5);
   const mesh = new THREE.Mesh(
     geo,
@@ -52,8 +57,8 @@ export function addFlag(v, x, z, height = 11, scale = 1) {
       emissiveIntensity: 0.2,
     }),
   );
-  mesh.position.set(x + 3 * scale, height - 2 * scale, z);
-  v.decor.add(mesh);
+  mesh.position.set(3 * scale, height - 2 * scale, 0);
+  root.add(mesh);
   v.flags.push(mesh);
 }
 export function tower(v) {

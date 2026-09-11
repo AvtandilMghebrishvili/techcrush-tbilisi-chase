@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { registerBreakable } from "./breakable-props.js";
 import {
   ROADS,
   NODES,
@@ -272,15 +273,20 @@ function streetDetails(v, line) {
         const x = r.start.x + fx * t + rx * (r.width / 2 + 2.4) * side,
           z = r.start.z + fz * t + rz * (r.width / 2 + 2.4) * side;
         if (nearestRoad({ x, z }).distance < r.width / 2 + 1) continue;
-        v.box(0.15, 8, 0.15, metal, x, 4, z);
+        const pole = new THREE.Group();
+        pole.position.set(x,0,z);
+        v.decor.add(pole);
+        registerBreakable(v,pole,x,z);
+        v.box(0.15, 8, 0.15, metal, 0, 4, 0, pole);
         const arm = v.box(
           2.5,
           0.12,
           0.12,
           metal,
-          x - rx * side,
+          -rx * side,
           8,
-          z - rz * side,
+          -rz * side,
+          pole,
         );
         arm.rotation.y = r.angle;
         const light = v.box(
@@ -288,9 +294,10 @@ function streetDetails(v, line) {
           0.12,
           0.55,
           lamp,
-          x - rx * side * 2,
+          -rx * side * 2,
           7.95,
-          z - rz * side * 2,
+          -rz * side * 2,
+          pole,
         );
         light.rotation.y = r.angle;
         trees.push({
@@ -328,6 +335,11 @@ function streetDetails(v, line) {
   const p = nearestRoad(START);
   sign.position.set(p.x - 8, 5, p.z - 14);
   sign.rotation.y = -Math.PI / 2;
-  v.decor.add(sign);
-  v.box(0.12, 5, 0.12, metal, sign.position.x, 2.5, sign.position.z);
+  const post = new THREE.Group();
+  post.position.set(sign.position.x,0,sign.position.z);
+  sign.position.set(0,5,0);
+  post.add(sign);
+  v.decor.add(post);
+  v.box(0.12,5,0.12,metal,0,2.5,0,post);
+  registerBreakable(v,post,post.position.x,post.position.z,5);
 }

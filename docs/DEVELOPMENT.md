@@ -1,22 +1,26 @@
 # Development guide
 
-Run commands from the repository root after `npm ci`. Start the local server with `npm start`, make changes, refresh the browser and run `npm test` before opening a pull request. There is no bundling step or hidden application source outside `dist/`.
+Use Node.js 24+. Run commands from the repository root after `npm ci`. Start with `npm start`, refresh after browser edits and restart after backend edits. Run `npm test` and `npm run build` before a pull request. Browser source is authored in `dist/`; server source is in `server/`. Generated `dist/client`, `dist/server` and `dist/.openai` are ignored. Never delete the entire dist directory.
 
 ## Change vehicles and handling
 
-Edit `CARS` in `dist/config.js`. Each trim defines its stable ID, label, color, speed, acceleration, handling and damage multiplier. Speeds are m/s: `50` gives 180 km/h before turbo. Lower `damageScale` means less damage. The legacy IDs `gt`, `rally` and `suv` currently all select sports-car configurations of the same 458 model.
+Edit `CARS` in `dist/config.js`. Each model defines ID, label, dimensions, speed, acceleration, handling and damage multiplier. Speeds are m/s; lower damageScale means less damage. Legacy IDs `gt`, `rally`, `suv` now select Apex R, Vector V12 and Veyra W16 respectively, each with a separate original geometry in `dist/car-models.js`.
 
 Core throttle, braking, reverse, grip and drift integration lives in `stepVehicle` in `dist/simulation.js`. Keep steering consistent with `controls.js` and the tests: A/negative steer turns left when moving forward. Turbo is simulation state (charge, spool, recharge delay and lockout); flames/camera/audio should reflect it, not independently decide whether a boost is active.
 
-Edit `dist/sports-car.js` for the sports-car body, paint and wheel setup, `dist/cockpit.js` for its cabin, and `dist/patrol-car.js` for procedural patrol and civilian cars. Match visual dimensions to contact dimensions in `dist/contacts.js`; otherwise cars may overlap visually or collide too early. Different physics trims do not imply different 3D base models.
+Edit `dist/car-models.js` for sports-car bodies, interiors, wheels and equipment visuals. `dist/patrol-car.js` builds police and civilian variants. Match render dimensions to contact dimensions. Keep upgrades in `dist/progression.js` so browser and server share rules; use `upgradedSpec()` in actual physics, not only UI statistics.
 
 ## Change police and game balance
 
-`dist/simulation.js` owns initial police, roles, wave timing/cap, sightings, route decisions, HP, destruction and replacement. Current waves add one unit every 35 seconds up to twelve, with extra checkpoint reinforcements. Pursuit tests cover separation, roadblocks, limited shared observations and replacement after destruction.
+`dist/simulation.js` owns roles, sightings, routes, HP and replacement. `pursuitTuning()` in `dist/progression.js` scales those decisions by level. Level 1 starts with three officers and adds waves every 35 seconds up to twelve; later levels increase counts and decision speed. Test separation, flanking, roadblocks, observation limits and replacement together.
 
 Preserve stable vehicle identities and include new mutable fields in rewind. For tuning changes, use both focused tests and full-route runs; a smarter roadblock or larger police force can make a run impossible even if individual steering tests pass. The controller has ideal route knowledge and uses recovery, so also assess human driving difficulty in the browser.
 
-Checkpoint positions and street routes are in `dist/city-map.js`; collection rewards and final escape conditions are in `dist/simulation.js`. Keep gates on clear, connected roads. Update the [README rules](../README.md#rules) when changing visible game behavior or numbers.
+Checkpoint positions and routes are in `dist/city-map.js`; collection and escape rules are in `dist/simulation.js`. Keep gates on clear, connected roads. Update the [career rules](../README.md#career-and-garage) when behavior or numbers change.
+
+## Database changes
+
+Edit `db/schema.ts`, then run `npm run db:generate`. Review the generated schema-only SQL and commit `drizzle/` including its metadata. Never edit an already applied migration; generate a new one. Local startup applies migrations to SQLite; production receives them in the Sites archive. Never commit `.sites-runtime/garages.sqlite` or private garage-key backups. API behavior and concurrency are documented in [Career](CAREER.md).
 
 ## Extend the map
 

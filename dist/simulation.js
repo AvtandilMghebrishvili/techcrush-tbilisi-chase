@@ -3,6 +3,7 @@ import { vehicleContact, treeContact } from "./contacts.js";
 import { RewindTimeline } from "./rewind.js";
 import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
 import { riverDistance } from "./district-data.js";
+import { upgradedSpec, pursuitTuning } from "./progression.js";
 // Deterministic, renderer-independent simulation. Distances are metres, time is seconds.
 import {
   GRID,
@@ -153,24 +154,26 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
     (car.boostStrength || 0) +
     ((boosting ? 1 : 0) - (car.boostStrength || 0)) *
       (1 - Math.exp(-dt * (boosting ? 8 : 14)));
-  const spec = carSpec(car.carId);
-  let accel = throttle * (throttle * forward < -0.5 ? 30 : spec.acceleration);
+  const spec =
+    car.performance || upgradedSpec(carSpec(car.carId), car.equipment);
+  let accel =
+    throttle * (throttle * forward < -0.5 ? spec.braking : spec.acceleration);
   if (boosting) {
-    accel += 19 * car.boostStrength;
-    car.nitro = Math.max(0, car.nitro - dt * 25);
-    car.boostCooldown = 0.85;
+    accel += spec.boostPower * car.boostStrength;
+    car.nitro = Math.max(0, car.nitro - dt * spec.nitroDrain);
+    car.boostCooldown = spec.boostDelay;
     if (car.nitro <= 0) car.nitroLocked = true;
   } else if (car.boostCooldown <= 0)
-    car.nitro = Math.min(100, car.nitro + dt * 10);
+    car.nitro = Math.min(100, car.nitro + dt * spec.nitroRegen);
   forward += accel * dt;
   forward *= Math.exp(-dt * (0.13 + 0.0038 * Math.abs(forward)));
   if (!throttle && Math.abs(forward) < 0.15) forward = 0;
   if (input.brake) forward *= Math.exp(-dt * 0.8);
-  const limit = boosting ? spec.topSpeed + 15 : spec.topSpeed;
+  const limit = boosting ? spec.topSpeed + spec.boostSpeed : spec.topSpeed;
   // Preserve momentum on release: shed excess speed through drag instead of clipping it.
   if (forward > limit)
     forward = Math.max(limit, forward - (9 + (forward - limit) * 0.8) * dt);
-  forward = Math.max(-10, Math.min(spec.topSpeed + 15, forward));
+  forward = Math.max(-10, Math.min(spec.topSpeed + spec.boostSpeed, forward));
   const turn =
     -steer *
     spec.handling *
@@ -189,17 +192,22 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
   car.drift +=
     (Number(sliding) - car.drift) * (1 - Math.exp(-dt * (sliding ? 6 : 8)));
   lateral -= forward * turn * dt * car.drift;
-  lateral *= Math.exp(-dt * (8.5 - car.drift * 6.7));
+  lateral *= Math.exp(-dt * (spec.grip - car.drift * 6.7));
   lateral = clamp(lateral, -Math.abs(forward) * 0.65, Math.abs(forward) * 0.65);
   car.slip = Math.atan2(lateral, Math.max(1, Math.abs(forward)));
   car.isDrifting = Math.abs(car.slip) > 0.1 && Math.abs(forward) > 10;
   car.vx = Math.sin(car.angle) * forward + Math.cos(car.angle) * lateral;
   car.vz = Math.cos(car.angle) * forward - Math.sin(car.angle) * lateral;
-  car.x += car.vx * dt;
-  car.z += car.vz * dt;
   car.impact = 0;
   car.invulnerable = Math.max(0, car.invulnerable - dt);
-  for (const rect of obstacles) resolveCircleRect(car, 2.1, rect);
+  // Swept substeps keep fast/upgraded cars from skipping thin walls.
+  const steps = Math.max(1, Math.ceil((Math.hypot(car.vx, car.vz) * dt) / 0.8));
+  for (let i = 0; i < steps; i++) {
+    car.x += (car.vx * dt) / steps;
+    car.z += (car.vz * dt) / steps;
+    for (const rect of obstacles)
+      resolveCircleRect(car, Math.max(2.1, (car.length || 4.65) / 2), rect);
+  }
   if (Math.abs(car.x) > LIMIT) {
     car.x = clamp(car.x, -LIMIT, LIMIT);
     car.impact = Math.abs(car.vx);
@@ -250,6 +258,17 @@ export class ChaseSimulation {
   reset() {
     this.player = vehicle(START.x, START.z, START.angle);
     this.player.carId = this.selectedCar || "gt";
+    this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
+    this.difficulty = pursuitTuning(this.level);
+    this.player.equipment = structuredClone(this.runOptions?.equipment || {});
+    this.player.performance = upgradedSpec(
+      carSpec(this.player.carId),
+      this.player.equipment,
+    );
+    this.player.width = this.player.performance.width;
+    this.player.length = this.player.performance.length;
+    this.runCash = 0;
+    this.trafficWrecks = 0;
     this.time = 0;
     this.score = 0;
     this.checkpoint = 0;
@@ -261,7 +280,7 @@ export class ChaseSimulation {
     this.takedowns = 0;
     this.driftScore = 0;
     this.stuntScore = 0;
-    this.nextWaveAt = 35;
+    this.nextWaveAt = this.difficulty.waveInterval;
     this.heatLevel = 1;
     this.ramps = RAMPS;
     this.timeline = new RewindTimeline();
@@ -271,8 +290,17 @@ export class ChaseSimulation {
       fallenAt: 0,
       fallAngle: 0,
     }));
+    this.poles = (this.propDefinitions || []).map((p) => ({
+      ...p,
+      broken: false,
+      fallenAt: 0,
+      fallAngle: 0,
+    }));
     this.nextCopId = 1;
-    this.police = [75, 115, 155].map((d, i) => {
+    this.police = Array.from(
+      { length: this.difficulty.initialUnits },
+      (_, i) => 75 + i * 40,
+    ).map((d, i) => {
       const p = roadProjection({
         x: START.x - Math.sin(START.angle) * d,
         z: START.z - Math.cos(START.angle) * d,
@@ -292,6 +320,10 @@ export class ChaseSimulation {
       );
       if (distance(car, this.player) < 45) continue;
       Object.assign(car, {
+        id: 10000 + i,
+        hitCooldown: 0,
+        destroyed: false,
+        respawnAt: 0,
         toNode: reverse ? road.a : road.b,
         fromNode: reverse ? road.b : road.a,
         cruise: 10 + rng() * 7,
@@ -337,7 +369,8 @@ export class ChaseSimulation {
       lastSeen: { x: START.x, z: START.z },
     };
   }
-  start(carId = this.selectedCar || "gt") {
+  start(carId = this.selectedCar || "gt", options = this.runOptions || {}) {
+    this.runOptions = options;
     this.selectedCar = carSpec(carId).id;
     this.reset();
     this.phase = "running";
@@ -356,10 +389,30 @@ export class ChaseSimulation {
     if (credit) {
       this.takedowns++;
       this.score += 750;
+      this.runCash += 350;
     }
     this.explosions.push({ id: cop.id, x: cop.x, z: cop.z, born: this.time });
     this.events.push(credit ? "PATROL DESTROYED  +750" : "PATROL WRECKED");
     return true;
+  }
+  damageTraffic(car, impact) {
+    if (car.destroyed || car.hitCooldown > 0 || impact < 5) return;
+    car.health = Math.max(0, car.health - clamp(impact * 2.2, 25, 75));
+    car.hitCooldown = 0.9;
+    if (car.health === 0) {
+      car.destroyed = true;
+      car.vx = car.vz = 0;
+      car.respawnAt = this.time + 12;
+      this.runCash += 120;
+      this.trafficWrecks++;
+      this.explosions.push({
+        id: `traffic-${car.id}`,
+        x: car.x,
+        z: car.z,
+        born: this.time,
+      });
+      this.events.push("TRAFFIC WRECK  +120 CR");
+    }
   }
   respawnPolice(cop) {
     const p = this.player;
@@ -435,7 +488,7 @@ export class ChaseSimulation {
     this.events.push(automatic ? "BACK ON YOUR WHEELS" : "CAR RESET  −200");
   }
   addReinforcement(role, offset) {
-    if (this.police.length >= 12) return;
+    if (this.police.length >= this.difficulty.maxUnits) return;
     const p = this.player,
       target = roadProjection({
         x: p.x + Math.sin(p.angle) * offset,
@@ -511,7 +564,7 @@ export class ChaseSimulation {
       const role = ["pursuit", "intercept", "blockade"][this.heatLevel % 3];
       this.addReinforcement(role, role === "blockade" ? 180 : -160);
       this.heatLevel++;
-      this.nextWaveAt += 35;
+      this.nextWaveAt += this.difficulty.waveInterval;
     }
     const travel = distance(p, before);
     if (!p.airborne && p.y < 1 && riverDistance(p) < 39) {
@@ -524,6 +577,27 @@ export class ChaseSimulation {
     }
     this.score += travel * 1.8;
     for (const t of this.traffic) {
+      if (t.destroyed) {
+        if (this.time < t.respawnAt) continue;
+        const road =
+          ROADS.find(
+            (r, i) =>
+              i > t.turnSeed % ROADS.length && distance(r.start, p) > 120,
+          ) || ROADS[0];
+        Object.assign(t, {
+          x: road.start.x,
+          z: road.start.z,
+          angle: road.angle,
+          fromNode: road.a,
+          toNode: road.b,
+          id: t.id + 10000,
+          health: 100,
+          destroyed: false,
+          hitCooldown: 0,
+          nearMiss: false,
+        });
+      }
+      t.hitCooldown = Math.max(0, t.hitCooldown - dt);
       let target = NODES[t.toNode];
       if (distance(t, target) < 7) {
         const candidates = target.links.filter((e) => e.node !== t.fromNode);
@@ -566,7 +640,7 @@ export class ChaseSimulation {
     const sighted = this.police.some(
       (cop) =>
         !cop.destroyed &&
-        distance(cop, p) < 260 &&
+        distance(cop, p) < this.difficulty.sight &&
         lineOfSight(cop, p, this.obstacles),
     );
     if (sighted)
@@ -586,10 +660,11 @@ export class ChaseSimulation {
       cop.ramRecovery = Math.max(0, cop.ramRecovery - dt);
       cop.repath -= dt;
       const visible =
-        distance(cop, p) < 260 && lineOfSight(cop, p, this.obstacles);
+        distance(cop, p) < this.difficulty.sight &&
+        lineOfSight(cop, p, this.obstacles);
       if (sighted) {
         // One unit stays on the rear bumper, another tries to intercept farther ahead.
-        const lead = cop.role === "intercept" ? 1.8 : 0.35;
+        const lead = cop.role === "intercept" ? this.difficulty.lead : 0.35;
         const observation = this.radioContact;
         const predicted = {
           x: clamp(
@@ -622,8 +697,14 @@ export class ChaseSimulation {
           speed = Math.hypot(o.vx, o.vz);
         if (speed > 8) {
           const road = roadProjection({
-            x: o.x + (o.vx / speed) * (100 + (cop.id % 2) * 25),
-            z: o.z + (o.vz / speed) * (100 + (cop.id % 2) * 25),
+            x:
+              o.x +
+              (o.vx / speed) *
+                (this.difficulty.roadblockRange + (cop.id % 2) * 25),
+            z:
+              o.z +
+              (o.vz / speed) *
+                (this.difficulty.roadblockRange + (cop.id % 2) * 25),
           });
           if (distance(o, road) > 55) {
             const lane =
@@ -640,7 +721,7 @@ export class ChaseSimulation {
       }
       if (cop.repath <= 0 || !cop.path.length) {
         cop.path = routeBetween(cop, cop.blockPoint || cop.lastSeen);
-        cop.repath = 0.55;
+        cop.repath = this.difficulty.repath;
       }
       while (cop.path.length > 1 && distance(cop, cop.path[0]) < 10)
         cop.path.shift();
@@ -655,12 +736,28 @@ export class ChaseSimulation {
               ? cop.lastSeen
               : p
             : cop.path[0] || cop.lastSeen;
+      if (
+        this.difficulty.flank &&
+        visible &&
+        !cop.blockPoint &&
+        cop.role === "pursuit" &&
+        distance(cop, p) < 60 &&
+        Math.abs(p.speed) > 12
+      ) {
+        // Two officers squeeze from opposite rear quarters using the current sighting.
+        const side = cop.id % 2 ? 1 : -1;
+        const flank = {
+          x: p.x + Math.sin(p.angle) * 4 + Math.cos(p.angle) * side * 2.8,
+          z: p.z + Math.cos(p.angle) * 4 - Math.sin(p.angle) * side * 2.8,
+        };
+        if (lineOfSight(cop, flank, this.obstacles)) target = flank;
+      }
       const desired = holding
           ? cop.blockPoint.angle
           : Math.atan2(target.x - cop.x, target.z - cop.z),
         turn = angleDelta(desired, cop.angle);
       const max =
-        (40 + Math.min(this.checkpoint, 5) * 0.7) *
+        (this.difficulty.maxSpeed + Math.min(this.checkpoint, 5) * 0.7) *
         (cop.ramRecovery > 0 ? 0.55 : 1);
       let want =
         holding || distance(cop, target) < 3
@@ -699,7 +796,12 @@ export class ChaseSimulation {
       const signed =
         cop.vx * Math.sin(cop.angle) + cop.vz * Math.cos(cop.angle);
       const speed =
-        signed + clamp((reversing ? -7 : want) - signed, -28 * dt, 15.5 * dt);
+        signed +
+        clamp(
+          (reversing ? -7 : want) - signed,
+          -34 * dt,
+          this.difficulty.acceleration * dt,
+        );
       const grip = 1 - Math.exp(-dt * 9);
       cop.vx += (Math.sin(cop.angle) * speed - cop.vx) * grip;
       cop.vz += (Math.cos(cop.angle) * speed - cop.vz) * grip;
@@ -724,7 +826,7 @@ export class ChaseSimulation {
     }
     const allCars = [
       p,
-      ...this.traffic,
+      ...this.traffic.filter((c) => !c.destroyed),
       ...this.police.filter((c) => !c.destroyed),
     ];
     const officers = new Set(this.police);
@@ -752,20 +854,26 @@ export class ChaseSimulation {
                 : impact * 0.55;
             p.health = Math.max(
               0,
-              p.health - damage * carSpec(p.carId).damageScale,
+              p.health - damage * p.performance.damageScale,
             );
             p.invulnerable = 0.8;
             this.events.push("COLLISION");
           }
           for (const cop of [a, b])
             if (officers.has(cop)) {
-              if (cop.ramRecovery <= 0) cop.ramRecovery = playerHit ? 2.6 : 0.8;
+              if (cop.ramRecovery <= 0)
+                cop.ramRecovery = playerHit ? this.difficulty.ramRecovery : 0.8;
               this.damagePolice(cop, impact, playerHit);
             }
+          if (playerHit)
+            for (const civilian of [a, b])
+              if (civilian !== p && !officers.has(civilian))
+                this.damageTraffic(civilian, impact);
         }
+    const breakables = [...this.trees, ...this.poles];
     for (const car of allCars) {
       if (car.destroyed) continue;
-      for (const tree of this.trees) {
+      for (const tree of breakables) {
         if (
           (car.y || 0) > 2.5 ||
           tree.broken ||
@@ -774,16 +882,31 @@ export class ChaseSimulation {
         )
           continue;
         const impact = treeContact(car, tree, this.time);
+        if (tree.broken && tree.linked)
+          for (const id of tree.linked) {
+            const sibling = this.poles[id];
+            if (sibling && !sibling.broken)
+              Object.assign(sibling, {
+                broken: true,
+                fallenAt: tree.fallenAt,
+                fallAngle: tree.fallAngle,
+              });
+          }
         if (impact > 4 && car === p) {
           if (p.invulnerable <= 0) {
             p.health = Math.max(
               0,
-              p.health -
-                Math.min(18, impact * 0.4) * carSpec(p.carId).damageScale,
+              p.health - Math.min(18, impact * 0.4) * p.performance.damageScale,
             );
             p.invulnerable = 0.8;
           }
-          this.events.push(tree.broken ? "TREE DOWN" : "COLLISION");
+          this.events.push(
+            tree.broken
+              ? tree.breakSpeed
+                ? "POLE DOWN"
+                : "TREE DOWN"
+              : "COLLISION",
+          );
         } else if (impact > 5 && officers.has(car))
           this.damagePolice(car, impact, false);
       }
@@ -796,6 +919,7 @@ export class ChaseSimulation {
     for (const cop of this.police)
       if (!cop.destroyed) closest = Math.min(closest, distance(cop, p));
     for (const t of this.traffic) {
+      if (t.destroyed) continue;
       const d = distance(t, p);
       if (d > 4 && d < 7 && Math.abs(p.speed) > 20 && !t.nearMiss) {
         this.score += 150;
@@ -831,6 +955,7 @@ export class ChaseSimulation {
     const cp = CHECKPOINTS[this.checkpoint];
     if (cp && distance(p, cp) < 13 && p.y < 3 && !p.flipped) {
       this.checkpoint++;
+      this.runCash += 150;
       const bonus =
         1000 +
         Math.max(
@@ -860,6 +985,7 @@ export class ChaseSimulation {
       this.escape = clamp(this.escape + (unseen ? dt : -dt * 1.5), 0, 8);
       if (this.escape >= 8) {
         this.phase = "won";
+        this.runCash += 800;
         this.score += 3000 + Math.round(p.health * 20);
       }
     }
@@ -873,6 +999,9 @@ export class ChaseSimulation {
   snapshot() {
     return {
       phase: this.phase,
+      level: this.level,
+      runCash: this.runCash,
+      trafficWrecks: this.trafficWrecks,
       score: Math.floor(this.score),
       checkpoint: this.checkpoint,
       total: 6,

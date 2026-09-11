@@ -1,76 +1,57 @@
-# Deployment and public access
+# Deployment and access
 
-This game is a static website. Upload the **contents of `dist/`** to a static HTTPS host. `index.html` must be at the published root, beside its JavaScript modules, `assets/` and `vendor/`. There is no build command, application server, database or secret required for gameplay.
+The career edition requires **static assets + the Worker save API + a D1 database**. A static-only deployment cannot load saved garages. The obsolete GitHub Pages workflow has been removed.
 
-## What access means
+## Access
 
-| Access                   | What people can do                                      | Where it is controlled                        |
-| ------------------------ | ------------------------------------------------------- | --------------------------------------------- |
-| Public game URL          | Open and play in a supported browser                    | The hosting provider's site audience/settings |
-| Public GitHub repository | Read, clone, download and fork the source               | GitHub repository visibility                  |
-| Repository collaborator  | Push or manage project changes, according to their role | GitHub repository collaborator settings       |
+The [game link](https://nightshift-chase-september.avtandilmghebrishvili.chatgpt.site/) and [public source repository](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase) are separate resources. Public repository access permits reading, downloading and forking, not pushing changes. Game visitors receive separate anonymous garages; sharing the game never shares your private garage key.
 
-This repository is public. Public visitors do not automatically receive write access. The existing Sites game's access is separate and remains owner-private at the initial GitHub release. Publishing source here does not change that setting.
+Sites audience settings control who can open the game. Public permits anyone with the link. Source pushes to GitHub do not automatically redeploy Sites.
 
 ## Existing Sites deployment
 
-The creator's existing address is [TECHCRUSH Tbilisi Chase on Sites](https://nightshift-chase-september.avtandilmghebrishvili.chatgpt.site/). Its configuration is in `.openai/hosting.json`. The owner account's project currently offers a **Public** access mode in addition to custom access. To let everyone play at that address, the owner must select Public in the site's access controls, then verify the link in a signed-out browser.
+`.openai/hosting.json` identifies the creator's Sites project and logical `DB` binding. It is metadata, not a credential. Fork owners must use their own project.
 
-Source updates on GitHub do not automatically redeploy this Site. Forks should use their own hosting project rather than the creator's project ID. The ID is deployment metadata, not a credential or permission grant.
+Run `npm ci`, `npm test`, and `npm run build`. The build emits:
 
-## GitHub Pages
+- `dist/server/index.js`: bundled Workers-compatible default fetch handler.
+- `dist/client/`: game modules, assets, vendor files and credits.
+- `dist/.openai/hosting.json`: logical hosting configuration.
+- `dist/.openai/drizzle/`: generated migration files and metadata.
 
-GitHub Pages supports static sites and is available for public repositories on GitHub Free. See [GitHub's Pages overview](https://docs.github.com/en/pages/getting-started-with-github-pages).
+Publish the exact tested source and its build using the Sites hosting integration. Schema migrations must accompany the Worker. Sites provides the static asset binding `ASSETS` and database binding `DB`. Save a version before deployment and check the terminal deployment result. Never place player keys, database files or repository tokens into source or archives.
 
-The included [Pages workflow](../.github/workflows/pages.yml) is **manual only**. It does not run when source is pushed. To activate it as the repository owner:
+## Independent Cloudflare Worker deployment
 
-1. Open the repository's **Settings → Pages**.
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. Open **Actions → Deploy game to GitHub Pages → Run workflow**, choose `main`, and run it.
-4. Wait for the build and deployment jobs to succeed. Open the URL shown by the deployment job or Settings → Pages.
-5. Verify the garage, car model, roads, credits and a short drive in a signed-out browser.
+Cloudflare Workers with Static Assets and D1 provides an alternative for a fork. This is a configuration guide, not a claim that a second deployment has been created. See official [Static Assets](https://developers.cloudflare.com/workers/static-assets/), [asset binding](https://developers.cloudflare.com/workers/static-assets/binding/) and [Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/).
 
-If enabled for this repository with no custom domain, its expected address is `https://avtandilmghebrishvili.github.io/techcrush-tbilisi-chase/`. **This is an expected address, not a claim that Pages is already live.** A fork's URL uses its own owner and repository names.
+Create a D1 database in your account. Set up Wrangler with a configuration equivalent to:
 
-The workflow tests the checkout, uploads `dist/` with `actions/upload-pages-artifact`, and publishes using `actions/deploy-pages`. Deploy permission is scoped to the deployment job with `pages: write` and `id-token: write`, using the `github-pages` environment. Actions are pinned to reviewed commit SHAs. See the official [custom Pages workflows guide](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+```jsonc
+{
+  "name": "your-tbilisi-chase",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-09-11",
+  "assets": {
+    "directory": "dist/client",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "your-garages",
+    "database_id": "YOUR_DATABASE_ID",
+    "migrations_dir": "drizzle"
+  }]
+}
+```
 
-The game uses relative module, asset and credits paths, which support a repository subpath. Upload the complete directory. A blank model or module 404 usually means assets were omitted or files were published one directory too deep.
+Build first, apply the checked-in migrations to that remote database, then deploy the Worker using your authenticated Wrangler installation. Keep the existing database on updates so players retain their saves. Use your own database identifier; do not copy the Sites project identifier into this configuration.
 
-To update an enabled Pages site, push the new source and manually run the workflow again. To publish automatically in your own setup, add a `push` trigger for `main` to `pages.yml`. That is a deliberate change to publishing behavior. Re-running tests alone does not publish.
+Generated migrations are schema-only. After a migration has been applied, add a new migration for changes instead of editing history. Database backups/retention are the hosting operator's responsibility. No third-party API key is required by the game.
 
-## Cloudflare Pages
+GitHub Pages and a static file ZIP alone are unsuitable for the current server-saved career. A Node deployment is possible by adapting the loopback development server behind a suitable HTTPS reverse proxy and durable SQLite volume; the included `server.mjs` is intended for local development.
 
-Cloudflare Pages is another static hosting option, with Git integration or direct upload. Hosting plans and limits are governed by the provider.
+## Release checks
 
-For Git integration, connect this repository in Cloudflare Pages and use:
-
-| Setting                | Value                     |
-| ---------------------- | ------------------------- |
-| Production branch      | `main`                    |
-| Framework preset       | None                      |
-| Root directory         | Repository root           |
-| Build command          | Leave blank               |
-| Build output directory | `dist`                    |
-| Environment variables  | None required by the game |
-
-Deploy, then share the `pages.dev` address shown by Cloudflare. Git-integrated Pages projects can deploy automatically on subsequent pushes. See [Git integration](https://developers.cloudflare.com/pages/configuration/git-integration/) and [build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/).
-
-For [Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/), upload the contents of `dist/` or the web ZIP from a release, with `index.html` at its root. A Direct Upload project and a Git-integrated project have different workflows; choose the mode appropriate for future updates.
-
-## Other static hosts and archives
-
-Any static host able to serve JavaScript modules, GLB, PNG/JPEG and HDR files can host the game. Serve JavaScript as a JavaScript MIME type and preserve folder names/case. No single-page-app catch-all rewrite is needed: the game uses one HTML entry point and a separate `credits.html`.
-
-The included `server.mjs` is a loopback development server, not a public production server. A local `127.0.0.1` URL works only on the computer running it. Sending someone a source ZIP also requires them to start a static server; a hosted URL is simpler for players.
-
-Keep [Credits](../dist/credits.html), the downloadable derived map data and attribution with hosted copies. See [ASSETS.md](../ASSETS.md) for asset terms. Custom domains can be configured at the chosen provider after the default hosted URL works.
-
-## Publishing checklist
-
-- Verify `npm test` passes for the commit to publish.
-- Publish `dist/` intact, not the repository root or a folder containing another `dist/` layer.
-- Check the link while signed out to confirm the intended audience.
-- Start a run, steer both ways, trigger turbo, change the camera and open Credits.
-- After an update, refresh without cache if a browser still shows older modules.
-
-[Back to README](../README.md)
+Run tests/build for the release source, include all runtime assets and migrations, and preserve credits/license files. Validate saving, reloading, separate player profiles and a short drive. Public access and repository visibility must be configured separately. See [Testing](TESTING.md), [Career API](CAREER.md) and [Assets](../ASSETS.md).

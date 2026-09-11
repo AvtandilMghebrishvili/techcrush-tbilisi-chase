@@ -2,17 +2,84 @@
 
 [![Tests](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/actions/workflows/ci.yml/badge.svg)](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/actions/workflows/ci.yml)
 
-[Download source](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/archive/refs/heads/main.zip) · [Releases](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases) · [Setup guide](docs/GETTING_STARTED.md) · [Hosting guide](docs/DEPLOYMENT.md)
+[Play the game](https://nightshift-chase-september.avtandilmghebrishvili.chatgpt.site/) · [Download complete source](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/archive/refs/heads/main.zip) · [Releases](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases)
 
-A complete browser 3D arcade chase through a simplified reconstruction of central Tbilisi. Choose a sports car, dodge traffic, clear six checkpoints, destroy pursuing patrols, then break contact for eight seconds.
+A single-player browser 3D chase through central Tbilisi. Clear six checkpoints, dodge mixed traffic, ram patrols and break contact for eight seconds. Complete levels to earn credits and three-part reward boxes, then build a faster car in your saved garage.
 
-The expanded daylight edition connects Rustaveli, Baratashvili, the Mtkvari banks, Europe Square, Rike Park and Abanotubani. It adds a driving deck for Baratashvili Bridge, a glass-wave Peace Bridge, Rike's twin steel tubes, lawns and paths, bath domes and the blue Chreli Abano facade, Metekhi, Narikala and moving cable cars. Streets have continuous asphalt, markings, crossings, tiled sidewalks, benches, bins, planted trees and 22 additional two-sided TECHCRUSH billboards. A detailed Ferrari 458 model and modeled cockpit, original Georgian patrol sedans, 1980s/1990s traffic, HDR sky and textured mountains remain.
+## Play and save
 
-This is a reference-guided arcade reconstruction, not a one-to-one scan. Central streets and Baratashvili Bridge use cached OpenStreetMap geometry. Missing southern/eastern connections and the river outline are manually approximated from landmark positions and the user's aerial photographs; their provenance is in `data/reference-streets.json` and `ASSETS.md`. Roads are widened and directions/closures adapted for play. The supplied reference photos and Google Street View image are not redistributed as textures.
+Each browser receives a separate anonymous garage with **1,000 credits and one welcome box**. Progress is saved on the server without signing in. Share the game URL so friends start their own careers. Garage's **Back up private garage key** and **Restore garage** buttons transfer your progress to another device. Keep that backup private: it grants access to your garage.
+
+People sharing one browser profile share its garage; use separate browser profiles for separate saves. A live chase is held in memory. Earned credits are banked when a level ends or you use the in-game Garage/Restart controls. Closing the tab mid-chase discards that unfinished run, while previously banked progress remains saved.
+
+## Cars and controls
+
+The three original, unbadged models have different geometry, dimensions, interiors and handling. They evoke sports-car design categories, rather than licensed manufacturer replicas.
+
+| Car | Shape | Stock top speed | Stock turbo ceiling |
+| --- | --- | ---: | ---: |
+| Apex R | Rounded rear-engine coupe | 209 km/h | 281 km/h |
+| Vector V12 | Low angular V12 wedge | 241 km/h | 313 km/h |
+| Veyra W16 | Wide grand-touring hypercar | 270 km/h | 342 km/h |
+
+Ceilings are on-road values; acceleration time, charge, turns and collisions affect actual speed. Installed parts increase these values.
+
+| Control | Action |
+| --- | --- |
+| W / Up | Accelerate |
+| S / Down | Brake, then reverse |
+| A / D or Left / Right | Steer left / right |
+| Space | Handbrake and drift |
+| Shift | Turbo with exhaust flames and motion effects |
+| C | Chase, cockpit, hood, high chase cameras |
+| Q, held | Rewind up to five seconds; release to continue |
+| R | Recover on a clear road, with a score penalty |
+| P / Escape | Pause or resume |
+| M | Sound on/off |
+| Enter | Start from the garage |
+
+Physical key codes support Georgian keyboard layouts. Touch buttons are included; a desktop keyboard and WebGL2-capable computer are recommended.
+
+## Career and garage
+
+Completing a level grants **one box**, **1,800 + 250 × completed level CR**, and the next level. Separate run earnings are **150 CR per checkpoint, 350 CR per player-caused patrol takedown, 120 CR per civilian wreck and 800 CR for escape**. NPC-only crashes do not give free player rewards.
+
+Each box draws exactly three independent parts. Duplicates count separately. Per-slot tier odds are **Bronze 55%, Silver 28%, Gold 13%, Diamond 4%**; all 14 part types are equally likely. There are no real-money purchases.
+
+| Part | Benefit |
+| --- | --- |
+| Engine | Top speed and acceleration |
+| ECU tune | Acceleration |
+| Turbocharger | Boost power and speed |
+| Nitro tank | Longer boost duration |
+| Intercooler | Faster recharge, shorter cooldown |
+| Gearbox | Acceleration and speed |
+| Sport tires | Grip and steering |
+| Forged rims | Acceleration and speed; visible wheels |
+| Rear spoiler | Handling and speed; visible wing |
+| Brake kit | Stronger braking |
+| Body reinforcement | Less collision damage |
+| Suspension | Softer landings and handling |
+| Race exhaust | Boost power and speed |
+| Carbon panels | Acceleration and speed |
+
+Install an owned better part free, or buy the next tier for **600 / 1,500 / 3,600 / 7,800 CR**. Replaced parts become spares. Sell them for **75 / 180 / 420 / 960 CR**. Equipment belongs to the selected car; money and loose parts are shared within its garage.
+
+Each level increases police speed, acceleration, observation range and decision frequency. Waves arrive sooner and unit limits grow. From level 3, pursuers flank; interceptors anticipate your route and blockade units stage ahead. Growth is bounded for playability.
+
+## City and action
+
+Rustaveli, Baratashvili, Rike/Europe Square and Abanotubani connect across the Mtkvari. Landmarks include Baratashvili and Metekhi bridges, an arcade driving adaptation of the pedestrian Peace Bridge, bath domes, Chreli Abano, Rike's twin tubes, Metekhi, Narikala, cable cars, mountains, the TV tower and Mother of Georgia. Continuous asphalt, markings, crossings, sidewalks, trees, furniture, Georgian flags and double-sided TECHCRUSH signs complete the streets.
+
+Shared footprints keep buildings off roads and make visible wings solid. High-speed collision substeps prevent thin-wall tunneling. Cars exchange impulses; hard impacts break trees and street/bridge/sign poles. Patrol HP takes several hits before explosion and replacement. Traffic includes original 1980s/1990s sedan, hatchback, wagon and van variants.
+
+Four ramps launch cars into controllable rolls and pitch. A surviving overturned car recovers upright. Rewind restores position, HP, nitro, police, traffic, checkpoints, earned money and broken props together. Discarded future rewards cannot be banked again.
+
+This is a reference-guided arcade reconstruction, **not a one-to-one scan**. Cached OpenStreetMap geometry is combined with documented manual connections and widened surfaces. User reference photos and Google Street View screenshots are not redistributed as textures. See [asset/map provenance](ASSETS.md).
 
 ## Run locally
 
-Requires Node.js 20+ and a modern WebGL2 browser. Run `npm start` in this folder, then open `http://127.0.0.1:4173/`. No installation, API keys or build step are required to play: all game modules, models and textures are checked in. Google Fonts are optional, with local fallbacks.
+Requires **Node.js 24+**:
 
 ```sh
 git clone https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase.git
@@ -20,84 +87,32 @@ cd techcrush-tbilisi-chase
 npm start
 ```
 
-For development run `npm ci`. Refresh Three.js with `npm run vendor`. Rebuild the optimized sports car with `node scripts/prepare-car.mjs`. Rebuild the road graph with `python scripts/build-map.py`, then its joined asphalt and sidewalks with `node scripts/build-road-surface.mjs`; source OSM responses are archived in `data/`. `node scripts/prepare-tree.mjs` fetches Poly Haven's current manifest, records it in `data/tree-source.json`, downloads the CC0 source and builds both detail levels. Large original tree files are cached locally; runnable optimized GLBs are included.
+Open **http://127.0.0.1:4173/**. Checked-in assets and Node's built-in SQLite allow local play without dependency installation. The server applies checked-in migrations and saves garages in the ignored `.sites-runtime/garages.sqlite`. Stop with Ctrl+C.
 
-## Documentation
+For development and production builds:
 
-| Guide                                          | Contents                                                                        |
-| ---------------------------------------------- | ------------------------------------------------------------------------------- |
-| [Getting started](docs/GETTING_STARTED.md)     | Clone or download, prerequisites, local play, folder layout and troubleshooting |
-| [Cars, controls and rules](#cars-and-controls) | Driving, pursuit, scoring, stunts, recovery and rewind                          |
-| [Architecture](docs/ARCHITECTURE.md)           | Simulation/rendering boundaries, coordinate system, navigation and state        |
-| [Development](docs/DEVELOPMENT.md)             | Change cars, roads, landmarks, police, effects and generated assets             |
-| [Testing](docs/TESTING.md)                     | Automated suite, full driving controller and browser review checklist           |
-| [Validation results](VALIDATION.md)            | Recorded test results and known limitations                                     |
-| [Deployment and access](docs/DEPLOYMENT.md)    | Public game access, Sites, GitHub Pages and Cloudflare Pages                    |
-| [Assets and rights](ASSETS.md)                 | Model, texture, map, branding and reference provenance                          |
-| [Contributing](CONTRIBUTING.md)                | Propose changes, report bugs and prepare pull requests                          |
-| [Changelog](CHANGELOG.md)                      | Release history                                                                 |
+```sh
+npm ci
+npm test
+npm run build
+```
 
-## Cars and controls
+Authored browser modules remain in `dist/`. Build output goes into `dist/client/`, `dist/server/` and `dist/.openai/`. **Do not delete the whole dist folder.** The career edition requires its save API and database; static-only GitHub Pages cannot host the complete game.
 
-The three configurations share the same detailed 458 base model. These are fictional game trims, not manufacturer performance claims. Legacy internal IDs are retained for compatibility; all three are sports cars.
+## English documentation
 
-| Configuration       | Game top speed | Character                                   |
-| ------------------- | -------------- | ------------------------------------------- |
-| 458 Stradale (`gt`) | 180 km/h       | Red street car, fastest straights           |
-| 458 Track (`rally`) | 169 km/h       | Yellow track car, spoiler, sharper handling |
-| 458 Touring (`suv`) | 162 km/h       | Silver-blue GT, stronger body               |
+| Guide | Contents |
+| --- | --- |
+| [Getting started](docs/GETTING_STARTED.md) | Local play, saves, troubleshooting |
+| [Architecture](docs/ARCHITECTURE.md) | Simulation, rendering, modules |
+| [Career and API](docs/CAREER.md) | Progression, storage, recovery, concurrency |
+| [Development](docs/DEVELOPMENT.md) | Assets, roads, migrations, browser tools |
+| [Testing](docs/TESTING.md) | Unit checks, route controller, browser review |
+| [Deployment](docs/DEPLOYMENT.md) | Access, Sites, Worker/D1 self-hosting |
+| [Validation](VALIDATION.md) | Observed results and limitations |
+| [Changelog](CHANGELOG.md) | Release changes |
+| [Assets](ASSETS.md) | Attributions and licenses |
 
-| Key                    | Action                                               |
-| ---------------------- | ---------------------------------------------------- |
-| W / Up                 | Accelerate                                           |
-| S / Down               | Brake, then reverse                                  |
-| A / Left, D / Right    | Steer left / right                                   |
-| Space + steering       | Start a drift; countersteer to regain grip           |
-| Shift                  | Rechargeable turbo with exhaust flames               |
-| C                      | Chase / modeled cockpit / hood / high chase          |
-| P / Escape             | Pause / resume                                       |
-| R                      | Recover to nearest street, costs 200 points          |
-| Hold Q / rewind button | Slowly rewind up to 5 seconds; release to resume     |
-| A / D while airborne   | Apply left / right roll; countersteer to reduce spin |
-| W / S while airborne   | Adjust pitch down / up                               |
-| M                      | Sound on / off                                       |
+The public repository includes code, runtime assets, preparation scripts, map source data, tests, schema/migrations and the dependency lockfile. It excludes player saves, private keys, caches and personal reference photos. Public source access does not grant write access.
 
-Physical keys also work with Georgian keyboard layouts. Steering reverses naturally when backing up. Touch controls appear on phones; landscape gives a wider driving view. The game pauses when its tab loses focus. Pause and choose CHANGE CAR to return to the garage.
-
-## Rules
-
-- Six gates award 1,000 points plus a time bonus up to 800, restore 30 condition and 25 nitro. Animated cyan arrows and the minimap follow the connected street graph.
-- Driving awards 1.8 points per metre. Near misses above 72 km/h award 150.
-- Three patrols begin pursuit. Every 35 seconds another pursuer, interceptor or roadblock unit joins, up to 12. Checkpoints two and four also call reinforcements. They share sightings, anticipate observed travel, route around buildings, slow for corners and nearby cars, and reverse when stuck. Roadblock units park sideways ahead. When every officer loses sight, the shared target stops updating. The HUD shows active units, heat and the next wave.
-- Patrols have 100 HP. Rams deal 22–44 damage with a 0.9-second cooldown. Three to five hits trigger an explosion and award 750 points. A replacement enters after five seconds, at least 110 metres away.
-- Police speed rises from 40 to 43.5 m/s. Patrols recover for 2.6 seconds after ramming the player. Police collision damage is capped at 8 condition before armor. Oriented vehicle bodies separate and exchange mass-weighted impulses, including police against each other and civilian traffic. NPC crashes can destroy patrols but do not award free player takedowns.
-- Tree trunks are solid. A frontal impact of at least 12 m/s breaks a tree, absorbs speed and animates its fall; lesser impacts stop or deflect the car. Fallen trees fade after ten seconds, leaving a stump until restart.
-- Tap Space while steering above 40 km/h to start a drift. Hold the turn and throttle to carry the slide, then straighten or countersteer to regain grip. Controlled slides award drift points, tire smoke and skid marks.
-- Turbo spools smoothly, drains 25 charge per second, waits 0.85 seconds before recharging at 10 per second, and requires 22% refill after emptying. Release preserves momentum. Exhaust flames, animated edge streaks, camera FOV and synthesized audio respond to boost. Reduced-motion settings disable edge streaks.
-- After six gates, lose every patrol for eight seconds: beyond 100 metres, or beyond 60 metres with buildings blocking sight. Escape awards 3,000 plus 20 per remaining condition percentage.
-- Four seconds boxed in at low speed ends the run. Zero condition wrecks the car.
-- Four marked ramps launch a car approaching their slope above 9 m/s. Steering rolls the airborne car; throttle/brake adjust pitch. Upright landings award 150 plus four points per metre flown. A rollover damages the car, then restores it upright on a nearby clear road after 1.8 seconds if HP remains. Automatic rollover/river recovery has no manual-recovery score charge. Falling into the river costs 20 HP.
-- Q records the most recent five seconds at 30 snapshots per second and plays them backward at 0.8 speed. Release resumes the selected moment and discards its future. Position, velocity, air rotation, HP, nitro, score, checkpoints, patrol identities/HP/waves, traffic, explosions and broken trees are restored together. The button remains usable after a wreck or capture. At the oldest recorded moment it holds until release. Rewind grants no extra HP or score beyond the restored state. Losing focus releases rewind and pauses.
-- The minimap follows a local 1.1 km square, with river, nearby streets, cyan route/gate and gold ramp markers. Off-screen gate markers remain at the edge.
-
-## Source and validation
-
-`dist/main.js`, `index.html`, `style.css`: UI, fixed 120 Hz loop, keyboard/touch input, HUD, audio, minimap and WebMCP. `simulation.js`, `config.js`, `controls.js`: physics, collisions, pursuit, traffic and rules. `city-map.js`, `road-data.js`: OSM-derived graph, shortest paths and shared rotated collision footprints. `view.js`, `sports-car.js`: renderer, sports models, wheels, cockpit and follow cameras. `realistic-city.js`: streets, facades, clock building, hills and trees. `scenery.js`, `landmarks.js`, `kartlis-deda.js`: Georgian landmarks and branding. `route-guide.js`, `effects.js`: navigation, HP and explosions.
-
-`dist/assets/` and `dist/vendor/` contain the runtime assets. `scripts/` and `data/` contain reproducible preparation inputs. `server.mjs` is a dependency-free local server.
-
-Run `npm test` for automated checks. Run `node tests/route-drive.mjs gt` for a full driving controller using ordinary steering, throttle, braking, nitro and R recovery with traffic and police active. Substitute `rally` or `suv`. The controller is a test utility, not an in-game autopilot. See `VALIDATION.md` for observed results and limitations.
-
-Additional modules: `contacts.js` provides solid oriented contacts; `road-surface.js` and its generated data provide joined asphalt, sidewalks and curbs; `patrol-car.js` builds police and civilian variants; `camera-clearance.js` prevents wall occlusion; `trees.js` and `world-props.js` share solid tree placement and falling animation; `turbo-effects.js` supplies flames and pooled tire smoke.
-
-`district-data.js` supplies shared landmark anchors, river and collision footprints; `tbilisi-districts.js` builds the expanded scenery; `stunts.js` shares ramp definitions between drawing and physics and handles airborne motion; `rewind.js` records, interpolates and branches the simulation timeline. New district meshes are merged by material and spatial tile. Static contacts reject distant lots before transforms, keeping the larger map's physics responsive.
-
-Static boxes and 3D trees are instanced. Trees switch from 123,246 triangles nearby to 20,943 at distance and disappear beyond 420 metres. Fixed sedan parts are merged by material; detailed cars beyond 330 metres are hidden. Models are decoded ahead of time without runtime Draco workers. The directional shadow area follows the player.
-
-## Hosting and rights
-
-Serve `dist/` on a static HTTPS host. This repository is public: anyone can read, clone or download it. Publishing the source does not grant write access or change the existing game's audience. The existing [Sites deployment](https://nightshift-chase-september.avtandilmghebrishvili.chatgpt.site/) has separate access settings; at the initial GitHub release it remains owner-private. `.openai/hosting.json` identifies that owner's deployment. Forks should configure their own hosting destination.
-
-A manually triggered GitHub Pages workflow is included. It publishes `dist/` only after the owner enables Pages and runs it; it does not automatically create a public game URL when source is pushed. See [Deployment and access](docs/DEPLOYMENT.md) for exact steps and alternatives. There are no multiplayer, purchases, game accounts, persistent leaderboard or game-server dependencies.
-
-Project code and Three.js are MIT. OSM data is ODbL. The car, HDRI, terrain textures, generated artwork and supplied branding retain their respective terms. See `ASSETS.md` and the in-game Credits link. The source package includes runnable assets, code, tests, source data and the dependency lockfile.
+Project code is MIT. Third-party assets, OSM data, generated textures and TECHCRUSH branding retain their respective terms. See [LICENSE](LICENSE), [ASSETS.md](ASSETS.md) and the in-game Credits page.

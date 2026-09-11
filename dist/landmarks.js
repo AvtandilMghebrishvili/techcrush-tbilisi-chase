@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { registerBreakable } from "./breakable-props.js";
 import { makeKartlisDeda } from "./kartlis-deda.js";
 import { ROADS, nearestRoad } from "./city-map.js";
 import { riverDistance } from "./district-data.js";
@@ -137,8 +138,16 @@ export function buildTechcrushGarage(v) {
     });
     v.box(14.2, 0.12, 0.3, bar, 0, 6.65, 0, group);
     v.box(14.2, 0.12, 0.3, bar, 0, 2.98, 0, group);
-    for (const sx of [-5.7, 5.7])
+    for (const sx of [-5.7, 5.7]) {
       v.box(0.18, 3, 0.18, stone("#344348"), sx, 1.5, 0, group);
+      registerBreakable(
+        v,
+        group,
+        x + Math.cos(angle) * sx,
+        z - Math.sin(angle) * sx,
+        6.7,
+      );
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "nightshift-chase",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A browser 3D car chase through Tbilisi with sports cars, police pursuit, checkpoints, stunts and rewind.",
   "repository": {
     "type": "git",
@@ -13,6 +13,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "node scripts/build-server.mjs",
+    "db:generate": "drizzle-kit generate",
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs",
     "vendor": "node scripts/vendor.mjs"
@@ -26,6 +28,9 @@
     "@gltf-transform/functions": "^4.5.0",
     "clipper-lib": "^6.4.2",
     "draco3dgltf": "^1.5.7",
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "esbuild": "^0.28.2",
     "meshoptimizer": "^1.2.0",
     "prettier": "^3.6.2"
   }

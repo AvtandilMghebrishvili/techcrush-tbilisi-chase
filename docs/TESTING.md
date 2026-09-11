@@ -8,7 +8,9 @@ Tests use Node's built-in test runner. They import simulation and geometry modul
 npm test
 ```
 
-The current suite contains **44 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci` and the suite on Ubuntu and Windows with Node.js 24 for pushes and pull requests. It does not deploy a site. For one focused file, use e.g. `node --test tests/stunts-rewind.test.mjs`.
+The current suite contains **57 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/stunts-rewind.test.mjs`.
+
+`career.test.mjs` covers full-footprint road clearance, all three bridges in both directions, thin-wall tunneling, distinct car geometry, 14 parts/four tiers, integrated upgrade physics, duplicate rewards, currency settlement, level difficulty, wreck-credit rewind and breakable poles. `save-api.test.mjs` checks isolated profiles, request retries/conflicts, box idempotency and actual SQLite close/reopen persistence.
 
 | File                     | Main coverage                                                                              |
 | ------------------------ | ------------------------------------------------------------------------------------------ |
@@ -28,9 +30,10 @@ Test names in the files provide the precise assertions. Tests do not prove reali
 node tests/route-drive.mjs gt
 node tests/route-drive.mjs rally
 node tests/route-drive.mjs suv
+node tests/route-drive.mjs suv 4 2
 ```
 
-Run each command separately. The controller uses regular throttle, steering, handbrake, turbo and R recovery, with traffic, police and collisions enabled. It prints the final simulation snapshot and exits unsuccessfully if the run does not end in `won`. It can simulate up to 480 seconds at 120 Hz and may take several minutes of CPU time per run.
+Arguments are car ID, optional level, and optional installed tier for all parts (0 = stock). The level/tier arguments are controlled test starting conditions, not player rewards. The controller uses regular throttle, steering, handbrake, turbo and R recovery with traffic, police and collisions enabled. It prints a snapshot and exits unsuccessfully unless the run ends in won. It can simulate 480 seconds at 120 Hz and may take several minutes.
 
 It knows the ideal route and uses ordinary recovery, including the score penalty. It grants no checkpoints, health or immunity. It does not intentionally exercise stunts or rewind, which have separate tests. The latest recorded runs completed all six gates with all three trims; their scores and remaining HP are in [Validation](../VALIDATION.md#full-driving-runs).
 

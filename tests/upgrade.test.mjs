@@ -78,7 +78,7 @@ test("car selection persists across retries and changes driving and protection",
     for (let i = 0; i < 1200; i++) stepVehicle(c, { throttle: 1 }, 1 / 120);
     return c.speed;
   });
-  assert(speeds[0] > speeds[2]);
+  assert(speeds[2] > speeds[1] && speeds[1] > speeds[0], 'Veyra, Vector and Apex have increasing performance');
   assert(carSpec("suv").damageScale < carSpec("gt").damageScale);
   assert(carSpec("rally").handling > carSpec("gt").handling);
 });

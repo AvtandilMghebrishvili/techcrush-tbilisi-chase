@@ -23,7 +23,7 @@ function drive(car, input, seconds, dt = 1 / 120, obstacles = []) {
 test("acceleration, maximum speed, braking, and reverse", () => {
   const c = vehicle(0, 0);
   drive(c, { throttle: 1 }, 5);
-  assert(c.speed > 35 && c.speed < 51);
+  assert(c.speed > 45 && c.speed <= 58.01);
   const z = c.z;
   drive(c, { throttle: -1 }, 3);
   assert(c.speed < 0);

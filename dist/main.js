@@ -1,4 +1,12 @@
 import { ROADS } from "./city-map.js";
+import { ProfileClient } from "./profile-client.js";
+import { GarageUI } from "./garage-ui.js";
+import { upgradedSpec } from "./progression.js";
+const career = new ProfileClient();
+let workshop,
+  runId = null,
+  settlement = null,
+  transitioning = false;
 import { RIVER_POLYGON } from "./district-data.js";
 import { RAMPS } from "./stunts.js";
 import { SceneView } from "./view.js";
@@ -105,13 +113,16 @@ function chooseCar(id) {
   selectedCar = carSpec(id).id;
   sim.selectedCar = selectedCar;
   sim.player.carId = selectedCar;
-  view.selectCar(selectedCar);
+  const equipment = career.profile?.cars[selectedCar] || {};
+  sim.player.equipment = structuredClone(equipment);
+  sim.player.performance = upgradedSpec(carSpec(selectedCar), equipment);
+  view.selectCar(selectedCar, equipment);
   for (const button of document.querySelectorAll("[data-car]"))
     button.setAttribute(
       "aria-pressed",
       String(button.dataset.car === selectedCar),
     );
-  const c = carSpec(id);
+  const c = upgradedSpec(carSpec(id), equipment);
   $("car-details").textContent =
     c.description + " · " + Math.round(c.topSpeed * 3.6) + " km/h";
 }
@@ -124,7 +135,16 @@ function setupGarage() {
   for (const button of garage.querySelectorAll("button"))
     button.onclick = () => chooseCar(button.dataset.car);
   chooseCar(selectedCar);
-  $("garage-back").onclick = () => {
+  $("garage-back").onclick = async () => {
+    if (transitioning) return;
+    transitioning = true;
+    try {
+      await bankRun();
+    } catch (error) {
+      $("modal-copy").textContent = error.message;
+      transitioning = false;
+      return;
+    }
     keys.clear();
     agentInput = null;
     sim.reset();
@@ -142,7 +162,34 @@ function setupGarage() {
     view.player.position.set(4, 0, -30);
     view.player.rotation.set(0, 0, 0);
     view.resetPreview();
+    transitioning = false;
+    workshop.car = selectedCar;
+    workshop.open();
   };
+}
+async function bankRun() {
+  if (settlement) return settlement;
+  if (!runId) return;
+  const id = runId;
+  settlement = (async () => {
+    if (career.pending) await career.retry();
+    if (!career.profile.settled.includes(id))
+      await career.mutate({
+        type: "settle",
+        runId: id,
+        level: sim.level,
+        cash: sim.runCash,
+        result: ["won", "wrecked", "busted"].includes(sim.phase)
+          ? sim.phase
+          : "abandoned",
+      });
+    runId = null;
+  })();
+  try {
+    await settlement;
+  } finally {
+    settlement = null;
+  }
 }
 function switchCamera(id) {
   const mode = id ? view.setCamera(id) : view.cycleCamera();
@@ -239,20 +286,36 @@ function audioTick() {
     0.1,
   );
 }
-function start() {
-  keys.clear();
-  agentInput = null;
-  sim.start(selectedCar);
-  view.startGame(sim);
-  $("intro").hidden = true;
-  $("mission-card").hidden = true;
-  $("hud").hidden = false;
-  $("modal").hidden = true;
-  $("touch-controls").hidden = !touch;
-  $("pause").disabled = false;
-  document.body.classList.add("playing");
-  accumulator = 0;
-  updateHUD();
+async function start() {
+  if (transitioning || $("workshop").open || $("loot-dialog").open) return;
+  transitioning = true;
+  try {
+    await bankRun();
+    if (career.pending) await career.retry();
+    if (career.profile.selectedCar !== selectedCar)
+      await career.mutate({ type: "select", car: selectedCar });
+    keys.clear();
+    agentInput = null;
+    sim.start(selectedCar, {
+      level: career.profile.level,
+      equipment: career.profile.cars[selectedCar],
+    });
+    runId = crypto.randomUUID();
+    view.startGame(sim);
+    $("intro").hidden = true;
+    $("mission-card").hidden = true;
+    $("hud").hidden = false;
+    $("modal").hidden = true;
+    $("touch-controls").hidden = !touch;
+    $("pause").disabled = false;
+    document.body.classList.add("playing");
+    accumulator = 0;
+    updateHUD();
+  } catch (error) {
+    showModal("SAVE PENDING", error.message, "YOUR GARAGE", true);
+  } finally {
+    transitioning = false;
+  }
 }
 function pause() {
   if (!["running", "paused"].includes(sim.phase)) return;
@@ -268,6 +331,7 @@ function pause() {
   audioTick();
 }
 function showModal(title, copy, kicker, end) {
+  $("result-reward").textContent = "";
   $("modal-title").textContent = title;
   $("modal-copy").textContent = copy;
   $("modal-kicker").textContent = kicker;
@@ -293,6 +357,26 @@ function finish() {
   );
   keys.clear();
   $("pause").disabled = true;
+  if (won) {
+    $("modal-title").textContent = `LEVEL ${sim.level} CLEAR.`;
+    $("result-reward").textContent =
+      "Saving your credits and three-part reward box…";
+    void bankRun()
+      .then(() => {
+        $("result-reward").textContent =
+          `+${(sim.runCash + 1800 + sim.level * 250).toLocaleString()} CR · +1 BOX · LEVEL ${career.profile.level} UNLOCKED`;
+        $("restart").textContent = `START LEVEL ${career.profile.level} ↗`;
+        $("garage-back").textContent = "GARAGE · OPEN BOX & UPGRADE";
+      })
+      .catch((error) => {
+        $("result-reward").textContent =
+          error.message + " Use Garage to retry.";
+      });
+  } else {
+    $("result-reward").textContent =
+      `${sim.runCash} CR earned · banked when you leave or retry. Q can still rewind this run.`;
+    $("garage-back").textContent = "GARAGE · BANK CREDITS";
+  }
 }
 function toast(text) {
   if (text === "COLLISION") {
@@ -305,6 +389,8 @@ function toast(text) {
 }
 function updateHUD() {
   const p = sim.player;
+  $("run-level").textContent = `LEVEL ${sim.level}`;
+  $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
   $("score").textContent = Math.floor(sim.score).toString().padStart(6, "0");
   $("progress").textContent = sim.checkpoint + " / 6";
   $("dots").innerHTML = CHECKPOINTS.map(
@@ -376,9 +462,9 @@ function updateHUD() {
           : "Break line of sight and pull away."
         : sim.roadblockAhead
           ? "ROADBLOCK AHEAD — FIND A GAP"
-          : sim.police.length < 12
+          : sim.police.length < sim.difficulty.maxUnits
             ? "REINFORCEMENTS IN " + Math.ceil(sim.nextWaveAt - sim.time) + "s"
-            : "MAXIMUM PURSUIT — 12 UNITS";
+            : `MAXIMUM PURSUIT — ${sim.difficulty.maxUnits} UNITS`;
   const cp = CHECKPOINTS[sim.checkpoint];
   $("objective").textContent = cp
     ? "Reach " + cp.name
@@ -604,8 +690,8 @@ function registerTools() {
         properties: {},
         additionalProperties: false,
       },
-      execute: () => {
-        start();
+      execute: async () => {
+        await start();
         return sim.snapshot();
       },
     },
@@ -639,10 +725,16 @@ function registerTools() {
 try {
   sim = new ChaseSimulation();
   view = new SceneView($("world"));
-  await view.loadTextures();
+  await Promise.all([view.loadTextures(), career.init()]);
   view.setupGame(sim);
   $("loading").hidden = true;
+  selectedCar = career.profile.selectedCar;
   setupGarage();
+  workshop = new GarageUI(career, chooseCar);
+  $("workshop-open").onclick = () => {
+    workshop.car = selectedCar;
+    workshop.open();
+  };
   $("start").onclick = start;
   $("camera-toggle").onclick = () => switchCamera();
   $("pause").onclick = pause;
@@ -670,6 +762,7 @@ try {
     "q",
   ];
   addEventListener("keydown", (e) => {
+    if ($("workshop").open || $("loot-dialog").open) return;
     const k = normalizeKey(e);
     if (!relevant.includes(k)) return;
     if ([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(k))

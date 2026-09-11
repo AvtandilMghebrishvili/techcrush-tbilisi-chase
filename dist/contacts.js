@@ -82,12 +82,12 @@ export function treeContact(car, tree, time = 0) {
   const vn = car.vx * nx + car.vz * nz;
   if (vn >= 0) return 0;
   const impact = -vn;
-  if (impact >= 12) {
+  if (impact >= (tree.breakSpeed || 12)) {
     tree.broken = true;
     tree.fallenAt = time;
     tree.fallAngle = Math.atan2(car.vx, car.vz);
-    car.vx *= 0.64;
-    car.vz *= 0.64;
+    car.vx *= tree.breakSpeed ? 0.84 : 0.64;
+    car.vz *= tree.breakSpeed ? 0.84 : 0.64;
   } else {
     car.vx -= vn * 1.12 * nx;
     car.vz -= vn * 1.12 * nz;

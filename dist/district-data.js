@@ -1,3 +1,4 @@
+import { placeOffRoad, overlapsRoad } from "./map-clearance.js";
 const project = ([lat, lon]) => ({
   x: -(lon - 44.799) * 83140,
   z: (lat - 41.699) * 111320,
@@ -79,49 +80,56 @@ export function reservedDistrict(p, padding = 0) {
     Math.hypot(p.x - m.x, p.z - m.z) < 40 + padding
   );
 }
-export const DISTRICT_SOLIDS = [
-  ...[-1, 1].map((s) => ({
-    x: LANDMARKS.tubes.x - 13,
-    z: LANDMARKS.tubes.z + s * 26,
-    w: 91,
-    d: 31,
-    h: 39,
+const landmarkParts = {
+  tubes: [-1, 1].map((s) => ({
+    x: -13,
+    z: s * 26,
+    w: 132,
+    d: 42,
+    h: 42,
     angle: s * 0.32,
-    landmark: true,
   })),
-  ...[
-    [-22, -12, 7],
-    [-5, -15, 6],
-    [13, -14, 7],
-    [-22, 9, 6],
-    [-5, 10, 7],
-    [14, 10, 6],
-    [31, -3, 5],
-  ].map(([x, z, r]) => ({
-    x: LANDMARKS.baths.x + x,
-    z: LANDMARKS.baths.z + z,
-    w: r * 2,
-    d: r * 2,
-    h: 7,
+  baths: [
+    ...[
+      [-22, -12, 7],
+      [-5, -15, 6],
+      [13, -14, 7],
+      [-22, 9, 6],
+      [-5, 10, 7],
+      [14, 10, 6],
+      [31, -3, 5],
+    ].map(([x, z, r]) => ({ x, z, w: r * 2, d: r * 2, h: 8, angle: 0 })),
+    { x: -5, z: 35, w: 28, d: 6, h: 19, angle: 0 },
+  ],
+  metekhi: [{ x: 0, z: 0, w: 35, d: 38, h: 68, angle: 0 }],
+  cable: [{ x: 0, z: 0, w: 24, d: 14, h: 8, angle: 0 }],
+};
+for (const [key, parts] of Object.entries(landmarkParts))
+  Object.assign(
+    LANDMARKS[key],
+    placeOffRoad(LANDMARKS[key], parts, (p) => riverDistance(p) > 52),
+  );
+export const RETAINING_WALLS = [];
+for (let z = LANDMARKS.rike.z - 125; z < LANDMARKS.rike.z + 170; z += 18) {
+  const wall = {
+    x: LANDMARKS.rike.x - 132,
+    z,
+    w: 4.2,
+    d: 18,
+    h: 9,
     angle: 0,
     landmark: true,
-  })),
-  {
-    x: LANDMARKS.baths.x - 5,
-    z: LANDMARKS.baths.z + 35,
-    w: 27,
-    d: 5,
-    h: 19,
-    angle: 0,
-    landmark: true,
-  },
-  {
-    x: LANDMARKS.metekhi.x,
-    z: LANDMARKS.metekhi.z,
-    w: 35,
-    d: 38,
-    h: 58,
-    angle: 0,
-    landmark: true,
-  },
+  };
+  if (!overlapsRoad(wall, 3)) RETAINING_WALLS.push(wall);
+}
+export const DISTRICT_SOLIDS = [
+  ...Object.entries(landmarkParts).flatMap(([key, parts]) =>
+    parts.map((b) => ({
+      ...b,
+      x: b.x + LANDMARKS[key].x,
+      z: b.z + LANDMARKS[key].z,
+      landmark: true,
+    })),
+  ),
+  ...RETAINING_WALLS,
 ];

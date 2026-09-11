@@ -1,4 +1,6 @@
 import * as THREE from "./vendor/three.module.js";
+import { registerBreakable } from "./breakable-props.js";
+import { RETAINING_WALLS } from "./district-data.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import {
   LANDMARKS as L,
@@ -296,7 +298,13 @@ export function buildTbilisiDistricts(v) {
   // Baratashvili is a broad driving deck, with proper sidewalk edges and bridge railings.
   const bridges = [
     ["BARATASHVILI BRIDGE", { x: -770.57, z: -237.75 }, -1.45, 145, 31],
-    ["METEKHI BRIDGE", { x: -927, z: -986 }, -1.32, 121, 23],
+    ...ROADS.filter((r) => r.name === "Metekhi Bridge").map((r) => [
+      "METEKHI BRIDGE",
+      { x: (r.start.x + r.end.x) / 2, z: (r.start.z + r.end.z) / 2 },
+      r.angle,
+      r.length + 1,
+      r.width + 2,
+    ]),
   ];
   for (const [name, p, angle, length, width] of bridges) {
     const g = new THREE.Group();
@@ -310,21 +318,17 @@ export function buildTbilisiDistricts(v) {
       for (let z = -length / 2 + 1; z < length / 2; z += 1.8)
         box(0.08, 1.18, 0.08, metal, side * (width / 2 - 0.2), 0.77, z, g);
       for (let z = -length / 2 + 8; z < length / 2; z += 25) {
-        beam(
-          [side * (width / 2 - 1), 0.3, z],
-          [side * (width / 2 - 1), 8, z],
-          0.09,
-          metal,
-          g,
-        );
-        beam(
-          [side * (width / 2 - 1), 8, z],
-          [side * (width / 2 - 4), 8.7, z],
-          0.08,
-          metal,
-          g,
-        );
-        box(1.25, 0.16, 0.5, white, side * (width / 2 - 4), 8.65, z, g);
+        const localX = side * (width / 2 - 1),
+          lamp = new THREE.Group();
+        const wx = p.x + Math.cos(angle) * localX + Math.sin(angle) * z;
+        const wz = p.z - Math.sin(angle) * localX + Math.cos(angle) * z;
+        lamp.position.set(wx, 0, wz);
+        lamp.rotation.y = angle;
+        root.add(lamp);
+        registerBreakable(v, lamp, wx, wz, 8.7);
+        beam([0, 0.3, 0], [0, 8, 0], 0.09, metal, lamp);
+        beam([0, 8, 0], [-side * 3, 8.7, 0], 0.08, metal, lamp);
+        box(1.25, 0.16, 0.5, white, -side * 3, 8.65, 0, lamp);
       }
       // Small patinated figure silhouettes echo the sculptures on the supplied bridge reference.
       const patina = material("#4b796d", { metalness: 0.5 });
@@ -354,7 +358,7 @@ export function buildTbilisiDistricts(v) {
     g.position.set(p.x, 0, p.z);
     g.rotation.y = 0.12;
     root.add(g);
-    box(130, 0.5, 7, cream, 0, 0.25, 0, g);
+    box(150, 0.5, 8, cream, 0, -0.24, 0, g);
     const canopy = (u, t) => {
       const x = (u - 0.5) * 126,
         z = t * (6 + 4 * Math.sin(u * Math.PI) ** 2),
@@ -543,8 +547,9 @@ export function buildTbilisiDistricts(v) {
     orb(8, 16, 20, silver, -51, 22, 0, g);
   }
   // Retaining arcade behind the park follows the rising east-bank road.
-  for (let z = park.z - 125; z < park.z + 170; z += 18) {
-    box(3, 8, 18, stone, park.x - 132, 4, z);
+  for (const wall of RETAINING_WALLS) {
+    const z = wall.z;
+    box(3, 8, 18, stone, wall.x, 4, z);
     const arch = add(
       new THREE.TorusGeometry(5, 0.6, 6, 16, Math.PI),
       brick,

@@ -57,7 +57,7 @@ The simulation input is `{ throttle, steer, brake, boost, rewind }`: throttle/st
 
 ## World and navigation
 
-The current road graph has 514 nodes and 665 segments in one connected component. The same graph drives NPC routes, checkpoint guidance, minimap lines and recovery positions. The generated road surface joins widened streets into one asphalt polygon containing 45 block islands. Map changes must regenerate both graph and surface.
+The current road graph has 519 nodes and 671 segments in one connected component. The same graph drives NPC routes, checkpoint guidance, minimap lines and recovery positions. The generated road surface joins widened streets into one asphalt polygon containing 46 block islands. Map changes must regenerate both graph and surface.
 
 District data is shared by collision and drawing code. Buildings use rotated rectangular footprints. Car contacts use oriented boxes and multiple separation passes, including NPC-to-NPC collisions. Tree models share their trunk locations with the simulation; decorative furniture generally has no collision body. Ramps share one definition between drawing and flight physics. Bridges use the road datum rather than a multi-level road system.
 
@@ -79,6 +79,12 @@ This is an arcade reconstruction informed by references, with approximated roads
 
 ## Storage and external services
 
-Run state and scores live in memory and reset on reload. No database, multiplayer service, account system or persistent leaderboard is present. Runtime modules/assets are local to the deployment; optional Google Fonts have fallback fonts. Asset preparation can contact external providers, but playing does not require those preparation services or API credentials. Optional WebMCP controls are registered only when the host browser exposes the relevant interface; ordinary browsers use the same keyboard/touch game without it.
+Active run state lives in memory. Career profiles persist through `profile-client.js` → `server/api.mjs` → D1 (`DB`), with a local SQLite adapter for development. `garage-ui.js` and `garage.css` provide inventory, purchases and reward animations. `progression.js` supplies shared rules. See [Career and API](CAREER.md) for identity, recovery, concurrency and limitations.
+
+`server/worker.mjs` handles `/api/*` and delegates other requests to `ASSETS`. `scripts/build-server.mjs` bundles the Worker and copies browser modules into `dist/client`. `db/schema.ts` and `drizzle/` define the database. Generated subdirectories are ignored; authored files in `dist/` remain tracked.
+
+`car-models.js` now supplies three original model geometries with equipment visuals; `sports-car.js` retains the earlier licensed asset path and loads environment lighting. `map-clearance.js` uses full oriented-footprint overlap tests to relocate landmarks and reject lots across roads. The clock-building wing shares corrected render/collision coordinates. `breakable-props.js` links visible street lamps, flags, signs and bridge poles to simulation/rewind state. High-speed player movement resolves obstacles in substeps no longer than 0.8 metres.
+
+There is no multiplayer or persistent leaderboard. Runtime assets are local to the deployment; optional Google Fonts have fallbacks. Asset preparation may contact providers but gameplay needs no provider API key. Optional WebMCP controls expose ordinary input actions only when supported by the browser.
 
 [Back to README](../README.md)
