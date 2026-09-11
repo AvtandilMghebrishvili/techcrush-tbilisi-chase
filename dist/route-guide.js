@@ -1,5 +1,14 @@
 import * as THREE from "./vendor/three.module.js";
-import { routeBetween, distance, CHECKPOINTS } from "./simulation.js";
+import { routeBetween, distance } from "./simulation.js";
+
+const GUIDE_VIEWS = {
+  chase: { scale: 0.68, height: 0.23, tilt: 0, screenWidth: 0.085 },
+  cockpit: { scale: 0.4, height: 0.85, tilt: -0.38, screenWidth: 0.055 },
+  hood: { scale: 0.46, height: 0.75, tilt: -0.38, screenWidth: 0.06 },
+  aerial: { scale: 0.88, height: 0.23, tilt: 0, screenWidth: 0.085 },
+};
+const cameraForward = new THREE.Vector3();
+const cameraOffset = new THREE.Vector3();
 
 // Sample a street route by distance, so arrows follow corners instead of pointing through buildings.
 export function sampleRoute(from, route, spacing = 13, reach = 175) {
@@ -60,35 +69,62 @@ export function makeRouteGuide(scene) {
     group.add(mesh);
     return mesh;
   });
-  return { group, arrows, points: [], checkpoint: -1, refreshAt: -1 };
+  return { group, arrows, points: [], checkpoint: -1 };
 }
 
-export function updateRouteGuide(guide, sim, interior = false) {
+export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
+  const style = GUIDE_VIEWS[mode] || GUIDE_VIEWS.chase;
+  const interior = mode === "cockpit" || mode === "hood";
   const cp = sim.checkpoints[sim.checkpoint];
   guide.group.visible = !!cp && ["running", "paused"].includes(sim.phase);
   if (!guide.group.visible) return;
   if (
     sim.checkpoint !== guide.checkpoint ||
     sim.level !== guide.level ||
-    sim.time >= guide.refreshAt ||
-    sim.time < guide.refreshAt - 0.3
+    sim.player.x !== guide.originX ||
+    sim.player.z !== guide.originZ
   ) {
+    // Sample the current position each moving frame, rather than jumping every
+    // 200 ms. The street graph already caches its shortest-path trees.
     guide.points = sampleRoute(sim.player, routeBetween(sim.player, cp));
     guide.checkpoint = sim.checkpoint;
     guide.level = sim.level;
-    guide.refreshAt = sim.time + 0.2;
+    guide.originX = sim.player.x;
+    guide.originZ = sim.player.z;
   }
+  if (camera) camera.getWorldDirection(cameraForward);
   guide.arrows.forEach((mesh, i) => {
     const p = guide.points[i];
-    mesh.visible = !!p && (!interior || p.along >= 18);
+    const nearFade =
+      p && interior
+        ? THREE.MathUtils.smoothstep(distance(sim.player, p), 12, 24)
+        : 1;
+    mesh.visible = !!p && nearFade > 0;
     if (!p) return;
-    const wave = (Math.sin(p.along * 0.11 - sim.time * 5) + 1) / 2;
-    // Tilt the road chevrons toward the driver so they retain a visible face at eye level.
-    mesh.position.set(p.x, interior ? 1.05 : 0.18 + wave * 0.12, p.z);
-    mesh.rotation.set(interior ? -0.38 : 0, p.angle, 0, "YXZ");
+    const wave = (Math.sin(p.along * 0.11 - sim.time * 3.3) + 1) / 2;
+    // Animate only light: no bobbing or expanding arrows across the windshield.
+    mesh.position.set(p.x, style.height, p.z);
+    mesh.rotation.set(style.tilt, p.angle, 0, "YXZ");
     mesh.material.opacity =
-      (interior ? 0.82 : 0.38 + wave * 0.57) *
-      Math.min(1, (185 - p.along) / 35);
-    mesh.scale.setScalar(interior ? 0.74 : 0.9 + wave * 0.12);
+      (interior ? 0.64 + wave * 0.16 : 0.48 + wave * 0.24) *
+      nearFade *
+      (1 - THREE.MathUtils.smoothstep(p.along, 140, 180));
+    let scale = style.scale;
+    if (camera) {
+      const depth = cameraOffset
+        .copy(mesh.position)
+        .sub(camera.position)
+        .dot(cameraForward);
+      // Bound projected width on narrow screens too; retain natural perspective
+      // in the distance instead of enlarging far arrows into a solid ribbon.
+      const visibleWidth =
+        2 *
+        Math.max(0, depth - 2) *
+        Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) *
+        camera.aspect;
+      scale = Math.min(scale, (visibleWidth * style.screenWidth) / 5);
+      mesh.visible &&= depth > 2;
+    }
+    mesh.scale.setScalar(scale);
   });
 }

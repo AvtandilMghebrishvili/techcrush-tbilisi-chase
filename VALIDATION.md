@@ -1,5 +1,11 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Navigation scale 1.5.1 — 12 September 2026
+
+`npm test`: **93 passed, 0 failed**. Added coverage verifies sub-200 ms route updates, stable arrow size/height during light animation, paused effects, finite positions after time reversal, near-windshield clearance, depth testing and bounded projected widths for all four cameras at landscape and portrait aspect ratios. The existing street-route, checkpoint, driving, rewind, collision, pursuit and garage cases remain passing.
+
+Local Chromium visual review covered cockpit, hood, chase and aerial views at 1280 × 720, the Original 458 and Vector V12 cabins, and compact cockpit navigation at 390 × 844. A three-second turbo input reached 288 km/h; a further 1.1-second input crossed checkpoint 1 at 100 HP and displayed the new route and right-turn HUD. The narrow HUD measured a 36 px direction glyph and 28 px distance with no panel background. Temporary viewport overrides were reset. No browser warnings or errors were reported in the final cabin check. A short-landscape screenshot attempt timed out, so no visual verification claim is made for that viewport; projected geometry is covered by the tests. These checks are not physical-device or measured-FPS certification.
+
 ## Garage studio and cabins 1.5.0 — 12 September 2026
 
 `npm test`: **91 passed, 0 failed**. Six added cases cover validated independent per-car paint, serialization, unchanged performance/currency on repaint, 56 finite and geometrically distinct part grades, fixed wheel centers/radii/calipers, fitted wing assemblies, original GLB hub alignment/template isolation, exact non-mutating performance comparisons, and cockpit guide positioning/reset. Existing driving, collision, body damage, steering, rewind, pursuit, map and save tests remain green. `npm run build` produced the Worker, client assets and existing database migrations successfully.

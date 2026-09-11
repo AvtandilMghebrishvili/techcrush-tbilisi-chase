@@ -583,7 +583,8 @@ export class SceneView {
     updateRouteGuide(
       this.routeGuide,
       sim,
-      CAMERAS[this.cameraMode].id === "cockpit",
+      CAMERAS[this.cameraMode].id,
+      this.camera,
     );
     this.sun.position.set(
       this.player.position.x - 75,

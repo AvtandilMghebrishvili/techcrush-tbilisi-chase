@@ -323,18 +323,14 @@
 }
 body.playing.cockpit-mode .route-cue {
   top: 21%;
-  gap: 13px;
+  gap: 9px;
 }
 body.playing.cockpit-mode .route-cue > span {
   color: #baffea;
-  font-size: 78px;
   -webkit-text-stroke: 1px #143c36;
   text-shadow:
     0 2px 4px #000,
     0 0 9px #03131f;
-}
-body.playing.cockpit-mode .route-cue b {
-  font-size: 32px;
 }
 body.playing.cockpit-mode .route-cue small {
   font-size: 10px;
@@ -419,13 +415,12 @@ body.playing.cockpit-mode .route-cue small {
     flex-basis: 100%;
   }
   body.playing.cockpit-mode .route-cue {
-    top: 19%;
+    top: 210px;
   }
-  body.playing.cockpit-mode .route-cue > span {
-    font-size: 54px;
-  }
-  body.playing.cockpit-mode .route-cue b {
-    font-size: 25px;
+}
+@media (max-height: 500px) {
+  body.playing.cockpit-mode .route-cue {
+    top: 76px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

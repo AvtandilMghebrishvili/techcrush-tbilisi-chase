@@ -63,6 +63,111 @@ test("road guide animates, changes checkpoint, hides for escape and survives a r
   assert.equal(guide.checkpoint, 0);
 });
 
+test("guidance follows each driving frame without size pulsation and freezes on pause", () => {
+  const sim = new ChaseSimulation(),
+    guide = makeRouteGuide(new THREE.Scene());
+  sim.start();
+  updateRouteGuide(guide, sim, "cockpit");
+  const first = guide.points[0];
+  sim.player.x += Math.sin(sim.player.angle) * 0.5;
+  sim.player.z += Math.cos(sim.player.angle) * 0.5;
+  sim.time += 1 / 60;
+  updateRouteGuide(guide, sim, "cockpit");
+  assert(distance(first, guide.points[0]) > 0.1, "no 200 ms position stall");
+  const sizes = guide.arrows.map((a) => a.scale.x);
+  const heights = guide.arrows.map((a) => a.position.y);
+  sim.time += 0.1;
+  updateRouteGuide(guide, sim, "cockpit");
+  assert.deepEqual(
+    guide.arrows.map((a) => a.scale.x),
+    sizes,
+  );
+  assert.deepEqual(
+    guide.arrows.map((a) => a.position.y),
+    heights,
+  );
+  sim.phase = "paused";
+  const opacity = guide.arrows.map((a) => a.material.opacity);
+  updateRouteGuide(guide, sim, "cockpit");
+  assert.deepEqual(
+    guide.arrows.map((a) => a.material.opacity),
+    opacity,
+  );
+  sim.time = 0;
+  Object.assign(sim.player, START);
+  updateRouteGuide(guide, sim, "cockpit");
+  assert(guide.points.every((p) => Number.isFinite(p.x + p.z)));
+});
+
+test("all camera views keep projected arrows compact on wide and portrait screens", () => {
+  const sim = new ChaseSimulation();
+  sim.start();
+  for (const aspect of [16 / 9, 390 / 844]) {
+    for (const mode of ["chase", "cockpit", "hood", "aerial"]) {
+      const scene = new THREE.Scene(),
+        guide = makeRouteGuide(scene);
+      const interior = mode === "cockpit" || mode === "hood";
+      const camera = new THREE.PerspectiveCamera(
+        interior ? 76 : 56,
+        aspect,
+        0.1,
+        1500,
+      );
+      const forward = new THREE.Vector3(
+        Math.sin(sim.player.angle),
+        0,
+        Math.cos(sim.player.angle),
+      );
+      camera.position.set(
+        sim.player.x,
+        interior ? 1.05 : mode === "aerial" ? 26 : 4.4,
+        sim.player.z,
+      );
+      camera.position.addScaledVector(
+        forward,
+        interior ? 0 : mode === "aerial" ? -27 : -9,
+      );
+      camera.lookAt(
+        new THREE.Vector3(sim.player.x, 1, sim.player.z).addScaledVector(
+          forward,
+          60,
+        ),
+      );
+      updateRouteGuide(guide, sim, mode, camera);
+      scene.updateMatrixWorld(true);
+      const visible = guide.arrows.filter((a) => a.visible);
+      assert(visible.length > 3, `${mode} retains a readable route`);
+      if (interior)
+        assert.equal(
+          guide.arrows[0].visible,
+          false,
+          "clear the near windshield",
+        );
+      for (const arrow of visible) {
+        const positions = arrow.geometry.attributes.position,
+          xs = [];
+        for (let i = 0; i < positions.count; i++) {
+          const v = new THREE.Vector3()
+            .fromBufferAttribute(positions, i)
+            .applyMatrix4(arrow.matrixWorld)
+            .project(camera);
+          assert(Number.isFinite(v.x + v.y + v.z));
+          xs.push(v.x);
+        }
+        const screenFraction = (Math.max(...xs) - Math.min(...xs)) / 2;
+        assert(
+          screenFraction < (interior ? 0.065 : 0.09),
+          `${mode} arrow width ${screenFraction}`,
+        );
+        assert(
+          arrow.material.depthTest,
+          "world objects still occlude guidance",
+        );
+      }
+    }
+  }
+});
+
 test("aggressive patrol gains on a moving car while respecting its speed limit", () => {
   const sim = new ChaseSimulation();
   sim.start();

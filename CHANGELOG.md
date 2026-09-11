@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.1 — 2026-09-12
+
+- Reduce cockpit street chevrons from 3.7 m to at most 2 m wide, with separate hood, chase and aerial sizes and a projected-width limit for narrow screens.
+- Fade nearby first-person guidance smoothly, keep a raised visible face, and animate brightness without bobbing or size pulsation. Update route samples every moving frame instead of stepping every 200 ms.
+- Reduce the transparent direction/distance HUD, remove oversized cockpit overrides, stabilize number widths and adjust compact-screen placement.
+- Add navigation regressions for frame updates, pause, finite rewind positions and projected sizes across all four camera modes.
+
 ## 1.5.0 — 2026-09-12
 
 - Add an interactive studio with selected-car orbit/zoom, front/rear/wheel/interior views and explicitly labeled no-cost preview fits.

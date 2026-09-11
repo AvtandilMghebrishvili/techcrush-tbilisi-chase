@@ -177,16 +177,16 @@ test("cockpit route arrows keep road positions but gain a visible raised face an
   const sim = new ChaseSimulation();
   sim.start("gt");
   const guide = makeRouteGuide(new THREE.Scene());
-  updateRouteGuide(guide, sim, false);
+  updateRouteGuide(guide, sim, "chase");
   const arrow = guide.arrows.find((a) => a.visible),
     point = arrow.position.clone();
-  updateRouteGuide(guide, sim, true);
+  updateRouteGuide(guide, sim, "cockpit");
   assert.equal(arrow.position.x, point.x);
   assert.equal(arrow.position.z, point.z);
   assert(arrow.position.y > point.y);
   assert(Math.abs(arrow.rotation.x) > 0.3);
   assert(arrow.material.depthTest);
-  updateRouteGuide(guide, sim, false);
+  updateRouteGuide(guide, sim, "chase");
   assert.equal(arrow.rotation.x, 0);
   assert(arrow.position.y < 0.4);
 });

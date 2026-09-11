@@ -28,7 +28,7 @@ The original 458 keeps its original wheels while stock; fitting wheel, tire or b
 
 The four cars have model-specific instrument styles and trim. Procedural cabins have a genuine opening in the body surface, floor, headliner, door inserts, bolsters, trim and controls; the Vector has a flat-bottom steering rim. The restored 458 retains its licensed interior and gains a fitted instrument binnacle and dark upholstery. Speed/RPM/gear displays use the shared engine telemetry calculation; the steering wheel rotates around its shaft.
 
-In cockpit view, street chevrons are raised and tilted toward the driver, smaller, and omitted in the nearest 18 metres to avoid filling the windshield. They still follow the computed street route and depth-test against the world. The transparent HUD retains a larger direction arrow and checkpoint distance. **C** cycles camera modes.
+In cockpit view, street chevrons are raised and tilted toward the driver and at most 2 metres wide. Nearby guidance fades in between 12 and 24 metres to keep the windshield clear. Hood, chase and aerial views have their own sizes; projected-width limits also keep arrows compact on narrow screens. Brightness flows along the route without size pulsation or bobbing, and route samples follow each moving frame. Chevrons still follow the street route and depth-test against the world. The transparent HUD uses a compact direction arrow, stable-width distance numerals and responsive typography. **C** cycles camera modes.
 
 ## Save and compatibility
 

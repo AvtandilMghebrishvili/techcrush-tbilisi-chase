@@ -5,7 +5,7 @@
   box-shadow: none;
   backdrop-filter: none;
   padding: 0;
-  gap: 16px;
+  gap: 10px;
   top: 100px;
   color: #fff;
   text-shadow:
@@ -13,19 +13,23 @@
     0 0 14px #09101cd9;
 }
 .route-cue > span {
-  font-size: 62px;
+  font-size: clamp(32px, 5.5vh, 44px);
   color: #fff;
   line-height: 1;
+  width: 1em;
+  text-align: center;
+  flex-shrink: 0;
 }
 .route-cue b {
-  font-size: 46px;
+  font-size: clamp(25px, 4.3vh, 34px);
+  font-variant-numeric: tabular-nums;
   font-style: italic;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 1px;
 }
 .route-cue small {
-  font-size: 12px;
+  font-size: 10px;
   letter-spacing: 2px;
   color: #fff;
   font-weight: 700;
@@ -69,10 +73,10 @@
     gap: 9px;
   }
   .route-cue b {
-    font-size: 34px;
+    font-size: 28px;
   }
   .route-cue > span {
-    font-size: 43px;
+    font-size: 36px;
   }
   .route-cue small {
     font-size: 10px;
@@ -93,9 +97,9 @@
     top: 76px;
   }
   .route-cue b {
-    font-size: 30px;
+    font-size: 24px;
   }
   .route-cue > span {
-    font-size: 38px;
+    font-size: 30px;
   }
 }
