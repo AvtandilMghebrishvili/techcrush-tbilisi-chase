@@ -1,4 +1,6 @@
 import { ROADS } from "./city-map.js";
+import { RIVER_POLYGON } from "./district-data.js";
+import { RAMPS } from "./stunts.js";
 import { SceneView } from "./view.js";
 import {
   CARS,
@@ -131,7 +133,7 @@ function setupGarage() {
     $("intro").hidden = false;
     $("mission-card").hidden = false;
     $("touch-controls").hidden = true;
-    document.body.classList.remove("playing", "turbo-active");
+    document.body.classList.remove("playing", "turbo-active", "rewinding");
     view.player.visible = true;
     view.cockpit.root.visible = false;
     view.camera.position.set(11, 7.5, -49);
@@ -326,6 +328,27 @@ function updateHUD() {
   $("drift-status").textContent = p.isDrifting
     ? "DRIFT · " + Math.round((Math.abs(p.slip) * 180) / Math.PI) + "°"
     : "";
+  if (p.airborne)
+    $("drift-status").textContent =
+      "AIR · " + p.airTime.toFixed(1) + "s · A/D ROLL";
+  if (p.flipped) $("drift-status").textContent = "ROLLOVER · Q TO REWIND";
+  const reversing = sim.phase === "rewinding";
+  if (sim.phase === "running" || reversing) $("pause").disabled = false;
+  document.body.classList.toggle("rewinding", reversing);
+  $("rewind").disabled =
+    !["running", "wrecked", "busted", "rewinding"].includes(sim.phase) ||
+    (sim.timeline.available < 0.1 && !reversing);
+  $("rewind-status").textContent = reversing
+    ? "−" +
+      (sim.timeline.end - sim.timeline.cursor).toFixed(1) +
+      "s · RELEASE TO CONTINUE"
+    : sim.timeline.available.toFixed(1) + "s AVAILABLE";
+  $("rewind-fill").style.width =
+    Math.min(100, (sim.timeline.available / 5) * 100) + "%";
+  $("timeline-time").textContent = reversing
+    ? "−" + (sim.timeline.end - sim.timeline.cursor).toFixed(1) + " SEC"
+    : "";
+  if (reversing) $("modal").hidden = true;
   document.body.classList.toggle(
     "turbo-active",
     sim.phase === "running" && p.boosting,
@@ -335,9 +358,10 @@ function updateHUD() {
       ? "R"
       : String(Math.min(5, Math.floor((Math.max(0, p.speed) * 3.6) / 46) + 1));
   $("takedowns").textContent = String(sim.takedowns);
-  $("heat").textContent = sim.police
-    .map((c) => (c.destroyed ? "○" : "●"))
-    .join(" ");
+  $("heat").textContent =
+    sim.police.filter((c) => !c.destroyed).length +
+    " UNITS · HEAT " +
+    sim.heatLevel;
   const escape = sim.checkpoint === 6;
   $("bust-bar").style.width =
     (escape ? sim.escape / 8 : sim.bust / 4) * 100 + "%";
@@ -352,7 +376,9 @@ function updateHUD() {
           : "Break line of sight and pull away."
         : sim.roadblockAhead
           ? "ROADBLOCK AHEAD — FIND A GAP"
-          : "Pursuit and intercept units active.";
+          : sim.police.length < 12
+            ? "REINFORCEMENTS IN " + Math.ceil(sim.nextWaveAt - sim.time) + "s"
+            : "MAXIMUM PURSUIT — 12 UNITS";
   const cp = CHECKPOINTS[sim.checkpoint];
   $("objective").textContent = cp
     ? "Reach " + cp.name
@@ -382,12 +408,19 @@ function updateHUD() {
 }
 function drawMap() {
   const c = $("map").getContext("2d"),
-    s = 230 / MAP_SIZE,
-    ox = 115,
-    oz = 115;
+    s = 230 / 1100,
+    ox = 115 + sim.player.x * s,
+    oz = 115 + sim.player.z * s;
   c.clearRect(0, 0, 230, 230);
   c.fillStyle = "#112531";
   c.fillRect(0, 0, 230, 230);
+  c.fillStyle = "#204853";
+  c.beginPath();
+  RIVER_POLYGON.forEach(([x, z], i) =>
+    i ? c.lineTo(ox - x * s, oz - z * s) : c.moveTo(ox - x * s, oz - z * s),
+  );
+  c.closePath();
+  c.fill();
   c.strokeStyle = "#344954";
   c.lineWidth = 6;
   for (const road of ROADS) {
@@ -410,11 +443,27 @@ function drawMap() {
     c.setLineDash([]);
     c.fillStyle = "#73e6ed";
     c.beginPath();
-    c.arc(ox - cp.x * s, oz - cp.z * s, 5, 0, Math.PI * 2);
+    c.arc(
+      Math.max(9, Math.min(221, ox - cp.x * s)),
+      Math.max(9, Math.min(221, oz - cp.z * s)),
+      5,
+      0,
+      Math.PI * 2,
+    );
     c.fill();
   }
   c.fillStyle = "#d3b37a";
   c.fillRect(ox - TOWER.x * s - 2, oz - TOWER.z * s - 2, 4, 4);
+  for (const ramp of RAMPS) {
+    const x = ox - ramp.x * s,
+      y = oz - ramp.z * s;
+    c.beginPath();
+    c.moveTo(x, y - 4);
+    c.lineTo(x + 4, y + 3);
+    c.lineTo(x - 4, y + 3);
+    c.closePath();
+    c.fill();
+  }
   for (const cop of sim.police) {
     if (cop.destroyed) continue;
     c.fillStyle = "#ff706a";
@@ -437,13 +486,18 @@ function drawMap() {
 function frame(now) {
   const dt = Math.min((now - last) / 1000 || 0, 0.05);
   last = now;
-  if (sim.phase === "running") {
+  if (
+    sim.phase === "running" ||
+    sim.phase === "rewinding" ||
+    (input().rewind && ["wrecked", "busted"].includes(sim.phase))
+  ) {
     accumulator += dt;
     while (accumulator >= 1 / 120) {
+      const previousPhase = sim.phase;
       sim.update(1 / 120, input());
       accumulator -= 1 / 120;
-      if (sim.phase !== "running") {
-        finish();
+      if (["won", "wrecked", "busted"].includes(sim.phase)) {
+        if (previousPhase !== sim.phase) finish();
         break;
       }
     }
@@ -465,6 +519,33 @@ function registerTools() {
   const life = new AbortController();
   addEventListener("pagehide", () => life.abort(), { once: true });
   const tools = [
+    {
+      name: "set_chase_rewind",
+      description:
+        "Hold or release the same five-second rewind control as Q. Hold to play the recent chase backwards slowly; release to continue from there.",
+      inputSchema: {
+        type: "object",
+        properties: { held: { type: "boolean" } },
+        required: ["held"],
+        additionalProperties: false,
+      },
+      execute: ({ held }) => {
+        if (held) {
+          if (
+            !["running", "rewinding", "wrecked", "busted"].includes(sim.phase)
+          )
+            throw Error("Start or resume a run first");
+          if (sim.timeline.available < 0.1)
+            throw Error("Drive first to record some history");
+          keys.add("q");
+          sim.timeline.back(sim, 0);
+        } else {
+          keys.delete("q");
+          sim.timeline.release(sim);
+        }
+        return sim.snapshot();
+      },
+    },
     {
       name: "select_chase_car",
       description:
@@ -586,6 +667,7 @@ try {
     "m",
     "Enter",
     "c",
+    "q",
   ];
   addEventListener("keydown", (e) => {
     const k = normalizeKey(e);
@@ -604,9 +686,14 @@ try {
   addEventListener("keyup", (e) => keys.delete(normalizeKey(e)));
   addEventListener("blur", () => {
     keys.clear();
+    if (sim.timeline.active) sim.timeline.release(sim);
     if (sim.phase === "running") pause();
   });
   document.addEventListener("visibilitychange", () => {
+    if (document.hidden && sim.timeline.active) {
+      keys.clear();
+      sim.timeline.release(sim);
+    }
     if (document.hidden && sim.phase === "running") pause();
   });
   for (const btn of document.querySelectorAll("[data-key]")) {

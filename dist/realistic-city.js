@@ -15,6 +15,8 @@ import { makeKartlisDeda } from "./kartlis-deda.js";
 import { TREES } from "./world-props.js";
 import { TOWER } from "./config.js";
 import { buildRoadSurface } from "./road-surface.js";
+import { buildTbilisiDistricts, terrainMound } from "./tbilisi-districts.js";
+import { LANDMARKS, riverDistance } from "./district-data.js";
 const mat = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.83, ...extra });
 export function terrainHeight(x, z) {
@@ -22,16 +24,26 @@ export function terrainHeight(x, z) {
     315 * Math.exp(-(((x - 1160) / 640) ** 2) - ((z + 390) / 1490) ** 2);
   const south =
     215 * Math.exp(-(((x + 30) / 1480) ** 2) - ((z + 1490) / 560) ** 2);
+  const east =
+    260 *
+    Math.exp(-(((x + 2450) / 640) ** 2) - ((z + 400) / 1900) ** 2) *
+    Math.max(0, Math.min(1, (-x - 1630) / 380));
+  const north =
+    210 *
+    Math.exp(-(((z - 1750) / 600) ** 2) - (x / 2100) ** 2) *
+    Math.max(0, Math.min(1, (z - 1050) / 450));
   const fade = Math.max(
     0,
-    Math.min(1, Math.max((x - 680) / 350, (-z - 770) / 380)),
+    Math.min(1, Math.max((x - 680) / 350, (-z - 1360) / 380)),
   );
   return (
     (west + south) *
       (1 +
         0.055 * Math.sin(x * 0.011) * Math.sin(z * 0.008) +
         0.025 * Math.sin(x * 0.038 + z * 0.017)) *
-      fade -
+      fade +
+    east +
+    north -
     3
   );
 }
@@ -43,7 +55,7 @@ function mountains(v) {
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i),
       z = p.getZ(i),
-      h = terrainHeight(x, z);
+      h = riverDistance({ x, z }) < 85 ? -9 : terrainHeight(x, z);
     p.setY(i, h);
     const mottled =
       Math.sin(x * 0.034 + Math.sin(z * 0.028) * 4) * Math.sin(z * 0.063) +
@@ -60,22 +72,17 @@ function mountains(v) {
   terrain.receiveShadow = true;
   v.decor.add(terrain);
   const statue = makeKartlisDeda();
-  const sx = -430,
-    sz = -1190;
-  statue.position.set(sx, terrainHeight(sx, sz), sz);
+  const sx = LANDMARKS.mother.x,
+    sz = LANDMARKS.mother.z;
+  statue.position.set(sx, 91, sz);
   statue.rotation.y = 0;
   statue.scale.setScalar(1.8);
   v.decor.add(statue);
-  const base = v.box(
-    20,
-    4,
-    20,
-    mat("#9a9388"),
-    sx,
-    terrainHeight(sx, sz) + 2,
-    sz,
-  );
+  const base = v.box(20, 4, 20, mat("#9a9388"), sx, 90, sz);
   base.castShadow = true;
+  const shoulderMaterial = mat("#92977d", { vertexColors: true });
+  v.localHillMaterials = [shoulderMaterial];
+  terrainMound(v.decor, { x: sx, z: sz }, 165, 135, 93, shoulderMaterial);
   tower(v);
 }
 function clockBuilding(v, facade) {
@@ -170,7 +177,6 @@ export function buildRealisticCity(v) {
   v.roadMaterial = road;
   v.buildingMaterials = [];
   v.oldTownMaterials = [];
-  v.box(2500, 0.2, 2300, mat("#7c8070"), 0, -0.4, 0);
   const facades = ["#f4ecda", "#d8cfbb", "#dad3c6", "#bfc5bf", "#d1bca5"].map(
     (c) => {
       const m = mat(c);
@@ -179,6 +185,24 @@ export function buildRealisticCity(v) {
     },
   );
   buildRoadSurface(v, road, concrete, curb);
+  const paving = document.createElement("canvas");
+  paving.width = paving.height = 512;
+  const pc = paving.getContext("2d");
+  pc.fillStyle = "#a7a69e";
+  pc.fillRect(0, 0, 512, 512);
+  for (let y = 0; y < 8; y++)
+    for (let x = 0; x < 8; x++) {
+      const light = 166 + ((x * 17 + y * 31) % 23);
+      pc.fillStyle = `rgb(${light},${light},${light - 7})`;
+      pc.fillRect(x * 64 + 2, y * 64 + 2, 60, 60);
+    }
+  const ptex = new THREE.CanvasTexture(paving);
+  ptex.wrapS = ptex.wrapT = THREE.RepeatWrapping;
+  ptex.repeat.set(3, 3);
+  ptex.colorSpace = THREE.SRGBColorSpace;
+  concrete.map = ptex;
+  concrete.bumpMap = ptex;
+  concrete.bumpScale = 0.05;
   for (const r of ROADS) {
     const fx = Math.sin(r.angle),
       fz = Math.cos(r.angle),
@@ -227,6 +251,7 @@ export function buildRealisticCity(v) {
   clockBuilding(v, facades[1]);
   mountains(v);
   buildTechcrushGarage(v);
+  buildTbilisiDistricts(v);
   for (const i of [15, 48, 93, 134, 177]) {
     const n = NODES[i];
     if (n) addFlag(v, n.x + 15, n.z, 10, 0.58);

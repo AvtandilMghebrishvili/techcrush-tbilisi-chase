@@ -8,6 +8,7 @@ const codes = {
   KeyP: "p",
   KeyR: "r",
   KeyM: "m",
+  KeyQ: "q",
   Space: " ",
   ShiftLeft: "Shift",
   ShiftRight: "Shift",
@@ -28,5 +29,6 @@ export function drivingInput(keys) {
       Number(keys.has("a") || keys.has("ArrowLeft")),
     brake: keys.has(" "),
     boost: keys.has("Shift"),
+    rewind: keys.has("q"),
   };
 }

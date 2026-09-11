@@ -21,7 +21,7 @@ const escapeRoute = [
   CHECKPOINTS[4],
   CHECKPOINTS[0],
 ];
-for (let frame = 0; frame < 120 * 300 && sim.phase === "running"; frame++) {
+for (let frame = 0; frame < 120 * 480 && sim.phase === "running"; frame++) {
   const p = sim.player;
   stalled = sim.time > 3 && Math.abs(p.speed) < 3 ? stalled + 1 / 120 : 0;
   if (stalled > 1.1) {

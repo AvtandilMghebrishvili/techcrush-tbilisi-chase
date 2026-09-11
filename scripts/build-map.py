@@ -16,6 +16,15 @@ names = ['Shota Rustaveli Avenue', 'Nikoloz Baratashvili Avenue', 'Freedom Squar
          'Mitropane Laghidze Street', 'Pavle Ingorokva Street', '9th April Street',
          'Taras Shevchenko Street', 'Archil Jorjadze Street', 'Aleksandre Griboedov Street',
          'Shio Chitadze Street', 'Giorgi Leonidze Street', 'Merab Kostava Street']
+names += ['Nikoloz Baratashvili Bridge','Kote Abkhazi Street','Shalva Dadiani Street','Lado Asatiani Street','Galaktion Tabidze Street','Ivane Machabeli Street','Gia Abesadze Street','Vakhtang Beridze Street','Chakhrukhadze Street','Erekle Meori Square','Anton Katalikos Street','Harutyun Saiatnova Street','Ierusalimi Street','Betlemi Street','Kosta Khetagurov Street','Abo Tbilieli Street','Grigol Khandzteli Street']
+reference=json.loads((root/'data/reference-streets.json').read_text(encoding='utf8'))
+for i,p in enumerate(reference['roundabouts']):
+    lat,lon=p['center'];rx,rz=p['radii']
+    coords=[[lat+math.cos(j*math.pi/16)*rz/111320,lon+math.sin(j*math.pi/16)*rx/83140] for j in range(33)]
+    reference['paths'].append({'name':p['name'],'width':p['width'],'points':coords})
+for i,p in enumerate(reference['paths']):
+    ways[-i-1]={'id':-i-1,'tags':{'name:en':p['name'],'highway':'residential','game:width':p['width']},'geometry':[{'lat':lat,'lon':lon} for lat,lon in p['points']]}
+    names.append(p['name'])
 points, edges, edgekeys = [], [], set()
 def point(g):
     x, z = -(g['lon'] - 44.799) * 83140, (g['lat'] - 41.699) * 111320
@@ -31,9 +40,9 @@ for w in ways.values():
     if not name:name='Local street'
     if connector and not name:name='Connecting street'
     coords = w['geometry']
-    width = 30 if 'Rustaveli' in name else 20 if 'Baratashvili' in name or 'Freedom' in name else 15
+    width = w['tags'].get('game:width',30 if 'Rustaveli' in name else 20 if 'Baratashvili' in name or 'Freedom' in name else 15)
     for a,b in zip(coords,coords[1:]):
-        if not all(41.6928 < g['lat'] < 41.7043 and 44.790 < g['lon'] < 44.808 for g in [a,b]): continue
+        if not all(41.6855 < g['lat'] < 41.7043 and 44.790 < g['lon'] < 44.817 for g in [a,b]): continue
         ia,ib=point(a),point(b)
         key=tuple(sorted([ia,ib]))
         if ia==ib or key in edgekeys:continue
@@ -75,6 +84,6 @@ for i in adj:
 keep=max(components,key=len);ids={v:i for i,v in enumerate(sorted(keep))}
 out={'center':[41.699,44.799], 'nodes':[points[i] for i in sorted(keep)],
      'edges':[[ids[a],ids[b],w,n] for a,b,w,n in edges if a in keep and b in keep]}
-(root/'dist/road-data.js').write_text('// © OpenStreetMap contributors, ODbL 1.0. Snapshot 2026-09-11.\n// Simplified, widened and bidirectional for gameplay. See ASSETS.md.\nexport const ROAD_DATA = '+json.dumps(out,separators=(',',':'))+';\n',encoding='utf8')
+(root/'dist/road-data.js').write_text('// © OpenStreetMap contributors, ODbL 1.0. Snapshot 2026-09-11.\n// Simplified, widened and bidirectional for gameplay. See ASSETS.md.\n// Eastern/southern extensions also include original approximate reference-aligned connections.\nexport const ROAD_DATA = '+json.dumps(out,separators=(',',':'))+';\n',encoding='utf8')
 print('Map:',len(out['nodes']),'nodes,',len(out['edges']),'segments; disconnected components omitted:',[len(c) for c in components if c != keep])
 print('Streets:',sorted(set(e[3] for e in out['edges'])))

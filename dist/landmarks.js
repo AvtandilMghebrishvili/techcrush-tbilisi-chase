@@ -1,5 +1,7 @@
 import * as THREE from "./vendor/three.module.js";
 import { makeKartlisDeda } from "./kartlis-deda.js";
+import { ROADS, nearestRoad } from "./city-map.js";
+import { riverDistance } from "./district-data.js";
 
 const stone = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...extra });
@@ -100,22 +102,43 @@ export function buildTechcrushGarage(v) {
   v.garageSignTexture = texture;
   const mat = new THREE.MeshBasicMaterial({
     map: texture,
-    side: THREE.DoubleSide,
+    side: THREE.FrontSide,
   });
   // Road-facing signs on opposite blocks are visible from both driving directions.
-  for (const [x, z, angle] of [
+  const placements = [
     [-495, -252, -Math.PI / 2],
     [-550, -297, Math.PI / 2],
-  ]) {
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(14, 3.5), mat);
-    sign.position.set(x, 4.8, z);
-    sign.rotation.y = angle;
-    v.decor.add(sign);
+  ];
+  for (const r of ROADS.filter((r) => r.length > 55 && r.id % 4 === 0)) {
+    const x = (r.start.x + r.end.x) / 2 + Math.cos(r.angle) * (r.width / 2 + 4),
+      z = (r.start.z + r.end.z) / 2 - Math.sin(r.angle) * (r.width / 2 + 4);
+    if (
+      riverDistance({ x, z }) < 48 ||
+      placements.some((p) => Math.hypot(p[0] - x, p[1] - z) < 100)
+    )
+      continue;
+    placements.push([x, z, r.angle - Math.PI / 2]);
+    if (placements.length >= 22) break;
+  }
+  for (const [x, z, angle] of placements) {
+    const group = new THREE.Group();
+    group.position.set(x, 0, z);
+    group.rotation.y = angle;
+    v.decor.add(group);
+    for (const side of [1, -1]) {
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(14, 3.5), mat);
+      sign.position.set(0, 4.8, side * 0.09);
+      sign.rotation.y = side === 1 ? 0 : Math.PI;
+      group.add(sign);
+    }
     const bar = stone("#ff1644", {
       emissive: "#ff1644",
       emissiveIntensity: 1.8,
     });
-    v.box(0.18, 0.12, 14, bar, x, 6.65, z, v.decor);
+    v.box(14.2, 0.12, 0.3, bar, 0, 6.65, 0, group);
+    v.box(14.2, 0.12, 0.3, bar, 0, 2.98, 0, group);
+    for (const sx of [-5.7, 5.7])
+      v.box(0.18, 3, 0.18, stone("#344348"), sx, 1.5, 0, group);
   }
 }
 

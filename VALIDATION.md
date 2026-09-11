@@ -1,42 +1,45 @@
-# Validation — pursuit and handling update, 11 September 2026
+# Validation — expanded Tbilisi, stunts and rewind, 11 September 2026
 
 ## Automated checks
 
-`npm test`: **36 passed, 0 failed**. Checks cover acceleration/braking/reverse, fixed-step consistency, left/right steering and Georgian physical keys, real lateral drift and countersteer recovery, smooth turbo spool/release and empty-tank lockout, building collisions, oriented bumper/door impulses, police-to-police separation, solid trees and breaking, patrol roles and forward roadblock planning, radio observation limits, HP/explosion/replacement, checkpoint order, repairs, escape/capture/restart, clear-road recovery, navigation and all static module imports.
+`npm test`: **44 passed, 0 failed**. Existing checks cover acceleration, braking, reverse, fixed-step consistency, left/right steering and Georgian physical keys, lateral drift, turbo spool/release/empty lockout, walls, oriented vehicle contacts, police-to-police separation, solid/breakable trees, pursuit roles and roadblocks, limited radio observation, police HP/explosion/replacement, checkpoints and repairs, escape/capture/restart, camera clearance, navigation and local module imports.
 
-The camera test checks rotated walls between clear endpoints and clearance above roofs. The joined asphalt test checks actual triangles, upward normals and street coverage. The OSM-derived map has 373 nodes and 498 segments; connectivity checks visit every node and verify unobstructed routes between all six gates. The rendered asphalt is one connected polygon with 35 block islands.
+Eight new checks cover driving onto a shared ramp, flight/landing score, roll control and upright recovery with damage, whole-world rewind, the rolling five-second limit, release/future-history discard, rewinding after a wreck, restoration of trees and police identities across respawn, and reinforcements capped at twelve. Stunt tests were rerun after raising the overturned car so its roof stays above the street.
 
-## Complete driving runs
+The graph has **514 nodes and 665 segments**. All nodes are connected and six gates have clear road routes. Triangulation tests check street coverage and upward-facing triangles. Asphalt is one polygon with **45 block islands**; ground includes a river cutout. No non-bridge road midpoint lies within 35 metres of the final river center line.
 
-The deterministic controller uses ordinary throttle, steering, braking, turbo and the player's R recovery action, including its score penalty. Traffic, solid trees and all police roles remain active. It grants no checkpoints, health or immunity. Ideal route knowledge and recovery mean these runs establish that the game is completable, not first-time human difficulty.
+## Full driving runs
 
-| Car          | Result  | Gates | Simulation time | Score  | Condition | Patrol takedowns | Broken trees |
-| ------------ | ------- | ----- | --------------- | ------ | --------- | ---------------- | ------------ |
-| 458 Stradale | Escaped | 6/6   | 171.8 s         | 28,699 | 25%       | 7                | 4            |
-| 458 Track    | Escaped | 6/6   | 162.9 s         | 26,097 | 60%       | 5                | 5            |
-| 458 Touring  | Escaped | 6/6   | 193.7 s         | 31,967 | 22%       | 9                | 10           |
+The deterministic controller uses ordinary throttle, steering, braking, turbo and the player's R recovery action, including its score penalty. Traffic, trees, collisions and all police roles stay active. It grants no gates, health or immunity. These runs do not use rewind or intentional jumps; those have separate tests. Ideal route knowledge and recovery establish completion, not first-time human difficulty.
 
-Reproduce with `node tests/route-drive.mjs gt`, `node tests/route-drive.mjs rally`, and `node tests/route-drive.mjs suv`. All used the final simulation and map; later edits affected only camera, cosmetics and documentation.
+| Car          | Result  | Gates | Simulation time | Score  | Condition | Takedowns | Broken trees | Units |
+| ------------ | ------- | ----- | --------------- | ------ | --------- | --------- | ------------ | ----- |
+| 458 Stradale | Escaped | 6/6   | 262.2 s         | 35,450 | 14%       | 12        | 9            | 12    |
+| 458 Track    | Escaped | 6/6   | 228.0 s         | 34,340 | 62%       | 11        | 7            | 12    |
+| 458 Touring  | Escaped | 6/6   | 245.1 s         | 33,636 | 75%       | 9         | 11           | 12    |
+
+Reproduce with `node tests/route-drive.mjs gt`, `node tests/route-drive.mjs rally`, and `node tests/route-drive.mjs suv`. These results use the final map, bridge approach clearance and contact broad phase. The later overturned-car height change does not affect these no-jump runs. The first Touring run failed after six gates; a small acceleration, handling and speed increase allowed escape from the larger force while retaining the slower armored character.
 
 ## Browser inspection
 
-Inspected the new 3D tree, original police sedan and 1980s civilian sedan in a temporary model review page, then the actual game. Checked continuous street surfacing, detailed sports car, TECHCRUSH branding, tree canopies, turbo flames and animated edge streaks, drift indicator, cornering and checkpoint guidance in desktop Chromium. The model review page is removed from the deliverable.
+The actual game was driven using its registered controls in Chromium. Turbo, a handbrake turn and driving after rewind were checked. Drift reached 27 degrees of lateral slip. Holding rewind took time from 7.8 to 2.8 seconds and score from 351 to 143, then held at the five-second boundary. Rewind after capture restored an earlier unboxed state, a previously destroyed patrol and earlier HP. Another run reversed to its beginning; releasing immediately returned `running`, acceleration worked again, then pause worked. Browser error/warning logs were empty.
 
-A normal 1.6-second turbo acceleration reached 141 km/h with 70% charge remaining. A subsequent handbrake turn produced 17 degrees of lateral slip at 99 km/h. A separate ordinary drive registered a broken tree. Browser error/warning logs were empty after driving. The follow camera now clips its entire boom against buildings, including the smoothed camera path, instead of jumping upward into a facade.
+Temporary review pages rendered real assets at Baratashvili Bridge, Peace Bridge, Rike, the twin tubes, Europe Square and Abanotubani. A controlled ramp fixture used the real simulation/renderer: the car reached **5.6 m**, rolled upside down, and returned upright with HP remaining. These fixtures are not ordinary completed playthroughs and are removed from the delivered site.
+
+Inspected two-sided TECHCRUSH branding, deck alignment, river banks, sidewalks/crossings, lawns, 3D trees, masonry/mosaic, roofs and the narrow-screen HUD. The local minimap shows nearby streets and ramps. Rewind hides the overlapping route cue.
 
 ## Issues corrected
 
-- Replaced overlapping road rectangles with a joined asphalt polygon and world-aligned UVs; curbs and sidewalks follow its boundary.
-- Replaced flat tree cards with optimized geometry sharing solid trunk locations with the simulation. Strong impacts topple trees and leave stumps.
-- Replaced circular car contacts with oriented bodies and iterative mass-weighted separation for every vehicle pair.
-- Added three-to-six coordinated pursuers, interceptors and roadblock units with corner braking, obstacle awareness and reverse recovery.
-- Added original patrol sedans and multiple civilian body styles instead of only sports cars.
-- Eliminated abrupt speed loss on turbo release and repeated empty-tank pulses. Added spool, recharge delay, exhaust flames, FOV, edge streaks and synthesized audio.
-- Added sustained lateral drift with countersteering, smoke and connected rear-tire marks. Reset clears smoke.
-- Recovery chooses an unoccupied road position; camera collision checks the complete line back to the car.
+- Moved the approximate river away from Dachi Ujarmeli Street and the Gorgasali extension; removed floating street islands.
+- Aligned bridge decks to roads and cleared the Peace Bridge's blocked approach.
+- Gave Rike tubes a single waist and visible sampled diamond seams.
+- Clipped park edges to the bank; replaced spherical hill bases with irregular terrain leaving roads clear.
+- Prevented interpolation between different patrol identities across respawn.
+- Made the rewind tool's release immediate and cleared rewind styling on returning to the garage.
+- Rejected distant buildings before contact/visibility transforms. A local 600-step CPU sample fell from about 4.28 to 1.17 ms/step; this is not a browser FPS claim. Full-run outcomes stayed unchanged.
 
 ## Limits
 
-This is a simplified arcade reconstruction using OSM street center lines, widened roads, approximate buildings, original terrain and visual references. It is not Google Maps photogrammetry or an exact street survey. The three player configurations share one 458 base model; other vehicles are original procedural geometry. Trees use two geometry detail levels; detailed assets increase loading/GPU cost.
+The game combines cached OSM streets, approximate manual connections, widened roads, reference-inspired buildings and original terrain. Live expanded-area map requests were unavailable. It is **not** an exact satellite reconstruction, Google Maps photogrammetry, or a measured model of every facade. Provenance is in `ASSETS.md` and Credits.
 
-WebGL2 and a modern browser are required. Physical phones, Safari and low-end GPUs were not tested in this update. Short browser drives are functional checks, not a frame-rate benchmark. Single-player game without multiplayer or a persistent leaderboard. Asset provenance is in `ASSETS.md` and the in-game Credits page.
+The three trims share a 458 model; other vehicles are original procedural geometry. Ramps/rollover use arcade physics without suspension simulation or body deformation. Buildings and tree trunks are solid; small sidewalk furniture is decorative. Bridges share the road datum, without separately driveable lower decks. Physical phones, Safari and low-end GPUs were not tested. WebGL2 is required. No multiplayer, persistent leaderboard or accounts are implemented.

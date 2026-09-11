@@ -84,8 +84,8 @@
         <div class="eyebrow"><span></span> TECHCRUSH / TBILISI STREETS</div>
         <h1>TBILISI<br /><em>CHASE.</em></h1>
         <p class="intro-copy">
-          Rustaveli. Baratashvili. Six checkpoints.<br />Pick a sports car and
-          make your getaway.
+          Rustaveli. Rike. Abanotubani.<br />Six checkpoints. Twelve patrols.
+          One way out.
         </p>
         <div
           id="garage"
@@ -116,16 +116,16 @@
           <b>02</b>
           <div>
             <strong>Fight back</strong>
-            <p>
-              Ram patrol cars to drain their HP. Reinforcements will follow.
-            </p>
+            <p>Ram patrols or jump clear. More units join every 35 seconds.</p>
           </div>
         </div>
         <div class="mission-row">
           <b>03</b>
           <div>
             <strong>Lose the heat</strong>
-            <p>Break away from police to escape. Press C for cockpit view.</p>
+            <p>
+              Break away to escape. Made a mistake? Hold Q to rewind 5 seconds.
+            </p>
           </div>
         </div>
       </section>
@@ -206,6 +206,7 @@
           ><span><kbd>C</kbd> <span>CAMERA</span></span
           ><span><kbd>P</kbd> <span>PAUSE</span></span
           ><span><kbd>R</kbd> <span>RESET CAR</span></span>
+          <span><kbd>Q</kbd> <span>HOLD TO REWIND</span></span>
         </div>
         <span class="footer-note"
           ><a href="./credits.html" target="_blank" rel="noopener"
@@ -227,6 +228,21 @@
       </div>
       <div id="loading">WARMING UP THE ENGINE…</div>
       <div id="error" hidden role="alert"></div>
+      <button
+        id="rewind"
+        class="rewind-control"
+        data-key="q"
+        aria-label="Hold to rewind up to five seconds"
+        disabled
+      >
+        <span><b>↶</b> HOLD Q · REWIND</span>
+        <small id="rewind-status">0.0s AVAILABLE</small>
+        <i><em id="rewind-fill"></em></i>
+      </button>
+      <div class="timeline-overlay" aria-hidden="true">
+        <span>REWINDING</span><strong id="timeline-time"></strong
+        ><small>RELEASE Q TO CONTINUE</small>
+      </div>
     </main>
     <script type="module" src="./main.js"></script>
   </body>

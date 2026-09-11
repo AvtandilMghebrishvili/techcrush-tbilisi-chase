@@ -1,6 +1,7 @@
 import ClipperLib from "clipper-lib";
 import { writeFile } from "node:fs/promises";
 import { ROADS, NODES } from "../dist/city-map.js";
+import { RIVER_POLYGON } from "../dist/district-data.js";
 function network(padding) {
   const polygons = ROADS.map((r) => {
     const rx = Math.cos(r.angle) * (r.width / 2 + padding),
@@ -30,14 +31,12 @@ function clip(subject, other, operation) {
   const c = new ClipperLib.Clipper(),
     result = new ClipperLib.PolyTree();
   const paths = (polygons) =>
-    polygons
-      .flat()
-      .map((r) =>
-        r.map(([x, y]) => ({
-          X: Math.round(x * 1000),
-          Y: Math.round(y * 1000),
-        })),
-      );
+    polygons.flat().map((r) =>
+      r.map(([x, y]) => ({
+        X: Math.round(x * 1000),
+        Y: Math.round(y * 1000),
+      })),
+    );
   c.AddPaths(paths(subject), ClipperLib.PolyType.ptSubject, true);
   if (other.length) c.AddPaths(paths(other), ClipperLib.PolyType.ptClip, true);
   c.Execute(
@@ -56,8 +55,23 @@ function clip(subject, other, operation) {
 }
 const asphalt = network(0),
   sidewalk = clip(network(4.5), asphalt, "ctDifference");
+const ground = clip(
+  [
+    [
+      [
+        [-2400, -2400],
+        [2400, -2400],
+        [2400, 2400],
+        [-2400, 2400],
+        [-2400, -2400],
+      ],
+    ],
+  ],
+  [[RIVER_POLYGON]],
+  "ctDifference",
+);
 const rounded = JSON.parse(
-  JSON.stringify({ asphalt, sidewalk }, (_, v) =>
+  JSON.stringify({ asphalt, sidewalk, ground }, (_, v) =>
     typeof v === "number" ? +v.toFixed(4) : v,
   ),
 );

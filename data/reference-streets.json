@@ -1,0 +1,98 @@
+{
+  "provenance": "Reference-aligned arcade connections. Approximate coordinates reconstructed from supplied aerial references and verified landmark anchors; not surveyed OSM data. Existing center streets and Baratashvili bridge use archived OSM geometry.",
+  "paths": [
+    {
+      "name": "Rike / Baratashvili Rise",
+      "width": 19,
+      "points": [
+        [41.6969765, 44.8090552],
+        [41.6971, 44.80965],
+        [41.6968, 44.8106],
+        [41.6958, 44.81123],
+        [41.6942, 44.81155],
+        [41.69245, 44.81193],
+        [41.6919, 44.81113]
+      ]
+    },
+    {
+      "name": "Mtkvari Right Embankment",
+      "width": 19,
+      "points": [
+        [41.696839, 44.8074663],
+        [41.6962, 44.80675],
+        [41.6947, 44.80655],
+        [41.6932, 44.8073],
+        [41.6923, 44.80795],
+        [41.6915, 44.8085],
+        [41.69002, 44.80948]
+      ]
+    },
+    {
+      "name": "Rike Park Drive",
+      "width": 12,
+      "points": [
+        [41.6969765, 44.8090552],
+        [41.6956, 44.80965],
+        [41.6942, 44.8095],
+        [41.6928, 44.80972],
+        [41.69165, 44.8105]
+      ]
+    },
+    {
+      "name": "Metekhi Bridge",
+      "width": 21,
+      "points": [
+        [41.69002, 44.80948],
+        [41.69012, 44.81015],
+        [41.6903, 44.81083],
+        [41.69057, 44.81113]
+      ]
+    },
+    {
+      "name": "Vakhtang Gorgasali Street",
+      "width": 20,
+      "points": [
+        [41.69002, 44.80948],
+        [41.6893, 44.8105],
+        [41.68875, 44.8115],
+        [41.68785, 44.8134],
+        [41.6867, 44.8157]
+      ]
+    },
+    {
+      "name": "Abano Street",
+      "width": 12,
+      "points": [
+        [41.68875, 44.8115],
+        [41.68805, 44.8111],
+        [41.6882, 44.8099],
+        [41.6893, 44.8105]
+      ]
+    },
+    {
+      "name": "Old Town Connection",
+      "width": 13,
+      "points": [
+        [41.69174, 44.80796],
+        [41.6915, 44.8085],
+        [41.69002, 44.80948]
+      ]
+    },
+    {
+      "name": "Europe Square West Approach",
+      "width": 18,
+      "points": [
+        [41.69165, 44.8105],
+        [41.691225, 44.81061]
+      ]
+    }
+  ],
+  "roundabouts": [
+    {
+      "name": "Europe Square",
+      "center": [41.691225, 44.811128],
+      "radii": [43, 75],
+      "width": 19
+    }
+  ]
+}

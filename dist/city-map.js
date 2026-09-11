@@ -1,4 +1,9 @@
 import { ROAD_DATA } from "./road-data.js";
+import {
+  reservedDistrict,
+  DISTRICT_SOLIDS,
+  LANDMARKS,
+} from "./district-data.js";
 export const NODES = ROAD_DATA.nodes.map(([x, z], id) => ({
   x,
   z,
@@ -133,11 +138,11 @@ export const START = {
 export const CLOCK_BUILDING = { x: -410, z: -234 };
 export const CHECKPOINTS = [
   point(41.6964, 44.80348, "Baratashvili Avenue"),
-  point(41.69452, 44.80155, "Pushkin Street"),
   point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
-  point(41.702, 44.796, "Tabukashvili Street", "Tabukashvili"),
-  point(41.6991, 44.79955, "Chanturia Street", "Chanturia"),
-  point(41.6969, 44.8032, "Orbeliani Quarter"),
+  point(41.6969, 44.80835, "Baratashvili Bridge", "Baratashvili Bridge"),
+  point(41.6912, 44.81174, "Europe Square", "Europe Square"),
+  point(41.68805, 44.8111, "Abanotubani", "Abano Street"),
+  point(41.694, 44.8015, "Freedom Square", "Freedom"),
 ];
 // Deterministic street-front lots; the same rotated footprints drive rendering and collision.
 export const BUILDINGS = [];
@@ -156,6 +161,7 @@ for (const road of ROADS) {
       const offset = road.width / 2 + 5 + d / 2;
       const x = road.start.x + fx * along + rx * offset * side,
         z = road.start.z + fz * along + rz * offset * side;
+      if (reservedDistrict({ x, z }, Math.max(w, d) / 2)) continue;
       // Reserve the photographed clock building at the Baratashvili fork.
       if (x > -460 && x < -360 && z > -280 && z < -140) continue;
       let clear = true;
@@ -189,7 +195,23 @@ for (const road of ROADS) {
     }
   }
 }
+// Keep the pedestrian bridge approaches open without perturbing other seeded lots.
+for (let i = BUILDINGS.length - 1; i >= 0; i--) {
+  const b = BUILDINGS[i];
+  if (
+    [-65, 65].some((x) =>
+      containsPoint(
+        b,
+        LANDMARKS.peace.x + Math.cos(0.12) * x,
+        LANDMARKS.peace.z - Math.sin(0.12) * x,
+        7,
+      ),
+    )
+  )
+    BUILDINGS.splice(i, 1);
+}
 BUILDINGS.push(
+  ...DISTRICT_SOLIDS,
   {
     x: CLOCK_BUILDING.x + 9,
     z: CLOCK_BUILDING.z,
@@ -217,6 +239,8 @@ export function containsPoint(o, x, z, padding = 0) {
       z > o.minZ - padding &&
       z < o.maxZ + padding
     );
+  const bound = (o.w + o.d) / 2 + padding;
+  if (Math.abs(x - o.x) > bound || Math.abs(z - o.z) > bound) return false;
   const dx = x - o.x,
     dz = z - o.z,
     c = Math.cos(o.angle),

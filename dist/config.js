@@ -1,7 +1,7 @@
 export const GRID = 140;
 export const GRID_RADIUS = 4;
-export const ROAD_EDGE = 820;
-export const LIMIT = 1050;
+export const ROAD_EDGE = 1650;
+export const LIMIT = 1900;
 export const MAP_SIZE = (LIMIT + 32) * 2;
 export const TOWER = { x: 1070, z: -430, y: 278 };
 export const CARS = [
@@ -38,9 +38,9 @@ export const CARS = [
     name: "458 Touring",
     type: "REINFORCED GT",
     color: "#8da6bb",
-    topSpeed: 43,
-    acceleration: 13.5,
-    handling: 0.86,
+    topSpeed: 45,
+    acceleration: 14.5,
+    handling: 0.9,
     damageScale: 0.55,
     description: "Built to take a hit",
     speedRating: 3,

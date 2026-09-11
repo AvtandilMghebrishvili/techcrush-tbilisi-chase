@@ -24,7 +24,17 @@ The police sedan and civilian modern sedan, classic 1980s/1990s sedans, wagon an
 
 `dist/road-data.js`, `dist/road-surface-data.js` and OSM responses in `data/`: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Overpass snapshot: 2026-09-11. Adaptations: local metre coordinates, simplified junctions, selected connected roads, widened lanes, bidirectional game traffic and reopened construction roads. The road surface unions those widened roads into continuous asphalt with sidewalk differences. Derived data is downloadable from the credits page; original responses are included in the source archive.
 
-## Higgsfield images
+## Expanded district references
+
+The 19 images in the user's local `referensi quCebis` folder were inspected for street alignment, bridge railings, Rike paths and the twin tubes, Europe Square's oval/flags/floral clock, brick bath domes and the blue bathhouse facade. The folder is deliberately excluded from the distributed source and game; it is reference material, not a texture atlas or scan.
+
+Original geometry in `tbilisi-districts.js` interprets those references. Geographic anchors and architectural identities were cross-checked against [Fuksas — Rhike Park](https://fuksas.com/rhike-park/), [AMDL Circle — Bridge of Peace](https://amdlcircle.com/en/projects/bridge-of-peace/), [Georgia Travel — Rike Park](https://georgia.travel/family-attractions/rike-park), [Georgia Travel — Abanotubani](https://georgia.travel/abanotubani-in-tbilisi), [Chreli Abano](https://chreli-abano.ge/?lan=en) and [Georgian Travel Guide — Baratashvili Bridge](https://georgiantravelguide.com/en/nikoloz-baratashvili-bridge). The twin forms are the music-theatre/exhibition complex, not boat docks.
+
+Live map API requests for the expanded area returned rate-limit/access errors. The game therefore combines the archived OSM streets with explicitly approximate, hand-authored connections in `data/reference-streets.json`. That file includes provenance, road widths, polylines and Europe Square's ellipse. The river shoreline and landmark dimensions are also approximate and adjusted to keep roads connected and playable. There is no claimed 1:1 geographic, facade or traffic accuracy. No Google satellite pixels, Street View frames or Google 3D tiles are shipped.
+
+Masonry joints, bathhouse mosaic, lawn grain, pavement and EU flags are original procedural Canvas textures in the source. Existing CC0 aerial-rock textures cover original hills and muted ground. Tree crowns are widened and varied in color at runtime. TECHCRUSH billboards have two separately oriented front-facing planes, so the original logo and wordmark read correctly on either side.
+
+## Higgsfield images (retained)
 
 Generated through the connected Higgsfield plugin, GPT Image 2, 1K, on 11 September 2026. Generated assets remain subject to the account's applicable Higgsfield terms.
 

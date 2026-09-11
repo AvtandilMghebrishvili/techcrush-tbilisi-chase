@@ -6,6 +6,128 @@
   --ink: #0c1420;
   --muted: #b1beca;
 }
+.rewind-control {
+  display: none;
+  position: absolute;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 215px;
+  padding: 12px 16px;
+  border: 1px solid #82bfff66;
+  background: #101c2ed9;
+  color: #d8efff;
+  text-align: left;
+  z-index: 8;
+  border-radius: 6px;
+  touch-action: none;
+  user-select: none;
+}
+body.playing .rewind-control {
+  display: block;
+}
+.rewind-control span {
+  font:
+    700 14px Barlow,
+    Arial;
+  letter-spacing: 1px;
+  display: block;
+}
+.rewind-control b {
+  font-size: 24px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+.rewind-control small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1px;
+  margin: 5px 0 8px;
+  color: #a7becf;
+}
+.rewind-control i {
+  display: block;
+  background: #69819342;
+  height: 3px;
+  overflow: hidden;
+}
+.rewind-control em {
+  height: 100%;
+  display: block;
+  background: #97d8ff;
+  width: 0;
+}
+.rewind-control:disabled {
+  opacity: 0.45;
+}
+.rewind-control.pressed,
+body.rewinding .rewind-control {
+  background: #244564;
+  border-color: #97d8ff;
+}
+.timeline-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  border: 10px solid #98d4ff33;
+  box-shadow: inset 0 0 100px #3185c170;
+  text-align: center;
+  padding-top: 24vh;
+  color: #d4efff;
+}
+.timeline-overlay span,
+.timeline-overlay small {
+  display: block;
+  letter-spacing: 5px;
+  font-size: 13px;
+}
+.timeline-overlay strong {
+  display: block;
+  font:
+    800 italic 65px "Barlow Condensed",
+    Arial;
+  margin: 8px;
+}
+body.rewinding .timeline-overlay {
+  display: block;
+}
+body.rewinding .route-cue {
+  visibility: hidden;
+}
+body.rewinding #world {
+  filter: saturate(0.55) hue-rotate(14deg);
+}
+@media (max-width: 700px) {
+  .rewind-control {
+    bottom: 185px;
+    width: 148px;
+    padding: 7px 10px;
+  }
+  .rewind-control span {
+    font-size: 10px;
+  }
+  .rewind-control small {
+    font-size: 9px;
+  }
+  .timeline-overlay strong {
+    font-size: 46px;
+  }
+}
+@media (max-height: 500px) {
+  .rewind-control {
+    bottom: 15px;
+    width: 170px;
+    padding: 6px 10px;
+  }
+  .timeline-overlay {
+    padding-top: 31vh;
+  }
+  .timeline-overlay strong {
+    font-size: 42px;
+  }
+}
 .garage {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

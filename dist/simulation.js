@@ -1,5 +1,8 @@
 import { TREES } from "./world-props.js";
 import { vehicleContact, treeContact } from "./contacts.js";
+import { RewindTimeline } from "./rewind.js";
+import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
+import { riverDistance } from "./district-data.js";
 // Deterministic, renderer-independent simulation. Distances are metres, time is seconds.
 import {
   GRID,
@@ -33,6 +36,17 @@ export function vehicle(x = 0, z = 0, angle = 0) {
     x,
     z,
     angle,
+    y: 0,
+    vy: 0,
+    roll: 0,
+    pitch: 0,
+    airborne: false,
+    flipped: false,
+    onRamp: null,
+    rampCooldown: 0,
+    airTime: 0,
+    airDistance: 0,
+    jumpCount: 0,
     vx: 0,
     vz: 0,
     speed: 0,
@@ -54,6 +68,10 @@ export function vehicle(x = 0, z = 0, angle = 0) {
 }
 export function resolveCircleRect(car, r, rect) {
   if (rect.angle !== undefined) {
+    // Conservative broad phase: distant lots need no local transform or contact allocation.
+    const bound = (rect.w + rect.d) / 2 + r;
+    if (Math.abs(car.x - rect.x) > bound || Math.abs(car.z - rect.z) > bound)
+      return false;
     const c = Math.cos(rect.angle),
       s = Math.sin(rect.angle),
       dx = car.x - rect.x,
@@ -242,6 +260,11 @@ export class ChaseSimulation {
     this.explosions = [];
     this.takedowns = 0;
     this.driftScore = 0;
+    this.stuntScore = 0;
+    this.nextWaveAt = 35;
+    this.heatLevel = 1;
+    this.ramps = RAMPS;
+    this.timeline = new RewindTimeline();
     this.trees = TREES.map((t) => ({
       ...t,
       broken: false,
@@ -318,6 +341,7 @@ export class ChaseSimulation {
     this.selectedCar = carSpec(carId).id;
     this.reset();
     this.phase = "running";
+    this.timeline.capture(this);
     this.events.push("CHASE ON — HIT THE CYAN GATES");
   }
   damagePolice(cop, impact, credit = true) {
@@ -358,7 +382,7 @@ export class ChaseSimulation {
     cop.angle = Math.atan2(p.x - cop.x, p.z - cop.z);
     this.events.push("NEW PATROL INBOUND");
   }
-  recover() {
+  recover(automatic = false) {
     if (this.phase !== "running") return;
     const projected = roadProjection(this.player);
     const candidates = [projected];
@@ -382,6 +406,17 @@ export class ChaseSimulation {
     this.player.x = p.x;
     this.player.z = p.z;
     this.player.vx = this.player.vz = this.player.speed = 0;
+    Object.assign(this.player, {
+      y: 0,
+      vy: 0,
+      roll: 0,
+      pitch: 0,
+      airborne: false,
+      flipped: false,
+      flipTimer: 0,
+      onRamp: null,
+      rampCooldown: 1.5,
+    });
     this.player.steering = 0;
     this.player.boostStrength = 0;
     this.player.boosting = false;
@@ -396,10 +431,11 @@ export class ChaseSimulation {
       ? Math.atan2(toward.x - p.x, toward.z - p.z)
       : p.angle;
     this.player.invulnerable = 2;
-    this.score = Math.max(0, this.score - 200);
-    this.events.push("CAR RESET  −200");
+    if (!automatic) this.score = Math.max(0, this.score - 200);
+    this.events.push(automatic ? "BACK ON YOUR WHEELS" : "CAR RESET  −200");
   }
   addReinforcement(role, offset) {
+    if (this.police.length >= 12) return;
     const p = this.player,
       target = roadProjection({
         x: p.x + Math.sin(p.angle) * offset,
@@ -426,14 +462,66 @@ export class ChaseSimulation {
     );
   }
   update(dt, input = {}) {
+    if (
+      input.rewind &&
+      ["running", "wrecked", "busted", "rewinding"].includes(this.phase)
+    ) {
+      if (this.timeline.back(this, dt)) return;
+    }
+    if (this.timeline.active) this.timeline.release(this);
     if (this.phase !== "running") return;
     dt = clamp(dt, 0, 0.05);
     this.time += dt;
     this.explosions = this.explosions.filter((e) => this.time - e.born < 2.2);
     const p = this.player;
     const before = { x: p.x, z: p.z };
-    stepVehicle(p, input, dt, this.obstacles);
+    if (p.flipped) {
+      p.flipTimer -= dt;
+      p.vx *= Math.exp(-dt * 5);
+      p.vz *= Math.exp(-dt * 5);
+      p.x += p.vx * dt;
+      p.z += p.vz * dt;
+      if (p.flipTimer <= 0 && p.health > 0) this.recover(true);
+    } else if (p.airborne) {
+      const landed = stepAirborne(
+        p,
+        input,
+        dt,
+        this.obstacles,
+        resolveCircleRect,
+      );
+      if (landed) {
+        const bonus = landed.flipped
+          ? 50
+          : Math.round(150 + landed.distance * 4);
+        this.score += bonus;
+        this.stuntScore += bonus;
+        this.events.push(
+          landed.flipped
+            ? "ROLLOVER — HOLD Q TO REWIND"
+            : `JUMP ${Math.round(landed.distance)} M  +${bonus}`,
+        );
+      }
+    } else {
+      stepVehicle(p, input, dt, this.obstacles);
+      if (driveRamp(p, input, dt, this.ramps) === "launch")
+        this.events.push("AIRBORNE — A / D TO ROLL");
+    }
+    if (this.time >= this.nextWaveAt) {
+      const role = ["pursuit", "intercept", "blockade"][this.heatLevel % 3];
+      this.addReinforcement(role, role === "blockade" ? 180 : -160);
+      this.heatLevel++;
+      this.nextWaveAt += 35;
+    }
     const travel = distance(p, before);
+    if (!p.airborne && p.y < 1 && riverDistance(p) < 39) {
+      const road = roadProjection(p);
+      if (road.distance > road.road.width / 2 + 2) {
+        p.health = Math.max(0, p.health - 20);
+        if (p.health > 0) this.recover(true);
+        this.events.push("RIVER RECOVERY — HOLD Q TO REWIND");
+      }
+    }
     this.score += travel * 1.8;
     for (const t of this.traffic) {
       let target = NODES[t.toNode];
@@ -649,6 +737,7 @@ export class ChaseSimulation {
           if (
             a.destroyed ||
             b.destroyed ||
+            Math.abs((a.y || 0) - (b.y || 0)) > 1.6 ||
             Math.abs(a.x - b.x) > 6 ||
             Math.abs(a.z - b.z) > 6
           )
@@ -678,6 +767,7 @@ export class ChaseSimulation {
       if (car.destroyed) continue;
       for (const tree of this.trees) {
         if (
+          (car.y || 0) > 2.5 ||
           tree.broken ||
           Math.abs(tree.x - car.x) > 4 ||
           Math.abs(tree.z - car.z) > 4
@@ -698,7 +788,9 @@ export class ChaseSimulation {
           this.damagePolice(car, impact, false);
       }
       // Pairwise pushes cannot leave an officer or civilian inside a building.
-      for (const block of this.obstacles) resolveCircleRect(car, 2.1, block);
+      for (const block of this.obstacles)
+        if ((car.y || 0) < (block.h || 50) + 1)
+          resolveCircleRect(car, 2.1, block);
     }
     let closest = Infinity;
     for (const cop of this.police)
@@ -724,16 +816,20 @@ export class ChaseSimulation {
       (c) => !c.destroyed && c.blockPoint && distance(c.blockPoint, p) < 110,
     );
     // Resolve dynamic collision displacement against static geometry as well.
-    for (const block of this.obstacles) resolveCircleRect(p, 2.1, block);
+    for (const block of this.obstacles)
+      if ((p.y || 0) < (block.h || 50) + 1) resolveCircleRect(p, 2.1, block);
     p.speed = p.vx * Math.sin(p.angle) + p.vz * Math.cos(p.angle);
     this.bust = clamp(
-      this.bust + (closest < 8 && Math.abs(p.speed) < 5 ? dt : -dt * 0.8),
+      this.bust +
+        (closest < 8 && Math.abs(p.speed) < 5 && !p.airborne && !p.flipped
+          ? dt
+          : -dt * 0.8),
       0,
       4,
     );
     this.closestPolice = closest;
     const cp = CHECKPOINTS[this.checkpoint];
-    if (cp && distance(p, cp) < 13) {
+    if (cp && distance(p, cp) < 13 && p.y < 3 && !p.flipped) {
       this.checkpoint++;
       const bonus =
         1000 +
@@ -772,6 +868,7 @@ export class ChaseSimulation {
     } else if (this.bust >= 4) {
       this.phase = "busted";
     }
+    if (this.phase === "running") this.timeline.capture(this);
   }
   snapshot() {
     return {
@@ -780,9 +877,20 @@ export class ChaseSimulation {
       checkpoint: this.checkpoint,
       total: 6,
       time: Number(this.time.toFixed(1)),
+      rewindAvailable: +this.timeline.available.toFixed(2),
+      rewound: this.timeline.active
+        ? +(this.timeline.end - this.timeline.cursor).toFixed(2)
+        : 0,
+      heatLevel: this.heatLevel,
+      nextWaveIn: Math.max(0, Math.ceil(this.nextWaveAt - this.time)),
+      jumps: this.player.jumpCount,
+      stuntScore: this.stuntScore,
       player: {
         x: +this.player.x.toFixed(2),
         z: +this.player.z.toFixed(2),
+        y: +(this.player.y || 0).toFixed(2),
+        airborne: !!this.player.airborne,
+        flipped: !!this.player.flipped,
         speed: Math.round(Math.abs(this.player.speed) * 3.6),
         health: Math.ceil(this.player.health),
         nitro: Math.round(this.player.nitro),

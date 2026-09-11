@@ -14,6 +14,7 @@ import {
 } from "./turbo-effects.js";
 import { START } from "./city-map.js";
 import { clearCameraPosition } from "./camera-clearance.js";
+import { animateDistricts } from "./tbilisi-districts.js";
 import { loadSportsAssets, sportsCar, animateWheels } from "./sports-car.js";
 import { makeCockpit, updateCockpit } from "./cockpit.js";
 import { makeRouteGuide, updateRouteGuide } from "./route-guide.js";
@@ -137,6 +138,25 @@ export class SceneView {
     this.terrainMaterial.normalMap = hillNormal;
     this.terrainMaterial.normalScale.set(0.6, 0.6);
     this.terrainMaterial.needsUpdate = true;
+    const detailHill = hill.clone(),
+      detailNormal = hillNormal.clone();
+    detailHill.repeat.set(1, 1);
+    detailNormal.repeat.set(1, 1);
+    for (const m of [
+      ...(this.localHillMaterials || []),
+      this.districtMaterials?.ground,
+    ].filter(Boolean)) {
+      m.map = detailHill;
+      m.normalMap = detailNormal;
+      m.normalScale.set(0.3, 0.3);
+      m.needsUpdate = true;
+    }
+    this.districtMaterials.ground.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        "#include <map_fragment>",
+        "#include <map_fragment>\ndiffuseColor.rgb=mix(diffuseColor.rgb,vec3(.29,.31,.23),.72);",
+      );
+    };
     await Promise.all([loadTrees(this), loadSportsAssets(this)]);
     this.selectCar("gt");
   }
@@ -351,8 +371,9 @@ export class SceneView {
     const ready = sim.phase === "ready";
     if (!ready) {
       const p = sim.player;
-      this.player.position.set(p.x, 0, p.z);
-      this.player.rotation.y = p.angle;
+      this.player.position.set(p.x, p.y || 0, p.z);
+      this.player.rotation.order = "YXZ";
+      this.player.rotation.set(p.pitch || 0, p.angle, p.roll || 0, "YXZ");
       animateWheels(this.player, p.speed, dt, p.steering);
       updateTurboExhaust(this.player, p, sim.time);
       updateTireSmoke(
@@ -362,12 +383,21 @@ export class SceneView {
         sim.phase === "running" && p.isDrifting,
       );
       this.player.rotation.z =
-        -p.steering * Math.min(Math.abs(p.speed) / 50, 1) * 0.035;
+        (p.roll || 0) -
+        p.steering * Math.min(Math.abs(p.speed) / 50, 1) * 0.035;
+      if (sim.phase === "rewinding" && !this.wasRewinding) {
+        for (const mark of this.skids) mark.visible = false;
+        resetTireSmoke(this.tireSmoke);
+        this.lastTirePositions = null;
+      }
+      this.wasRewinding = sim.phase === "rewinding";
       while (this.policeMeshes.length < sim.police.length) {
         const m = this.makeCar("#18232b", true);
         this.scene.add(m);
         this.policeMeshes.push(m);
       }
+      for (let i = sim.police.length; i < this.policeMeshes.length; i++)
+        this.policeMeshes[i].visible = false;
       for (const [cars, meshes] of [
         [sim.traffic, this.trafficMeshes],
         [sim.police, this.policeMeshes],
@@ -414,7 +444,7 @@ export class SceneView {
         const driverOffset = interior ? 0.34 : 0;
         this.camera.position.set(
           p.x + forward.x * seat + forward.z * driverOffset,
-          interior ? 1.08 : 0.97,
+          (p.y || 0) + (interior ? 1.08 : 0.97),
           p.z + forward.z * seat - forward.x * driverOffset,
         );
         this.camera.lookAt(
@@ -427,10 +457,10 @@ export class SceneView {
         const zoom = mode === "aerial" ? 27 : 9 + p.boostStrength * 1.6;
         const target = new THREE.Vector3(
           p.x - forward.x * zoom,
-          mode === "aerial" ? 26 : 4.4,
+          (p.y || 0) + (mode === "aerial" ? 26 : 4.4),
           p.z - forward.z * zoom,
         );
-        const anchor = { x: p.x, y: 1.7, z: p.z };
+        const anchor = { x: p.x, y: (p.y || 0) + 1.7, z: p.z };
         const clearTarget = clearCameraPosition(anchor, target, sim.obstacles);
         this.camera.position.lerp(clearTarget, 1 - Math.exp(-dt * 7));
         // Smoothing around a corner can itself cross a wall; constrain that path too.
@@ -438,7 +468,11 @@ export class SceneView {
           clearCameraPosition(anchor, this.camera.position, sim.obstacles),
         );
         this.cameraLook.lerp(
-          new THREE.Vector3(p.x + forward.x * 10, 1.5, p.z + forward.z * 10),
+          new THREE.Vector3(
+            p.x + forward.x * 10,
+            (p.y || 0) + 1.5,
+            p.z + forward.z * 10,
+          ),
           1 - Math.exp(-dt * 10),
         );
         this.camera.lookAt(this.cameraLook);
@@ -452,7 +486,7 @@ export class SceneView {
           this.fx.set(e.id, createExplosion(this.scene, e));
       }
       for (const [id, fx] of this.fx) {
-        if (sim.time - fx.born >= 2.2) {
+        if (sim.time - fx.born >= 2.2 || fx.born > sim.time) {
           disposeGroup(this.scene, fx.group);
           this.fx.delete(id);
         } else animateExplosion(fx, sim.time);
@@ -494,13 +528,11 @@ export class SceneView {
         this.lastTirePositions = tires;
       }
     }
-    updateScenery(this, sim.time || performance.now() / 1000);
-    updateTrees(
-      this,
-      sim.player,
-      sim.time || performance.now() / 1000,
-      sim.trees,
-    );
+    const worldTime =
+      sim.phase === "ready" ? performance.now() / 1000 : sim.time;
+    updateScenery(this, worldTime);
+    animateDistricts(this, worldTime);
+    updateTrees(this, sim.player, worldTime, sim.trees);
     updateRouteGuide(this.routeGuide, sim);
     this.sun.position.set(
       this.player.position.x - 75,

@@ -46,6 +46,7 @@ export async function loadTrees(v) {
         v.treePositions.length,
       );
       batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      batch.userData.leaves = material.name.includes("leaves");
       batch.castShadow = level === 0;
       batch.receiveShadow = true;
       batch.frustumCulled = false;
@@ -94,9 +95,9 @@ export function updateTrees(
       dummy.position.set(t.x, 0.18, t.z);
       const s = t.h / height;
       dummy.scale.set(
-        s * (0.86 + (i % 4) * 0.07),
+        s * (1.1 + (i % 4) * 0.08),
         s,
-        s * (0.86 + (i % 3) * 0.06),
+        s * (1.1 + (i % 3) * 0.08),
       );
       dummy.rotation.set(0, i * 2.399, 0);
       if (t.broken) {
@@ -112,10 +113,21 @@ export function updateTrees(
           dummy.scale.multiplyScalar(Math.max(0.001, (12 - age) / 2));
       }
       dummy.updateMatrix();
-      batch.setMatrixAt(count++, dummy.matrix);
+      batch.setMatrixAt(count, dummy.matrix);
+      if (batch.userData.leaves)
+        batch.setColorAt(
+          count,
+          new THREE.Color().setHSL(
+            0.23 + (i % 5) * 0.012,
+            0.25 + (i % 3) * 0.04,
+            0.75 + (i % 4) * 0.045,
+          ),
+        );
+      count++;
     });
     batch.count = count;
     batch.instanceMatrix.needsUpdate = true;
+    if (batch.instanceColor) batch.instanceColor.needsUpdate = true;
   }
   let count = 0;
   for (const t of states)
