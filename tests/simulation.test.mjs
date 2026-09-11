@@ -87,7 +87,7 @@ test("interior overlap and car collision are separated without NaNs", () => {
   const a = vehicle(),
     b = vehicle();
   collideVehicles(a, b);
-  assert(distance(a, b) >= 3.64);
+  assert(distance(a, b) >= 1.98, 'door-to-door overlap is resolved using the actual body width');
   assert(Number.isFinite(a.x));
 });
 test("police route around blocks instead of driving through them", () => {
@@ -124,7 +124,7 @@ test("checkpoints only award in order, repairs cap at 100, reinforcements arrive
     assert.equal(s.checkpoint, i + 1);
     assert(s.player.health <= 100);
   }
-  assert.equal(s.police.length, 1);
+  assert.equal(s.police.length, 3);
   assert(s.score >= 6000);
 });
 test("escape requires all checkpoints and eight continuous seconds without contact", () => {

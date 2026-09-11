@@ -153,6 +153,8 @@ export function sportsCar(view, color, police = false, carId = "gt") {
 export function animateWheels(group, speed, dt, steer = 0) {
   for (const wheel of group.userData.wheels || [])
     wheel.rotation.x -= (speed * dt) / 0.34;
+  for (const pivot of group.userData.wheelSteering || [])
+    pivot.rotation.y = -steer * 0.4;
   const wheel = group.userData.body?.getObjectByName("steering_wheel");
   if (wheel) wheel.rotation.z = steer * 0.45;
 }

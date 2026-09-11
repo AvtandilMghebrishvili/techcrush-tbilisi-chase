@@ -5,13 +5,16 @@ import {
   BUILDINGS,
   geo,
   nearestRoad,
+  containsPoint,
   START,
   CLOCK_BUILDING,
 } from "./city-map.js";
 import { flagTexture, addFlag, tower } from "./scenery.js";
 import { buildTechcrushGarage } from "./landmarks.js";
 import { makeKartlisDeda } from "./kartlis-deda.js";
+import { TREES } from "./world-props.js";
 import { TOWER } from "./config.js";
+import { buildRoadSurface } from "./road-surface.js";
 const mat = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.83, ...extra });
 export function terrainHeight(x, z) {
@@ -175,61 +178,36 @@ export function buildRealisticCity(v) {
       return m;
     },
   );
+  buildRoadSurface(v, road, concrete, curb);
   for (const r of ROADS) {
-    const x = (r.start.x + r.end.x) / 2,
-      z = (r.start.z + r.end.z) / 2;
-    const base = v.box(r.width + 9, 0.28, r.length + 3, concrete, x, -0.1, z);
-    base.rotation.y = r.angle;
-    const mesh = v.box(r.width, 0.1, r.length + 2, road, x, 0.015, z);
-    mesh.rotation.y = r.angle;
-    mesh.userData.preserveUV = true;
-    const uv = mesh.geometry.attributes.uv;
-    for (let i = 0; i < uv.count; i++)
-      uv.setXY(i, (uv.getX(i) * r.width) / 9, (uv.getY(i) * r.length) / 9);
     const fx = Math.sin(r.angle),
       fz = Math.cos(r.angle),
       rx = fz,
       rz = -fx;
-    for (let along = 9; along < r.length - 7; along += 13) {
+    const endGap = (n) =>
+      n.links.length > 2
+        ? Math.max(...n.links.map((l) => ROADS[l.road].width)) / 2 + 2
+        : 3;
+    for (
+      let along = endGap(r.start);
+      along < r.length - endGap(r.end);
+      along += 13
+    ) {
       for (const offset of r.width > 24
         ? [-r.width / 4, 0, r.width / 4]
         : [0]) {
         const stripe = v.box(
           0.13,
-          0.012,
-          5.5,
+          0.008,
+          Math.min(5.5, r.length - endGap(r.end) - along),
           line,
           r.start.x + fx * along + rx * offset,
-          0.081,
+          0.075,
           r.start.z + fz * along + rz * offset,
         );
         stripe.rotation.y = r.angle;
       }
     }
-    for (const side of [-1, 1]) {
-      const m = v.box(
-        0.25,
-        0.2,
-        Math.max(1, r.length - r.width),
-        curb,
-        x + rx * (r.width / 2 + 0.15) * side,
-        0.1,
-        z + rz * (r.width / 2 + 0.15) * side,
-      );
-      m.rotation.y = r.angle;
-    }
-  }
-  // Flat intersection discs join the exact road center lines without gaps.
-  for (const node of NODES) {
-    const width = Math.max(...node.links.map((l) => ROADS[l.road].width));
-    const mesh = new THREE.Mesh(
-      new THREE.CircleGeometry(width / 2 + 0.2, 20),
-      road,
-    );
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.set(node.x, 0.072, node.z);
-    mesh.receiveShadow = true;
-    v.decor.add(mesh);
   }
   for (const b of BUILDINGS) {
     if (b.landmark) continue;
@@ -298,48 +276,7 @@ function streetDetails(v, line) {
       }
     }
   }
-  v.treePositions = trees;
-  const trunks = new THREE.InstancedMesh(
-    new THREE.CylinderGeometry(0.16, 0.3, 1, 7),
-    bark,
-    trees.length,
-  );
-  const foliage = new THREE.InstancedMesh(
-    new THREE.IcosahedronGeometry(1, 1),
-    mat("#ffffff", { roughness: 1 }),
-    trees.length * 45,
-  );
-  const dummy = new THREE.Object3D();
-  let i = 0;
-  for (const t of trees) {
-    dummy.position.set(t.x, t.h * 0.42, t.z);
-    dummy.scale.set(1, t.h * 0.8, 1);
-    dummy.rotation.set(0, 0, 0);
-    dummy.updateMatrix();
-    trunks.setMatrixAt(i, dummy.matrix);
-    for (let k = 0; k < 45; k++) {
-      const a = k * 2.399,
-        r = Math.sqrt((k + 0.5) / 45) * 2.75,
-        h = Math.sin(k * 1.9) * 1.7;
-      dummy.position.set(t.x + Math.sin(a) * r, t.h + h, t.z + Math.cos(a) * r);
-      dummy.scale.set(0.72 + (k % 3) * 0.13, 0.8, 0.74);
-      dummy.rotation.set(k, 0.4 * k, k);
-      dummy.updateMatrix();
-      foliage.setMatrixAt(i * 45 + k, dummy.matrix);
-      foliage.setColorAt(
-        i * 45 + k,
-        new THREE.Color(
-          ["#647a47", "#48603b", "#768657", "#849054", "#536c40"][k % 5],
-        ),
-      );
-    }
-    i++;
-  }
-  trunks.castShadow = true;
-  foliage.castShadow = true;
-  foliage.receiveShadow = true;
-  v.decor.add(trunks, foliage);
-  v.proceduralTrees = [trunks, foliage];
+  v.treePositions = TREES;
   // Road-name signs orient the player without a cluttered satellite-map overlay.
   const signCanvas = document.createElement("canvas");
   signCanvas.width = 1024;
@@ -368,47 +305,4 @@ function streetDetails(v, line) {
   sign.rotation.y = -Math.PI / 2;
   v.decor.add(sign);
   v.box(0.12, 5, 0.12, metal, sign.position.x, 2.5, sign.position.z);
-}
-export function applyTreeTexture(v, texture) {
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
-  const material = mat("#ffffff", {
-    map: texture,
-    side: THREE.DoubleSide,
-    roughness: 1,
-  });
-  // Treat the generated pale matte as empty space in the billboard shader.
-  // The original RGB source is preserved unchanged, including fine leaf gaps.
-  material.onBeforeCompile = (shader) => {
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <map_fragment>",
-      `#include <map_fragment>
-    if(min(diffuseColor.r,min(diffuseColor.g,diffuseColor.b))>.28) discard;
-  `,
-    );
-  };
-  const geometry = new THREE.PlaneGeometry(12, 15);
-  geometry.translate(0, 7.35, 0);
-  const trees = new THREE.InstancedMesh(
-      geometry,
-      material,
-      v.treePositions.length * 2,
-    ),
-    dummy = new THREE.Object3D();
-  v.treePositions.forEach((t, i) => {
-    for (let side = 0; side < 2; side++) {
-      dummy.position.set(t.x, 0, t.z);
-      dummy.scale.setScalar(t.h / 9);
-      dummy.rotation.set(0, i * 0.73 + (side * Math.PI) / 2, 0);
-      dummy.updateMatrix();
-      trees.setMatrixAt(i * 2 + side, dummy.matrix);
-    }
-  });
-  trees.receiveShadow = true;
-  v.decor.add(trees);
-  for (const m of v.proceduralTrees) {
-    v.decor.remove(m);
-    m.geometry.dispose();
-    m.material.dispose();
-  }
 }

@@ -4,7 +4,13 @@
 
 `dist/assets/ferrari.glb`: Ferrari 458 model by [vicent091036](https://sketchfab.com/models/57bf6cc56931426e87494f554df1dab6), provided through the [official Three.js car example](https://threejs.org/examples/webgl_materials_car.html), attributed under CC BY 4.0. The [WorldCoder provenance table](https://huggingface.co/datasets/shuolucs/WorldCoder-Bench) also identifies this file as CC BY 4.0. The original Sketchfab detail endpoint was unavailable during this update.
 
-`dist/assets/sports-car.glb` is the decoded, welded and simplified derivative: approximately 307,393 triangles versus 358,788 originally. The original input is retained for reproducibility. Custom paint, track spoiler, police equipment, animation and fictional game tuning are applied at runtime. All three trims share this base model. Vehicle names/marks are not project-authored assets and do not imply manufacturer endorsement.
+`dist/assets/sports-car.glb` is the decoded, welded and simplified derivative: approximately 307,393 triangles versus 358,788 originally. The original input is retained for reproducibility. Custom paint, track spoiler, animation and fictional game tuning are applied at runtime. All three trims share this base model. Vehicle names/marks are not project-authored assets and do not imply manufacturer endorsement.
+
+The police sedan and civilian modern sedan, classic 1980s/1990s sedans, wagon and hatchback are original unbranded geometry in `dist/patrol-car.js`. Georgian police panels, emergency lighting, push bar, mirrors, wheel details and chrome trim are authored in code. Occasional sports cars in traffic use the credited 458 asset.
+
+## Solid 3D trees
+
+`tree-near.glb` and `tree-far.glb`: [Tree Small 02](https://polyhaven.com/a/tree_small_02) by Rico Cilliers / Poly Haven, [CC0](https://polyhaven.com/license). Original geometry and 1K maps are downloaded by `scripts/prepare-tree.mjs` using the manifest in `data/tree-source.json`. Derivatives have 123,246 and 20,943 triangles; leaf islands are expanded after simplification to retain canopy coverage. Wind, distance switching, trunk collisions, falling and stumps are runtime additions. These replace the earlier flat tree cards; `plane-tree.png` below is retained only as a historical asset.
 
 `ferrari_ao.png` is the contact-shadow texture from the same example. Its grayscale is interpreted as shadow opacity by the renderer. The original image is unchanged.
 
@@ -16,7 +22,7 @@
 
 ## Street geography
 
-`dist/road-data.js` and `data/*.json`: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Overpass snapshot: 2026-09-11. Adaptations: local metre coordinates, simplified junctions, selected connected roads, widened lanes, bidirectional game traffic and reopened construction roads. The derived database is downloadable from the public credits page. Source responses are included in the complete code archive.
+`dist/road-data.js`, `dist/road-surface-data.js` and OSM responses in `data/`: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Overpass snapshot: 2026-09-11. Adaptations: local metre coordinates, simplified junctions, selected connected roads, widened lanes, bidirectional game traffic and reopened construction roads. The road surface unions those widened roads into continuous asphalt with sidewalk differences. Derived data is downloadable from the credits page; original responses are included in the source archive.
 
 ## Higgsfield images
 

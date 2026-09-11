@@ -1,41 +1,42 @@
-# Validation — Tbilisi daylight edition, 11 September 2026
+# Validation — pursuit and handling update, 11 September 2026
 
 ## Automated checks
 
-`npm test`: **24 passed, 0 failed**. Checks cover acceleration/braking/reverse, fixed-step consistency, handbrake and nitro, left/right steering from every camera heading, Georgian keyboard physical keys, rotated building and vehicle collisions, car configuration, police routing/radio/chase, patrol HP/explosion/replacement, checkpoint order, repair, escape/capture/restart states, animated navigation and all static module imports including transitive Three.js loaders.
+`npm test`: **36 passed, 0 failed**. Checks cover acceleration/braking/reverse, fixed-step consistency, left/right steering and Georgian physical keys, real lateral drift and countersteer recovery, smooth turbo spool/release and empty-tank lockout, building collisions, oriented bumper/door impulses, police-to-police separation, solid trees and breaking, patrol roles and forward roadblock planning, radio observation limits, HP/explosion/replacement, checkpoint order, repairs, escape/capture/restart, clear-road recovery, navigation and all static module imports.
 
-The OSM-derived map has 373 nodes and 498 segments. Connectivity tests visit every node, check road centers with the player collision radius against building footprints, and verify connected, unobstructed routes between all six gates.
+The camera test checks rotated walls between clear endpoints and clearance above roofs. The joined asphalt test checks actual triangles, upward normals and street coverage. The OSM-derived map has 373 nodes and 498 segments; connectivity checks visit every node and verify unobstructed routes between all six gates. The rendered asphalt is one connected polygon with 35 block islands.
 
 ## Complete driving runs
 
-The deterministic controller uses ordinary throttle, steering, braking, nitro and the same R recovery action available to the player, including its score penalty. Traffic and police remain active. It does not grant checkpoints, condition or immunity. Controller recovery and ideal route knowledge mean these runs establish that the game is completable, not an estimate of first-time human difficulty.
+The deterministic controller uses ordinary throttle, steering, braking, turbo and the player's R recovery action, including its score penalty. Traffic, solid trees and all police roles remain active. It grants no checkpoints, health or immunity. Ideal route knowledge and recovery mean these runs establish that the game is completable, not first-time human difficulty.
 
-| Car          | Result  | Gates | Simulation time | Score  | Condition | Patrol takedowns |
-| ------------ | ------- | ----- | --------------- | ------ | --------- | ---------------- |
-| 458 Stradale | Escaped | 6/6   | 112 s           | 25,852 | 80%       | 6                |
-| 458 Track    | Escaped | 6/6   | 136 s           | 27,271 | 61%       | 6                |
-| 458 Touring  | Escaped | 6/6   | 129 s           | 26,882 | 88%       | 6                |
+| Car          | Result  | Gates | Simulation time | Score  | Condition | Patrol takedowns | Broken trees |
+| ------------ | ------- | ----- | --------------- | ------ | --------- | ---------------- | ------------ |
+| 458 Stradale | Escaped | 6/6   | 171.8 s         | 28,699 | 25%       | 7                | 4            |
+| 458 Track    | Escaped | 6/6   | 162.9 s         | 26,097 | 60%       | 5                | 5            |
+| 458 Touring  | Escaped | 6/6   | 193.7 s         | 31,967 | 22%       | 9                | 10           |
 
-Reproduce with `node tests/route-drive.mjs gt`, `node tests/route-drive.mjs rally`, and `node tests/route-drive.mjs suv`. These results use the final simulation and map.
+Reproduce with `node tests/route-drive.mjs gt`, `node tests/route-drive.mjs rally`, and `node tests/route-drive.mjs suv`. All used the final simulation and map; later edits affected only camera, cosmetics and documentation.
 
 ## Browser inspection
 
-Inspected the initial garage, detailed sports car, TECHCRUSH branding, limestone facades, asphalt, tree billboards, mountain/tower backdrop, checkpoint arrows and driving HUD in local desktop Chromium. The modeled cockpit shows the steering wheel, dashboard and windshield pillars with the road visible ahead. A normal two-second acceleration test reached 95 km/h with full condition. Three seconds of an earlier cockpit drive advanced approximately three seconds of simulation; this is a short functional check, not a GPU benchmark.
+Inspected the new 3D tree, original police sedan and 1980s civilian sedan in a temporary model review page, then the actual game. Checked continuous street surfacing, detailed sports car, TECHCRUSH branding, tree canopies, turbo flames and animated edge streaks, drift indicator, cornering and checkpoint guidance in desktop Chromium. The model review page is removed from the deliverable.
 
-The final contact-shadow shader renders without a rectangular white matte. Tree pale-matte removal was inspected in the scene. Browser error/warning logs were empty after loading and driving. The default browser panel was also observed at a narrow desktop width; a physical phone, Safari and low-end GPUs were not tested in this update.
+A normal 1.6-second turbo acceleration reached 141 km/h with 70% charge remaining. A subsequent handbrake turn produced 17 degrees of lateral slip at 99 km/h. A separate ordinary drive registered a broken tree. Browser error/warning logs were empty after driving. The follow camera now clips its entire boom against buildings, including the smoothed camera path, instead of jumping upward into a facade.
 
-## Issues corrected during the update
+## Issues corrected
 
-- Vendored HDRLoader's transitive imports so loading does not stall on a missing module; added an import-graph check.
-- Kept AI, checkpoint guidance, minimap and building collisions on the same connected geographic map.
-- Restored the Lagidze connection and adjusted gate positions to avoid awkward checkpoint turns.
-- Made traffic retain ram momentum instead of immediately overwriting collision velocity.
-- Used patrol recovery, capped police ram damage and 30 condition repair at gates to balance the stronger pursuit.
-- Converted the car contact-shadow grayscale to opacity and removed the pale tree background in the material shader.
-- Hid close patrol HP sprites when they would obscure the driving camera.
+- Replaced overlapping road rectangles with a joined asphalt polygon and world-aligned UVs; curbs and sidewalks follow its boundary.
+- Replaced flat tree cards with optimized geometry sharing solid trunk locations with the simulation. Strong impacts topple trees and leave stumps.
+- Replaced circular car contacts with oriented bodies and iterative mass-weighted separation for every vehicle pair.
+- Added three-to-six coordinated pursuers, interceptors and roadblock units with corner braking, obstacle awareness and reverse recovery.
+- Added original patrol sedans and multiple civilian body styles instead of only sports cars.
+- Eliminated abrupt speed loss on turbo release and repeated empty-tank pulses. Added spool, recharge delay, exhaust flames, FOV, edge streaks and synthesized audio.
+- Added sustained lateral drift with countersteering, smoke and connected rear-tire marks. Reset clears smoke.
+- Recovery chooses an unoccupied road position; camera collision checks the complete line back to the car.
 
 ## Limits
 
-This is a simplified playable reconstruction using OSM street center lines, widened roads, approximate buildings, original terrain and the user's visual references. It is not Google Maps photogrammetry or an exact street survey. The three configurations share one detailed 458 model with different appearance and driving characteristics. Photographic tree billboards are flat crossed planes. Detailed models and textures increase loading and GPU cost compared with the earlier stylized edition.
+This is a simplified arcade reconstruction using OSM street center lines, widened roads, approximate buildings, original terrain and visual references. It is not Google Maps photogrammetry or an exact street survey. The three player configurations share one 458 base model; other vehicles are original procedural geometry. Trees use two geometry detail levels; detailed assets increase loading/GPU cost.
 
-WebGL2 and a modern browser are required. No cross-browser or physical-device performance guarantee is made. Single-player arcade game; no multiplayer or persistent leaderboard. Asset credits and licenses are in `ASSETS.md` and the in-game Credits page.
+WebGL2 and a modern browser are required. Physical phones, Safari and low-end GPUs were not tested in this update. Short browser drives are functional checks, not a frame-rate benchmark. Single-player game without multiplayer or a persistent leaderboard. Asset provenance is in `ASSETS.md` and the in-game Credits page.

@@ -515,6 +515,66 @@ kbd {
 .nitro i {
   background: var(--cyan);
 }
+.turbo-readout {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 9px;
+  font-size: 12px;
+  letter-spacing: 0.7px;
+  color: #d9e5e9;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 4px #07121d;
+}
+.turbo-readout > b {
+  color: var(--cyan);
+}
+.turbo-active .nitro i {
+  box-shadow: 0 0 14px #75eaff;
+  background: #d2fbff;
+}
+.turbo-active #turbo-status {
+  color: #9af5ff;
+}
+.turbo-active .speed-value strong {
+  text-shadow: 0 0 26px #59d9fa55;
+}
+.speed-streaks {
+  z-index: 2;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+.speed-streaks path {
+  stroke-dasharray: 5 12;
+  animation: boost-streak 0.24s linear infinite;
+}
+.turbo-active .speed-streaks {
+  opacity: 0.55;
+}
+@keyframes boost-streak {
+  to {
+    stroke-dashoffset: 34;
+  }
+}
+.drift-status {
+  height: 18px;
+  text-align: right;
+  color: #93eced;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-shadow: 0 1px 4px #07121d;
+}
+@media (prefers-reduced-motion: reduce) {
+  .speed-streaks {
+    display: none;
+  }
+}
 .route-cue {
   position: absolute;
   left: 50%;

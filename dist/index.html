@@ -25,6 +25,18 @@
   <body>
     <main id="game">
       <canvas id="world" aria-label="3D car chase city"></canvas>
+      <svg
+        class="speed-streaks"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <g fill="none" stroke="#d8f9ff" stroke-width=".15">
+          <path
+            d="M-10 15L21 33 M-10 40L14 44 M-10 82L20 67 M9 110L31 78 M38 110L43 87 M110 15L79 33 M110 40L86 44 M110 82L80 67 M91 110L69 78 M62 110L57 87"
+          />
+        </g>
+      </svg>
       <div class="vignette"></div>
       <header>
         <a class="brand" href="./" aria-label="TECHCRUSH Nightshift home">
@@ -152,13 +164,18 @@
           <div class="speed-value">
             <strong id="speed">0</strong><span>KM/H</span>
           </div>
+          <div id="drift-status" class="drift-status"></div>
           <div class="condition">
             <span>CONDITION</span><b id="health">100%</b>
           </div>
           <div class="bar"><i id="health-bar"></i></div>
           <div class="nitro">
-            <span>SHIFT / NITRO</span>
+            <span>SHIFT / TURBO</span>
             <div class="bar"><i id="nitro-bar"></i></div>
+          </div>
+          <div class="turbo-readout">
+            <span id="turbo-status">READY</span><b id="turbo-charge">100%</b
+            ><span>AUTO <b id="gear">1</b></span>
           </div>
         </div>
         <div id="toast" class="toast" aria-live="polite"></div>
@@ -184,8 +201,8 @@
           <span
             ><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
             <span>DRIVE</span></span
-          ><span><kbd>SPACE</kbd> <span>HANDBRAKE</span></span
-          ><span><kbd>SHIFT</kbd> <span>NITRO</span></span
+          ><span><kbd>SPACE</kbd> <span>DRIFT</span></span
+          ><span><kbd>SHIFT</kbd> <span>TURBO</span></span
           ><span><kbd>C</kbd> <span>CAMERA</span></span
           ><span><kbd>P</kbd> <span>PAUSE</span></span
           ><span><kbd>R</kbd> <span>RESET CAR</span></span>

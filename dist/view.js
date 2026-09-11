@@ -2,8 +2,18 @@ import * as THREE from "./vendor/three.module.js";
 import { CHECKPOINTS } from "./simulation.js";
 import { carSpec, CAMERAS } from "./config.js";
 import { updateScenery } from "./scenery.js";
-import { buildRealisticCity, applyTreeTexture } from "./realistic-city.js";
-import { START, containsPoint } from "./city-map.js";
+import { buildRealisticCity } from "./realistic-city.js";
+import { loadTrees, updateTrees } from "./trees.js";
+import { makeSedan } from "./patrol-car.js";
+import {
+  addTurboExhaust,
+  updateTurboExhaust,
+  createTireSmoke,
+  updateTireSmoke,
+  resetTireSmoke,
+} from "./turbo-effects.js";
+import { START } from "./city-map.js";
+import { clearCameraPosition } from "./camera-clearance.js";
 import { loadSportsAssets, sportsCar, animateWheels } from "./sports-car.js";
 import { makeCockpit, updateCockpit } from "./cockpit.js";
 import { makeRouteGuide, updateRouteGuide } from "./route-guide.js";
@@ -79,6 +89,7 @@ export class SceneView {
     return mesh;
   }
   makeCar(color, police = false, carId = "gt") {
+    if (police) return makeSedan(this, true);
     return this.carTemplate
       ? sportsCar(this, color, police, carId)
       : new THREE.Group();
@@ -126,8 +137,7 @@ export class SceneView {
     this.terrainMaterial.normalMap = hillNormal;
     this.terrainMaterial.normalScale.set(0.6, 0.6);
     this.terrainMaterial.needsUpdate = true;
-    applyTreeTexture(this, await loader.loadAsync("./assets/plane-tree.png"));
-    await loadSportsAssets(this);
+    await Promise.all([loadTrees(this), loadSportsAssets(this)]);
     this.selectCar("gt");
   }
   setupGame(sim) {
@@ -219,7 +229,7 @@ export class SceneView {
       depthWrite: false,
     });
     for (let i = 0; i < 160; i++) {
-      const skid = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 1.4), skidMat);
+      const skid = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 1), skidMat);
       skid.rotation.x = -Math.PI / 2;
       skid.visible = false;
       this.scene.add(skid);
@@ -227,6 +237,8 @@ export class SceneView {
     }
     this.skidIndex = 0;
     this.skidTimer = 0;
+    this.lastTirePositions = null;
+    this.tireSmoke = createTireSmoke(this.scene);
     const beamMat = new THREE.MeshBasicMaterial({
       color: "#f8eabb",
       transparent: true,
@@ -255,6 +267,8 @@ export class SceneView {
     }
   }
   startGame(sim) {
+    resetTireSmoke(this.tireSmoke);
+    this.lastTirePositions = null;
     for (const child of [...this.scene.children])
       if (
         child.type === "Group" &&
@@ -268,11 +282,13 @@ export class SceneView {
     this.trafficMeshes = [];
     this.policeMeshes = [];
     for (const car of sim.traffic) {
-      const m = this.makeCar(
-        ["#819caa", "#b7b3a3", "#4b6565", "#914b42", "#d5ddce"][
-          this.trafficMeshes.length % 5
-        ],
-      );
+      const color = ["#819caa", "#b7b3a3", "#4b6565", "#914b42", "#d5ddce"][
+        this.trafficMeshes.length % 5
+      ];
+      const m =
+        car.kind === "sport"
+          ? this.makeCar(color)
+          : makeSedan(this, false, color, car.kind);
       this.trafficMeshes.push(m);
       this.scene.add(m);
     }
@@ -289,6 +305,7 @@ export class SceneView {
     const spec = carSpec(id),
       previous = this.player;
     this.player = this.makeCar(spec.color, false, spec.id);
+    addTurboExhaust(this.player);
     if (previous) {
       this.player.position.copy(previous.position);
       this.player.rotation.copy(previous.rotation);
@@ -308,6 +325,7 @@ export class SceneView {
     return CAMERAS[this.cameraMode];
   }
   resetPreview() {
+    resetTireSmoke(this.tireSmoke);
     for (const child of [...this.scene.children])
       if (
         child.type === "Group" &&
@@ -335,9 +353,16 @@ export class SceneView {
       const p = sim.player;
       this.player.position.set(p.x, 0, p.z);
       this.player.rotation.y = p.angle;
-      animateWheels(this.player, p.speed, dt, input.steer);
+      animateWheels(this.player, p.speed, dt, p.steering);
+      updateTurboExhaust(this.player, p, sim.time);
+      updateTireSmoke(
+        this.tireSmoke,
+        p,
+        dt,
+        sim.phase === "running" && p.isDrifting,
+      );
       this.player.rotation.z =
-        -input.steer * Math.min(Math.abs(p.speed) / 50, 1) * 0.035;
+        -p.steering * Math.min(Math.abs(p.speed) / 50, 1) * 0.035;
       while (this.policeMeshes.length < sim.police.length) {
         const m = this.makeCar("#18232b", true);
         this.scene.add(m);
@@ -362,6 +387,9 @@ export class SceneView {
           meshes[i].position.set(car.x, 0, car.z);
           meshes[i].rotation.y = car.angle;
           animateWheels(meshes[i], Math.hypot(car.vx, car.vz), dt);
+          if (meshes[i].userData.brakeLights)
+            meshes[i].userData.brakeLights.emissiveIntensity =
+              car.ramRecovery > 0 ? 2.2 : 0.65;
           if (meshes[i].userData.lights)
             meshes[i].userData.lights.forEach(
               (m, j) =>
@@ -396,27 +424,27 @@ export class SceneView {
         );
         this.camera.fov = interior ? 76 : 70;
       } else {
-        const zoom = mode === "aerial" ? 27 : p.boosting ? 12 : 9;
+        const zoom = mode === "aerial" ? 27 : 9 + p.boostStrength * 1.6;
         const target = new THREE.Vector3(
           p.x - forward.x * zoom,
           mode === "aerial" ? 26 : 4.4,
           p.z - forward.z * zoom,
         );
-        if (
-          sim.obstacles.some((o) => containsPoint(o, target.x, target.z, 2))
-        ) {
-          target.x = p.x - forward.x * 7;
-          target.z = p.z - forward.z * 7;
-          target.y = mode === "aerial" ? 32 : 16;
-        }
-        this.camera.position.lerp(target, 1 - Math.exp(-dt * 7));
+        const anchor = { x: p.x, y: 1.7, z: p.z };
+        const clearTarget = clearCameraPosition(anchor, target, sim.obstacles);
+        this.camera.position.lerp(clearTarget, 1 - Math.exp(-dt * 7));
+        // Smoothing around a corner can itself cross a wall; constrain that path too.
+        this.camera.position.copy(
+          clearCameraPosition(anchor, this.camera.position, sim.obstacles),
+        );
         this.cameraLook.lerp(
           new THREE.Vector3(p.x + forward.x * 10, 1.5, p.z + forward.z * 10),
           1 - Math.exp(-dt * 10),
         );
         this.camera.lookAt(this.cameraLook);
         this.camera.fov +=
-          ((p.boosting ? 65 : 56) - this.camera.fov) * Math.min(dt * 3, 1);
+          (56 + p.boostStrength * 8 - this.camera.fov) *
+          (1 - Math.exp(-dt * 5));
       }
       this.camera.updateProjectionMatrix();
       for (const e of sim.explosions) {
@@ -435,26 +463,44 @@ export class SceneView {
         this.shake = Math.max(0, this.shake - dt);
       }
       this.skidTimer += dt;
-      if (
+      const marking =
         sim.phase === "running" &&
-        input.brake &&
-        Math.abs(p.speed) > 10 &&
-        this.skidTimer > 0.035
-      ) {
+        (input.brake || p.isDrifting) &&
+        Math.abs(p.speed) > 10;
+      if (!marking) this.lastTirePositions = null;
+      if (marking && this.skidTimer > 0.035) {
         this.skidTimer = 0;
-        for (const side of [-1, 1]) {
+        const tires = [-1, 1].map((side) => ({
+          x: p.x - forward.x * 1.45 + forward.z * side * 0.85,
+          z: p.z - forward.z * 1.45 - forward.x * side * 0.85,
+        }));
+        tires.forEach((tire, i) => {
+          const previous = this.lastTirePositions?.[i];
+          if (!previous) return;
+          const dx = tire.x - previous.x,
+            dz = tire.z - previous.z;
+          const length = Math.hypot(dx, dz);
+          if (length < 0.02 || length > 5) return;
           const m = this.skids[this.skidIndex++ % this.skids.length];
           m.position.set(
-            p.x + Math.cos(p.angle) * side,
-            p.boosting ? 0.055 : 0.05,
-            p.z - Math.sin(p.angle) * side,
+            (tire.x + previous.x) / 2,
+            0.084,
+            (tire.z + previous.z) / 2,
           );
-          m.rotation.set(-Math.PI / 2, 0, -p.angle);
+          m.rotation.set(-Math.PI / 2, 0, Math.atan2(dx, dz));
+          m.scale.y = length + 0.025;
           m.visible = true;
-        }
+        });
+        this.lastTirePositions = tires;
       }
     }
     updateScenery(this, sim.time || performance.now() / 1000);
+    updateTrees(
+      this,
+      sim.player,
+      sim.time || performance.now() / 1000,
+      sim.trees,
+    );
     updateRouteGuide(this.routeGuide, sim);
     this.sun.position.set(
       this.player.position.x - 75,

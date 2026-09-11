@@ -33,6 +33,11 @@ let sim,
 const touch = matchMedia("(pointer: coarse)").matches || innerWidth < 650;
 let agentInput = null;
 let selectedCar = "gt";
+let turboGain,
+  turboWhine,
+  turboWhineGain,
+  boostWasOn = false,
+  releaseUntil = 0;
 if (document.modelContext?.registerTool) {
   try {
     Promise.resolve(
@@ -126,7 +131,7 @@ function setupGarage() {
     $("intro").hidden = false;
     $("mission-card").hidden = false;
     $("touch-controls").hidden = true;
-    document.body.classList.remove("playing");
+    document.body.classList.remove("playing", "turbo-active");
     view.player.visible = true;
     view.cockpit.root.visible = false;
     view.camera.position.set(11, 7.5, -49);
@@ -163,6 +168,27 @@ function initAudio() {
   sirenGain.gain.value = 0;
   siren.connect(sirenGain).connect(audio.destination);
   siren.start();
+  const noiseBuffer = audio.createBuffer(1, audio.sampleRate, audio.sampleRate);
+  const noiseData = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < noiseData.length; i++)
+    noiseData[i] = (Math.random() * 2 - 1) * 0.5;
+  const noise = audio.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+  const filter = audio.createBiquadFilter();
+  filter.type = "bandpass";
+  filter.frequency.value = 2300;
+  filter.Q.value = 0.65;
+  turboGain = audio.createGain();
+  turboGain.gain.value = 0;
+  noise.connect(filter).connect(turboGain).connect(audio.destination);
+  noise.start();
+  turboWhine = audio.createOscillator();
+  turboWhine.type = "sine";
+  turboWhineGain = audio.createGain();
+  turboWhineGain.gain.value = 0;
+  turboWhine.connect(turboWhineGain).connect(audio.destination);
+  turboWhine.start();
 }
 function toggleSound() {
   initAudio();
@@ -174,6 +200,26 @@ function toggleSound() {
 function audioTick() {
   if (!audio) return;
   const active = !muted && sim.phase === "running";
+  const p = sim.player;
+  if (active && boostWasOn && !p.boosting)
+    releaseUntil = audio.currentTime + 0.34;
+  boostWasOn = active && p.boosting;
+  const release = Math.max(0, (releaseUntil - audio.currentTime) / 0.34);
+  turboGain.gain.setTargetAtTime(
+    active ? (p.boosting ? p.boostStrength * 0.025 : release * 0.045) : 0,
+    audio.currentTime,
+    0.045,
+  );
+  turboWhine.frequency.setTargetAtTime(
+    620 + p.boostStrength * 1100,
+    audio.currentTime,
+    0.1,
+  );
+  turboWhineGain.gain.setTargetAtTime(
+    active && p.boosting ? p.boostStrength * 0.006 : 0,
+    audio.currentTime,
+    0.06,
+  );
   engine.frequency.setTargetAtTime(
     42 + Math.abs(sim.player.speed) * 3.8,
     audio.currentTime,
@@ -267,8 +313,31 @@ function updateHUD() {
   $("health-bar").style.width = p.health + "%";
   $("health-bar").style.background = p.health < 30 ? "#ff796e" : "#e8ff76";
   $("nitro-bar").style.width = p.nitro + "%";
+  $("turbo-status").textContent = p.boosting
+    ? p.boostStrength < 0.8
+      ? "SPOOLING"
+      : "BOOST ACTIVE"
+    : p.nitroLocked
+      ? "RECHARGING"
+      : p.boostCooldown > 0
+        ? "RECHARGE DELAY"
+        : "READY";
+  $("turbo-charge").textContent = Math.round(p.nitro) + "%";
+  $("drift-status").textContent = p.isDrifting
+    ? "DRIFT · " + Math.round((Math.abs(p.slip) * 180) / Math.PI) + "°"
+    : "";
+  document.body.classList.toggle(
+    "turbo-active",
+    sim.phase === "running" && p.boosting,
+  );
+  $("gear").textContent =
+    p.speed < -0.4
+      ? "R"
+      : String(Math.min(5, Math.floor((Math.max(0, p.speed) * 3.6) / 46) + 1));
   $("takedowns").textContent = String(sim.takedowns);
-  $("heat").textContent = sim.police.length === 3 ? "● ● ●" : "● ● ○";
+  $("heat").textContent = sim.police
+    .map((c) => (c.destroyed ? "○" : "●"))
+    .join(" ");
   const escape = sim.checkpoint === 6;
   $("bust-bar").style.width =
     (escape ? sim.escape / 8 : sim.bust / 4) * 100 + "%";
@@ -281,7 +350,9 @@ function updateHUD() {
         ? sim.escape > 0
           ? "Losing them… " + Math.ceil(8 - sim.escape) + "s"
           : "Break line of sight and pull away."
-        : "Keep moving. Don’t get boxed in.";
+        : sim.roadblockAhead
+          ? "ROADBLOCK AHEAD — FIND A GAP"
+          : "Pursuit and intercept units active.";
   const cp = CHECKPOINTS[sim.checkpoint];
   $("objective").textContent = cp
     ? "Reach " + cp.name
