@@ -40,6 +40,7 @@
     </script>
     <link rel="stylesheet" href="./expedition.css" />
     <link rel="stylesheet" href="./results.css" />
+    <link rel="stylesheet" href="./menu.css" />
   </head>
   <body>
     <main id="game">
@@ -130,36 +131,89 @@
         aria-label="Choose a car and start your chase"
       >
         <div class="intro-content">
-          <div class="eyebrow"><span></span> TECHCRUSH / TBILISI STREETS</div>
-          <h1>TBILISI<br /><em>CHASE.</em></h1>
-          <p class="intro-copy">
-            Six checkpoints. One getaway.<br />Race through the streets of
-            Tbilisi.
-          </p>
-          <div
-            id="garage"
-            class="garage"
-            role="group"
-            aria-label="Choose your car"
-          ></div>
-          <p id="car-details" class="car-details"></p>
-          <p id="intro-career" class="career-line"></p>
-          <div class="map-slots" aria-label="City maps">
-            <button type="button" data-map="tbilisi" class="active-map">
-              <b>01 / TBILISI</b><small>LIVE · ENDLESS LEVELS</small>
-            </button>
-            <button type="button" data-map="kutaisi" disabled>
-              <b>02 / KUTAISI</b><small>CLEAR TBILISI LEVEL 3</small>
-            </button>
-            <span aria-disabled="true"
-              ><b>03 / BATUMI</b><small>COMING SOON · მალე</small></span
-            >
+          <div class="menu-heading">
+            <div class="eyebrow"><span></span> TECHCRUSH / TBILISI STREETS</div>
+            <h1>TBILISI <em>CHASE.</em></h1>
+            <p class="intro-copy">
+              Six checkpoints. Lose the police. Build your next getaway.
+            </p>
           </div>
-          <p id="map-access-note" class="stunt-record">
-            Clear Tbilisi level 3 to unlock Kutaisi. Cars and upgrades travel
-            with you.
-          </p>
-          <p id="stunt-record" class="stunt-record"></p>
+          <div class="menu-choice-grid">
+            <section class="menu-city-choice" aria-label="City selection">
+              <div class="menu-section-heading">
+                <h2><span>01</span> CHOOSE YOUR CITY</h2>
+                <span id="menu-city-count">1 / 2 AVAILABLE</span>
+              </div>
+              <div class="map-slots" role="group" aria-label="Choose your city">
+                <button type="button" data-map="tbilisi" class="active-map">
+                  <span class="city-state">SELECTED</span><b>TBILISI</b>
+                  <span class="city-caption"
+                    >Capital streets · mountain skyline</span
+                  ><small>LEVEL 1 · ENDLESS</small>
+                  <svg viewBox="0 0 140 60" aria-hidden="true">
+                    <path
+                      d="M2 56h136M15 55V38h20v17m5 0V29h24v26m13 0 8-36 8 36m-8-36V4m-6 17h12m-16 20h20m13 14V34h21v21"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  data-map="kutaisi"
+                  disabled
+                  aria-describedby="map-access-note"
+                >
+                  <span class="city-state">LOCKED</span><b>KUTAISI</b>
+                  <span class="city-caption"
+                    >Rioni bridges · Platinum secrets</span
+                  ><small>CLEAR TBILISI LEVEL 3</small>
+                  <svg viewBox="0 0 140 60" aria-hidden="true">
+                    <path
+                      d="M4 36h132M8 53q22-40 44 0m2 0q20-40 40 0m2 0q20-40 40 0M10 58q13-6 26 0t26 0t26 0t26 0t26 0M60 30V17l10-8 10 8v13M70 9V2"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div id="city-unlock" class="city-unlock">
+                <div class="unlock-copy">
+                  <strong id="unlock-title">NEXT DESTINATION · KUTAISI</strong>
+                  <p id="map-access-note">
+                    Complete three Tbilisi levels to unlock Kutaisi.
+                  </p>
+                </div>
+                <div
+                  id="unlock-progress"
+                  role="progressbar"
+                  aria-label="Tbilisi levels completed to unlock Kutaisi"
+                  aria-valuemin="0"
+                  aria-valuemax="3"
+                  aria-valuenow="0"
+                >
+                  <span data-unlock-step="1">1</span
+                  ><span data-unlock-step="2">2</span
+                  ><span data-unlock-step="3">3</span>
+                </div>
+              </div>
+              <div class="upcoming-city">
+                <span>03 / BATUMI</span><small>COMING SOON · მალე</small
+                ><span aria-hidden="true">↗</span>
+              </div>
+            </section>
+            <section class="menu-car-choice" aria-label="Car selection">
+              <div class="menu-section-heading car-section-heading">
+                <h2><span>02</span> CHOOSE YOUR CAR</h2>
+                <span>UPGRADE IN GARAGE</span>
+              </div>
+              <div
+                id="garage"
+                class="garage"
+                role="group"
+                aria-label="Choose your car"
+              ></div>
+              <p id="car-details" class="car-details"></p>
+              <p id="intro-career" class="career-line"></p>
+              <p id="stunt-record" class="stunt-record"></p>
+            </section>
+          </div>
           <div class="community-entry">
             <button id="driver-open" type="button">
               <span id="driver-name-label">CHOOSE YOUR DRIVER NAME</span
@@ -167,29 +221,40 @@
             ><span id="menu-multiplier"></span>
           </div>
         </div>
-        <div class="intro-actions">
-          <button
-            id="leaderboard-menu"
-            class="secondary leaderboard-link"
-            type="button"
-          >
-            🏆 LEADERBOARD <small>LEVELS · TIMES · SCORES</small>
-          </button>
-          <button id="workshop-open" class="secondary workshop-link" disabled>
-            YOUR GARAGE
-          </button>
-          <button id="start" class="primary">
-            START CHASE <span>↗</span>
-          </button>
-        </div>
-        <button id="mobile-setup" class="secondary" hidden disabled>
-          DRIVER SETUP · TOUCH / GYRO
-        </button>
-        <p class="mobile-hint">
-          Slide to steer · pull to drift · tap NITRO. Best in landscape.
-        </p>
-        <div class="intro-meta">
-          <span>CHOOSE YOUR RIDE</span><span>MAKE YOUR ESCAPE ↗</span>
+        <div class="menu-launch">
+          <div class="launch-summary">
+            <span id="menu-race-label">TBILISI · LEVEL 1</span
+            ><button id="menu-car-jump" type="button" title="Change your car">
+              CHOOSE YOUR CAR ↗
+            </button>
+          </div>
+          <div class="intro-actions">
+            <button id="start" class="primary">
+              START CHASE <span>↗</span>
+            </button>
+            <button id="workshop-open" class="secondary workshop-link" disabled>
+              YOUR GARAGE
+            </button>
+            <button
+              id="leaderboard-menu"
+              class="secondary leaderboard-link"
+              type="button"
+            >
+              LEADERBOARD <small>LEVELS · TIMES · SCORES</small>
+            </button>
+          </div>
+          <div class="menu-controls">
+            <span class="desktop-menu-hint"
+              ><kbd>WASD</kbd> Drive <kbd>SPACE</kbd> Drift
+              <kbd>SHIFT</kbd> Nitro</span
+            >
+            <span class="mobile-hint"
+              >Slide to steer · pull to drift · tap NITRO</span
+            >
+            <button id="mobile-setup" class="secondary" hidden disabled>
+              TOUCH / GYRO SETUP ↗
+            </button>
+          </div>
         </div>
       </section>
       <section class="mission-card" id="mission-card">

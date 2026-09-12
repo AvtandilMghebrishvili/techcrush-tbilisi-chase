@@ -2,6 +2,14 @@
 
 Choose one of four cars and press **Start Chase**. **Your Garage** opens saved customization. On shorter displays, the car details scroll inside the menu while the main actions remain reachable.
 
+## City selection and unlock progress (1.18)
+
+The start menu has two numbered sections: **01 Choose your city** and **02 Choose your car**. They sit side by side on wide screens and stack on phones. The launch area remains visible while scrolling, with Start Chase, Your Garage and Leaderboard. The current city/level and selected car stay beside Start. Press the car's **Change** shortcut to scroll to and focus its selection button; choosing another car updates the shortcut immediately.
+
+Tbilisi is available from the start. **Complete Tbilisi levels 1, 2 and 3**, including each final police escape, to unlock Kutaisi. Being on Tbilisi level 3 means two levels are complete: the menu shows **2 / 3**, two completed steps and one remaining level. After winning level 3 the saved Tbilisi level becomes 4, and Kutaisi becomes selectable with a green **Unlocked** label. An accessible progress bar supplies the same information without relying on color.
+
+City cards show each city's own current endless level. The available-city count excludes upcoming Batumi. Both cities share cars, parts and credits. Unlock status refreshes through the existing profile change callback. Choosing Kutaisi still performs the normal safe city reload. The menu changes no driving physics, rewards, save schema or timing-course IDs, and adds no image downloads, animation loop or network polling.
+
 ## Driving screen
 
 The upper-left panel shows level, run earnings, score and six checkpoint marks. The upper-right panel shows pursuit units, heat and reinforcement timing. The central arrow and distance have no background so the road stays visible. Speed and condition sit above the pedals on touch screens; the circular radar, Rewind and Reset Car have separate targets.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.18.0 — 2026-09-13
+
+- Redesign the start menu around city selection, car selection and one prominent Start action. Use balanced columns on wide screens, a scrollable phone layout and a persistent launch area with garage/ranking access.
+- Show Kutaisi's exact unlock requirement, completed Tbilisi levels out of three, remaining levels, selected/locked/unlocked states and available-city count. Refresh from the existing profile change event.
+- Keep the selected city/level and current car beside Start; add an accessible Change shortcut to the selected car. Retain upcoming Batumi and YouTuber Car slots.
+- Use inline city illustrations and CSS only: no new media, continuous animation, frame loop or background request. Preserve gameplay, garages and timed courses.
+
 ## 1.17.0 — 2026-09-13
 
 - Show up to three animated score notices for patrol takedowns, near misses, completed drifts, safe jump landings, checkpoints and escapes. Display actual awarded points and credits, with a desktop level multiplier. Traffic destruction correctly shows credits only.

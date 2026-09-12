@@ -169,6 +169,11 @@ function chooseCar(id) {
       String(button.dataset.car === selectedCar),
     );
   const c = upgradedSpec(carSpec(id), equipment);
+  $("menu-car-jump").textContent = c.name + " · CHANGE ↗";
+  $("menu-car-jump").setAttribute(
+    "aria-label",
+    "Selected car: " + c.name + ". Change your car",
+  );
   $("car-details").textContent =
     c.description + " · " + Math.round(c.topSpeed * 3.6) + " km/h";
   wake();
@@ -191,6 +196,11 @@ function setupGarage() {
   for (const button of garage.querySelectorAll("button[data-car]"))
     button.onclick = () => chooseCar(button.dataset.car);
   chooseCar(selectedCar);
+  $("menu-car-jump").onclick = () => {
+    const selected = garage.querySelector('[data-car][aria-pressed="true"]');
+    selected.focus({ preventScroll: true });
+    selected.scrollIntoView({ block: "center", behavior: "instant" });
+  };
   $("garage-back").onclick = () => leaveRun(true);
 }
 async function leaveRun(showGarage = true) {

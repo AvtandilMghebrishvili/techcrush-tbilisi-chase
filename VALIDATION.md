@@ -1,5 +1,13 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## v1.18.0 — City selection and entry menu
+
+- All **190 automated tests** pass. No physics, reward, profile-schema or timing-course change.
+- Local Chromium checks cover Tbilisi levels 1/2/3/4, exact 0/1/2/3 unlock steps, locked versus available Kutaisi, per-city level labels and active selection. A controlled profile-change fixture immediately unlocks the menu through the existing callback; reload restores the unchanged server fixture. Test profiles stay in the isolated local database.
+- Layouts checked: 1440×900, 1280×720, 1024×768, 390×844, 360×640, 844×390 and 667×375. Main actions remain unobstructed, content has no horizontal overflow, and the Change shortcut scrolls to and focuses the selected car. Car changes update the launch label. Real city navigation, Garage, Leaderboard and normal keyboard driving pass without page/request errors.
+- Menu renderer frame counts remain unchanged with no pending RAF during 550 ms idle observations. The new UI has no timers, animation loop or network polling. Physical-device touch/FPS testing was not performed.
+- The final minified client passes locked/unlocked states, car-change focus, city switching, Garage, driving, pause and return-to-menu checks at 1280×720, 1440×900, 390×844 and 667×375. No QA globals or page/request errors. Production links resolve and all 21 runtime media assets (41,110,441 bytes) remain byte-identical to source.
+
 ## v1.17.0 — Score feedback and cornering
 
 - All **190 automated tests** pass. New coverage checks exact scaled points/credits, bounded feed/queue, actual safe near-pass crossings in every heading, collision/following/teleport rejection, rewind restoration, both-map turn radius/speed scrub, braking before entry, maximum fused builds and 60/120 Hz behavior. Existing drift, mobile combined controls, pursuit, terrain, persistence and API tests remain green.

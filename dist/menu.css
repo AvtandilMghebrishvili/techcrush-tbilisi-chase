@@ -1,0 +1,727 @@
+/* Entry menu only. Shared driving and garage screens retain their layout. */
+#intro {
+  top: 84px;
+  bottom: 60px;
+  left: max(24px, env(safe-area-inset-left));
+  width: min(760px, calc(100% - 420px));
+  max-width: none;
+  max-height: none;
+  padding: 24px;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #73839a55;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #121d2bf7, #0c1421f5);
+  box-shadow: 0 22px 70px #0005;
+}
+#intro .intro-content {
+  display: block;
+  padding: 0 6px 6px 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1;
+  scroll-padding: 12px;
+}
+#intro .eyebrow {
+  font-size: 9px;
+  letter-spacing: 2.1px;
+  color: #ff93a9;
+}
+#intro h1 {
+  font-size: clamp(40px, 4.4vw, 62px);
+  line-height: 1;
+  margin: 12px 0 8px;
+  transform: none;
+  letter-spacing: -0.8px;
+}
+#intro .intro-copy {
+  display: block;
+  font-size: 12px;
+  margin: 0 0 21px;
+  color: #bccbdc;
+  line-height: 1.5;
+}
+#intro .menu-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+#intro .menu-section-heading h2 {
+  margin: 0;
+  font:
+    700 11px Barlow,
+    Arial,
+    sans-serif;
+  letter-spacing: 1.1px;
+  color: #e9f0fa;
+}
+#intro .menu-section-heading h2 span {
+  color: #ff8ba3;
+  margin-right: 7px;
+}
+#intro .menu-section-heading > span {
+  font-size: 9px;
+  color: #92a7be;
+  letter-spacing: 0.4px;
+}
+#intro .map-slots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+#intro .map-slots > button {
+  min-height: 110px;
+  position: relative;
+  overflow: hidden;
+  padding: 13px 15px;
+  border: 1px solid #64788f80;
+  border-radius: 12px;
+  opacity: 1;
+  color: #ecf3fc;
+  background: #19283a;
+}
+#intro .map-slots > button:hover:not(:disabled) {
+  background: #25384e;
+  border-color: #bacce0;
+}
+#intro .map-slots > button.active-map {
+  border: 1px solid #ff5e80;
+  background: linear-gradient(110deg, #422536, #222337);
+  box-shadow: inset 3px 0 #ff5076;
+}
+#intro .map-slots > button.city-available {
+  border-color: #58bea9;
+  background: linear-gradient(110deg, #143b39, #182b37);
+}
+#intro .map-slots > button.city-locked {
+  color: #cbd6e3;
+  background: #17212e;
+}
+#intro .city-state {
+  display: block;
+  width: fit-content;
+  margin-bottom: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  color: #ffb1c2;
+}
+#intro .city-available .city-state {
+  color: #8af0c6;
+}
+#intro .city-locked .city-state {
+  color: #dfc88f;
+}
+#intro .map-slots b {
+  position: relative;
+  font:
+    700 30px/1 "Barlow Condensed",
+    Arial,
+    sans-serif;
+  letter-spacing: 0.8px;
+  z-index: 1;
+}
+#intro .city-caption {
+  display: block;
+  position: relative;
+  font-size: 10px;
+  color: #b6c5d7;
+  margin-top: 7px;
+  z-index: 1;
+}
+#intro .map-slots small {
+  position: relative;
+  font:
+    700 9px/1.5 Barlow,
+    Arial,
+    sans-serif;
+  color: #e0e8f2;
+  margin-top: 8px;
+  z-index: 1;
+}
+#intro .map-slots svg {
+  position: absolute;
+  right: -6px;
+  bottom: 8px;
+  width: 140px;
+  height: 60px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3;
+  opacity: 0.12;
+}
+#intro .city-unlock {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding: 11px 13px;
+  border: 1px solid #897c514f;
+  border-radius: 10px;
+  background: #c0983410;
+}
+#intro .unlock-copy {
+  min-width: 0;
+}
+#intro .unlock-copy strong {
+  color: #f4d994;
+  font:
+    700 11px Barlow,
+    Arial,
+    sans-serif;
+  letter-spacing: 0.5px;
+}
+#intro #map-access-note {
+  margin: 5px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #c2cddd;
+}
+#intro #unlock-progress {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
+#intro #unlock-progress span {
+  width: 27px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #947e4b;
+  border-radius: 6px;
+  color: #e6d09b;
+  font-size: 12px;
+  font-weight: 700;
+}
+#intro #unlock-progress .complete {
+  background: #285347;
+  color: #9df2c9;
+  border-color: #4c9f80;
+}
+#intro .city-unlock.is-unlocked {
+  background: #63dbac0b;
+  border-color: #63dbac44;
+}
+#intro .is-unlocked .unlock-copy strong {
+  color: #91e7c1;
+}
+#intro .upcoming-city {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 2px 0;
+  font-size: 9px;
+  letter-spacing: 0.7px;
+  color: #a8b7cb;
+}
+#intro .upcoming-city small {
+  font-size: 8px;
+  color: #879bb3;
+}
+#intro .upcoming-city > span:last-child {
+  margin-left: auto;
+}
+#intro .car-section-heading {
+  margin-top: 22px;
+}
+#intro #garage {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  display: grid;
+}
+#intro #garage button[data-car] {
+  min-height: 76px;
+  padding: 12px 10px;
+}
+#intro #garage b {
+  font-size: 20px;
+}
+#intro #garage small {
+  font-size: 8px;
+  line-height: 1.3;
+  letter-spacing: 0.3px;
+}
+#intro #garage i {
+  width: 26px;
+  height: 3px;
+  margin-bottom: 9px;
+}
+#intro #garage .coming-car {
+  min-height: 30px;
+  padding: 4px 10px;
+  opacity: 0.8;
+  margin: 0;
+}
+#intro #garage .coming-car b {
+  font-size: 17px;
+}
+#intro #garage .coming-car span {
+  font-size: 9px;
+}
+#intro #car-details {
+  display: block;
+  font-size: 10px !important;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+#intro #intro-career {
+  font-size: 11px;
+  padding-top: 8px;
+  margin: 8px 0 0;
+}
+#intro #stunt-record {
+  font-size: 9px;
+  margin: 6px 0;
+}
+#intro .community-entry {
+  display: flex;
+  margin-top: 10px;
+  padding-top: 8px;
+  gap: 10px;
+}
+#intro #driver-open {
+  min-height: 44px;
+}
+#intro #driver-name-label {
+  font-size: 12px;
+  max-width: 260px;
+}
+#intro #driver-open small {
+  display: block;
+  font-size: 8px;
+}
+#intro .menu-launch {
+  flex: none;
+  border-top: 1px solid #7288a03b;
+  padding-top: 13px;
+  margin-top: 12px;
+  background: #101a28;
+}
+#intro .launch-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  color: #98aec6;
+  margin-bottom: 9px;
+}
+#intro #menu-race-label {
+  color: #e9edf6;
+  font-weight: 700;
+}
+#intro .intro-actions {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 8px;
+}
+#intro .intro-actions #start {
+  min-height: 50px;
+  position: static;
+  box-shadow: 0 3px 0 #841b37;
+  font-size: 18px;
+}
+#intro .intro-actions .secondary {
+  min-height: 50px;
+  font-size: 11px;
+  grid-column: auto;
+  padding: 8px;
+}
+#intro .intro-actions .leaderboard-link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  color: #e4d19e;
+  background: #24293a;
+  border-color: #897d575e;
+}
+#intro .leaderboard-link small {
+  font-size: 7px;
+}
+#intro .menu-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 11px;
+}
+#intro .desktop-menu-hint {
+  font-size: 9px;
+  color: #97aac0;
+}
+#intro .desktop-menu-hint kbd {
+  font: 700 8px Arial;
+  border: 1px solid #677d965c;
+  border-radius: 3px;
+  padding: 2px 3px;
+  margin-left: 6px;
+}
+#intro .desktop-menu-hint kbd:first-child {
+  margin-left: 0;
+}
+#intro .mobile-hint {
+  display: none;
+  font-size: 9px;
+  color: #9fb2c8;
+}
+#intro #mobile-setup {
+  width: auto;
+  min-height: 36px;
+  padding: 5px 8px;
+  font-size: 9px;
+  background: transparent;
+  border-color: #6e829652;
+}
+body.mobile-controls #intro .desktop-menu-hint {
+  display: none;
+}
+body.mobile-controls #intro .mobile-hint {
+  display: block;
+}
+#mission-card {
+  top: 84px;
+  bottom: auto;
+  right: 24px;
+  width: 340px;
+  max-height: calc(100dvh - 150px);
+  overflow: auto;
+}
+#mission-card .mission-cover {
+  height: 205px;
+  object-fit: cover;
+}
+body:not(.playing) #game > header #pause {
+  display: none;
+}
+@media (max-width: 1100px) {
+  #intro {
+    left: max(16px, env(safe-area-inset-left));
+    width: min(760px, calc(100% - 32px));
+    top: 76px;
+    bottom: 24px;
+    padding: 20px;
+  }
+  #mission-card {
+    display: none;
+  }
+  body:not(.playing) #game > footer {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  #intro {
+    top: 66px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    left: max(10px, env(safe-area-inset-left));
+    width: calc(
+      100% - max(10px, env(safe-area-inset-left)) -
+        max(10px, env(safe-area-inset-right))
+    );
+    padding: 15px;
+    border-radius: 15px;
+  }
+  #intro .intro-content {
+    padding-right: 3px;
+  }
+  #intro h1 {
+    font-size: 42px;
+    margin: 10px 0 7px;
+  }
+  #intro .eyebrow {
+    font-size: 8px;
+  }
+  #intro .intro-copy {
+    font-size: 11px;
+    margin-bottom: 17px;
+  }
+  #intro .menu-section-heading h2 {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+  }
+  #intro .menu-section-heading > span {
+    font-size: 8px;
+  }
+  #intro .map-slots {
+    gap: 7px;
+  }
+  #intro .map-slots > button {
+    padding: 11px 10px;
+    min-height: 98px;
+  }
+  #intro .map-slots b {
+    font-size: 25px;
+  }
+  #intro .city-caption {
+    display: none;
+  }
+  #intro .map-slots small {
+    font-size: 8px;
+  }
+  #intro .city-state {
+    font-size: 8px;
+  }
+  #intro .city-unlock {
+    padding: 10px;
+    gap: 9px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  #intro .unlock-copy strong {
+    font-size: 10px;
+  }
+  #intro #map-access-note {
+    font-size: 10px;
+  }
+  #intro #unlock-progress {
+    width: 100%;
+  }
+  #intro #unlock-progress span {
+    flex: 1;
+    height: 23px;
+    font-size: 11px;
+  }
+  #intro .car-section-heading {
+    margin-top: 18px;
+  }
+  #intro #garage {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #intro #garage button[data-car] {
+    min-height: 70px;
+    padding: 10px;
+  }
+  #intro #garage b {
+    font-size: 21px;
+  }
+  #intro .menu-launch {
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+  #intro .launch-summary {
+    font-size: 8px;
+    letter-spacing: 0.3px;
+  }
+  #intro .intro-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  #intro .intro-actions #start {
+    grid-column: 1 / -1;
+    min-height: 44px;
+    padding: 9px 13px;
+  }
+  #intro .intro-actions .secondary {
+    min-height: 40px;
+  }
+  #intro .intro-actions .leaderboard-link small {
+    display: none;
+  }
+  #intro .menu-controls {
+    margin-top: 8px;
+    gap: 8px;
+  }
+  #intro .mobile-hint {
+    line-height: 1.5;
+    max-width: 150px;
+    font-size: 8px;
+  }
+  #intro #mobile-setup {
+    font-size: 8px;
+    min-height: 36px;
+    padding: 4px 6px;
+  }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  #intro {
+    top: 60px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(12px, env(safe-area-inset-left));
+    width: calc(
+      100% - max(12px, env(safe-area-inset-left)) -
+        max(12px, env(safe-area-inset-right))
+    );
+    padding: 12px 16px;
+  }
+  #intro .intro-content {
+    display: block;
+    padding: 0 5px 3px 0;
+  }
+  #intro h1 {
+    font-size: 34px;
+    margin: 8px 0;
+  }
+  #intro .intro-copy {
+    display: none;
+  }
+  #intro .eyebrow {
+    font-size: 8px;
+  }
+  #intro .map-slots > button {
+    min-height: 91px;
+    padding: 10px 12px;
+  }
+  #intro .city-caption {
+    display: none;
+  }
+  #intro .map-slots b {
+    font-size: 25px;
+  }
+  #intro .menu-launch {
+    padding-top: 7px;
+    margin-top: 7px;
+  }
+  #intro .launch-summary {
+    margin-bottom: 5px;
+    font-size: 8px;
+  }
+  #intro .intro-actions button,
+  #intro .intro-actions #start,
+  #intro .intro-actions .secondary {
+    min-height: 44px;
+  }
+  #intro .menu-controls {
+    margin-top: 5px;
+  }
+  #intro #mobile-setup {
+    min-height: 28px;
+  }
+  #intro .leaderboard-link small {
+    display: none;
+  }
+  #mission-card {
+    display: none;
+  }
+}
+
+#intro .menu-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+#intro .menu-choice-grid > section {
+  min-width: 0;
+}
+#intro .car-section-heading {
+  margin-top: 0;
+}
+#intro #garage {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#intro .city-caption {
+  display: none;
+}
+#intro .city-unlock {
+  flex-direction: column;
+  align-items: stretch;
+}
+#intro #unlock-progress {
+  width: 100%;
+}
+#intro #unlock-progress span {
+  flex: 1;
+}
+#intro .map-slots b {
+  font-size: 27px;
+}
+#intro .map-slots > button {
+  min-height: 110px;
+  padding: 13px 11px;
+}
+#intro #menu-car-jump {
+  font: inherit;
+  letter-spacing: 0.3px;
+  color: #8fdfeb;
+  border: 0;
+  background: transparent;
+  padding: 4px 0 4px 8px;
+  margin: -4px 0;
+  text-align: right;
+  max-width: 65%;
+}
+#intro #menu-car-jump:hover {
+  color: #d6fcff;
+  text-decoration: underline;
+}
+#intro .launch-summary {
+  align-items: center;
+}
+@media (max-width: 600px) {
+  #intro .menu-choice-grid {
+    grid-template-columns: 1fr;
+    gap: 19px;
+  }
+  #intro .map-slots > button {
+    min-height: 98px;
+    padding: 11px 10px;
+  }
+  #intro #unlock-progress span {
+    height: 23px;
+  }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  #intro .menu-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  #intro .menu-heading h1 {
+    margin: 0;
+    font-size: 27px;
+  }
+  #intro .menu-heading .eyebrow {
+    letter-spacing: 1px;
+  }
+  #intro .menu-choice-grid {
+    gap: 16px;
+  }
+  #intro .map-slots > button {
+    min-height: 90px;
+    padding: 9px;
+  }
+  #intro .map-slots b {
+    font-size: 23px;
+  }
+  #intro .map-slots small {
+    font-size: 8px;
+  }
+  #intro #garage button[data-car] {
+    min-height: 64px;
+    padding: 9px;
+  }
+  #intro .menu-section-heading h2 {
+    font-size: 9px;
+  }
+  #intro .menu-section-heading > span {
+    font-size: 7px;
+  }
+}
+
+@media (min-width: 601px) and (min-height: 501px) and (max-height: 800px) {
+  #intro {
+    top: 76px;
+    bottom: 16px;
+    padding: 18px 20px;
+  }
+  #intro h1 {
+    font-size: 44px;
+    margin: 9px 0 6px;
+  }
+  #intro .intro-copy {
+    margin-bottom: 15px;
+  }
+  #intro .menu-controls {
+    margin-top: 8px;
+  }
+}
+#intro #menu-car-jump {
+  min-height: 28px;
+  margin: -5px 0;
+}

@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**New: clearer city selection** — the start menu shows Kutaisi's **0/3 → 3/3 unlock progress**, the remaining requirement, a green unlocked state, and each city's current level. Choose city and car side by side on wide screens; on phones, Start stays visible and **Change** jumps to your selected car. [Menu guide](docs/INTERFACE.md#city-selection-and-unlock-progress-118).
+
 **New: Bonus feedback & cornering** — animated notices beside the score show patrol takedown, near-pass, drift, jump and checkpoint rewards. Real close passes earn bonuses; following or colliding does not. Fast, sharp turns scrub a little speed and run wider until you ease off or brake. Keyboard/mobile drift and nitro stay available. [Scoring and driving guide](docs/SCORE_FEEDBACK.md).
 
 **New: Drift & Fusion update** — reliable handbrake turns on both maps (including after clicking the camera), stronger player-matched police, a **four-minute Auto day/night cycle**, and **MAP + SIDE QUESTS** with rooftop/river route selection. Level-clear boxes now reveal immediately: equip stronger drops, sell spares or keep duplicates for **five fusion stars**. Existing saves are preserved. [Fusion rules and update guide](docs/FUSION.md).
