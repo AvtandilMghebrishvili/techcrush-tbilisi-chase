@@ -74,3 +74,13 @@ To inspect in Chrome DevTools:
 5. Repeat several garage/run cycles. Compare heap snapshots after garbage collection and WebGL object counts at the same warmed scene/camera state; do not mistake the first-time asset/shader cache for a leak.
 
 Test instrumentation and synthetic visibility/orientation fixtures are local only. They do not alter production saves or ship public debug controls. Physical iPhone/Android sensor, battery and thermal tests remain separate from Chromium emulation.
+
+## v1.12 expedition update
+
+Breakable trees and street props now use the existing 48 m spatial index. Their stationary coordinates are indexed once per collection; mutable break states and source-order contacts remain exact. The simulation reuses the combined prop collection until its source arrays change. Static building trim and lane markings are merged by material in 160 m tiles, preserving full geometry, materials, shadows and culling. The per-level checkpoint-layout cache retains at most 32 layouts rather than growing with endless level numbers. Patrol capacity remains bounded at 22.
+
+Using `node scripts/benchmark-simulation.mjs` on this Windows host, the warm median for 1,200 stationary level-3 simulation steps changed from **714.23 ms before** to **336.62 ms after** (about 53% less simulation time), including the expanded map. This is a controlled CPU workload, not a whole-game FPS or phone battery claim. The four final samples were 534.36 / 376.60 / 336.62 / 319.81 ms; the first is discarded as warm-up.
+
+Six additional warmed start/pause/garage/close cycles held world geometry/textures constant at 5,599 / 86 and the garage at 67 / 5. Effects and sample voices returned to zero each cycle. Retained heap ranged from 71.74 to 72.56 MiB; bounded road/shader caches can warm further, so this short run is not an assertion that every possible leak is excluded. Idle frame/audio suspension, hidden-tab pause and rewind from a settled wreck passed.
+
+All 21 deployed media assets remain byte-identical (41,110,441 bytes). Four new facade atlases and a concrete grain map are generated once, without additional image downloads. The final bundled browser code is 1,124,714 bytes and CSS 98,054 bytes; reference-only assets remain excluded from deployment. The visual additions have a small memory/code cost; the physics optimization does not reduce graphics settings or asset quality.

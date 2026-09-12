@@ -62,7 +62,7 @@ test("new and legacy drivers migrate privately without losing garage data", () =
   p.credits = 9000;
   p.cars.gt.engine = 3;
   const next = migrateProfile(p);
-  assert.equal(next.schema, 3);
+  assert.equal(next.schema, 4);
   assert.equal(next.driver.listed, false);
   assert.equal(next.community.runs, 0);
   assert.equal(next.community.furthestLevel, 7);

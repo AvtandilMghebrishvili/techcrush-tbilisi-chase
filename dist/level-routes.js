@@ -61,6 +61,7 @@ export function checkpointsForLevel(level = 1) {
     [5, 1, 0, 2, 3, 4],
   ];
   const result = orders[(level - 2) % orders.length].map((i) => selected[i]);
+  if (cache.size >= 32) cache.delete(cache.keys().next().value);
   cache.set(level, result);
   return result.map((p) => ({ ...p }));
 }

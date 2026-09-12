@@ -88,3 +88,11 @@ Run `python scripts/prepare-audio.py` from the repository root with Python 3 and
 ## Evening lighting and racing interface (1.6.0)
 
 `dist/city-lighting.js` reuses `daylight.hdr` for the sky and reflections and derives five 512 × 512 emission masks from the actual window panes of the existing `limestone.png`. The masks are generated once in memory; their source image attribution above remains applicable. The moon, sparse stars and soft 64 × 64 lamp falloff are original runtime shader/texture code. No new photos, videos, models, fonts or audio files were downloaded. `dist/motorsport.css` reuses the existing TECHCRUSH marks, cover image and Barlow font families.
+
+## v1.12 city expedition additions
+
+`expansion-visuals.js` contains four original procedural facade atlases and aligned night-window masks, a concrete grain texture, original challenge props and original 3D interpretations of Tbilisi architecture. They are generated once locally and introduce no external image/model downloads. Existing source images are retained unchanged. The newer facade styles supplement the earlier generated limestone rather than replacing every facade.
+
+The Bank of Georgia / former Ministry of Road Construction silhouette was checked against the [Tbilisi Architecture Archive](https://taa.net.ge/en/archive-geo/ministry-of-road-construction/) and the [Bank's 2011 headquarters announcement](https://new.georgiacapital.ge/sites/default/files/jsc-bank-of-georgia-announces-its-move-to-new-hq-the-launch-of-new-website-and-brand-restyling-80.pdf). The real headquarters is outside the central-city map. The in-game site and Architecture Drive are compressed/original arcade placements, explicitly documented in `world-sites.js` and `data/reference-streets.json`. No reference photography is shipped as a texture. No bank sponsorship is implied.
+
+The expanded named streets use the same attributed OSM snapshot. Stunt aprons and the rooftop challenge are original gameplay geometry. New coupe/V12 patrols reuse original unbadged body families with fitted police markings and light bars; they are not additional player-selectable cars.

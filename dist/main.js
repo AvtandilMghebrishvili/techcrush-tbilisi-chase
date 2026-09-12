@@ -3,7 +3,7 @@ import { ACHIEVEMENTS } from "./community-rules.js";
 import { setupInterface, actionLabel } from "./interface.js";
 import { ChaseAudio } from "./chase-audio.js";
 import { FrameLoop } from "./frame-loop.js";
-import { playerRoute } from "./navigation-cache.js";
+import { playerRoute, navigationTarget } from "./navigation-cache.js";
 import { MobileControls } from "./mobile-ui.js";
 import { LIGHTING_MODES } from "./city-lighting.js";
 import { ROADS } from "./city-map.js";
@@ -157,7 +157,16 @@ function setupGarage() {
     (c) =>
       `<button type="button" data-car="${c.id}" aria-pressed="${c.id === selectedCar}"><i style="background:${c.color}"></i><b>${c.name}</b><small>${c.type}</small></button>`,
   ).join("");
-  for (const button of garage.querySelectorAll("button"))
+  garage.insertAdjacentHTML(
+    "beforeend",
+    `<button type="button" disabled class="coming-car"><b>?</b><span>YOUTUBER CAR</span><small>COMING SOON · მალე</small></button>`,
+  );
+  $("route-selector").onchange = () => {
+    sim.navQuest = $("route-selector").value || null;
+    $("route-selector").blur();
+    wake();
+  };
+  for (const button of garage.querySelectorAll("button[data-car]"))
     button.onclick = () => chooseCar(button.dataset.car);
   chooseCar(selectedCar);
   $("garage-back").onclick = () => leaveRun(true);
@@ -220,6 +229,7 @@ async function bankRun() {
           driftSeconds: sim.runDriftSeconds,
           jumps: sim.runJumps,
           topSpeed: sim.runTopSpeed,
+          quests: sim.runQuests,
         },
         result: ["won", "wrecked", "busted"].includes(sim.phase)
           ? sim.phase
@@ -321,7 +331,9 @@ async function start() {
     sim.start(selectedCar, {
       level: career.profile.level,
       equipment: career.profile.cars[selectedCar],
+      completedQuests: career.profile.quests?.completed || [],
     });
+    sim.navQuest = $("route-selector").value || null;
     runId = career.profile.activeRun.id;
     view.startGame(sim);
     $("intro").hidden = true;
@@ -432,6 +444,8 @@ function toast(text) {
 function updateHUD() {
   document.body.dataset.phase = sim.phase;
   const p = sim.player;
+  if ($("route-selector").value !== (sim.navQuest || ""))
+    $("route-selector").value = sim.navQuest || "";
   $("run-level").textContent = `LEVEL ${sim.level}`;
   $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
   $("score").textContent = Math.floor(sim.score).toString().padStart(6, "0");
@@ -514,7 +528,7 @@ function updateHUD() {
     "cockpit-mode",
     CAMERAS[view.cameraMode].id === "cockpit",
   );
-  const cp = sim.checkpoints[sim.checkpoint];
+  const cp = navigationTarget(sim);
   $("objective").textContent = cp
     ? "Reach " + cp.name
     : "Lose the police for 8 seconds";
@@ -537,7 +551,9 @@ function updateHUD() {
     $("distance").textContent = "ESCAPE";
   }
   $("route-cue").querySelector("small").textContent = cp
-    ? "NEXT CHECKPOINT"
+    ? sim.navQuest
+      ? "STUNT CHALLENGE"
+      : "NEXT CHECKPOINT"
     : "LOSE THE HEAT";
   drawMap();
 }

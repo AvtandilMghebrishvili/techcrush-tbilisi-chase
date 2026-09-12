@@ -132,7 +132,7 @@ test("existing garages gain the original car without losing credits or installed
     lastBox: null,
   };
   const p = migrateProfile(old);
-  assert.equal(p.schema, 3);
+  assert.equal(p.schema, 4);
   assert.deepEqual(p.cars.classic, {});
   const { classic, ...cars } = p.cars;
   assert.deepEqual(cars, old.cars);

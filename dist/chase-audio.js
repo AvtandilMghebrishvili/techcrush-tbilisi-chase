@@ -428,6 +428,28 @@ export class ChaseAudio {
     const v = pos.gain * (0.14 + 0.28 * strength),
       rate = 0.82 + Math.random() * 0.2;
     const opt = { volume: v, pan, rate };
+    if (event.kind === "reward") {
+      this.thump(660, 0.1, pan, 0.18);
+      this.play(this.buffers.glass, {
+        volume: 0.08,
+        pan,
+        rate: 1.8,
+        duration: 0.25,
+        filter: 5000,
+      });
+      return;
+    }
+    if (event.kind === "collision" || event.kind === "landing") {
+      this.thump(76, v * 0.55, pan, 0.22);
+      this.play(this.buffers.stone, {
+        ...opt,
+        volume: v * 0.42,
+        filter: 1300,
+        rate: 0.68,
+        duration: 0.22,
+      });
+      return;
+    }
     if (event.kind === "water") {
       this.play(this.noise, {
         volume: v * 1.6,
@@ -487,7 +509,11 @@ export class ChaseAudio {
       return;
     }
     if (event.kind === "wood") {
-      this.play(this.buffers[Math.random() > 0.5 ? "wood" : "wood2"], opt);
+      this.play(this.buffers[Math.random() > 0.5 ? "wood" : "wood2"], {
+        ...opt,
+        filter: 3500,
+        rate: 0.95 + strength * 0.18,
+      });
       if (event.broken) {
         this.play(this.buffers.snap, {
           ...opt,
@@ -506,7 +532,8 @@ export class ChaseAudio {
       return;
     }
     if (event.kind === "stone") {
-      this.play(this.buffers.stone, { ...opt, rate: 0.78 });
+      this.play(this.buffers.stone, { ...opt, rate: 0.78, filter: 2800 });
+      this.thump(58, v * 0.25, pan, 0.16);
       if (event.broken)
         this.play(this.buffers.glass, { ...opt, volume: v * 0.32, rate: 0.6 });
       return;

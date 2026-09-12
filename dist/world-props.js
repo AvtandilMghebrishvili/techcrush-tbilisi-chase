@@ -1,3 +1,4 @@
+import { reservedExpansion } from "./world-sites.js";
 import { ROADS, BUILDINGS, nearestRoad, containsPoint } from "./city-map.js";
 import { LANDMARKS, riverDistance } from "./district-data.js";
 // Shared physical stems and renderer locations. A tree never exists only in the picture.
@@ -16,6 +17,7 @@ for (const r of ROADS) {
         z = lz + fz * 12,
         road = nearestRoad({ x, z });
       if (
+        reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||
         riverDistance({ x, z }) < 47 ||
         road.distance <= road.road.width / 2 + 1.4 ||
         BUILDINGS.some((b) => containsPoint(b, x, z, 0.6)) ||
@@ -40,6 +42,7 @@ for (let i = 0; i < 110; i++) {
     z = p.z + Math.sin(a) * 220 * r;
   const road = nearestRoad({ x, z });
   if (
+    reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||
     riverDistance({ x, z }) < 50 ||
     road.distance < road.road.width / 2 + 3 ||
     Math.hypot(x - LANDMARKS.tubes.x, z - LANDMARKS.tubes.z) < 62

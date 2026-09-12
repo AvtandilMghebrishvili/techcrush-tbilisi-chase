@@ -45,3 +45,7 @@ Prepared statements and a version compare-and-swap protect concurrent writes. Th
 This is a casual single-player game. The API validates funds, inventory, current level, bounded cash and concurrency; the browser calculates driving and run outcomes. It is **not an anti-cheat authority**, competitive leaderboard, payment system or multiplayer server. A modified client can fabricate a run result. Credits have no monetary value.
 
 Different people using one browser profile share its garage. Two tabs can access one save; conflicting purchases refresh instead of merging. Backups, data retention and production key-management policies remain the hosting operator's responsibility.
+
+## Expedition saves (v1.12)
+
+Profile schema 4 adds completed stunt challenge IDs without resetting any existing garage fields. Roof/river boxes and cash bank once per garage with a normal run settlement. [Expedition guide and migration contract](EXPEDITIONS.md).

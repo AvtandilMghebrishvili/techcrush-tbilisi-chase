@@ -1,3 +1,7 @@
+export const STUNT_REWARDS = {
+  "tbilisi-skybox-v1": { cash: 2500, boxes: 1, name: "Skybox" },
+  "mtkvari-gap-v1": { cash: 1500, boxes: 1, name: "Mtkvari gap" },
+};
 // Shared community rules. Public standings use banked runs, never private keys.
 export function levelRewards(level = 1) {
   const n = Math.max(1, Math.floor(level));
@@ -176,6 +180,20 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
         levelRewards(ticket.level).score
   )
     throw Error("This run could not be verified. Please start a new chase.");
+  const quests = metrics.quests ?? [];
+  if (
+    !Array.isArray(quests) ||
+    quests.length > 2 ||
+    new Set(quests).size !== quests.length ||
+    quests.some((id) => !Object.hasOwn(STUNT_REWARDS, id))
+  )
+    throw Error("Invalid stunt challenge.");
+  if (
+    quests.length &&
+    (m.jumps < quests.length || m.time < 3 || m.topSpeed < 180)
+  )
+    throw Error("The stunt landing could not be verified.");
+  m.quests = quests;
   return m;
 }
 export function settleCommunity(p, m, result, level, now = Date.now()) {
@@ -229,12 +247,24 @@ export function settleCommunity(p, m, result, level, now = Date.now()) {
   c.badges.push(...unlocked.map((a) => a.id));
   const badgeCash = unlocked.reduce((n, a) => n + a.reward, 0);
   p.credits += daily + badgeCash;
+  const stuntIds = (m.quests || []).filter(
+    (id) => !p.quests.completed.includes(id),
+  );
+  const stuntCash = stuntIds.reduce(
+    (sum, id) => sum + STUNT_REWARDS[id].cash,
+    0,
+  );
+  const stuntBoxes = stuntIds.length;
+  p.quests.completed.push(...stuntIds);
+  p.credits += stuntCash;
+  p.boxes += stuntBoxes;
   c.lastReward = {
-    cash: cash + bonus + daily + badgeCash,
+    cash: cash + bonus + daily + badgeCash + stuntCash,
+    stunts: stuntIds,
     runCash: cash,
     clear: bonus,
     daily,
-    boxes: Number(won) + streakBox,
+    boxes: Number(won) + streakBox + stuntBoxes,
     badges: unlocked.map((a) => a.id),
     score: m.score,
     streak: c.streak,

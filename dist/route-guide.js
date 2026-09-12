@@ -1,6 +1,6 @@
 import * as THREE from "./vendor/three.module.js";
 import { distance } from "./simulation.js";
-import { playerRoute } from "./navigation-cache.js";
+import { playerRoute, navigationTarget } from "./navigation-cache.js";
 
 const GUIDE_VIEWS = {
   chase: { scale: 0.68, height: 0.23, tilt: 0, screenWidth: 0.085 },
@@ -76,11 +76,12 @@ export function makeRouteGuide(scene) {
 export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
   const style = GUIDE_VIEWS[mode] || GUIDE_VIEWS.chase;
   const interior = mode === "cockpit" || mode === "hood";
-  const cp = sim.checkpoints[sim.checkpoint];
+  const cp = navigationTarget(sim);
   guide.group.visible = !!cp && ["running", "paused"].includes(sim.phase);
   if (!guide.group.visible) return;
   if (
     sim.checkpoint !== guide.checkpoint ||
+    guide.navQuest !== sim.navQuest ||
     sim.level !== guide.level ||
     sim.player.x !== guide.originX ||
     sim.player.z !== guide.originZ
@@ -90,6 +91,7 @@ export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
     guide.points = sampleRoute(sim.player, playerRoute(sim));
     guide.checkpoint = sim.checkpoint;
     guide.level = sim.level;
+    guide.navQuest = sim.navQuest;
     guide.originX = sim.player.x;
     guide.originZ = sim.player.z;
   }

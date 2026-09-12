@@ -1,3 +1,5 @@
+import { facadeMaterial, batchStatic } from "./expansion-visuals.js";
+import { reservedExpansion } from "./world-sites.js";
 import { buildGrass } from "./grass.js";
 import * as THREE from "./vendor/three.module.js";
 import { registerBreakable } from "./breakable-props.js";
@@ -162,6 +164,12 @@ export function buildRealisticCity(v) {
       return m;
     },
   );
+  const newFacades = [0, 1, 2, 3].map(facadeMaterial);
+  v.buildingMaterials.push(...newFacades);
+  v.expansionFacades = newFacades;
+  const staticCity = new THREE.Group();
+  staticCity.userData.environment = true;
+  v.decor.add(staticCity);
   buildRoadSurface(v, road, concrete, curb);
   const paving = document.createElement("canvas");
   paving.width = paving.height = 512;
@@ -206,6 +214,7 @@ export function buildRealisticCity(v) {
           r.start.x + fx * along + rx * offset,
           0.075,
           r.start.z + fz * along + rz * offset,
+          staticCity,
         );
         stripe.rotation.y = r.angle;
       }
@@ -213,18 +222,41 @@ export function buildRealisticCity(v) {
   }
   for (const b of BUILDINGS) {
     if (b.landmark) continue;
-    const facade = facades[b.tint],
-      m = v.box(b.w, b.h, b.d, facade, b.x, b.h / 2, b.z);
+    const facade =
+        b.tint === 0
+          ? newFacades[Math.abs(Math.round(b.x + b.z)) % 3]
+          : facades[b.tint],
+      m = v.box(b.w, b.h, b.d, facade, b.x, b.h / 2, b.z, staticCity);
     m.rotation.y = b.angle;
     for (const y of [1, b.h * 0.25, b.h * 0.5, b.h * 0.75, b.h + 0.3]) {
-      const cornice = v.box(b.w + 0.65, 0.32, b.d + 0.65, curb, b.x, y, b.z);
+      const cornice = v.box(
+        b.w + 0.65,
+        0.32,
+        b.d + 0.65,
+        curb,
+        b.x,
+        y,
+        b.z,
+        staticCity,
+      );
       cornice.rotation.y = b.angle;
     }
-    const cap = v.box(b.w + 0.8, 0.55, b.d + 0.8, roof, b.x, b.h + 0.9, b.z);
+    const cap = v.box(
+      b.w + 0.8,
+      0.55,
+      b.d + 0.8,
+      roof,
+      b.x,
+      b.h + 0.9,
+      b.z,
+      staticCity,
+    );
     cap.rotation.y = b.angle;
     // Light wells and chimneys give the roof a believable silhouette from high chase.
-    if (b.h > 20) v.box(2, 2.5, 2, concrete, b.x + 3, b.h + 2.1, b.z - 3);
+    if (b.h > 20)
+      v.box(2, 2.5, 2, concrete, b.x + 3, b.h + 2.1, b.z - 3, staticCity);
   }
+  batchStatic(staticCity);
   streetDetails(v, line);
   clockBuilding(v, facades[1]);
   mountains(v);
@@ -252,7 +284,11 @@ function streetDetails(v, line) {
       for (const side of [-1, 1]) {
         const x = r.start.x + fx * t + rx * (r.width / 2 + 2.4) * side,
           z = r.start.z + fz * t + rz * (r.width / 2 + 2.4) * side;
-        if (nearestRoad({ x, z }).distance < r.width / 2 + 1) continue;
+        if (
+          reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||
+          nearestRoad({ x, z }).distance < r.width / 2 + 1
+        )
+          continue;
         const pole = new THREE.Group();
         pole.position.set(x, 0, z);
         v.decor.add(pole);

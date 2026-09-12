@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.12.0 — 2026-09-12
+
+- Expand the connected Tbilisi road graph to 598 nodes / 766 segments; join stunt aprons into continuous asphalt, keep widened roads clear of buildings and add a scenic landmark access road.
+- Fix ramp high-end/side collisions, airborne wall damage, roof support and edge falls. Add a high-speed Skybox roof challenge and a bank-to-bank Mtkvari jump, each with a one-time upgrade box and credit reward.
+- Add checkpoint/challenge navigation in the pursuit panel, a disabled YouTuber Car slot and coming-soon Kutaisi/Batumi map slots. Preserve all four playable cars.
+- Add a compressed Bank of Georgia-inspired landmark, northern office towers and four original facade atlases with matching night window masks.
+- Retain sedans/SUVs/tanks and add coupe interceptors from level 4 and V12 pursuit cars from level 7. Extend difficulty scaling with at most 22 active patrols.
+- Add profile schema 4 without resetting old saves, anonymous keys, leaderboard records or equipment. Server settlements validate and award each challenge once; rewind restores unbanked challenge collection.
+- Distinguish masonry/landing thuds, wood/splinter impacts and metal vehicle crashes. Reuse existing sound recordings with separate filtering and layers.
+- Spatially index breakable contacts, reuse the prop index, merge static street/building meshes in cullable tiles and bound the checkpoint-layout cache. Keep source textures and quality settings intact.
+
+
 ## 1.11.0 — 2026-09-12
 
 - Add anonymous named drivers with Georgian/English nicknames, six avatar colors, stable public tags and optional public visibility. Retain existing private garage keys and saves.

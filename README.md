@@ -4,7 +4,9 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
-**New: Community leaderboard** — furthest level, best chase and weekly points. Earn eight badges, a daily getaway bonus and a three-win streak box. [Community guide and scoring rules](docs/COMMUNITY.md).
+**New: Tbilisi expeditions** — expanded streets, a rooftop reward crate, a river jump, varied late-level police and coming-soon city/car slots. Your existing garage stays intact. [Challenges, rewards and save compatibility](docs/EXPEDITIONS.md).
+
+**Community leaderboard** — furthest level, best chase and weekly points. Earn eight badges, a daily getaway bonus and a three-win streak box. [Community guide and scoring rules](docs/COMMUNITY.md).
 
 A compact interface keeps the road visible, with quick garage navigation and grouped driver settings. [Interface guide](docs/INTERFACE.md).
 

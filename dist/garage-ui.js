@@ -245,7 +245,13 @@ export class GarageUI {
       (c) =>
         `<button data-choice="${c.id}" ${this.store.busy || this.store.pending ? "disabled" : ""} aria-pressed="${c.id === this.car}">${c.name}</button>`,
     ).join("");
-    for (const b of $("workshop-cars").querySelectorAll("button"))
+    $("workshop-cars").insertAdjacentHTML(
+      "beforeend",
+      `<button disabled class="coming-car">? YOUTUBER CAR <small>COMING SOON</small></button>`,
+    );
+    $("stunt-record").textContent =
+      `${p.quests?.completed.length || 0}/2 STUNT BOXES FOUND · Progress survives map updates`;
+    for (const b of $("workshop-cars").querySelectorAll("button[data-choice]"))
       b.onclick = () => {
         this.car = b.dataset.choice;
         this.inspection = null;

@@ -1,3 +1,4 @@
+import { updateExpansion } from "./expansion-visuals.js";
 import { updateBridgeRails } from "./bridge-visuals.js";
 import { createWaterSplash, animateWaterSplash } from "./crash-effects.js";
 import * as THREE from "./vendor/three.module.js";
@@ -198,6 +199,7 @@ export class SceneView {
     this.roadMaterial.bumpScale = 0.018;
     this.roadMaterial.needsUpdate = true;
     for (const [i, m] of this.buildingMaterials.entries()) {
+      if (m.userData.originalFacade) continue;
       m.map = facade;
       m.emissive.set("#ffffff");
       m.emissiveMap = windowGlow(facade.image, i);
@@ -509,6 +511,7 @@ export class SceneView {
                   Math.sin(sim.time * 19 + j * Math.PI) > 0 ? 6 : 0.3),
             );
         });
+      updateExpansion(this, sim);
       updateBridgeRails(this, sim.obstacles, sim.time);
       this.updateGate(sim.checkpoint, sim.checkpoints);
       const mode = CAMERAS[this.cameraMode].id;

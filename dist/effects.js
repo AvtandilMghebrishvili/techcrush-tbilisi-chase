@@ -51,7 +51,15 @@ export function updatePatrolHealthBar(
   c.font = "bold 20px sans-serif";
   c.textAlign = "center";
   c.fillText(
-    (kind === "tank" ? "TANK" : kind === "suv" ? "SUV" : "PATROL") +
+    (kind === "tank"
+      ? "TANK"
+      : kind === "suv"
+        ? "SUV"
+        : kind === "supercar"
+          ? "V12 PURSUIT"
+          : kind === "interceptor"
+            ? "INTERCEPTOR"
+            : "PATROL") +
       " · " +
       hp +
       " HP",

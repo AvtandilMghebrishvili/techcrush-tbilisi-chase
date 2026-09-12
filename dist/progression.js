@@ -119,7 +119,8 @@ export const salvageValue = (tier) => [0, 75, 180, 420, 960][tier] || 0;
 export const partKey = (id, tier) => `${id}:${tier}`;
 export function newProfile() {
   return {
-    schema: 3,
+    schema: 4,
+    quests: { completed: [] },
     driver: { name: "", avatar: "red", listed: false },
     community: newCommunity(),
     activeRun: null,
@@ -135,7 +136,8 @@ export function newProfile() {
 }
 export function migrateProfile(profile) {
   const p = structuredClone(profile);
-  p.schema = 3;
+  p.schema = 4;
+  p.quests = { completed: [], ...p.quests };
   p.driver ||= { name: "", avatar: "red", listed: false };
   p.community = { ...newCommunity(p.level), ...p.community };
   p.activeRun ||= null;
@@ -167,16 +169,17 @@ export function upgradedSpec(base, equipment = {}) {
 }
 export function pursuitTuning(level = 1) {
   level = Math.max(1, Math.floor(level));
-  const growth = 1 - Math.exp(-(level - 1) / 8);
+  const growth = (level - 1) / (level + 7);
+  const endurance = (level - 1) / (level + 45);
   return {
     level,
-    maxSpeed: 43 + growth * 37,
-    acceleration: 15.5 + growth * 15,
+    maxSpeed: 43 + growth * 37 + endurance * 12,
+    acceleration: 15.5 + growth * 15 + endurance * 6,
     repath: 0.55 - growth * 0.34,
     lead: 1.8 + growth * 1.3,
     ramRecovery: 2.6 - growth * 1.5,
-    waveInterval: 35 - growth * 19,
-    maxUnits: 12 + Math.floor(growth * 7),
+    waveInterval: 35 - growth * 19 - endurance * 5,
+    maxUnits: 12 + Math.min(10, Math.floor((level - 1) / 2)),
     initialUnits: 3 + Math.min(4, Math.floor((level - 1) / 3)),
     sight: 260 + growth * 100,
     flank: level >= 3,

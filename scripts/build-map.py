@@ -18,6 +18,7 @@ names = ['Shota Rustaveli Avenue', 'Nikoloz Baratashvili Avenue', 'Freedom Squar
          'Shio Chitadze Street', 'Giorgi Leonidze Street', 'Merab Kostava Street']
 names += ['Nikoloz Baratashvili Bridge','Kote Abkhazi Street','Shalva Dadiani Street','Lado Asatiani Street','Galaktion Tabidze Street','Ivane Machabeli Street','Gia Abesadze Street','Vakhtang Beridze Street','Chakhrukhadze Street','Erekle Meori Square','Anton Katalikos Street','Harutyun Saiatnova Street','Ierusalimi Street','Betlemi Street','Kosta Khetagurov Street','Abo Tbilieli Street','Grigol Khandzteli Street']
 names += ['Besiki Street', 'Lesia Ukrainka Street', 'Geronti Kikodze Street', 'Paolo Iashvili Street', 'Mikheil Lermontovi Street', 'Sulkhan-Saba Street', 'Vakhtang Mosidze Street', 'Alexandre Dumas Street']
+names += ['First Republic Square', 'Giorgi Akhvlediani Street', 'Leo Kiacheli Street', 'Mikheil Zandukeli Street', 'Vashlovani Street', 'Ekaterine Gabashvili Street', 'Dzmebi Kakabadze Street', 'Dzmebi Kakabadzeebi Street', 'Ia Ekaladze Street']
 reference=json.loads((root/'data/reference-streets.json').read_text(encoding='utf8'))
 for i,p in enumerate(reference['roundabouts']):
     lat,lon=p['center'];rx,rz=p['radii']
@@ -43,7 +44,7 @@ for w in ways.values():
     coords = w['geometry']
     width = w['tags'].get('game:width',30 if 'Rustaveli' in name else 20 if 'Baratashvili' in name or 'Freedom' in name else 15)
     for a,b in zip(coords,coords[1:]):
-        if not all(41.6855 < g['lat'] < 41.7043 and 44.790 < g['lon'] < 44.817 for g in [a,b]): continue
+        if not all(41.6855 < g['lat'] < 41.7085 and 44.7865 < g['lon'] < 44.817 for g in [a,b]): continue
         ia,ib=point(a),point(b)
         key=tuple(sorted([ia,ib]))
         if ia==ib or key in edgekeys:continue

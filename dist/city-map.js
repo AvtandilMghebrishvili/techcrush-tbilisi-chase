@@ -1,3 +1,4 @@
+import { reservedExpansion, EXPANSION_SOLIDS } from "./world-sites.js";
 import { ROAD_DATA } from "./road-data.js";
 import { overlapsRoad, placeOffRoad } from "./map-clearance.js";
 import {
@@ -222,6 +223,7 @@ for (const road of ROADS) {
         }
       if (
         !clear ||
+        reservedExpansion({ x, z, w, d, angle: road.angle - Math.PI / 2 }) ||
         overlapsRoad({ x, z, w, d, angle: road.angle - Math.PI / 2 }, 3) ||
         BUILDINGS.some(
           (b) =>
@@ -259,6 +261,7 @@ for (let i = BUILDINGS.length - 1; i >= 0; i--) {
 }
 BUILDINGS.push(
   ...DISTRICT_SOLIDS,
+  ...EXPANSION_SOLIDS,
   ...CLOCK_PARTS.map((b) => ({
     ...b,
     x: b.x + CLOCK_BUILDING.x,

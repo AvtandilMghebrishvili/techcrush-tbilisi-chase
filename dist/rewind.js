@@ -47,6 +47,7 @@ export class RewindTimeline {
           fallenAt: b.fallenAt || 0,
           announced: !!b.announced,
         })),
+      runQuests: clone(sim.runQuests),
       player: clone(sim.player),
       police: clone(sim.police),
       traffic: clone(sim.traffic),
@@ -73,6 +74,7 @@ export class RewindTimeline {
     if (!f) return;
     for (const k of scalars) sim[k] = f[k];
     for (const k of [
+      "runQuests",
       "player",
       "police",
       "traffic",

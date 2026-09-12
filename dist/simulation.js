@@ -1,3 +1,4 @@
+import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
 import { levelRewards, creditAward } from "./community-rules.js";
 import { TREES } from "./world-props.js";
 import { BRIDGE_BARRIERS } from "./bridge-data.js";
@@ -18,7 +19,7 @@ import {
 } from "./damage-state.js";
 import { vehicleContact, treeContact } from "./contacts.js";
 import { RewindTimeline } from "./rewind.js";
-import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
+import { RAMPS, driveRamp, stepAirborne, resolveRampSolid } from "./stunts.js";
 import { upgradedSpec, pursuitTuning } from "./progression.js";
 import { checkpointsForLevel } from "./level-routes.js";
 import { createAirSupport, updateAirSupport } from "./air-support.js";
@@ -91,7 +92,12 @@ export function vehicle(x = 0, z = 0, angle = 0) {
   };
 }
 export function resolveCircleRect(car, r, rect) {
-  if (rect.broken) return false;
+  if (
+    rect.broken ||
+    (rect.h != null && (car.y || 0) >= rect.h - 0.1) ||
+    (rect.base && (car.y || 0) + 1.8 < rect.base)
+  )
+    return false;
   if (rect.angle !== undefined) {
     // Conservative broad phase: distant lots need no local transform or contact allocation.
     const bound = (rect.w + rect.d) / 2 + r;
@@ -317,6 +323,7 @@ export class ChaseSimulation {
     this.runDistance = 0;
     this.runDriftSeconds = 0;
     this.runJumps = 0;
+    this.runQuests = [];
     this.runTopSpeed = 0;
     this.trafficWrecks = 0;
     this.time = 0;
@@ -411,9 +418,15 @@ export class ChaseSimulation {
       tanks < Math.min(3, 2 + Math.floor((this.level - 3) / 4)) &&
       (role === "blockade" || id % 3 === 0)
         ? "tank"
-        : this.level >= 2 && id % 2 === 0
-          ? "suv"
-          : "sedan";
+        : id % 5 === 0
+          ? "sedan"
+          : this.level >= 7 && id % 4 === 1
+            ? "supercar"
+            : this.level >= 4 && id % 4 === 3
+              ? "interceptor"
+              : this.level >= 2 && id % 2 === 0
+                ? "suv"
+                : "sedan";
     const spec =
       kind === "tank"
         ? {
@@ -444,6 +457,16 @@ export class ChaseSimulation {
               accelerationScale: 1,
               yawScale: 1,
             };
+    if (kind === "interceptor" || kind === "supercar")
+      Object.assign(spec, {
+        maxHealth: kind === "supercar" ? 120 : 110,
+        width: kind === "supercar" ? 2.08 : 1.96,
+        length: kind === "supercar" ? 4.8 : 4.5,
+        speedScale: kind === "supercar" ? 1.14 : 1.07,
+        accelerationScale: kind === "supercar" ? 1.3 : 1.16,
+        yawScale: 1.12,
+        mass: 1.12,
+      });
     return {
       ...vehicle(x, z),
       id,
@@ -770,7 +793,15 @@ export class ChaseSimulation {
         this.obstacles,
         resolveCircleRect,
       );
-      if (p.impact > 2) this.emitSound("collision", p, p.impact, "wall");
+      if (p.impact > 2) this.emitSound("stone", p, p.impact, "wall");
+      if (p.impact > 5 && p.invulnerable <= 0) {
+        p.health = Math.max(
+          0,
+          p.health -
+            Math.min(26, (p.impact - 3) * 0.65) * p.performance.damageScale,
+        );
+        p.invulnerable = 0.7;
+      }
       dentVehicle(p, p.impact, this.time);
       if (landed) {
         if (landed.damage > 0)
@@ -796,10 +827,24 @@ export class ChaseSimulation {
       }
     } else {
       stepVehicle(p, input, dt, this.obstacles);
+      const rampResult = driveRamp(p, input, dt, this.ramps, before);
+      if (rampResult === "launch") this.events.push("AIRBORNE — A / D TO ROLL");
+      if (rampResult === "impact" && p.impact > 5 && p.invulnerable <= 0) {
+        p.health = Math.max(
+          0,
+          p.health -
+            Math.min(26, (p.impact - 3) * 0.65) * p.performance.damageScale,
+        );
+        p.invulnerable = 0.7;
+      }
       dentVehicle(p, p.impact, this.time);
-      if (p.impact > 2) this.emitSound("collision", p, p.impact, "wall");
-      if (driveRamp(p, input, dt, this.ramps) === "launch")
-        this.events.push("AIRBORNE — A / D TO ROLL");
+      if (p.impact > 2)
+        this.emitSound(
+          rampResult === "impact" ? "metal" : "stone",
+          p,
+          p.impact,
+          "wall",
+        );
     }
     if (this.time >= this.nextWaveAt) {
       const role = ["pursuit", "intercept", "blockade"][this.heatLevel % 3];
@@ -1120,7 +1165,7 @@ export class ChaseSimulation {
           : Math.max(0, cop.stuck - dt);
       dentVehicle(cop, cop.impact, this.time);
       if (cop.impact > 4)
-        this.emitSound("metal", cop, cop.impact, "wall:" + cop.id);
+        this.emitSound("stone", cop, cop.impact, "wall:" + cop.id);
       if (cop.stuck > 1.4) {
         cop.reverseUntil = this.time + 0.85;
         cop.stuck = 0;
@@ -1180,10 +1225,20 @@ export class ChaseSimulation {
               if (civilian !== p && !officers.has(civilian))
                 this.damageTraffic(civilian, impact);
         }
-    const breakables = [...this.trees, ...this.poles];
+    if (
+      this.breakableTrees !== this.trees ||
+      this.breakablePoles !== this.poles ||
+      this.breakableCount !== this.trees.length + this.poles.length
+    ) {
+      this.breakableTrees = this.trees;
+      this.breakablePoles = this.poles;
+      this.breakableCount = this.trees.length + this.poles.length;
+      this.breakables = [...this.trees, ...this.poles];
+    }
+    const breakables = this.breakables;
     for (const car of allCars) {
       if (car.destroyed || car.waterAt != null) continue;
-      for (const tree of breakables) {
+      for (const tree of nearbyObstacles(breakables, car.x, car.z, 5)) {
         if (
           (car.y || 0) > Math.min(2.5, tree.h || 8) ||
           tree.broken ||
@@ -1229,6 +1284,9 @@ export class ChaseSimulation {
         } else if (impact > 5 && officers.has(car))
           this.damagePolice(car, impact, false);
       }
+      if (car !== p)
+        for (const r of this.ramps)
+          resolveRampSolid(car, r, positions.get(car) || car, false);
       // Pairwise pushes cannot leave an officer or civilian inside a building.
       for (const block of nearbyObstacles(this.obstacles, car.x, car.z, 5))
         if ((car.y || 0) < (block.h || 50) + 1)
@@ -1263,6 +1321,33 @@ export class ChaseSimulation {
         rail.fallenAt = this.time;
         this.emitSound("metal", rail, 40, "barrier:" + rail.id, true);
       }
+    if (!p.airborne && !p.flipped && p.health > 0 && p.waterAt == null) {
+      const unlock = (id, text) => {
+        if (
+          !this.runQuests.includes(id) &&
+          !this.runOptions?.completedQuests?.includes(id)
+        ) {
+          this.runQuests.push(id);
+          this.navQuest = null;
+          this.events.push(text + " · BANK IN GARAGE");
+          this.emitSound("reward", p, 20, "quest:" + id);
+        }
+      };
+      if (
+        p.lastLandingRamp === 4 &&
+        roofAt(p) &&
+        Math.abs(p.y - ROOFTOP.h) < 0.2 &&
+        distance(p, QUEST_BOX) < 7
+      )
+        unlock(ROOFTOP.id, "SKYBOX FOUND · +1 BOX / 2,500 CR");
+      if (
+        p.lastLandingRamp === 5 &&
+        p.launchSpeed >= 50 &&
+        p.x < -850 &&
+        Math.abs(p.z + 440) < 32
+      )
+        unlock("mtkvari-gap-v1", "MTKVARI GAP · +1 BOX / 1,500 CR");
+    }
     let closest = Infinity;
     for (const cop of this.police)
       if (!cop.destroyed && cop.waterAt == null)

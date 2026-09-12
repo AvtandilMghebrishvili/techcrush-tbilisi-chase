@@ -175,7 +175,7 @@ test("vehicle contacts and wall impacts produce cues; police destruction produce
   w.vz = 30;
   w.speed = 30;
   wall.update(1 / 120, {});
-  assert(wall.soundEvents.some((e) => e.kind === "collision"));
+  assert(wall.soundEvents.some((e) => e.kind === "stone"));
 });
 test("audio cues are bounded and deduplicated; rewind clears them and permits a new impact", () => {
   const s = emptySim();

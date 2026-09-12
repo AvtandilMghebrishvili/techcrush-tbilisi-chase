@@ -1,3 +1,4 @@
+import { STUNT_APRONS } from "../dist/world-sites.js";
 import ClipperLib from "clipper-lib";
 import { writeFile } from "node:fs/promises";
 import { ROADS, NODES } from "../dist/city-map.js";
@@ -25,6 +26,22 @@ function network(padding) {
       ]),
     ]);
   }
+  for (const a of STUNT_APRONS)
+    polygons.push([
+      [
+        [-1, -1],
+        [1, -1],
+        [1, 1],
+        [-1, 1],
+      ].map(([sx, sz]) => [
+        a.x +
+          Math.cos(a.angle) * sx * (a.w / 2 + padding) +
+          Math.sin(a.angle) * sz * (a.d / 2 + padding),
+        a.z -
+          Math.sin(a.angle) * sx * (a.w / 2 + padding) +
+          Math.cos(a.angle) * sz * (a.d / 2 + padding),
+      ]),
+    ]);
   return clip(polygons, [], "ctUnion");
 }
 function clip(subject, other, operation) {

@@ -1,6 +1,7 @@
 import * as THREE from "./vendor/three.module.js";
 import { makeSedan, mergeCarParts } from "./patrol-car.js";
 import { makePatrolHealthBar } from "./effects.js";
+import { makeOriginalSportsCar, MODEL_SHAPES } from "./car-models.js";
 const material = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({
     color,
@@ -157,6 +158,42 @@ export function makeTank() {
   return g;
 }
 export function makePoliceVehicle(view, cop) {
+  if (cop.kind === "interceptor" || cop.kind === "supercar") {
+    const id = cop.kind === "supercar" ? "rally" : "gt",
+      shape = MODEL_SHAPES[id];
+    const g = makeOriginalSportsCar(id, "#e4e9ea");
+    g.name =
+      cop.kind === "supercar" ? "V12 highway pursuit" : "R coupe interceptor";
+    for (const light of g.userData.headlights || []) light.visible = false;
+    const { box, mesh } = builder(g),
+      dark = material("#13202c");
+    const roof = shape.roof;
+    box(1.05, 0.05, 0.28, dark, 0, roof + 0.035, -0.1);
+    const lights = ["#ff284e", "#228fff"].map((color) =>
+      material(color, { emissive: color, emissiveIntensity: 4 }),
+    );
+    lights.forEach((m, i) =>
+      box(0.44, 0.09, 0.24, m, i ? 0.25 : -0.25, roof + 0.1, -0.1),
+    );
+    for (const side of [-1, 1]) {
+      const z = 0,
+        section = g.userData.bodySurface.section(z);
+      const decal = mesh(
+        new THREE.PlaneGeometry(1.05, 0.2),
+        policeDecal(),
+        side * (section.w + 0.012),
+        0.67,
+        z,
+      );
+      decal.rotation.y = (side * Math.PI) / 2;
+    }
+    const bar = makePatrolHealthBar();
+    bar.sprite.position.y = roof + 1.1;
+    g.add(bar.sprite);
+    Object.assign(g.userData, { kind: cop.kind, lights, healthBar: bar });
+    mergeCarParts(g);
+    return g;
+  }
   const g =
     cop.kind === "tank"
       ? makeTank()

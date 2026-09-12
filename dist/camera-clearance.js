@@ -24,8 +24,8 @@ export function clearCameraPosition(anchor, desired, obstacles) {
       b = local(desired);
     const w = (o.w ?? o.maxX - o.minX) / 2 + 0.7;
     const d = (o.d ?? o.maxZ - o.minZ) / 2 + 0.7;
-    const low = [-w, -1, -d],
-      high = [w, (o.h || 60) + 2, d];
+    const low = [-w, (o.base || 0) - 0.65, -d],
+      high = [w, (o.h || 60) + 0.65, d];
     let enter = 0,
       leave = fraction;
     for (let i = 0; i < 3; i++) {

@@ -223,6 +223,33 @@
         ]
       ],
       "provenance": "Fictional driveable arcade adaptation of the pedestrian bridge, with road-connected approaches."
+    },
+    {
+      "name": "TECHCRUSH Architecture Drive",
+      "width": 18,
+      "points": [
+        [
+          41.70592166726554,
+          44.79064421457782
+        ],
+        [
+          41.706213438735176,
+          44.79106158287226
+        ],
+        [
+          41.70641106719368,
+          44.79154269906182
+        ],
+        [
+          41.70652784764642,
+          44.7929860476305
+        ],
+        [
+          41.70652784764642,
+          44.793587442867455
+        ]
+      ],
+      "provenance": "Original arcade access road to a compressed Bank of Georgia-inspired landmark; not a surveyed Tbilisi road."
     }
   ],
   "roundabouts": [

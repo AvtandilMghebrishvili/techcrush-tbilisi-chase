@@ -36,6 +36,7 @@
         }
       }
     </script>
+    <link rel="stylesheet" href="./expedition.css" />
   </head>
   <body>
     <main id="game">
@@ -140,6 +141,16 @@
           ></div>
           <p id="car-details" class="car-details"></p>
           <p id="intro-career" class="career-line"></p>
+          <div class="map-slots" aria-label="City maps">
+            <span class="active-map"
+              ><b>01 / TBILISI</b><small>LIVE · ENDLESS LEVELS</small></span
+            ><span aria-disabled="true"
+              ><b>02 / KUTAISI</b><small>COMING SOON · მალე</small></span
+            ><span aria-disabled="true"
+              ><b>03 / BATUMI</b><small>COMING SOON · მალე</small></span
+            >
+          </div>
+          <p id="stunt-record" class="stunt-record"></p>
           <div class="community-entry">
             <button id="driver-open" type="button">
               <span id="driver-name-label">CHOOSE YOUR DRIVER NAME</span
@@ -188,8 +199,8 @@
           <div>
             <strong>Fight back</strong>
             <p>
-              Ram patrols or jump clear. New levels bring SUVs, helicopters and
-              tanks.
+              Ram patrols or jump clear. Later levels bring SUVs, tanks, sport
+              interceptors and helicopters.
             </p>
           </div>
         </div>
@@ -198,7 +209,8 @@
           <div>
             <strong>Lose the heat</strong>
             <p>
-              Break away to escape. Made a mistake? Hold Q to rewind 5 seconds.
+              Use ROUTE to find the rooftop Skybox or river jump. Land, collect
+              and bank 2 bonus boxes. Hold Q to rewind.
             </p>
           </div>
         </div>
@@ -225,6 +237,17 @@
           </div>
           <div class="bar heat-bar"><i id="bust-bar"></i></div>
           <p id="pursuit-text">Keep moving. Don't get boxed in.</p>
+          <label class="stunt-route" for="route-selector"
+            ><span>ROUTE</span
+            ><select
+              id="route-selector"
+              aria-label="Choose checkpoint or stunt navigation"
+            >
+              <option value="">CHECKPOINTS</option>
+              <option value="skybox">SKYBOX · 200+ KM/H</option>
+              <option value="river">RIVER GAP · 220+ KM/H</option>
+            </select></label
+          >
         </div>
         <div class="navigator">
           <canvas

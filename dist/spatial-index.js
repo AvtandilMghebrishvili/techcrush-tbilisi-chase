@@ -11,10 +11,10 @@ export function nearbyObstacles(obstacles, x, z, radius = 0) {
         s = Math.abs(Math.sin(o.angle || 0));
       const hx = ((o.w || 0) * c + (o.d || 0) * s) / 2;
       const hz = ((o.w || 0) * s + (o.d || 0) * c) / 2;
-      const minX = o.minX ?? o.x - hx,
-        maxX = o.maxX ?? o.x + hx;
-      const minZ = o.minZ ?? o.z - hz,
-        maxZ = o.maxZ ?? o.z + hz;
+      const minX = o.minX ?? o.x - Math.max(hx, o.radius || 0),
+        maxX = o.maxX ?? o.x + Math.max(hx, o.radius || 0);
+      const minZ = o.minZ ?? o.z - Math.max(hz, o.radius || 0),
+        maxZ = o.maxZ ?? o.z + Math.max(hz, o.radius || 0);
       for (
         let ix = Math.floor(minX / CELL);
         ix <= Math.floor(maxX / CELL);

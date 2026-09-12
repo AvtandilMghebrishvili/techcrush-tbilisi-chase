@@ -1,3 +1,4 @@
+import { buildExpansion } from "./expansion-visuals.js";
 import { moundHeight } from "./terrain.js";
 import { buildBridgeRails } from "./bridge-visuals.js";
 import * as THREE from "./vendor/three.module.js";
@@ -810,13 +811,14 @@ export function buildTbilisiDistricts(v) {
     const ramp = add(geo, metal, 0, 0, 0, g);
     ramp.rotation.y = -Math.PI / 2;
     ramp.position.x = r.width / 2;
-    for (let z = -4.5; z < 5; z += 1) {
+    const hazard = material("#eac851");
+    for (let z = -r.length / 2 + 0.5; z < r.length / 2; z += 1) {
       const h = (z / r.length + 0.5) * r.height + 0.035;
       const stripe = box(
         r.width,
         0.04,
         0.23,
-        z % 2 ? white : material("#eac851"),
+        Math.floor(z) % 2 ? white : hazard,
         0,
         h,
         z,
@@ -825,7 +827,7 @@ export function buildTbilisiDistricts(v) {
       stripe.rotation.x = -Math.atan(r.height / r.length);
     }
     label(
-      "TECHCRUSH · JUMP",
+      r.id >= 4 ? r.name : "TECHCRUSH · JUMP",
       8,
       1,
       r.x + Math.cos(r.angle) * 4,
@@ -965,6 +967,7 @@ export function buildTbilisiDistricts(v) {
       box(5, 0.18, 2.5, brick, x, b.h * 0.5 + 3, b.d / 2 + 0.9, g);
     }
   }
+  buildExpansion(v, root, box, label, v.expansionFacades);
   // Static meshes are merged in local tiles, retaining culling and dynamic gondolas/water.
   root.updateMatrixWorld(true);
   const batches = new Map(),

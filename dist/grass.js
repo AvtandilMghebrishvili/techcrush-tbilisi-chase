@@ -1,3 +1,4 @@
+import { reservedExpansion } from "./world-sites.js";
 import * as THREE from "./vendor/three.module.js";
 import { ROADS, BUILDINGS, nearestRoad, containsPoint } from "./city-map.js";
 import { LANDMARKS } from "./district-data.js";
@@ -62,6 +63,7 @@ export function buildGrass(view) {
     if (total >= 6500 || inRiver({ x, z })) return;
     const road = nearestRoad({ x, z });
     if (
+      reservedExpansion({ x, z, w: 1, d: 1, angle: 0 }) ||
       road.distance < road.road.width / 2 + 4.5 ||
       nearbyObstacles(BUILDINGS, x, z, 2).some((b) => containsPoint(b, x, z, 2))
     )

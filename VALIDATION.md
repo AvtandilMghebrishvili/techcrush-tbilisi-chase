@@ -1,5 +1,18 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## v1.12.0 — Tbilisi expeditions
+
+- 143 automated tests pass, including new real-physics rooftop/river landings, slow failed launches, high-speed solid ramp faces, roof camera clearance, old profile migration, idempotent server stunt awards and varied late-level patrols.
+- The expanded graph has 598 nodes / 766 segments. All sampled lanes stay clear of buildings, hills and unbridged water. Regenerated asphalt, including both stunt-bank aprons, has one connected component.
+- A normal-input Veyra W16 level-1 controller run clears six checkpoints and escapes: 222.5 simulated seconds, 30,914 points, 97 HP remaining, 12 pursuing units. A separate Apex run was wrecked after five checkpoints; the controller is a smoke test, not a guarantee of winning every car/run.
+- Source-browser QA uses controlled local starting positions, then the normal game loop for takeoff, landing and crate collection. Both challenges bank through the real local API, persist through reload and award 2 boxes / 4,000 CR in total. No test records were written to the public game.
+- Five Chromium layouts (1440×900, 1024×768, 390×844, 844×390, 667×375) expose four selectable cars, disabled coming-soon slots and usable challenge navigation. Browser inspection identified and fixed a short-landscape panel overlap and the roof camera's former collapsed boom.
+- New coupe/V12 police mesh creation and render updates complete without page errors. Existing original car, customization, mobile input, audio lifecycle, water recovery and server privacy tests remain in the suite.
+- Six lifecycle cycles preserve WebGL geometry/texture counts, release effects/voices and suspend idle rendering/audio. See the measured CPU and retained-heap limits in [Performance](docs/PERFORMANCE.md).
+- Production build links resolve; all 21 runtime media assets remain byte-identical and no QA globals ship. Build/manifest retains the same D1 database and unchanged SQL migration history.
+- The final minified build also passes mobile simultaneous steering/drift/tap-nitro, pause, a real save-backed three-part box, garage preview, preferences/box persistence across reload, and desktop keyboard driving with no page errors or missing assets.
+
+
 ## Community leaderboard 1.11.0 — 12 September 2026
 
 `npm test`: **134 passed, 0 failed**. Eleven community cases cover Unicode/name validation, private legacy migration, level coefficients, server-derived cash, daily UTC rollover, streak boxes, one-time achievements, consumed/replaced tickets, malformed/implausible results, atomic concurrent settlement, shared ranking/ordering/pagination/personal rank, private-row removal and additive SQLite migration without losing the old garage. Rewind restores every new run metric and recovery teleports no longer produce travel points.
