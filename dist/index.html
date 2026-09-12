@@ -195,9 +195,12 @@
               </div>
               <div id="city-unlock" class="city-unlock">
                 <div class="unlock-copy">
-                  <strong id="unlock-title">3 CITIES · 3 MYSTERY CARS</strong>
+                  <strong id="unlock-title"
+                    >LVL 10 · ALL CARS / LVL 15 · TECHCRUSH</strong
+                  >
                   <p id="map-access-note">
-                    Clear level 5 in each city to earn its exclusive car.
+                    Reach either milestone in any city. Bonus boxes every 5
+                    levels.
                   </p>
                 </div>
               </div>
@@ -985,6 +988,28 @@
               <span>3 PARTS / BOX</span>
             </div>
             <section id="box-bench" class="box-bench">
+              <article class="supply-card" style="--supply: #eac068">
+                <div class="supply-visual" aria-hidden="true">?</div>
+                <div>
+                  <h3>MYSTERY BOX</h3>
+                  <p>Every 5 city levels · 1,500–3,000 coins + 3 parts.</p>
+                  <small>Gold 50% · Diamond 40% · Platinum 10%</small
+                  ><button id="open-mystery-box" class="primary" disabled>
+                    OPEN MYSTERY · 0 ↗
+                  </button>
+                </div>
+              </article>
+              <article class="supply-card" style="--supply: #bfadff">
+                <div class="supply-visual" aria-hidden="true">✦</div>
+                <div>
+                  <h3>SPECIAL BOX</h3>
+                  <p>Every 5 city levels · 4,000–7,000 coins + 3 parts.</p>
+                  <small>Diamond 65% · Platinum 35%</small
+                  ><button id="open-special-box" class="secondary" disabled>
+                    OPEN SPECIAL · 0 ↗
+                  </button>
+                </div>
+              </article>
               <article class="supply-card" style="--supply: #ffce73">
                 <div class="supply-visual" aria-hidden="true">✦</div>
                 <div>
@@ -1011,8 +1036,8 @@
                   <h3>TECHCRUSH BOX</h3>
                   <p>Earn one for every 10 banked patrol takedowns.</p>
                   <small
-                    >Platinum to TECHCRUSH · exclusive grades for the Creator
-                    car.</small
+                    >Platinum to TECHCRUSH · stored until LVL 15 unlocks the
+                    Creator car.</small
                   ><button
                     id="open-creator-box"
                     class="creator-box-button"
@@ -1049,6 +1074,7 @@
         <span class="eyebrow">TECHCRUSH / SUPPLY DROP</span>
         <h2 id="loot-title">PARTS INCOMING.</h2>
         <div id="loot-slots" class="loot-slots"></div>
+        <div id="loot-coins" class="loot-coins" hidden></div>
         <p id="loot-summary" aria-live="polite">Opening your three rewards…</p>
         <button id="loot-skip" class="secondary">SKIP ANIMATION</button
         ><button id="loot-done" class="primary">BACK TO UPGRADES ↗</button>

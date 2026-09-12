@@ -4,7 +4,7 @@ Choose a city, choose an available car and press **Start Chase**. Four stock car
 
 ## City selection and mastery (2.0)
 
-Tbilisi, Kutaisi and Batumi are all open from the first visit. The selected city has a red outline and checkmark; the other two show Play Now. Each city displays its own current level and progress out of five completed levels. **Your Mystery Cars & Rewards** expands the three car milestones and creator-box progress. Complete level 5, then open that city’s car box here or from the finish screen. The car becomes available in both selectors.
+Tbilisi, Kutaisi and Batumi are all open from the first visit. The selected city has a red outline and checkmark; the other two show Play Now. Each city displays its current level and next bonus level. **Mystery Cars & Rewards** shows progress toward level 10 (all ordinary cars) and level 15 (TECHCRUSH), based on your highest city level. Both unlock automatically. Every five levels in each city give two bonus boxes; the result screen links straight to Garage → Boxes. Older earned car boxes remain claimable. [Reward details](MILESTONES.md).
 
 The launch area shows saved coins, the selected city/level and the driver profile. The car photo strip scrolls to the selected car. The in-game coin balance sits beside the logo, separate from the level’s unbanked earnings. Cars, parts and currency follow the same private garage between cities. Changing city banks the current run and reloads the page to release the old world.
 

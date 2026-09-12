@@ -2,6 +2,7 @@ import { TIME_COURSES } from "./race-timing.js";
 import {
   mapUnlocked,
   cityLevel,
+  cityCommunity,
   MAP_COURSES,
   CITY_IDS,
 } from "./map-selection.js";
@@ -142,24 +143,70 @@ export const totalTakedowns = (p) =>
         : p.maps?.[map]?.community?.takedowns || 0),
     0,
   );
+export const highestCityLevel = (p) =>
+  Math.max(...CITY_IDS.map((map) => cityLevel(p, map)));
+export const MILESTONE_BOXES = {
+  mystery: {
+    name: "Mystery",
+    field: "mysteryBoxes",
+    cashMin: 1500,
+    cashMax: 3000,
+    tiers: [
+      [3, 50],
+      [4, 40],
+      [5, 10],
+    ],
+  },
+  special: {
+    name: "Special",
+    field: "specialBoxes",
+    cashMin: 4000,
+    cashMax: 7000,
+    tiers: [
+      [4, 65],
+      [5, 35],
+    ],
+  },
+};
+export const totalBoxes = (p) =>
+  p.boxes +
+  (p.platinumBoxes || 0) +
+  (p.creatorBoxes || 0) +
+  (p.mysteryBoxes || 0) +
+  (p.specialBoxes || 0);
 export function syncMilestones(p) {
   p.unlockedCars ||= [];
   p.carBoxes ||= [];
   p.claimedCityCars ||= [];
   p.creatorBoxes ||= 0;
   p.creatorMilestones ||= 0;
-  for (const map of CITY_IDS)
-    if (
-      cityLevel(p, map) >= 6 &&
-      !p.claimedCityCars.includes(map) &&
-      !p.carBoxes.includes(map)
-    )
-      p.carBoxes.push(map);
+  p.mysteryBoxes ||= 0;
+  p.specialBoxes ||= 0;
+  p.levelMilestones ||= {};
+  const highest = highestCityLevel(p);
+  const unlocks =
+    highest >= 15
+      ? [...Object.values(CITY_CARS), "creator"]
+      : highest >= 10
+        ? Object.values(CITY_CARS)
+        : [];
+  for (const id of unlocks)
+    if (!p.unlockedCars.includes(id)) p.unlockedCars.push(id);
+  // Fixed-size per-city high-water marks make reloads and retries idempotent,
+  // including retroactive grants and arbitrarily high endless career levels.
+  for (const map of CITY_IDS) {
+    const earned = Math.floor(cityLevel(p, map) / 5);
+    const previous = p.levelMilestones[map] || 0;
+    if (earned > previous) {
+      p.mysteryBoxes += earned - previous;
+      p.specialBoxes += earned - previous;
+      p.levelMilestones[map] = earned;
+    }
+  }
   const earned = Math.floor(totalTakedowns(p) / 10);
   if (earned > p.creatorMilestones) {
     p.creatorBoxes += earned - p.creatorMilestones;
     p.creatorMilestones = earned;
-    if (!p.unlockedCars.includes("creator")) p.unlockedCars.push("creator");
   }
   return p;
 }
@@ -181,7 +228,7 @@ export const partPower = (equipment, id) => {
 };
 export function newProfile() {
   return {
-    schema: 5,
+    schema: 6,
     maps: {
       kutaisi: { level: 1, community: newCommunity() },
       batumi: { level: 1, community: newCommunity() },
@@ -191,6 +238,9 @@ export function newProfile() {
     claimedCityCars: [],
     creatorBoxes: 0,
     creatorMilestones: 0,
+    mysteryBoxes: 0,
+    specialBoxes: 0,
+    levelMilestones: {},
     platinumBoxes: 0,
     quests: { completed: [] },
     driver: { name: "", avatar: "red", listed: false },
@@ -208,7 +258,8 @@ export function newProfile() {
 }
 export function migrateProfile(profile) {
   const p = structuredClone(profile);
-  p.schema = 5;
+  const legacy = (p.schema || 1) < 6;
+  p.schema = 6;
   p.quests = { completed: [], ...p.quests };
   p.driver ||= { name: "", avatar: "red", listed: false };
   p.community = { ...newCommunity(p.level), ...p.community };
@@ -219,6 +270,22 @@ export function migrateProfile(profile) {
   p.cars ||= {};
   p.platinumBoxes ||= 0;
   for (const id of CAR_IDS) p.cars[id] ||= {};
+  // Honor cars and unclaimed car boxes earned under the previous rules once.
+  if (legacy) {
+    p.unlockedCars ||= [];
+    p.carBoxes ||= [];
+    p.claimedCityCars ||= [];
+    for (const map of CITY_IDS)
+      if (
+        cityLevel(p, map) >= 6 &&
+        !p.claimedCityCars.includes(map) &&
+        !p.carBoxes.includes(map) &&
+        !carUnlocked(p, CITY_CARS[map])
+      )
+        p.carBoxes.push(map);
+    if (totalTakedowns(p) >= 10 && !carUnlocked(p, "creator"))
+      p.unlockedCars.push("creator");
+  }
   return syncMilestones(p);
 }
 export function upgradedSpec(base, equipment = {}) {
@@ -306,7 +373,7 @@ export function applyProgressAction(
     ) &&
     !carUnlocked(p, car)
   )
-    throw Error("Unlock this car from its milestone box first.");
+    throw Error("Unlock this car by reaching its required level in any city.");
   const item = PARTS.find((x) => x.id === action.part);
   if (action.type === "driver") {
     const name = normalizeName(action.name);
@@ -355,12 +422,43 @@ export function applyProgressAction(
     p.cars[car].paint = action.color.toLowerCase();
   } else if (action.type === "claim-car-box") {
     if (!p.carBoxes.includes(action.map))
-      throw Error("Complete level 5 in this city to earn its car.");
+      throw Error(
+        "This legacy car box has already been claimed or was not earned.",
+      );
     p.carBoxes = p.carBoxes.filter((m) => m !== action.map);
     p.claimedCityCars.push(action.map);
     const reward = CITY_CARS[action.map];
     if (!p.unlockedCars.includes(reward)) p.unlockedCars.push(reward);
     p.lastCarReward = { map: action.map, car: reward };
+  } else if (["open-mystery-box", "open-special-box"].includes(action.type)) {
+    const kind = action.type === "open-mystery-box" ? "mystery" : "special";
+    const box = MILESTONE_BOXES[kind];
+    if (p[box.field] < 1)
+      throw Error(
+        "Reach level 5, 10, 15 and beyond in any city to earn milestone boxes.",
+      );
+    p[box.field]--;
+    const credits =
+      box.cashMin + Math.floor(rng() * (box.cashMax - box.cashMin + 1));
+    const items = Array.from({ length: 3 }, () => {
+      const part =
+        PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))].id;
+      const roll = rng() * 100;
+      let threshold = 0,
+        tier = box.tiers.at(-1)[0];
+      for (const [grade, weight] of box.tiers) {
+        threshold += weight;
+        if (roll < threshold) {
+          tier = grade;
+          break;
+        }
+      }
+      const key = partKey(part, tier);
+      p.inventory[key] = (p.inventory[key] || 0) + 1;
+      return { part, tier };
+    });
+    p.credits += credits;
+    p.lastBox = { id: action.id, items, kind, credits };
   } else if (action.type === "open-creator-box") {
     if (p.creatorBoxes < 1)
       throw Error("Destroy 10 patrol cars to earn a TECHCRUSH box.");
@@ -450,7 +548,7 @@ export function applyProgressAction(
       throw Error("Choose a valid part tier.");
     if (action.type === "upgrade" && tier >= 5)
       throw Error(
-        "Platinum parts are found in Kutaisi secret boxes. Install an owned part.",
+        "Platinum parts come from stunt and milestone boxes. Install an owned part.",
       );
     if (action.type !== "sell" && tier > 5 && car !== "creator")
       throw Error(
@@ -487,6 +585,12 @@ export function applyProgressAction(
     )
       throw Error("Invalid run.");
     if (p.settled.includes(action.runId)) return p;
+    const beforeMilestones = {
+      mystery: p.mysteryBoxes,
+      special: p.specialBoxes,
+      creator: p.creatorBoxes,
+      cars: [...p.unlockedCars],
+    };
     const level = Number(action.level);
     const map = p.activeRun?.map || "tbilisi";
     if (
@@ -570,6 +674,16 @@ export function applyProgressAction(
       p.lastBox = { id: action.runId, kind: "level", items };
     }
     syncMilestones(p);
+    if (action.metrics) {
+      Object.assign(cityCommunity(p, map).lastReward, {
+        mysteryBoxes: p.mysteryBoxes - beforeMilestones.mystery,
+        specialBoxes: p.specialBoxes - beforeMilestones.special,
+        creatorBoxes: p.creatorBoxes - beforeMilestones.creator,
+        unlockedCars: p.unlockedCars.filter(
+          (id) => !beforeMilestones.cars.includes(id),
+        ),
+      });
+    }
     p.settled.push(action.runId);
     p.settled = p.settled.slice(-128);
   } else throw Error("Unknown garage action.");

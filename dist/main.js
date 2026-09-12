@@ -566,6 +566,16 @@ function finish() {
           cityLevel(career.profile),
         );
         refreshRewards(career);
+        if (reward.mysteryBoxes || reward.specialBoxes) {
+          const bonusButton = document.createElement("button");
+          bonusButton.className = "primary";
+          bonusButton.textContent = "OPEN BONUS BOXES ↗";
+          bonusButton.onclick = () => {
+            workshop.open();
+            workshop.switchTab("boxes");
+          };
+          $("result-reward").append(bonusButton);
+        }
         if (career.profile.carBoxes.includes(ACTIVE_MAP)) {
           const rewardButton = document.createElement("button");
           rewardButton.className = "primary";

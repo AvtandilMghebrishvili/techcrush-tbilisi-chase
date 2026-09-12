@@ -1,5 +1,5 @@
-import { carUnlocked } from "./progression.js";
-import { carRequirement, refreshRewards } from "./reward-ui.js";
+import { carUnlocked, totalBoxes, MILESTONE_BOXES } from "./progression.js";
+import { carRequirement, refreshRewards, coinIcon } from "./reward-ui.js";
 import { ACTIVE_MAP, CITY_NAME, cityLevel } from "./map-selection.js";
 import { GaragePreview } from "./garage-preview.js";
 import { PAINTS, paintColor } from "./customization.js";
@@ -113,6 +113,8 @@ export class GarageUI {
     $("workshop").addEventListener("cancel", (e) => {
       if (this.rolling) e.preventDefault();
     });
+    for (const kind of Object.keys(MILESTONE_BOXES))
+      $("open-" + kind + "-box").onclick = () => this.openBox(kind);
     $("open-box").onclick = () => this.openBox();
     $("open-platinum-box").onclick = () => this.openBox(true);
     $("open-creator-box").onclick = () => this.openBox("creator");
@@ -351,9 +353,7 @@ export class GarageUI {
     $("garage-level").textContent =
       `LEVEL ${String(cityLevel(p)).padStart(2, "0")}`;
     $("garage-credits").textContent = p.credits.toLocaleString() + " CR";
-    $("garage-boxes").textContent = String(
-      p.boxes + (p.platinumBoxes || 0) + (p.creatorBoxes || 0),
-    );
+    $("garage-boxes").textContent = String(totalBoxes(p));
     $("garage-save-state").textContent = this.store.busy
       ? "Saving…"
       : this.store.pending
@@ -361,7 +361,7 @@ export class GarageUI {
         : "ALL CHANGES SAVED ✓";
     $("save-retry").hidden = !this.store.pending;
     $("intro-career").textContent =
-      `LEVEL ${cityLevel(p)} · ${p.credits.toLocaleString()} CR · ${p.boxes} BOX${p.boxes === 1 ? "" : "ES"}`;
+      `LEVEL ${cityLevel(p)} · ${p.credits.toLocaleString()} CR · ${totalBoxes(p)} BOX${totalBoxes(p) === 1 ? "" : "ES"}`;
     $("workshop-car-select").innerHTML = CARS.map(
       (c) =>
         `<option value="${c.id}" ${c.id === this.car ? "selected" : ""} ${!carUnlocked(p, c.id) ? "disabled" : ""}>${c.name}${carUnlocked(p, c.id) ? "" : ` · ${carRequirement(c.id)}`}</option>`,
@@ -454,6 +454,15 @@ export class GarageUI {
       button.onclick = () =>
         this.inspect(button.dataset.inspect, Number(button.dataset.tier));
     refreshRewards(this.store);
+    for (const [kind, box] of Object.entries(MILESTONE_BOXES)) {
+      const button = $("open-" + kind + "-box");
+      button.textContent = `OPEN ${box.name.toUpperCase()} · ${p[box.field] || 0} ↗`;
+      button.disabled =
+        !p[box.field] ||
+        this.store.busy ||
+        !!this.store.pending ||
+        this.rolling;
+    }
     $("open-creator-box").textContent =
       `TECHCRUSH · ${p.creatorBoxes || 0} BOXES ↗`;
     $("open-creator-box").disabled =
@@ -476,6 +485,9 @@ export class GarageUI {
       " ↗";
     $("last-drop").textContent = p.lastBox
       ? "Last drop: " +
+        (p.lastBox.credits
+          ? `+${p.lastBox.credits.toLocaleString()} coins · `
+          : "") +
         p.lastBox.items
           .map(
             (r) =>
@@ -501,26 +513,34 @@ export class GarageUI {
         : await this.run(() =>
             this.store.mutate({
               type:
-                platinum === "creator"
-                  ? "open-creator-box"
+                typeof platinum === "string" &&
+                ["creator", "mystery", "special"].includes(platinum)
+                  ? `open-${platinum}-box`
                   : platinum
                     ? "open-platinum-box"
                     : "open-box",
             }),
           );
-      if (profile.lastBox.kind === "creator") this.car = "creator";
+      if (profile.lastBox.kind === "creator" && carUnlocked(profile, "creator"))
+        this.car = "creator";
       this.lootBoxId = profile.lastBox.id;
       try {
         this.preview ||= new GaragePreview($("garage-preview"), this.view);
       } catch {}
       $("loot-title").textContent = existing
         ? "LEVEL CLEAR. YOUR REWARDS."
-        : "PARTS INCOMING.";
+        : MILESTONE_BOXES[profile.lastBox.kind]
+          ? `${MILESTONE_BOXES[profile.lastBox.kind].name.toUpperCase()} BONUS DROP.`
+          : "PARTS INCOMING.";
       $("loot-done").textContent = existing
         ? "CONTINUE TO RESULTS ↗"
         : "KEEP REMAINING · BACK TO GARAGE ↗";
       const results = profile.lastBox.items;
       $("loot-summary").textContent = "Opening your three rewards…";
+      $("loot-coins").hidden = !profile.lastBox.credits;
+      $("loot-coins").innerHTML = profile.lastBox.credits
+        ? `${coinIcon}<b>+${profile.lastBox.credits.toLocaleString()}</b><span>COINS SAVED</span>`
+        : "";
       $("loot-slots").innerHTML = results
         .map(
           () =>
@@ -562,8 +582,14 @@ export class GarageUI {
                 ? results[i]
                 : {
                     part: PARTS[Math.floor(Math.random() * PARTS.length)].id,
-                    tier:
-                      platinum === "creator"
+                    tier: MILESTONE_BOXES[platinum]
+                      ? MILESTONE_BOXES[platinum].tiers[
+                          Math.floor(
+                            Math.random() *
+                              MILESTONE_BOXES[platinum].tiers.length,
+                          )
+                        ][0]
+                      : platinum === "creator"
                         ? 5 + Math.floor(Math.random() * 4)
                         : platinum
                           ? 5
@@ -595,6 +621,7 @@ export class GarageUI {
       slot.querySelector(".loot-choices")?.remove();
       const reward = box.items[index];
       const stronger =
+        carUnlocked(this.store.profile, this.car) &&
         reward.tier > (equipment[reward.part] || 0) &&
         (reward.tier <= 5 || this.car === "creator");
       const owned =

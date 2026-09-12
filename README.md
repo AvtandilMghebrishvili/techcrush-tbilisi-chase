@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**Version 2.4 — career milestone rewards.** Reach **level 10 in any city** to automatically unlock Falcon RS, Rioni GT and Coast X; reach **level 15** to unlock TECHCRUSH. Every fifth city level adds a **Mystery + Special** pair with bonus coins and six high-grade parts. Existing players receive retroactive rewards and retain every previously earned car. [Milestones, odds and save compatibility](docs/MILESTONES.md).
+
 **Version 2.3 — tune your map.** Open **Setup → Map & Radar** to adjust minimap size (80–160%) and street zoom (0.5–2.5×), with a live preview and saved browser preferences. The full city map adds +/−, drag/pinch navigation, Fit City and Find Me. The radar starts 10% larger and respects small-screen control space. [Map controls](docs/INTERFACE.md#map-size-and-zoom-23).
 
 **Version 2.2 — a compact workshop.** Switch between **Build & Paint**, **Upgrades** and **Boxes** instead of scrolling through a long garage. Keep the real 3D car, photo part picker, rarity inventory, exact before/after stats and every buy/equip/sell/fusion action. The launch menu and reward cards are smaller, and the hidden mobile studio stops rendering. Existing progress and gameplay rules stay intact. [Garage guide](docs/GARAGE.md).
@@ -12,7 +14,7 @@ Play directly in your browser — no installation or sign-in required. Choose a 
 
 **Version 2.0 — three cities, one garage.** Tbilisi, Kutaisi and Batumi are all available from the start. Batumi adds the Black Sea waterfront, palms, Alphabet Tower, Ali & Nino, a Ferris wheel, landmark hotels and a distant airport. Streets follow adapted OpenStreetMap geometry; the environment is an original game interpretation, not a Google Maps scan. [Batumi and version 2.0 guide](docs/BATUMI.md).
 
-**Earn four new cars.** Clear level 5 in each city to earn its mystery car: Falcon RS (Tbilisi), Rioni GT (Kutaisi) and Coast X (Batumi). The first 10 banked patrol takedowns unlock the TECHCRUSH YouTuber Car. Every 10 takedowns across cities award a three-part creator box. Platinum, Emerald, Ruby and TECHCRUSH are the four grades above Diamond; Emerald and above fit the signature car. The original four cars remain available. [Reward rules](docs/BATUMI.md#cars-and-rewards).
+**Earn four new cars.** The four original cars remain available. Reaching level 10 in any city automatically unlocks Falcon RS, Rioni GT and Coast X; level 15 unlocks the TECHCRUSH YouTuber. Every 10 banked takedowns still award a three-part creator box, whose exclusive parts can be saved until the car is unlocked. Platinum, Emerald, Ruby and TECHCRUSH are the four grades above Diamond; Emerald and above fit the signature car. [Reward rules](docs/MILESTONES.md).
 
 **Classic handling returns.** Steering and drift sensitivity are adjustable in Setup; wheel presentation follows asphalt and kerb height. Auto lighting starts at night and completes a smooth **180-second** cycle. Original background music is enabled by default after the first user gesture, with mute, volume and reset controls. Menus and hidden tabs stop continuous game rendering; hidden/paused gameplay stops music and engine processing.
 
@@ -87,7 +89,7 @@ The garage now has an interactive **3D studio preview** of the selected car, fre
 
 Completing a level grants **one box**, a clear reward and the next level. Base rewards are **150 CR per checkpoint, 350 CR per player-caused patrol takedown, 120 CR per civilian wreck, 800 CR for escape and 1,800 + 250 × completed level CR for clearing the level**. Each is multiplied by **1 + 0.10 × (level − 1)**, rounded per award. Positive score awards use **1 + 0.15 × (level − 1)**. NPC-only crashes do not give free player rewards. The first clear each UTC day adds **500 CR**; every third consecutive clear adds **one extra box**. Eight one-time achievements award additional credits.
 
-Each box draws exactly three independent parts. Duplicates count separately. Per-slot tier odds are **Bronze 55%, Silver 28%, Gold 13%, Diamond 4%**; all 14 part types are equally likely. There are no real-money purchases.
+Each Street box draws exactly three independent parts. Duplicates count separately. Per-slot tier odds are **Bronze 55%, Silver 28%, Gold 13%, Diamond 4%**; all 14 part types are equally likely. There are no real-money purchases.
 
 | Part               | Benefit                                |
 | ------------------ | -------------------------------------- |

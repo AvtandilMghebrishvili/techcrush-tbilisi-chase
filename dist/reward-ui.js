@@ -1,4 +1,9 @@
-import { CITY_CARS, carUnlocked, totalTakedowns } from "./progression.js";
+import {
+  CITY_CARS,
+  carUnlocked,
+  totalTakedowns,
+  highestCityLevel,
+} from "./progression.js";
 import { cityLevel, CITY_IDS } from "./map-selection.js";
 import { carSpec } from "./config.js";
 export const coinIcon =
@@ -7,11 +12,10 @@ export function carSilhouette(id) {
   return `<img class="car-photo" src="./assets/car-previews/${id}.webp" alt="" width="512" height="288" decoding="async">`;
 }
 export function carRequirement(id) {
-  const map = CITY_IDS.find((m) => CITY_CARS[m] === id);
-  return map
-    ? `${map.toUpperCase()} · LVL 5`
-    : id === "creator"
-      ? "10 PATROL TAKEDOWNS"
+  return id === "creator"
+    ? "ANY CITY · LVL 15"
+    : Object.values(CITY_CARS).includes(id)
+      ? "ANY CITY · LVL 10"
       : "READY TO DRIVE";
 }
 export function refreshRewards(store) {
@@ -30,12 +34,16 @@ export function refreshRewards(store) {
   if (!holder) return;
   holder.innerHTML =
     CITY_IDS.map((map) => {
-      const complete = Math.min(5, cityLevel(p, map) - 1),
+      const complete = Math.min(10, highestCityLevel(p)),
         id = CITY_CARS[map],
         claimed = carUnlocked(p, id);
-      return `<article class="milestone-card ${claimed ? "claimed" : ""}">${carSilhouette(id)}<div><small>${map.toUpperCase()} MASTERY</small><b>${carSpec(id).name}</b><progress value="${complete}" max="5"></progress><span>${claimed ? "IN YOUR GARAGE" : `${complete}/5 LEVELS · MYSTERY CAR`}</span></div>${p.carBoxes?.includes(map) ? `<button data-claim-city="${map}">OPEN CAR BOX ↗</button>` : ""}</article>`;
+      return `<article class="milestone-card ${claimed ? "claimed" : ""}">${carSilhouette(id)}<div><small>ANY CITY · LEVEL 10</small><b>${carSpec(id).name}</b><progress value="${complete}" max="10"></progress><span>${claimed ? "IN YOUR GARAGE" : `LVL ${complete}/10 · AUTO UNLOCK`}</span></div>${p.carBoxes?.includes(map) ? `<button data-claim-city="${map}">CLAIM LEGACY CAR ↗</button>` : ""}</article>`;
     }).join("") +
-    `<article class="creator-milestone">${carSilhouette("creator")}<div><b>TECHCRUSH YouTuber</b><span>${totalTakedowns(p) % 10}/10 patrols to your next box</span><progress value="${totalTakedowns(p) % 10}" max="10"></progress><small>First 10 unlock the car. Every 10 earn 3 exclusive parts.</small></div></article>`;
+    `<article class="creator-milestone">${carSilhouette("creator")}<div><b>TECHCRUSH YouTuber</b><span>${carUnlocked(p, "creator") ? "IN YOUR GARAGE" : `LVL ${Math.min(15, highestCityLevel(p))}/15 · ANY CITY`}</span><progress value="${Math.min(15, highestCityLevel(p))}" max="15"></progress><small>Reach LVL 15 to unlock. Every 10 patrols earn an exclusive parts box.</small></div></article>`;
+  holder.insertAdjacentHTML(
+    "beforeend",
+    `<div class="milestone-bonus"><b>EVERY 5 LEVELS · 2 BONUS BOXES</b><span>Mystery + Special · coins and high-grade parts</span>${CITY_IDS.map((map) => `<small>${map.toUpperCase()} · LVL ${cityLevel(p, map)} → NEXT ${5 * (Math.floor(cityLevel(p, map) / 5) + 1)}</small>`).join("")}<small>PATROL BONUS · ${totalTakedowns(p) % 10}/10 to next TECHCRUSH box</small></div>`,
+  );
   for (const b of holder.querySelectorAll("[data-claim-city]"))
     b.onclick = async () => {
       b.disabled = true;
@@ -48,7 +56,7 @@ export function refreshRewards(store) {
     };
 }
 export function rewardTiles(reward, level) {
-  return `<div class="reward-tiles"><div>${coinIcon}<strong>+${reward.cash.toLocaleString()}</strong><small>COINS BANKED</small></div><div><span class="box-symbol">◈</span><strong>+${reward.boxes + (reward.platinumBoxes || 0)}</strong><small>REWARD BOXES</small></div><div><span class="box-symbol">⚑</span><strong>${level}</strong><small>NEXT LEVEL</small></div></div>`;
+  return `<div class="reward-tiles"><div>${coinIcon}<strong>+${reward.cash.toLocaleString()}</strong><small>COINS BANKED</small></div><div><span class="box-symbol">◈</span><strong>+${reward.boxes + (reward.platinumBoxes || 0) + (reward.mysteryBoxes || 0) + (reward.specialBoxes || 0) + (reward.creatorBoxes || 0)}</strong><small>REWARD BOXES</small></div><div><span class="box-symbol">⚑</span><strong>${level}</strong><small>NEXT LEVEL</small></div></div>${reward.mysteryBoxes ? `<p class="milestone-payout">✦ LEVEL ${level} MILESTONE · +${reward.mysteryBoxes} MYSTERY + ${reward.specialBoxes} SPECIAL<br><small>Bonus coins + 6 high-grade parts · Open in Garage → Boxes</small></p>` : ""}${reward.unlockedCars?.length ? `<div class="unlocked-rewards"><b>AUTO UNLOCKED · READY IN EVERY CITY</b>${reward.unlockedCars.map((id) => `<span>${carSilhouette(id)}<small>${carSpec(id).name}</small></span>`).join("")}</div>` : ""}`;
 }
 
 export async function openCarReward(store, map) {

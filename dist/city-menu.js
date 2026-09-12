@@ -55,13 +55,13 @@ export function cityMenu(store, leave) {
         ? "✓ SELECTED"
         : "PLAY NOW ↗";
       b.querySelector("small").textContent =
-        `LVL ${cityLevel(p, map)} · ${Math.min(5, cityLevel(p, map) - 1)}/5`;
+        `LVL ${cityLevel(p, map)} · BOX AT ${5 * (Math.floor(cityLevel(p, map) / 5) + 1)}`;
     }
     $("menu-city-count").textContent = "3 / 3 OPEN";
     $("menu-race-label").textContent = `${CITY_NAME} · LEVEL ${cityLevel(p)}`;
-    $("unlock-title").textContent = "3 CITIES · 3 MYSTERY CARS";
+    $("unlock-title").textContent = "LVL 10 · ALL CARS / LVL 15 · TECHCRUSH";
     $("map-access-note").textContent =
-      "Clear level 5 in each city to unlock its exclusive car.";
+      "Reach either milestone in any city. Bonus boxes every 5 levels.";
     refreshRewards(store);
     $("result-kutaisi").hidden = false;
     $("result-kutaisi").textContent = "CHOOSE CITY · 3 MAPS ↗";

@@ -21,19 +21,11 @@ See [asset provenance](../ASSETS.md) for ODbL attribution and visual references.
 
 ## Cars and rewards
 
-The original four cars remain available. Completing level 5 means reaching level 6 in that city; a level-5 starting profile has not yet earned the reward.
+The original four cars remain available. As of **2.4**, reaching level 10 in **any** city automatically opens Falcon RS, Rioni GT and Coast X everywhere. Reaching level 15 opens TECHCRUSH. Every fifth reached city level grants a Mystery box and a Special box, each containing coins and three high-grade parts. Reaching level 10 means clearing level 9.
 
-| Milestone                                      | Reward                              |
-| ---------------------------------------------- | ----------------------------------- |
-| Finish Tbilisi level 5                         | Falcon RS mystery car box           |
-| Finish Kutaisi level 5                         | Rioni GT mystery car box            |
-| Finish Batumi level 5                          | Coast X mystery car box             |
-| First 10 banked patrol takedowns across cities | TECHCRUSH YouTuber Car              |
-| Every 10 banked patrol takedowns across cities | Creator box with three random parts |
+Every 10 cumulative banked patrol takedowns still earn a Creator box: three independent parts, each equally likely to be Platinum, Emerald, Ruby or TECHCRUSH. Platinum fits all cars; the three higher grades fit TECHCRUSH only. Store exclusive parts until level 15, or sell extras. Existing fusion and customization remain unchanged.
 
-City cars have fixed identities, revealed by opening their mystery box. Creator boxes independently roll three parts, so duplicates are possible. Their four possible grades are Platinum, Emerald, Ruby and TECHCRUSH. Platinum also fits regular cars; the three higher grades fit only the signature car. Existing five-step duplicate fusion still applies. The garage previews installed rims, tires, spoilers and paint and lists the exact stat change before an action.
-
-Milestones are granted by validated, banked runs; a rewind cannot duplicate a reward. Progress schema 5 migrates older profiles additively and grants already-earned city boxes and takedown milestones once. The server rejects locked cars, incompatible grades and repeated car-box claims. Coins, previous equipment, best times and city progress are preserved. Do not clear browser storage: the anonymous garage recovery key still identifies the player's saved profile.
+Schema 6 preserves previously unlocked cars and old earned/unclaimed city-car boxes, then grants missed five-level rewards once per city. New profiles use the level-10/15 rules. [Full reward and migration guide](MILESTONES.md). Keep the private garage key to retain access to your server-saved progress.
 
 ## Driving, audio and presentation
 
@@ -42,7 +34,7 @@ Milestones are granted by validated, banked runs; a rewind cannot duplicate a re
 - Wheel presentation samples asphalt and kerb height under the tires without changing physics, jump height or the water-fall state.
 - Auto is the default lighting mode. Active simulation runs a full 180-second night → dawn → day → dusk → night cycle; pause freezes it and rewind restores it. A saved manual choice remains respected.
 - Original loop music defaults on after the first click/key/touch allowed by the browser. M or Sound mutes all audio; Setup controls music volume and resets its playback/settings. Hidden tabs, pause and dialogs suspend playback.
-- The launch menu shows city level-5 progress, mystery rewards, car requirements, coin balance and clearer Play/Garage/Leaderboard actions. Completion panels show graphical reward tiles.
+- The launch menu shows each city’s next five-level bonus, mystery rewards, car requirements, coin balance and clearer Play/Garage/Leaderboard actions. Completion panels show graphical reward tiles.
 
 ## Visual sharing and runtime cost
 

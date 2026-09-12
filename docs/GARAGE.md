@@ -53,3 +53,7 @@ Level clears reveal the earned three-part box before Garage/Next Level. Equip a 
 The browser pass exercised 1366×768, 1024×768, 390×844, 360×740, 320×640 and 844×390 layouts. No dialog or control had horizontal overflow. On 1366×768, the outer garage has no scrolling; parts and longer explanations scroll within their own pane. On 390×844, the default part inspector and Boxes fit within the active viewport, with only short content scrolling needed for extra fusion details or small phone heights.
 
 The same pass bought an upgrade, previewed a higher tier without spending, sold a spare, fused twice, installed TECHCRUSH rims, changed paint, opened Street/Creator boxes, claimed a drop, switched tabs with the keyboard and reloaded the saved profile. The studio’s animation request is cancelled after closing and while its mobile pane is hidden. All 199 shared gameplay, profile, economy and API tests remain green. Browser checks use a local SQLite fixture; no public leaderboard rows are created.
+
+## Milestone supply drops (2.4)
+
+Garage → **Boxes** now lists Mystery and Special before the existing Street, Platinum and TECHCRUSH boxes. Each new box awards coins immediately and three high-grade parts; the reveal shows the coin amount and allows free stronger-part installation or selling. The badge counts all five box types. Coin awards, part draws and the box decrement are saved together before the reveal; closing or skipping it cannot lose rewards. [Exact odds, car unlocks and retroactive rewards](MILESTONES.md).

@@ -4,7 +4,7 @@
 
 ## Unlock and travel
 
-Select **KUTAISI** in the start menu. As of 2.0 it is open immediately, with no Tbilisi prerequisite. The cities retain separate endless levels and rankings; cars, credits, inventory and upgrades are shared. Clear Kutaisi level 5 to receive the **Rioni GT** mystery car box. City switching banks the run, then reloads to free the old scene.
+Select **KUTAISI** in the start menu. As of 2.0 it is open immediately, with no Tbilisi prerequisite. The cities retain separate endless levels and rankings; cars, credits, inventory and upgrades are shared. Reach level 10 in any city to unlock **Rioni GT** with the other ordinary reward cars. Every fifth reached city level gives bonus boxes. [Milestone rules](MILESTONES.md). City switching banks the run, then reloads to free the old scene.
 
 ## Places and roads
 

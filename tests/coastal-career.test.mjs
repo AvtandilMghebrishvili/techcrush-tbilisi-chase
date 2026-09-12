@@ -34,7 +34,7 @@ const metrics = (map) => ({
   quests: [],
   timing: { course: MAP_COURSES[map], elapsedMs: 85000, rewinds: 1 },
 });
-test("three cities are open; level-five car boxes and ten-takedown boxes are permanent and idempotent", () => {
+test("three cities are open; bonus and takedown boxes persist while cars await the new level requirements", () => {
   let p = newProfile();
   p.credits = 12345;
   p.cars.gt = { engine: 4, stars: { engine: 3 }, paint: "#123456" };
@@ -58,7 +58,7 @@ test("three cities are open; level-five car boxes and ten-takedown boxes are per
     };
     p = applyProgressAction(p, action, undefined, { now: 100000 });
     assert.equal(cityLevel(p, map), 6);
-    assert(p.carBoxes.includes(map));
+    assert(!p.carBoxes.includes(map));
     assert.deepEqual(
       applyProgressAction(p, action),
       p,
@@ -69,11 +69,11 @@ test("three cities are open; level-five car boxes and ten-takedown boxes are per
       () => applyProgressAction(p, { type: "select", car: CITY_CARS[map] }),
       /Unlock/,
     );
-    p = applyProgressAction(p, { type: "claim-car-box", map });
-    assert(carUnlocked(p, CITY_CARS[map]));
     assert.throws(() => applyProgressAction(p, { type: "claim-car-box", map }));
   }
-  assert(carUnlocked(p, "creator"));
+  assert(!carUnlocked(p, "creator"));
+  assert.equal(p.mysteryBoxes, 3);
+  assert.equal(p.specialBoxes, 3);
   assert.equal(p.creatorBoxes, 3);
   assert.equal(p.creatorMilestones, 3);
   assert.deepEqual(p.cars.gt, {
@@ -88,6 +88,7 @@ test("three cities are open; level-five car boxes and ten-takedown boxes are per
 });
 test("creator drops can repeat, advanced tiers are exclusive and fused performance remains finite", () => {
   let p = newProfile();
+  p.level = 15;
   p.community.takedowns = 10;
   p = migrateProfile(p);
   p = applyProgressAction(

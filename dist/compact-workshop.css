@@ -1250,3 +1250,73 @@
     box-shadow: none;
   }
 }
+
+/* Career milestones reuse existing artwork and only render when the UI changes. */
+.milestone-bonus {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid #827047;
+  border-radius: 7px;
+  background: #26261f;
+  font-size: 10px;
+}
+.milestone-bonus b,
+.milestone-payout {
+  color: #f8d885;
+}
+.milestone-bonus span,
+.milestone-bonus small {
+  color: #c5cbd3;
+}
+.milestone-payout {
+  padding: 9px;
+  border: 1px solid #827047;
+  border-radius: 7px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.milestone-payout small {
+  color: #c5cbd3;
+}
+.unlocked-rewards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.unlocked-rewards > b {
+  flex-basis: 100%;
+  color: #a5ecc6;
+}
+.unlocked-rewards > span {
+  display: grid;
+  width: 100px;
+}
+.unlocked-rewards .car-photo {
+  width: 100%;
+  height: 55px;
+  object-fit: contain;
+}
+.loot-coins {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #f8d885;
+  margin: 8px 0;
+}
+.loot-coins[hidden] {
+  display: none;
+}
+.loot-coins .coin-icon {
+  width: 24px;
+  height: 24px;
+}
+.loot-coins b {
+  font-size: 22px;
+}
+.loot-coins span {
+  font-size: 10px;
+}

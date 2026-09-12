@@ -154,3 +154,9 @@ Profile schema 5 adds Batumi progress, owned/queued city cars and banked creator
 `reward-ui.js` renders mastery, coins, car eligibility and reveal dialogs. `driving-feel.js` stores bounded local control preferences. `vehicle-ground.js` uses indexed tire contact samples and a per-car WeakMap cache to align wheel presentation with asphalt and kerbs. `background-music.js` owns one native media element and uses the existing activity lifecycle rather than an extra render loop.
 
 `server/result-image.mjs` and `server/share-glyphs.mjs` generate public PNG cards using the Worker's native CompressionStream API. `/result/:id/image.png` shares the same listed-record permission check as its HTML page. The client loads the image only in result sharing; no continuous PNG rendering occurs during play.
+
+## Career milestones (2.4)
+
+Profile schema 6 adds `mysteryBoxes`, `specialBoxes` and a fixed three-entry `levelMilestones` high-water mark. `syncMilestones` runs on migration and validated settlement: highest city level 10 unlocks the ordinary reward fleet; 15 unlocks Creator. Each city awards the difference between `floor(level / 5)` and its recorded milestone count. This is O(number of cities), even for old high-level saves. Legacy schema-5 eligibility and pending city-car claims remain honored without granting new early unlocks.
+
+`open-mystery-box` / `open-special-box` derive three items and coins from server randomness and atomically store them with the decrement under the existing optimistic version/idempotency guard. Clients supply no reward values. A settlement's `lastReward` includes bonus box deltas and newly unlocked cars. No database DDL, background timer, renderer, media asset, third-party service or ranked course change is needed. See [MILESTONES.md](MILESTONES.md).

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.0 — 2026-09-13
+
+- Automatically unlock all ordinary reward cars at level 10 in any city and TECHCRUSH at level 15. Keep already owned and previously earned legacy cars.
+- Award one Mystery plus one Special box on entering level 5, 10, 15 and every five levels thereafter, independently per city, with retroactive grants and constant-size milestone tracking.
+- Add server-drawn bonus coins and three high-grade parts per box, exact odds in the compact supply panel, coin reveals and free equip/sell actions. Retain Street, stunt and takedown boxes.
+- Show current/next city bonuses, car unlock requirements, graphical finish rewards and a direct Open Bonus Boxes action. Preserve all existing artwork and idle rendering behavior.
+- Add nine focused progression/API tests for all-city unlock thresholds, migrations, endless milestones, rarity boundaries, duplicate drops, replay safety and concurrent box spending.
+
 ## 2.3.0 — 2026-09-13
 
 - Add separately adjustable minimap display size (80–160%, default 110%) and world zoom (0.5–2.5×). Keep Setup and full-map controls synchronized, preview changes immediately and persist browser preferences after the slider gesture.
