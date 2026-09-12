@@ -17,7 +17,7 @@ flowchart LR
   View --> Canvas[WebGL canvas]
 ```
 
-`main.js` accumulates animation-frame time and calls `sim.update(1 / 120, input)` at a fixed rate. Incoming frame time is capped at 0.05 seconds to limit catch-up after interruptions. Rendering and audio update once per animation frame; HUD text updates are throttled to roughly 0.08 seconds. The simulation owns positions, velocities, damage, scoring and pursuit decisions. The renderer reads that state and maintains transient visual effects.
+`main.js` accumulates active animation-frame time and calls `sim.update(1 / 120, input)` at a fixed rate. `frame-loop.js` coalesces invalidations, cancels callbacks while hidden, and resets its clock after idle so resuming cannot integrate background wall time. Incoming frame time is capped at 0.05 seconds. Rendering and audio update once per active frame; HUD text updates are throttled to roughly 0.08 seconds, with immediate phase changes. Menus, pause and settled result screens retain a static image and own no continuous frame callback. A final explosion drains before idling. UI changes request a frame; the garage preview independently renders on demand. The simulation owns positions, velocities, damage, scoring and pursuit decisions. The renderer reads that state and maintains transient visual effects. See [performance lifecycle](PERFORMANCE.md).
 
 ## Module guide
 
@@ -111,7 +111,7 @@ There is no multiplayer or persistent leaderboard. Runtime assets are local to t
 
 Physics emits material-tagged `soundEvents` immediately after contacts at 120 Hz. Each cue includes world position, impact, breakage and simulation time; source cooldowns suppress solver duplicates. The renderer-frame audio update drains these independently of the 80 ms HUD update. Sounds beyond 125 metres are rejected before queuing, the queue is capped at 48 and the mixer at 28 one-shot voices. Stereo, distance attenuation, attack/release envelopes and a compressor control the mix.
 
-AudioContext and eight small WAV assets are initialized only after the user enables sound. Missing recordings fail softly while procedural engine/air layers continue. Pause, rewind and mute consume queued effects, clear pass history as appropriate, and silence active voices. Sound queues/cooldowns are transient and explicitly cleared on rewind restoration; they are not save data. The checked-in CC0 inputs, processing script and per-file hashes are described in ASSETS.md and data/audio-sources.json.
+AudioContext and eight small WAV assets are initialized only after the user enables sound. Missing recordings fail softly while procedural engine/air layers continue. Pause, rewind and mute consume queued effects, clear pass history as appropriate, and disconnect active one-shot graphs. `syncContext` suspends DSP when muted, hidden, in a menu or paused, and resumes for audible gameplay. Terminal one-shots suspend the context after their final `onended` callback. A single context and decoded buffers are retained for reuse; mute does not merely turn down oscillators that continue consuming CPU. Sound queues/cooldowns are transient and explicitly cleared on rewind restoration; they are not save data. The checked-in CC0 inputs, processing script and per-file hashes are described in ASSETS.md and data/audio-sources.json.
 
 ## Damage and crash effects
 

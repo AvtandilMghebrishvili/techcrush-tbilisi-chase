@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Share the link with friends; each browser gets its own saved garage.
 
+Menus, pause screens and finished chases now stop continuous rendering and audio processing. Garage previews update when you interact with them. [Performance improvements and measurements](docs/PERFORMANCE.md).
+
 **[▶ WATCH / DOWNLOAD THE 46-SECOND GAMEPLAY TRAILER (1080p MP4)](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases/download/v1.6.0/TECHCRUSH-Nightshift-Action-46s-1080p.mp4)**
 
 Actual game footage: city flyovers, police chases, jumps, crashes, car selection, reward boxes, visible garage upgrades and cockpit driving. [Video guide and download instructions](docs/TRAILER.md).

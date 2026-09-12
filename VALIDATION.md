@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Idle CPU lifecycle 1.7.1 — 12 September 2026
+
+`npm test`: **107 passed, 0 failed** including four new lifecycle/audio cleanup cases. Production Worker/assets build passes. [Detailed before/after measurements and reproduction steps](docs/PERFORMANCE.md).
+
+In controlled local Chrome samples, paused/result/menu city rendering fell from roughly 60 frames/second to zero after settling, and the stationary garage stopped its separate rendering loop. Main-thread task time in three-second idle windows fell from 175–3,029 ms to at most 1 ms. AudioContext changes from running to suspended in previously played idle states. Invisible turbo SVG animation is paused as well. These are idle workload measurements, not total machine CPU or gameplay FPS guarantees.
+
+Browser regressions passed driving, audio mute/resume, synthetic visibility lifecycle, crash-tail disposal, waking from game-over with Q rewind, and on-demand garage orbit/inspection. Six warmed run/garage cycles kept geometry/texture counts constant, effects/voices at zero after returning, and collected JS heap within 59.33–59.67 MiB. No growing resource leak was observed in this bounded sample. Mobile emulation passed the existing touch, synthetic gyro permission/fallback, pinch and five viewport/layout checks. No page errors were reported; no physical-device thermal or long-soak claim is made.
+
+Changes retain the same visual detail, simulation, saved-garage format and public URL. Local QA uses an in-memory database; measurement fixtures are excluded from production.
+
 ## Mobile driving 1.7.0 — 12 September 2026
 
 `npm test`: **103 passed, 0 failed**. Seven mobile cases cover four screen orientations, calibration/dead zone/filtering, Euler-angle wrap, stale-data neutrality, independent pointer ownership, keyboard priority, auto-gas brake override, actual simulation equivalence/rewind, GPU pixel budgets and portrait camera framing. Production Worker/assets build passes.

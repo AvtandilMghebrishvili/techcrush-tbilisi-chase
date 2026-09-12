@@ -18,6 +18,7 @@ const ASSETS = {
 export class ChaseAudio {
   constructor() {
     this.muted = true;
+    this.foreground = true;
     this.telemetry = {};
     this.passBy = new PassByTracker();
     this.voices = new Set();
@@ -35,7 +36,31 @@ export class ChaseAudio {
       this.loading = this.load().catch(() => {});
     }
     await this.context.resume();
+    this.requestedState = null;
+    this.syncContext();
     return true;
+  }
+  setForeground(value) {
+    this.foreground = value;
+    if (!value) this.stopEffects();
+    this.syncContext();
+  }
+  syncContext() {
+    const c = this.context;
+    if (!c || c.state === "closed") return;
+    const wanted =
+      this.foreground &&
+      !this.muted &&
+      (this.phase === "running" || this.voices.size > 0)
+        ? "running"
+        : "suspended";
+    if (this.requestedState === wanted) return;
+    this.requestedState = wanted;
+    // Silence at the gain is not enough: suspend the oscillator/filter graph.
+    const operation = wanted === "running" ? c.resume() : c.suspend();
+    void operation.catch(() => {
+      if (this.requestedState === wanted) this.requestedState = null;
+    });
   }
   build() {
     const c = this.context;
@@ -160,13 +185,14 @@ export class ChaseAudio {
         this.context.currentTime,
         0.02,
       );
+    this.syncContext();
   }
   stopEffects() {
     for (const voice of this.voices) {
       try {
         voice.source.stop();
       } catch {}
-      voice.gain.disconnect();
+      voice.dispose();
     }
     this.voices.clear();
   }
@@ -191,6 +217,13 @@ export class ChaseAudio {
       : [];
     this.lastTime = sim.time;
     this.phase = sim.phase;
+    if (this.muted || !this.foreground || (!running && !terminal)) {
+      this.stopEffects();
+      if (this.loops)
+        this.loops.gain.setValueAtTime(0, this.context.currentTime);
+      this.syncContext();
+      return;
+    }
     if (!this.context) return;
     const c = this.context,
       t = c.currentTime,
@@ -318,6 +351,7 @@ export class ChaseAudio {
         this.effect(event, p);
       }
     }
+    this.syncContext();
   }
   play(
     buffer,
@@ -367,12 +401,17 @@ export class ChaseAudio {
     source.connect(low).connect(gain).connect(panner).connect(this.master);
     const item = { source, gain };
     this.voices.add(item);
-    source.onended = () => {
+    item.dispose = () => {
+      source.onended = null;
       source.disconnect();
       low.disconnect();
       gain.disconnect();
       panner.disconnect();
       this.voices.delete(item);
+    };
+    source.onended = () => {
+      item.dispose();
+      this.syncContext();
     };
     source.start(t);
     source.stop(end);
@@ -511,11 +550,16 @@ export class ChaseAudio {
     source.connect(gain).connect(panner).connect(this.master);
     const item = { source, gain };
     this.voices.add(item);
-    source.onended = () => {
+    item.dispose = () => {
+      source.onended = null;
       source.disconnect();
       gain.disconnect();
       panner.disconnect();
       this.voices.delete(item);
+    };
+    source.onended = () => {
+      item.dispose();
+      this.syncContext();
     };
     source.start();
     source.stop(t + duration + 0.02);

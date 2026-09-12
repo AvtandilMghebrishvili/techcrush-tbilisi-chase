@@ -5,8 +5,15 @@ import {
 } from "./mobile-input.js";
 const $ = (id) => document.getElementById(id);
 export class MobileControls {
-  constructor({ pause, clearKeys, recover, quality, phase }) {
-    this.actions = { pause, clearKeys, recover, quality, phase };
+  constructor({
+    pause,
+    clearKeys,
+    recover,
+    quality,
+    phase,
+    invalidate = () => {},
+  }) {
+    this.actions = { pause, clearKeys, recover, quality, phase, invalidate };
     this.touch = new PointerLedger();
     this.tilt = new TiltSteering();
     this.mode = "buttons";
@@ -89,6 +96,10 @@ export class MobileControls {
         clearTimeout(this.sensorTimer);
         this.status("Gyro ready. Tilt left / right; hold GAS to drive.");
       }
+      if ($("controls-dialog").open) {
+        this.tilt.update(1 / 60, performance.now());
+        $("tilt-meter").style.setProperty("--steer", this.tilt.value);
+      }
     };
     const rotated = () => {
       this.clear();
@@ -124,11 +135,13 @@ export class MobileControls {
         this.touch.down(e.pointerId, button.dataset.key);
         button.setPointerCapture(e.pointerId);
         this.paintHeld();
+        this.actions.invalidate();
       });
       for (const name of ["pointerup", "pointercancel", "lostpointercapture"])
         button.addEventListener(name, (e) => {
           this.touch.up(e.pointerId);
           this.paintHeld();
+          this.actions.invalidate();
         });
     }
     this.syncLayout();
@@ -200,6 +213,7 @@ export class MobileControls {
     this.mode = "buttons";
     this.waiting = false;
     removeEventListener("deviceorientation", this.onOrientation);
+    this.sensorAttached = false;
     this.tilt.reset();
     document.body.classList.remove("gyro-active");
     $("tilt-enable").disabled = false;
@@ -226,25 +240,21 @@ export class MobileControls {
         return this.disableTilt(
           "Motion permission was declined. Buttons still work. Enable access in browser settings to try gyro again.",
         );
+      removeEventListener("deviceorientation", this.onOrientation);
+      this.sensorAttached = false;
       this.mode = "gyro";
       this.waiting = true;
       this.tilt.reset();
       this.settings.controls = "on";
       this.syncLayout();
       this.save();
-      addEventListener("deviceorientation", this.onOrientation);
       document.body.classList.add("gyro-active");
       $("tilt-enable").setAttribute("aria-pressed", "true");
       $("buttons-enable").setAttribute("aria-pressed", "false");
       this.status(
         "Hold your phone in a comfortable driving position. Waiting for the motion sensor…",
       );
-      this.sensorTimer = setTimeout(() => {
-        if (this.waiting)
-          this.disableTilt(
-            "No motion data received. Use buttons or open the game directly in Safari / Chrome.",
-          );
-      }, 5000);
+      this.syncActivity();
     } catch {
       if (request === this.requestId)
         this.disableTilt(
@@ -267,9 +277,11 @@ export class MobileControls {
   }
   tick(dt) {
     this.tilt.update(dt, performance.now());
-    $("tilt-meter").style.setProperty("--steer", this.tilt.value);
+    if ($("controls-dialog").open)
+      $("tilt-meter").style.setProperty("--steer", this.tilt.value);
     if (
       this.mode === "gyro" &&
+      this.sensorAttached &&
       !this.waiting &&
       performance.now() - this.tilt.lastSample > 3000 &&
       !document.hidden
@@ -282,6 +294,35 @@ export class MobileControls {
     if (running && !this.wake && !this.wakePending && !this.wakeFailed)
       this.acquireWake();
     if (!running && this.wake) this.releaseWake();
+  }
+  syncActivity(allowed = true) {
+    const playing = ["running", "rewinding"].includes(this.actions.phase());
+    const sensing =
+      allowed &&
+      !document.hidden &&
+      this.mode === "gyro" &&
+      ((playing && this.active) || $("controls-dialog").open);
+    if (sensing && !this.sensorAttached) {
+      this.sensorAttached = true;
+      this.tilt.reset();
+      this.waiting = true;
+      addEventListener("deviceorientation", this.onOrientation);
+      clearTimeout(this.sensorTimer);
+      this.sensorTimer = setTimeout(() => {
+        if (this.waiting)
+          this.disableTilt(
+            "No motion data received. Use buttons or open the game directly in Safari / Chrome.",
+          );
+      }, 5000);
+    } else if (!sensing && this.sensorAttached) {
+      removeEventListener("deviceorientation", this.onOrientation);
+      this.sensorAttached = false;
+      clearTimeout(this.sensorTimer);
+      this.waiting = false;
+      this.tilt.reset();
+    }
+    if (!allowed || document.hidden || !playing || !this.active)
+      this.releaseWake();
   }
   read(keyboard, keys, phase) {
     return mergeMobileInput(

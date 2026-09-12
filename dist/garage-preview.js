@@ -5,6 +5,7 @@ import { carSpec } from "./config.js";
 import { paintColor, box, metal } from "./customization.js";
 import { makePartModel } from "./workshop-parts.js";
 import { disposeGroup } from "./effects.js";
+import { FrameLoop } from "./frame-loop.js";
 
 export class GaragePreview {
   constructor(host, source) {
@@ -16,6 +17,10 @@ export class GaragePreview {
     this.pitch = 0.28;
     this.zoom = 6.7;
     this.mode = "exterior";
+    this.loop = new FrameLoop(() => {
+      this.tick();
+      return false;
+    });
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(
       Math.min(devicePixelRatio, source.budget?.low ? 1 : 1.5),
@@ -48,6 +53,15 @@ export class GaragePreview {
     this.scene.add(halo);
     this.observer = new ResizeObserver(() => this.resize());
     this.observer.observe(host);
+    document.addEventListener("visibilitychange", () => {
+      this.loop.setEnabled(this.active && !document.hidden);
+      this.loop.invalidate();
+    });
+    addEventListener("pagehide", () => this.loop.setEnabled(false));
+    addEventListener("pageshow", () => {
+      this.loop.setEnabled(this.active && !document.hidden);
+      this.loop.invalidate();
+    });
     const c = this.renderer.domElement;
     this.pointers = new Map();
     c.onpointerdown = (e) => {
@@ -69,6 +83,7 @@ export class GaragePreview {
         );
         this.pinch = pinch;
         this.drag = { x: e.clientX, y: e.clientY };
+        this.loop.invalidate();
         return;
       }
       this.mode = "exterior";
@@ -79,6 +94,7 @@ export class GaragePreview {
         0.85,
       );
       this.drag = { x: e.clientX, y: e.clientY };
+      this.loop.invalidate();
     };
     c.onpointerup =
       c.onpointercancel =
@@ -93,6 +109,7 @@ export class GaragePreview {
     c.onwheel = (e) => {
       e.preventDefault();
       this.zoom = THREE.MathUtils.clamp(this.zoom + e.deltaY * 0.004, 5.6, 10);
+      this.loop.invalidate();
     };
     this.resize();
   }
@@ -136,6 +153,7 @@ export class GaragePreview {
     this.carId = id;
     if (this.car.userData.glass) this.car.userData.glass.opacity = 0.55;
     for (const l of this.car.userData.headlights || []) l.intensity = 0;
+    this.loop.invalidate();
   }
   angle(mode) {
     this.mode = mode;
@@ -154,16 +172,18 @@ export class GaragePreview {
       this.pitch = 0.16;
       this.zoom = 5.6;
     }
+    this.loop.invalidate();
   }
   start() {
     if (this.active) return;
     this.active = true;
+    this.loop.setEnabled(!document.hidden);
     this.resize();
-    this.tick();
+    this.loop.invalidate();
   }
   stop() {
     this.active = false;
-    cancelAnimationFrame(this.frame);
+    this.loop.setEnabled(false);
     this.drag = null;
     this.pointers.clear();
     this.pinch = 0;
@@ -174,6 +194,7 @@ export class GaragePreview {
     this.renderer.setSize(r.width, r.height);
     this.camera.aspect = r.width / r.height;
     this.camera.updateProjectionMatrix();
+    this.loop.invalidate();
   }
   tick = () => {
     if (!this.active) return;
@@ -197,7 +218,6 @@ export class GaragePreview {
       this.camera.updateProjectionMatrix();
       this.renderer.render(this.scene, this.camera);
     }
-    this.frame = requestAnimationFrame(this.tick);
   };
   artwork(id, tier) {
     const key = `${id}:${tier}`;

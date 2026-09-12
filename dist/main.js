@@ -1,4 +1,5 @@
 import { ChaseAudio } from "./chase-audio.js";
+import { FrameLoop } from "./frame-loop.js";
 import { MobileControls } from "./mobile-ui.js";
 import { LIGHTING_MODES } from "./city-lighting.js";
 import { ROADS } from "./city-map.js";
@@ -36,13 +37,32 @@ let sim,
   view,
   mobile,
   muted = true,
-  last = 0,
   accumulator = 0,
   toastUntil = 0,
-  uiTime = 0;
+  uiTime = 0,
+  lastHUDPhase = null;
 let agentInput = null;
 let selectedCar = "gt";
 const soundscape = new ChaseAudio();
+const loop = new FrameLoop(frame);
+const wake = () => loop.invalidate();
+function dialogOpen() {
+  return ["workshop", "loot-dialog", "controls-dialog"].some(
+    (id) => $(id).open,
+  );
+}
+function refreshActivity() {
+  loop.setEnabled(!document.hidden);
+  soundscape.setForeground(!document.hidden && !dialogOpen());
+  mobile?.syncActivity();
+  document.body.classList.toggle(
+    "idle",
+    document.hidden ||
+      dialogOpen() ||
+      !["running", "rewinding"].includes(sim.phase),
+  );
+  wake();
+}
 if (document.modelContext?.registerTool) {
   try {
     Promise.resolve(
@@ -121,6 +141,7 @@ function chooseCar(id) {
   const c = upgradedSpec(carSpec(id), equipment);
   $("car-details").textContent =
     c.description + " · " + Math.round(c.topSpeed * 3.6) + " km/h";
+  wake();
 }
 function setupGarage() {
   const garage = $("garage");
@@ -195,6 +216,7 @@ function switchCamera(id) {
     "aria-label",
     "Camera: " + mode.label + "; click to switch",
   );
+  wake();
 }
 function switchLighting() {
   const modes = LIGHTING_MODES,
@@ -205,6 +227,7 @@ function switchLighting() {
   } catch {}
   lighting.update(sim);
   updateLightingLabel();
+  wake();
 }
 function updateLightingLabel() {
   const lighting = view.lighting;
@@ -228,6 +251,7 @@ async function toggleSound() {
     if (!(await soundscape.unlock())) throw Error("Web Audio unavailable");
     muted = !muted;
     soundscape.setMuted(muted);
+    wake();
     $("sound").textContent = muted ? "SOUND OFF" : "SOUND ON";
     $("sound").setAttribute(
       "aria-label",
@@ -249,7 +273,7 @@ async function start() {
   )
     return;
   // Unlock the existing audio context while a tap still has user activation.
-  void soundscape.unlock().catch(() => {});
+  if (!muted) void soundscape.unlock().catch(() => {});
   transitioning = true;
   try {
     await bankRun();
@@ -274,6 +298,7 @@ async function start() {
     document.body.classList.add("playing");
     accumulator = 0;
     updateHUD();
+    refreshActivity();
   } catch (error) {
     showModal("SAVE PENDING", error.message, "YOUR GARAGE", true);
   } finally {
@@ -289,6 +314,7 @@ function pause() {
     mobile?.clear();
     showModal("PAUSED.", "Your getaway can wait.", "TAKE A BREATHER", false);
   } else {
+    if (!muted) void soundscape.unlock().catch(() => {});
     mobile?.reset();
     sim.phase = "running";
     $("modal").hidden = true;
@@ -296,6 +322,7 @@ function pause() {
   }
   document.body.dataset.phase = sim.phase;
   audioTick();
+  refreshActivity();
 }
 function showModal(title, copy, kicker, end) {
   mobile?.clear();
@@ -578,14 +605,14 @@ function drawMap() {
   c.arc(115, 115, 112, -Math.PI * 0.65, -Math.PI * 0.35);
   c.stroke();
 }
-function frame(now) {
-  const dt = Math.min((now - last) / 1000 || 0, 0.05);
-  last = now;
+function frame(dt) {
+  const blocked = dialogOpen();
   mobile?.tick(dt);
   if (
-    sim.phase === "running" ||
-    sim.phase === "rewinding" ||
-    (input().rewind && ["wrecked", "busted"].includes(sim.phase))
+    !blocked &&
+    (sim.phase === "running" ||
+      sim.phase === "rewinding" ||
+      (input().rewind && ["wrecked", "busted"].includes(sim.phase)))
   ) {
     accumulator += dt;
     while (accumulator >= 1 / 120) {
@@ -601,20 +628,23 @@ function frame(now) {
     if (sim.time > toastUntil) $("toast").classList.remove("visible");
   }
   audioTick(dt);
-  if (
-    !document.hidden &&
-    !$("workshop").open &&
-    !$("loot-dialog").open &&
-    !$("controls-dialog").open
-  )
-    view.render(sim, dt, input());
+  if (!blocked) view.render(sim, dt, input());
   uiTime += dt;
-  if (uiTime > 0.08) {
+  const moving = ["running", "rewinding"].includes(sim.phase);
+  if (uiTime > 0.08 || sim.phase !== lastHUDPhase) {
     updateLightingLabel();
     if (sim.phase !== "ready") updateHUD();
+    lastHUDPhase = sim.phase;
     uiTime = 0;
   }
-  requestAnimationFrame(frame);
+  document.body.classList.toggle("idle", blocked || !moving);
+  mobile?.syncActivity();
+  // Let a final crash finish and release its debris, then retain the last image.
+  return (
+    !blocked &&
+    (moving ||
+      (["won", "wrecked", "busted"].includes(sim.phase) && view.fx.size > 0))
+  );
 }
 function registerTools() {
   const context = document.modelContext;
@@ -646,6 +676,7 @@ function registerTools() {
           keys.delete("q");
           sim.timeline.release(sim);
         }
+        wake();
         return sim.snapshot();
       },
     },
@@ -755,13 +786,17 @@ try {
   setupGarage();
   workshop = new GarageUI(career, chooseCar, view);
   mobile = new MobileControls({
+    invalidate: wake,
     pause,
     clearKeys: () => keys.clear(),
     phase: () => sim.phase,
     recover: () => {
       if (sim.phase === "running") sim.recover();
     },
-    quality: (mode) => view.setQuality(mode),
+    quality: (mode) => {
+      view.setQuality(mode);
+      wake();
+    },
   });
   $("control-settings").disabled = false;
   $("mobile-setup").disabled = false;
@@ -816,6 +851,7 @@ try {
     if ([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(k))
       e.preventDefault();
     keys.add(k);
+    wake();
     if (!e.repeat) {
       if (k === "p" || k === "Escape") pause();
       if (k === "r") sim.recover();
@@ -824,7 +860,10 @@ try {
       if (k === "Enter" && sim.phase === "ready") start();
     }
   });
-  addEventListener("keyup", (e) => keys.delete(normalizeKey(e)));
+  addEventListener("keyup", (e) => {
+    keys.delete(normalizeKey(e));
+    wake();
+  });
   addEventListener("blur", () => {
     keys.clear();
     if (sim.timeline.active) sim.timeline.release(sim);
@@ -836,13 +875,25 @@ try {
       sim.timeline.release(sim);
     }
     if (document.hidden && sim.phase === "running") pause();
+    refreshActivity();
   });
+  addEventListener("resize", wake);
+  addEventListener("pagehide", () => {
+    if (["running", "rewinding"].includes(sim.phase)) pause();
+    loop.setEnabled(false);
+    soundscape.setForeground(false);
+    mobile?.syncActivity(false);
+  });
+  addEventListener("pageshow", refreshActivity);
+  const dialogs = new MutationObserver(refreshActivity);
+  for (const id of ["workshop", "loot-dialog", "controls-dialog"])
+    dialogs.observe($(id), { attributes: true, attributeFilter: ["open"] });
   registerTools();
   await view.renderer.compileAsync(view.scene, view.camera);
   loadingProgress(100, "READY TO RACE");
   $("loading").hidden = true;
   document.body.classList.add("loaded");
-  requestAnimationFrame(frame);
+  refreshActivity();
 } catch (e) {
   $("loading").hidden = true;
   $("error").hidden = false;

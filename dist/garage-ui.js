@@ -33,7 +33,19 @@ export class GarageUI {
       this.filter = button.dataset.filter;
       this.render();
     };
-    $("workshop").addEventListener("close", () => this.preview?.stop());
+    $("workshop").addEventListener("close", () => {
+      this.preview?.stop();
+      cancelAnimationFrame(this.statFrame);
+    });
+    const suspend = () => {
+      cancelAnimationFrame(this.statFrame);
+      this.skip?.();
+    };
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) suspend();
+    });
+    addEventListener("pagehide", suspend);
+    $("loot-dialog").addEventListener("close", () => this.skip?.());
     $("preview-angles").onclick = (e) => {
       const b = e.target.closest("[data-angle]");
       if (b) this.preview?.angle(b.dataset.angle);
@@ -115,14 +127,12 @@ export class GarageUI {
           ? "wheels"
           : "front",
     );
-    document
-      .querySelector(".garage-showcase")
-      .scrollIntoView({
-        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "instant"
-          : "smooth",
-        block: "start",
-      });
+    document.querySelector(".garage-showcase").scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+      block: "start",
+    });
   }
   animateUpgrade(before, after) {
     const changed = PARTS.filter(
@@ -161,7 +171,8 @@ export class GarageUI {
             (row.after - row.before) * ease
           ).toFixed(row.unit === "s" ? 2 : 1);
       }
-      if (t < 1) this.statFrame = requestAnimationFrame(tick);
+      if (t < 1 && $("workshop").open && !document.hidden)
+        this.statFrame = requestAnimationFrame(tick);
     };
     tick(start);
   }

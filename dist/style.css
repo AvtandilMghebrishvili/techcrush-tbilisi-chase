@@ -674,6 +674,13 @@ kbd {
 .speed-streaks path {
   stroke-dasharray: 5 12;
   animation: boost-streak 0.24s linear infinite;
+  animation-play-state: paused;
+}
+.turbo-active:not(.idle) .speed-streaks path {
+  animation-play-state: running;
+}
+.idle .speed-streaks {
+  visibility: hidden;
 }
 .turbo-active .speed-streaks {
   opacity: 0.55;

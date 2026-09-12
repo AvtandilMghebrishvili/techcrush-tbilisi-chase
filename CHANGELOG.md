@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.1 — 2026-09-12
+
+- Stop continuous city rendering and HUD work on the menu, pause and result screens. Finish the last crash burst, dispose its debris, then retain the last image. Input, resize, camera/lighting changes and dialog transitions request a fresh frame.
+- Render the garage preview only when its car, angle, size or pointer input changes. Cancel pending frames on close, page hide and navigation; stop hidden reward/upgrade animations.
+- Suspend the Web Audio graph when muted, paused, in menus or hidden. Resume for an audible chase, let terminal one-shots finish, and disconnect every node of interrupted collision sounds immediately. Muted starts no longer create or download audio.
+- Stop invisible turbo streak animations and remove gyro listeners outside gameplay or motion setup. Release screen wake locks when inactive and restore sensor calibration on return.
+- Add lifecycle regressions and measured idle CPU / repeated-run memory results in `docs/PERFORMANCE.md`. Driving physics, visual detail and garage saves are unchanged.
+
 ## 1.7.0 — 2026-09-12
 
 - Add multi-touch gas, brake/reverse, steering, drift and turbo with independent pointer ownership; preserve keyboard input and hold-to-rewind after crashes.
