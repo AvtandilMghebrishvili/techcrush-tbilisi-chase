@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="./ui-refresh.css" />
     <link rel="stylesheet" href="./community.css" />
     <link rel="stylesheet" href="./fusion-map.css" />
+    <link rel="stylesheet" href="./score-feedback.css" />
     <meta name="theme-color" content="#10151f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
@@ -239,6 +240,14 @@
             <span>LEVEL TIME</span><b id="run-time">0:00.00</b>
           </div>
           <span class="label">RUN SCORE</span><strong id="score">000000</strong>
+          <span id="score-multiplier" aria-label="Score multiplier">×1.00</span>
+          <div
+            id="score-feedback"
+            role="status"
+            aria-live="polite"
+            aria-relevant="additions"
+            aria-label="Recent bonus points"
+          ></div>
           <div class="checkpoint-heading">
             <span>CHECKPOINTS</span><b id="progress">0 / 6</b>
           </div>

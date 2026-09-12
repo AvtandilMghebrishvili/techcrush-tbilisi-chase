@@ -1,4 +1,5 @@
 import { QuestMap, QUEST_PINS, mapAtlas, MAP_EXTENT } from "./quest-map.js";
+import { ScoreFeedback } from "./score-feedback.js";
 import { ResultScreen } from "./result-screen.js";
 import {
   ACTIVE_MAP,
@@ -50,6 +51,7 @@ import {
 const $ = (id) => document.getElementById(id),
   keys = new Set();
 setupInterface();
+const scoreFeedbackUI = new ScoreFeedback($("score-feedback"), $("score"));
 const results = new ResultScreen(career);
 let sim,
   view,
@@ -59,6 +61,7 @@ let sim,
   toastUntil = 0,
   uiTime = 0,
   lastHUDPhase = null;
+let lastDotsKey = "";
 let agentInput = null;
 let selectedCar = "gt";
 const soundscape = new ChaseAudio();
@@ -483,6 +486,8 @@ function finish() {
   }
 }
 function toast(text) {
+  if (/^(PATROL DESTROYED|NEAR MISS|DRIFT  \+|TRAFFIC WRECK)/.test(text))
+    return;
   if (text === "BACK ON YOUR WHEELS" || text.startsWith("CAR RESET"))
     mobile?.clear();
   if (text === "COLLISION") {
@@ -503,11 +508,18 @@ function updateHUD() {
     Math.ceil(raceClock.elapsedMs / 10) * 10,
   );
   $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
-  $("score").textContent = Math.floor(sim.score).toString().padStart(6, "0");
+  const scoreText = Math.floor(sim.score).toString().padStart(6, "0");
+  if ($("score").textContent !== scoreText) $("score").textContent = scoreText;
+  $("score-multiplier").textContent = "×" + sim.rewardRates.score.toFixed(2);
+  scoreFeedbackUI.update(sim);
   $("progress").textContent = sim.checkpoint + " / 6";
-  $("dots").innerHTML = sim.checkpoints
-    .map((_, i) => `<i class="${i < sim.checkpoint ? "done" : ""}"></i>`)
-    .join("");
+  const dotsKey = sim.checkpoints.length + ":" + sim.checkpoint;
+  if (dotsKey !== lastDotsKey) {
+    $("dots").innerHTML = sim.checkpoints
+      .map((_, i) => `<i class="${i < sim.checkpoint ? "done" : ""}"></i>`)
+      .join("");
+    lastDotsKey = dotsKey;
+  }
   $("speed").textContent = Math.round(Math.abs(p.speed) * 3.6);
   $("health").textContent = Math.ceil(p.health) + "%";
   $("health-bar").style.width = p.health + "%";
@@ -525,7 +537,9 @@ function updateHUD() {
   $("turbo-charge").textContent = Math.round(p.nitro) + "%";
   $("drift-status").textContent = p.isDrifting
     ? "DRIFT · " + Math.round((Math.abs(p.slip) * 180) / Math.PI) + "°"
-    : "";
+    : p.understeer > 0.18
+      ? "WIDE TURN · EASE OFF"
+      : "";
   if (p.airborne)
     $("drift-status").textContent =
       "AIR · " + p.airTime.toFixed(1) + "s · A/D ROLL";
@@ -753,7 +767,7 @@ function frame(dt) {
   if (!blocked) view.render(sim, dt, input());
   uiTime += dt;
   const moving = ["running", "rewinding"].includes(sim.phase);
-  if (uiTime > 0.08 || sim.phase !== lastHUDPhase) {
+  if (uiTime > 0.08 || sim.phase !== lastHUDPhase || sim.scoreEvents.length) {
     updateLightingLabel();
     if (sim.phase !== "ready") updateHUD();
     lastHUDPhase = sim.phase;

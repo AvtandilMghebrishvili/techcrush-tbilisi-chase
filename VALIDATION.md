@@ -1,5 +1,13 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## v1.17.0 — Score feedback and cornering
+
+- All **190 automated tests** pass. New coverage checks exact scaled points/credits, bounded feed/queue, actual safe near-pass crossings in every heading, collision/following/teleport rejection, rewind restoration, both-map turn radius/speed scrub, braking before entry, maximum fused builds and 60/120 Hz behavior. Existing drift, mobile combined controls, pursuit, terrain, persistence and API tests remain green.
+- A local Chromium fixture produces actual simulation takedown, traffic-wreck and near-pass events and verifies three readable notices at 1440×900, 390×844, 360×640, 844×390 and 667×375. It uses controlled car positions for the visual test, not a normal-input win. Real Pause/Resume freezes the simulation clock, renderer frame count and CSS animation times, with no pending RAF over a 600 ms observation; notices expire after resumed play. No page/request errors or public test records.
+- Normal-input full level-1 controller: stock Veyra clears Tbilisi in **216.2 simulated seconds**, with **60 HP** and **16 takedowns**. Silver Vector clears Kutaisi in **204.6 seconds**, with **11 HP** and **18 takedowns**. Silver Apex is wrecked after four Kutaisi gates; stock Veyra reaches all six but is caught during escape with 58 HP. These runs use ordinary inputs and recovery, with no health/checkpoint cheats; the bot follows routes and does not deliberately dodge police rams.
+- The final minified production client passes UI-only driving (126 km/h observed), real local garage fusion, side-quest routing, pause, city switching and a saved three-part box at portrait size. No console/request errors, overflow or QA globals. Build/link checks confirm all **21 runtime assets / 41,110,441 bytes** remain byte-identical to source.
+- No saved profile schema or database migration changes. New physics uses timing courses Tbilisi 1.17 / Kutaisi 1.2 and preserves older archives. No new model, texture, audio download or render-quality reduction. Physical-device FPS/gyro and long-soak testing were not performed.
+
 ## v1.16.0 — Drift, Fusion and side-quest navigation
 
 - All **183 automated tests** pass. Added every-car/every-direction drift checks on both maps with stock, Diamond and maximum-fused Platinum parts; combined mobile nitro/drift; all fourteen parts through five stars at all rarities; insufficient/wrong duplicates; upgrade retention; finite maximum stats; atomic automatic level boxes; equip/sell replay prevention; actual SQLite API conflicts; four-minute continuous lighting; patrol speed/count bounds. Existing map, dry bridge, water recovery, building, tree, stunt and persistence regressions remain green.

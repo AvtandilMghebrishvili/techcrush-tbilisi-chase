@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.17.0 — 2026-09-13
+
+- Show up to three animated score notices for patrol takedowns, near misses, completed drifts, safe jump landings, checkpoints and escapes. Display actual awarded points and credits, with a desktop level multiplier. Traffic destruction correctly shows credits only.
+- Award near misses when the player actually passes a traffic car with safe side clearance and enough relative speed. Reject collisions, following, teleports and repeated junction proximity; rewind restores eligibility and clears stale notices.
+- Add gentle tire scrub and speed/grip-dependent understeer on both maps. Braking before a corner restores a tighter line; handbrake drift and combined mobile nitro remain available, including maximum fused builds.
+- Bound the event queue and DOM, reuse the existing HUD loop and pause animations when inactive. Update checkpoint dots only when progress changes. No new media or graphics-quality reduction.
+- Preserve garages, parts, levels and rankings. Archive previous timed courses and start Tbilisi 1.17 / Kutaisi 1.2 for the changed driving rules.
+
 ## 1.16.0 — 2026-09-13
 
 - Fix handbrake input after toolbar focus and rear-traction behavior with upgraded/fused tires. Support smooth drift entry, recovery and re-entry on both maps; keyboard and mobile turbo can accompany a turn.

@@ -8,7 +8,9 @@ Tests use Node's built-in test runner. They import simulation and geometry modul
 npm test
 ```
 
-The current suite contains **183 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/mobile.test.mjs`.
+The current suite contains **190 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/mobile.test.mjs`.
+
+`score-feedback.test.mjs` covers exact scaled point/credit events, bounded notices, real crossing-based near passes, collision/following/teleport rejection and rewind. `cornering-tbilisi.test.mjs` and `cornering-kutaisi.test.mjs` check wider fast turns, modest speed scrub, braking recovery, all maximum-fused car builds and 60/120 Hz stability. Existing drift tests retain both-map, upgraded-tire and simultaneous mobile nitro coverage.
 
 `career.test.mjs` covers full-footprint road clearance, all three bridges in both directions, thin-wall tunneling, distinct car geometry, 14 parts/four tiers, integrated upgrade physics, duplicate rewards, currency settlement, level difficulty, wreck-credit rewind and breakable poles. `save-api.test.mjs` checks isolated profiles, request retries/conflicts, box idempotency and actual SQLite close/reopen persistence.
 
@@ -39,7 +41,7 @@ node tests/route-drive.mjs suv 4 2
 
 Arguments are car ID, optional level, and optional installed tier for all parts (0 = stock). The level/tier arguments are controlled test starting conditions, not player rewards. The controller uses regular throttle, steering, handbrake, turbo and R recovery with traffic, police and collisions enabled. It prints a snapshot and exits unsuccessfully unless the run ends in won. It can simulate 480 seconds at 120 Hz and may take several minutes.
 
-It knows the ideal route and uses ordinary recovery, including the score penalty. It grants no checkpoints, health or immunity. It does not intentionally exercise stunts or rewind, which have separate tests. The latest recorded runs completed all six gates with all three trims; their scores and remaining HP are in [Validation](../VALIDATION.md#full-driving-runs).
+It knows the ideal route and uses ordinary recovery, including the score penalty. It grants no checkpoints, health or immunity. It does not intentionally exercise stunts or rewind, which have separate tests. Recorded outcomes, including unsuccessful runs, are in [Validation](../VALIDATION.md). A route-following controller does not actively evade police rams; not every car/build wins every run.
 
 For diagnosis, set the optional `TRACE` environment variable to `1` before running a controller. It prints position, target, heading and path samples. These longer runs are not part of routine push CI; repeat them for changes affecting routes, physics, pursuit balance or recovery.
 

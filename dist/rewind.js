@@ -109,6 +109,7 @@ export class RewindTimeline {
           },
         );
     sim.events.length = 0;
+    sim.scoreEvents.length = 0;
     sim.soundEvents.length = 0;
     sim.soundCooldowns.clear();
     this.lastApplied = index;

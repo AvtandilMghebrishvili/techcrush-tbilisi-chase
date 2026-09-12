@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**New: Bonus feedback & cornering** — animated notices beside the score show patrol takedown, near-pass, drift, jump and checkpoint rewards. Real close passes earn bonuses; following or colliding does not. Fast, sharp turns scrub a little speed and run wider until you ease off or brake. Keyboard/mobile drift and nitro stay available. [Scoring and driving guide](docs/SCORE_FEEDBACK.md).
+
 **New: Drift & Fusion update** — reliable handbrake turns on both maps (including after clicking the camera), stronger player-matched police, a **four-minute Auto day/night cycle**, and **MAP + SIDE QUESTS** with rooftop/river route selection. Level-clear boxes now reveal immediately: equip stronger drops, sell spares or keep duplicates for **five fusion stars**. Existing saves are preserved. [Fusion rules and update guide](docs/FUSION.md).
 
 **New: Kutaisi is playable** — clear **Tbilisi level 3**, then select **02 / KUTAISI** above the car selector. Explore the Rioni, White/Red/Rustaveli/Chain bridges, Colchis Fountain, Bagrati Cathedral, the royal quarter and more. Two stunt challenges award secret **Platinum boxes**, each containing three parts. Cities have separate endless levels and leaderboards; your cars, paint, upgrades, inventory and credits are shared. [Kutaisi map, unlock and challenge guide](docs/KUTAISI.md).

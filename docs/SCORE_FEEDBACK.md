@@ -1,0 +1,21 @@
+# Bonus feedback and cornering
+
+Animated notices appear beside the score, with the newest at the top. They show the amount actually awarded, including the current level coefficient. At most three are visible for 2.6 seconds of active play; reduced-motion settings remove the movement. Compact phone layouts keep the direction cue and thumb controls clear. Secondary credit lines are hidden on compact screens; the running credit total remains visible.
+
+| Action | Feedback |
+| --- | --- |
+| Destroy a patrol through your collision | 750 base points and 350 base credits, scaled by level |
+| Pass close to a traffic car safely | 150 base points, scaled by level |
+| Finish a scored drift | Total points already earned during that drift; this is not a second award |
+| Land a jump upright | The actual distance-based landing points |
+| Reach a checkpoint | The actual time-dependent points and level-scaled credits |
+| Complete the escape | The actual health-dependent escape points and credits |
+| Wreck city traffic | 120 base credits, scaled by level; no invented point award |
+
+Near passes require forward speed above 72 km/h, relative speed of at least 32.4 km/h, and approximately 0.18–3.2 metres of clearance beyond the projected vehicle bodies. The cars must cross alongside one another. Following close behind, a recent collision, falling into water and teleporting cannot count. One nearby traffic car cannot repeatedly award points at each road junction; it must separate by more than 35 metres before another pass can qualify. Rewind restores both the score and pass eligibility.
+
+At high speed, a sharp steering input now exceeds the tire grip budget: the car follows a wider arc and scrubs a modest amount of speed. Ease off or use S / Down (mobile BRAKE) before entry for a tighter line. Gentle steering remains close to the previous response. Space / DRIFT still releases rear traction, and mobile thumb drift can be combined with a committed nitro burst. Grip upgrades help without making high-speed turning instantaneous.
+
+These rules apply to both cities and all four cars. Existing saves need no migration. The timing courses advance to `tbilisi-1.17` and `kutaisi-1.2`; previous times remain available in the leaderboard's Archive choices.
+
+The feed uses the existing HUD update and a maximum 16-event queue / three DOM rows. It has no timer, polling or independent animation frame loop. Paused/hidden gameplay pauses the finite CSS animation. Checkpoint progress dots are updated only when their state changes. No texture, vehicle model, render resolution or audio quality was reduced.

@@ -1,5 +1,10 @@
 # Rendering and audio lifecycle
 
+## Bonus feedback 1.17.0
+
+The feed retains at most 16 pending simulation events and three DOM rows, expiring on active simulation time. It introduces no independent RAF, timer, network call or media download. Finite opacity/transform animation pauses with the existing idle lifecycle. HUD checkpoint dots are rebuilt only when checkpoint count/progress changes, instead of every HUD update. The near-pass test reuses existing physics-step positions; it does not maintain a second motion history. Rendering quality and runtime media are unchanged. These are bounded-work improvements, not a measured universal FPS increase.
+
+
 ## Drift, Fusion and map UI (1.16)
 
 The radar reuses one lazy 1536 × 1536 canvas atlas of the selected city’s roads and water instead of stroking every street on each HUD update. The full quest map uses the same atlas and repaints its 900 × 900 overlay only when opened. Together these buffers use about 12.1 MiB of raw RGBA storage; there is no new frame loop, WebGL context for the map, media download or change to 3D quality. Map changes still reload and release the previous world.
