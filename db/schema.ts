@@ -104,3 +104,34 @@ export const raceResults = sqliteTable("race_results", {
   rewinds: integer("rewinds").notNull(),
   recordedAt: integer("recorded_at").notNull(),
 });
+export const cityRankings = sqliteTable(
+  "city_rankings",
+  {
+    keyHash: text("key_hash")
+      .notNull()
+      .references(() => garages.keyHash),
+    map: text("map").notNull(),
+    rankedRuns: integer("ranked_runs").notNull(),
+    rankLevel: integer("rank_level").notNull(),
+    rankCheckpoints: integer("rank_checkpoints").notNull(),
+    bestScore: integer("best_score").notNull(),
+    totalScore: integer("total_score").notNull(),
+    wins: integer("wins").notNull(),
+    badges: text("badges").notNull(),
+    weekKey: text("week_key").notNull(),
+    weekScore: integer("week_score").notNull(),
+    weekWins: integer("week_wins").notNull(),
+    rankAt: integer("rank_at").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.keyHash, t.map] }),
+    index("city_progress").on(
+      t.map,
+      t.rankLevel,
+      t.rankCheckpoints,
+      t.bestScore,
+    ),
+    index("city_score").on(t.map, t.bestScore),
+    index("city_week").on(t.map, t.weekKey, t.weekScore),
+  ],
+);

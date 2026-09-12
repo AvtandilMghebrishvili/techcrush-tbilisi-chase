@@ -28,7 +28,8 @@
   gap: 6px;
   margin: 9px 0 4px;
 }
-.map-slots > span {
+.map-slots > span,
+.map-slots > button {
   padding: 8px;
   border: 1px solid #ffffff18;
   border-radius: 9px;
@@ -49,6 +50,33 @@
   border-color: #fa335a78;
   color: #f8dce3;
   background: #50233566;
+}
+.map-slots > button {
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  min-height: 52px;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.map-slots > button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.map-slots > button:not(:disabled):hover {
+  border-color: #a3e7ee;
+  background: #224350;
+}
+#result-kutaisi,
+#open-platinum-box {
+  border: 1px solid #d9b9ff;
+  background: linear-gradient(125deg, #3d295d, #1a283d);
+  color: #f2e6ff;
+}
+[data-city="kutaisi"] .mission-card {
+  background: linear-gradient(145deg, #263f40, #101d29);
 }
 .stunt-record {
   font-size: 9px;
@@ -116,7 +144,8 @@
   .stunt-route > span {
     font-size: 7px;
   }
-  .map-slots > span {
+  .map-slots > span,
+  .map-slots > button {
     padding: 5px;
   }
   .garage .coming-car {

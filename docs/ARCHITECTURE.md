@@ -29,7 +29,7 @@ All paths below are relative to `dist/`.
 
 | Module                                                    | Responsibility                                                                                                |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `main.js`, `index.html`, `style.css`                      | Garage, controls, loop, pause/end screens, HUD, minimap, audio coordination and optional browser tools         |
+| `main.js`, `index.html`, `style.css`                      | Garage, controls, loop, pause/end screens, HUD, minimap, audio coordination and optional browser tools        |
 | `controls.js`, `config.js`                                | Physical keyboard normalization, input values, car trims and camera identifiers                               |
 | `simulation.js`                                           | Player integration, traffic, police AI, damage, reinforcement waves, checkpoints, recovery and end conditions |
 | `contacts.js`                                             | Oriented vehicle contact detection, separation and mass-weighted impulses                                     |
@@ -140,3 +140,9 @@ Water entry disables ground contacts, propulsion and capture participation. `wat
 ## Finish results (1.14)
 
 `result-screen.js` owns finite rank fetches and share links; `result-page.mjs` serves public saved result HTML without the game runtime. `race_results` is appended atomically during valid timed settlements. `level-conditions.js` supplies stable variation, `city-weather.js` animates a bounded GPU shower, and `road-clearance.js` shares the rendered asphalt index for placement. Source and Worker result routes use the same handler.
+
+## City selection (v1.15)
+
+`map-selection.js` defines the active city from the URL, the server-checked Tbilisi level-3 unlock and city-specific course IDs. `road-data.js`, `road-surface-data.js`, `district-data.js` and `world-sites.js` select one city's modules with conditional dynamic imports. Tbilisi's original data is retained under `tbilisi-*` names. Kutaisi adds `kutaisi-city.js` and OSM-derived graph/lot/river data. Shared simulation, traffic, police, lighting, audio and mobile input run unchanged against the selected city.
+
+The top-level profile level/community stays Tbilisi for compatibility; `maps.kutaisi` contains its independent level/community. Shared balances, parts and paint remain top-level. Server tickets carry map/course and settlement updates the garage plus the new `city_rankings` table atomically. Level records are separated by course. `city-menu.js` saves and reloads between cities, avoiding a second retained scene. [Full contract and rebuild instructions](KUTAISI.md).

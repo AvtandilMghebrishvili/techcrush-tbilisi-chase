@@ -251,6 +251,12 @@
 .tier-track {
   gap: 3px;
 }
+.tier-track {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+[data-art-tier="5"] {
+  filter: hue-rotate(34deg) saturate(0.78) brightness(1.18);
+}
 .tier-track > span {
   padding: 5px 1px;
   font-size: 9px;

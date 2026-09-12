@@ -2,6 +2,20 @@ import { TIME_COURSES } from "./race-timing.js";
 export const STUNT_REWARDS = {
   "tbilisi-skybox-v1": { cash: 2500, boxes: 1, name: "Skybox" },
   "mtkvari-gap-v1": { cash: 1500, boxes: 1, name: "Mtkvari gap" },
+  "kutaisi-skybox-v1": {
+    cash: 2500,
+    boxes: 0,
+    platinum: 1,
+    map: "kutaisi",
+    name: "Rioni Skybox",
+  },
+  "rioni-gap-v1": {
+    cash: 1500,
+    boxes: 0,
+    platinum: 1,
+    map: "kutaisi",
+    name: "Rioni Gap",
+  },
 };
 // Shared community rules. Public standings use banked runs, never private keys.
 export function levelRewards(level = 1) {
@@ -187,7 +201,11 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
     !Array.isArray(quests) ||
     quests.length > 2 ||
     new Set(quests).size !== quests.length ||
-    quests.some((id) => !Object.hasOwn(STUNT_REWARDS, id))
+    quests.some(
+      (id) =>
+        !Object.hasOwn(STUNT_REWARDS, id) ||
+        (STUNT_REWARDS[id].map || "tbilisi") !== (ticket.map || "tbilisi"),
+    )
   )
     throw Error("Invalid stunt challenge.");
   if (
@@ -278,7 +296,12 @@ export function settleCommunity(p, m, result, level, now = Date.now()) {
     (sum, id) => sum + STUNT_REWARDS[id].cash,
     0,
   );
-  const stuntBoxes = stuntIds.length;
+  const stuntBoxes = stuntIds.reduce((n, id) => n + STUNT_REWARDS[id].boxes, 0);
+  const platinumBoxes = stuntIds.reduce(
+    (n, id) => n + (STUNT_REWARDS[id].platinum || 0),
+    0,
+  );
+  p.platinumBoxes = (p.platinumBoxes || 0) + platinumBoxes;
   p.quests.completed.push(...stuntIds);
   p.credits += stuntCash;
   p.boxes += stuntBoxes;
@@ -289,6 +312,7 @@ export function settleCommunity(p, m, result, level, now = Date.now()) {
     clear: bonus,
     daily,
     boxes: Number(won) + streakBox + stuntBoxes,
+    platinumBoxes,
     badges: unlocked.map((a) => a.id),
     score: m.score,
     streak: c.streak,

@@ -14,7 +14,6 @@
 - A normal-input Apex R controller with Bronze parts clears all six gates and escapes in 233.7 simulated seconds, with 43 HP and 29,874 points. A separate stock Veyra controller was caught after five gates at 164.1 seconds; the controller is not a guarantee of winning every chase. These are local driving smoke tests, not public timed records.
 - The brief shower has one additional draw call, no extra triangles and no media downloads. Local synchronized render medians were 14.70 ms dry / 15.10 ms wet. The existing idle frame/audio suspension is retained. See [Performance](docs/PERFORMANCE.md) for scope.
 
-
 ## v1.13.0 — Shared level times and surface precision
 
 - 151 tests pass. New coverage includes non-rewindable wall time, frozen loadout metadata, invalid timing, old-client/save compatibility, per-level/car/stock rankings, equal-time ranks, privacy, atomic competing settlements and replay protection.
@@ -36,7 +35,6 @@
 - Six lifecycle cycles preserve WebGL geometry/texture counts, release effects/voices and suspend idle rendering/audio. See the measured CPU and retained-heap limits in [Performance](docs/PERFORMANCE.md).
 - Production build links resolve; all 21 runtime media assets remain byte-identical and no QA globals ship. Build/manifest retains the same D1 database and unchanged SQL migration history.
 - The final minified build also passes mobile simultaneous steering/drift/tap-nitro, pause, a real save-backed three-part box, garage preview, preferences/box persistence across reload, and desktop keyboard driving with no page errors or missing assets.
-
 
 ## Community leaderboard 1.11.0 — 12 September 2026
 
@@ -245,3 +243,15 @@ Inspected two-sided TECHCRUSH branding, deck alignment, river banks, sidewalks/c
 The game combines cached OSM streets, approximate manual connections, widened roads, reference-inspired buildings and original terrain. Live expanded-area map requests were unavailable. It is **not** an exact satellite reconstruction, Google Maps photogrammetry, or a measured model of every facade. Provenance is in `ASSETS.md` and Credits.
 
 The three trims share a 458 model; other vehicles are original procedural geometry. Ramps/rollover use arcade physics without suspension simulation or body deformation. Buildings and tree trunks are solid; small sidewalk furniture is decorative. Bridges share the road datum, without separately driveable lower decks. Physical phones, Safari and low-end GPUs were not tested. WebGL2 is required. No multiplayer, persistent leaderboard or accounts are implemented.
+
+## Kutaisi expedition — v1.15.0, 13 September 2026
+
+- Automated coverage checks the level-3 unlock, cross-city course rejection, backward-compatible migration, independent city levels/records and preservation of fitted parts, inventory, paint and money. Server API fixtures verify shared identity, separate city standings/times and privacy changes across both boards.
+- The OSM-derived graph has 1,772 nodes / 2,058 segments; its generated road surface has one connected component. Every sampled street lane, all bridge deck edges and 150 levels' checkpoint footprints are dry, outside hills and clear of building footprints. Every named bridge segment is driven physically in both directions.
+- Real physics reaches the rooftop crate with a high-speed run-up; a slow run-up fails. The Rioni jump crosses actual unsupported water and lands upright on the opposite bank. A hillside encroaching on the flight corridor was graded out in both rendering and physics. Fountain cylindrical contacts stay finite from 32 directions.
+- Platinum challenges bank once, reject wrong-city/repeated claims, roll exactly three independent grade-5 parts and allow fitting/selling. All 70 part/grade assemblies have finite distinct geometry; all five wheel grades retain hub/radius alignment. Batched lamps visibly react in the contact frame and rewind to exact intact transforms.
+- An ordinary-input automated driver completed Kutaisi level 1 in 190.5 simulated seconds with 60 HP, six checkpoints and seven takedowns. A Diamond Vector at level 3 reached all six checkpoints, then was wrecked during escape at 326.9 seconds; harder police therefore remain a real challenge. These fixtures are not public scores and do not imply every automated attempt wins.
+- Local Chromium flows switch Tbilisi → Kutaisi → Tbilisi, open a three-part Platinum box, fit a part, drive/steer, switch to cockpit, pause, bank and reopen the garage, select the Kutaisi board and preserve the original Tbilisi career. Locked deep links return to Tbilisi. Portrait 390×844 and landscape 844×390 touch layouts were checked. No page or HTTP errors were observed.
+- A paused game owns no pending frame callback and produces no additional world frames during the bounded idle observation. Existing mute/hidden-tab/lifecycle tests remain part of the suite. Physical iOS/Android sensor and long thermal tests were not performed.
+
+Final release checks: **174 automated tests passed**. Production build/link verification passed with all 21 runtime media files byte-identical. The actual minified build loaded both cities, drove to 113 km/h, paused, banked and switched back to Tbilisi without page/HTTP errors or QA globals. Network logs showed distinct selected-city chunks.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.15.0 — 2026-09-13
+
+- Unlock a separate Kutaisi city after clearing Tbilisi level 3. Use one shared saved garage with independent city levels, progress/score/weekly boards and per-level times. Existing Tbilisi careers and records remain intact.
+- Add a connected OSM-derived central Kutaisi street network, joined asphalt/sidewalks, the Rioni and bridge decks, Colchis Fountain, Bagrati, theatre, opera, royal quarter, palace, bazaar, synagogue, park wheel and cable cars. White Bridge includes an original bronze boy holding hats. Day/night, traffic, physics, police and mobile controls are shared.
+- Add four street jumps and two Platinum challenges: the rooftop Skybox and Rioni gap. Each secret awards one three-part Platinum box once per profile. Fourteen fifth-grade assemblies have matching previews, inventory/equipment behavior and a modest improvement over Diamond. Ordinary reward odds remain unchanged.
+- Load only the selected map's geometry, reload safely when switching cities, and batch individually breakable street lamps by spatial tile. Cache unchanged prop poses, preserve rewind and stop rendering/audio while idle. Runtime media files are unchanged.
+- Fix the stunt yard's hillside clearance, keep fountain collisions finite, retain dry bridge lanes, and add automated map, bridge, reward, save and renderer regressions. New additive city-ranking migration preserves all existing data.
+
 ## 1.14.1 — 2026-09-12
 
 - Add all-time unique player profiles, filtered ranking participants and personal rank denominators to the leaderboard. Finish results also show each rank out of its matching player count.
@@ -33,7 +41,6 @@
 - Add profile schema 4 without resetting old saves, anonymous keys, leaderboard records or equipment. Server settlements validate and award each challenge once; rewind restores unbanked challenge collection.
 - Distinguish masonry/landing thuds, wood/splinter impacts and metal vehicle crashes. Reuse existing sound recordings with separate filtering and layers.
 - Spatially index breakable contacts, reuse the prop index, merge static street/building meshes in cullable tiles and bound the checkpoint-layout cache. Keep source textures and quality settings intact.
-
 
 ## 1.11.0 — 2026-09-12
 

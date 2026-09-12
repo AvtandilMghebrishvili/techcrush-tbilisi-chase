@@ -369,7 +369,9 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     pivots = [],
     rimTier = equipment.rims || 0;
   const rimMat = new THREE.MeshStandardMaterial({
-    color: ["#b9c7cc", "#bd8b59", "#d5e2e8", "#dfc15e", "#8cdeec"][rimTier],
+    color: ["#b9c7cc", "#bd8b59", "#d5e2e8", "#dfc15e", "#8cdeec", "#d9b9ff"][
+      rimTier
+    ],
     metalness: 1,
     roughness: 0.23,
   });

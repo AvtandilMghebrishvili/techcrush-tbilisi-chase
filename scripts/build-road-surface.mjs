@@ -1,4 +1,5 @@
 import { STUNT_APRONS } from "../dist/world-sites.js";
+import { IS_KUTAISI } from "../dist/map-selection.js";
 import { BRIDGE_DECKS, PEACE_DECK, BANK_CAPS } from "../dist/bridge-data.js";
 import ClipperLib from "clipper-lib";
 import { writeFile } from "node:fs/promises";
@@ -117,7 +118,9 @@ const rounded = JSON.parse(
   ),
 );
 await writeFile(
-  "dist/road-surface-data.js",
+  IS_KUTAISI
+    ? "dist/kutaisi-road-surface-data.js"
+    : "dist/tbilisi-road-surface-data.js",
   "// Derived from OpenStreetMap road-data.js; ODbL 1.0. Rebuild with scripts/build-road-surface.mjs.\nexport const ROAD_SURFACE = " +
     JSON.stringify(rounded) +
     ";\n",

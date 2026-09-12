@@ -1,8 +1,21 @@
 import { nearestRoad } from "./city-map.js";
+import { IS_KUTAISI } from "./map-selection.js";
 import { LANDMARKS, RIVER, riverDistance } from "./district-data.js";
+import { STUNT_ZONES } from "./world-sites.js";
 const riverMinX = Math.min(...RIVER.map((p) => p.x)) - 85;
 const riverMaxX = Math.max(...RIVER.map((p) => p.x)) + 85;
 export function terrainHeight(x, z) {
+  if (IS_KUTAISI) {
+    const north = 170 * Math.exp(-(((z - 2200) / 640) ** 2) - (x / 2400) ** 2),
+      west =
+        95 * Math.exp(-(((x - 1650) / 500) ** 2) - ((z - 350) / 1500) ** 2);
+    return (
+      Math.max(0, Math.min(1, Math.max(Math.abs(x) - 1200, z - 1300) / 400)) *
+        (north + west) *
+        (1 + 0.045 * Math.sin(x * 0.009) * Math.sin(z * 0.008)) -
+      3
+    );
+  }
   const west =
     315 * Math.exp(-(((x - 1160) / 640) ** 2) - ((z + 390) / 1490) ** 2);
   const south =
@@ -30,11 +43,13 @@ export function terrainHeight(x, z) {
     3
   );
 }
-export const MOUNDS = [
-  { ...LANDMARKS.mother, rx: 165, rz: 135, height: 93 },
-  { ...LANDMARKS.narikala, rx: 155, rz: 115, height: 65 },
-  { ...LANDMARKS.metekhi, rx: 54, rz: 48, height: 25 },
-];
+export const MOUNDS = IS_KUTAISI
+  ? []
+  : [
+      { ...LANDMARKS.mother, rx: 165, rz: 135, height: 93 },
+      { ...LANDMARKS.narikala, rx: 155, rz: 115, height: 65 },
+      { ...LANDMARKS.metekhi, rx: 54, rz: 48, height: 25 },
+    ];
 export function moundHeight(x, z, mound) {
   const dx = x - mound.x,
     dz = z - mound.z;
@@ -57,8 +72,34 @@ export function moundHeight(x, z, mound) {
 export function mountainHeight(x, z) {
   // The riverbed must stay below the rendered water even on flat city terrain.
   if (x > riverMinX && x < riverMaxX && riverDistance({ x, z }) < 85) return -9;
-  const h = terrainHeight(x, z);
+  let h = terrainHeight(x, z);
   if (h <= 0) return h;
+  // Grade the constructed stunt yard into the hillside; render and collision
+  // use this same surface, including the flight corridor and rooftop footprint.
+  if (IS_KUTAISI) {
+    let yardDistance = Infinity;
+    for (const zone of STUNT_ZONES) {
+      const dx = x - zone.x,
+        dz = z - zone.z,
+        a = zone.angle || 0;
+      yardDistance = Math.min(
+        yardDistance,
+        Math.hypot(
+          Math.max(
+            0,
+            Math.abs(dx * Math.cos(a) - dz * Math.sin(a)) - zone.w / 2,
+          ),
+          Math.max(
+            0,
+            Math.abs(dx * Math.sin(a) + dz * Math.cos(a)) - zone.d / 2,
+          ),
+        ),
+      );
+    }
+    if (yardDistance < 8) return -3;
+    if (yardDistance < 38)
+      h = Math.min(h, ((h + 3) * (yardDistance - 8)) / 30 - 3);
+  }
   const road = nearestRoad({ x, z });
   const clear = Math.max(
     0,

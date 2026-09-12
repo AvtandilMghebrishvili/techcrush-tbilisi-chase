@@ -1,4 +1,6 @@
 import { updateExpansion } from "./expansion-visuals.js";
+import { IS_KUTAISI } from "./map-selection.js";
+import { batchStreetLamps } from "./lamp-batches.js";
 import { updateBridgeRails } from "./bridge-visuals.js";
 import { createWaterSplash, animateWaterSplash } from "./crash-effects.js";
 import * as THREE from "./vendor/three.module.js";
@@ -105,6 +107,7 @@ export class SceneView {
     this.sun = sun;
     buildRealisticCity(this);
     calibrateRoadsideProps(this);
+    if (IS_KUTAISI) batchStreetLamps(this);
     this.cameraMode = 0;
     this.cockpit = makeCockpit();
     this.camera.add(this.cockpit.root);

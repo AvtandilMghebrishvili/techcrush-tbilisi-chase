@@ -1,4 +1,5 @@
 import { readLeaderboard } from "./leaderboard.mjs";
+import { cityCommunity } from "../dist/map-selection.js";
 import {
   newProfile,
   migrateProfile,
@@ -144,7 +145,8 @@ export async function handleApi(request, DB) {
           return json({ error: error.message }, 400);
         }
         if (body.action.type === "settle" && body.action.metrics)
-          profile.community.rankAt = Date.now();
+          cityCommunity(profile, profile.lastRunMap || "tbilisi").rankAt =
+            Date.now();
         profile.operations = [...(profile.operations || []), body.id].slice(
           -128,
         );
@@ -174,12 +176,44 @@ export async function handleApi(request, DB) {
           hash,
           version,
         );
+        const settledMap = profile.lastRunMap || "tbilisi";
         const record =
-          body.action.type === "settle" ? profile.community.lastTime : null;
+          body.action.type === "settle"
+            ? cityCommunity(profile, settledMap).lastTime
+            : null;
+        const recordPath =
+          settledMap === "kutaisi"
+            ? "$.maps.kutaisi.community.lastTime.runId"
+            : "$.community.lastTime.runId";
+        const statements = [update];
+        if (body.action.type === "settle" && settledMap === "kutaisi") {
+          const c = profile.maps.kutaisi.community;
+          statements.push(
+            DB.prepare(
+              "INSERT INTO city_rankings(key_hash,map,ranked_runs,rank_level,rank_checkpoints,best_score,total_score,wins,badges,week_key,week_score,week_wins,rank_at) SELECT ?,'kutaisi',?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(key_hash,map) DO UPDATE SET ranked_runs=excluded.ranked_runs,rank_level=excluded.rank_level,rank_checkpoints=excluded.rank_checkpoints,best_score=excluded.best_score,total_score=excluded.total_score,wins=excluded.wins,badges=excluded.badges,week_key=excluded.week_key,week_score=excluded.week_score,week_wins=excluded.week_wins,rank_at=excluded.rank_at",
+            ).bind(
+              hash,
+              c.runs,
+              c.furthestLevel,
+              c.checkpoints,
+              c.bestScore,
+              c.totalScore,
+              c.wins,
+              JSON.stringify(c.badges),
+              c.week,
+              c.weekScore,
+              c.weekWins,
+              c.rankAt || Date.now(),
+              hash,
+              version + 1,
+              body.id,
+            ),
+          );
+        }
         let result;
         if (record && record.runId === body.action.runId) {
           const insert = DB.prepare(
-            "INSERT INTO level_records (key_hash,course,level,car,build_class,build_points,duration_ms,rewinds,recorded_at) SELECT ?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.community.lastTime.runId')=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(key_hash,course,level,car,build_class) DO UPDATE SET build_points=excluded.build_points,duration_ms=excluded.duration_ms,rewinds=excluded.rewinds,recorded_at=excluded.recorded_at WHERE excluded.duration_ms<level_records.duration_ms",
+            "INSERT INTO level_records (key_hash,course,level,car,build_class,build_points,duration_ms,rewinds,recorded_at) SELECT ?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,?)=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(key_hash,course,level,car,build_class) DO UPDATE SET build_points=excluded.build_points,duration_ms=excluded.duration_ms,rewinds=excluded.rewinds,recorded_at=excluded.recorded_at WHERE excluded.duration_ms<level_records.duration_ms",
           ).bind(
             hash,
             record.course,
@@ -192,13 +226,14 @@ export async function handleApi(request, DB) {
             record.recordedAt,
             hash,
             version + 1,
+            recordPath,
             record.runId,
             body.id,
           );
           // Save an immutable result, atomically with the reward and fastest time.
           // Public reads still require the owner to have a listed driver profile.
           const share = DB.prepare(
-            "INSERT INTO race_results (id,key_hash,course,level,car,build_points,duration_ms,score,rewinds,recorded_at) SELECT ?,?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.community.lastTime.runId')=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(id) DO NOTHING",
+            "INSERT INTO race_results (id,key_hash,course,level,car,build_points,duration_ms,score,rewinds,recorded_at) SELECT ?,?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,?)=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(id) DO NOTHING",
           ).bind(
             record.runId,
             hash,
@@ -212,11 +247,14 @@ export async function handleApi(request, DB) {
             record.recordedAt,
             hash,
             version + 1,
+            recordPath,
             record.runId,
             body.id,
           );
-          [result] = await DB.batch([update, insert, share]);
-        } else result = await update.run();
+          statements.push(insert, share);
+        }
+        if (statements.length > 1) [result] = await DB.batch(statements);
+        else result = await update.run();
         if (result.meta.changes !== 1)
           return json(
             {

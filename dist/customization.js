@@ -14,7 +14,7 @@ export const PAINTS = [
 export const paintColor = (equipment, fallback) =>
   /^#[0-9a-f]{6}$/i.test(equipment?.paint || "") ? equipment.paint : fallback;
 export const tierValue = (n) =>
-  Math.max(0, Math.min(4, Math.floor(Number(n) || 0)));
+  Math.max(0, Math.min(5, Math.floor(Number(n) || 0)));
 export const metal = (color, roughness = 0.27) =>
   new THREE.MeshStandardMaterial({ color, metalness: 0.88, roughness });
 export function mesh(parent, geometry, material, x = 0, y = 0, z = 0) {
@@ -60,10 +60,10 @@ export function makeWheel(equipment = {}, side = 1, radius = 0.35) {
   lip.rotation.y = Math.PI / 2;
   const inner = ring(root, r * 0.87, 0.007, dark, outer - side * 0.006, 0, 0);
   inner.rotation.y = Math.PI / 2;
-  const spokes = [5, 5, 7, 10, 6][rims];
+  const spokes = [5, 5, 7, 10, 6, 9][rims];
   for (let i = 0; i < spokes; i++) {
     const a = (i / spokes) * Math.PI * 2;
-    for (const offset of rims === 4 ? [-0.065, 0.065] : [0]) {
+    for (const offset of rims >= 4 ? [-0.065, 0.065] : [0]) {
       const spoke = box(
         root,
         0.026,
@@ -96,7 +96,7 @@ export function makeWheel(equipment = {}, side = 1, radius = 0.35) {
     );
   }
   // Actual tread bars and sidewall band distinguish touring, road sport, semi-slick and track tires.
-  const count = [28, 32, 36, 40, 0][tires];
+  const count = [28, 32, 36, 40, 0, 0][tires];
   for (let i = 0; i < count; i++) {
     const a = (i / count) * Math.PI * 2;
     const tread = box(
@@ -196,7 +196,7 @@ export function makeSpoiler(
         height + 0.024,
         z,
       );
-  if (tier === 4)
+  if (tier >= 4)
     box(
       root,
       span * 0.91,

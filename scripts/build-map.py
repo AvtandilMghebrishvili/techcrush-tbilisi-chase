@@ -86,6 +86,6 @@ for i in adj:
 keep=max(components,key=len);ids={v:i for i,v in enumerate(sorted(keep))}
 out={'center':[41.699,44.799], 'nodes':[points[i] for i in sorted(keep)],
      'edges':[[ids[a],ids[b],w,n] for a,b,w,n in edges if a in keep and b in keep]}
-(root/'dist/road-data.js').write_text('// © OpenStreetMap contributors, ODbL 1.0. Snapshot 2026-09-11.\n// Simplified, widened and bidirectional for gameplay. See ASSETS.md.\n// Eastern/southern extensions also include original approximate reference-aligned connections.\nexport const ROAD_DATA = '+json.dumps(out,separators=(',',':'))+';\n',encoding='utf8')
+(root/'dist/tbilisi-road-data.js').write_text('// © OpenStreetMap contributors, ODbL 1.0. Snapshot 2026-09-11.\n// Simplified, widened and bidirectional for gameplay. See ASSETS.md.\n// Eastern/southern extensions also include original approximate reference-aligned connections.\nexport const ROAD_DATA = '+json.dumps(out,separators=(',',':'))+';\n',encoding='utf8')
 print('Map:',len(out['nodes']),'nodes,',len(out['edges']),'segments; disconnected components omitted:',[len(c) for c in components if c != keep])
 print('Streets:',sorted(set(e[3] for e in out['edges'])))

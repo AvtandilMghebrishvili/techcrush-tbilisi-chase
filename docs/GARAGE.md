@@ -37,3 +37,7 @@ In cockpit view, street chevrons are raised and tilted toward the driver and at 
 Paint is an optional `cars[carId].paint` field in the existing saved profile. Old garages need no reset or database migration. The server validates both the car ID and six-digit hex color. The existing version checks, idempotent operations and private garage backup cover paint as well as upgrades. No paid currency, account requirement or new third-party service is introduced.
 
 The 56 part-grade assemblies are original procedural 3D models rendered into cached studio images. Geometry, machining and materials vary by grade; these are illustrative part assemblies, not manufacturer photographs. The existing photographic atlas remains as a fallback when the studio renderer is unavailable. The studio needs WebGL; gameplay requirements are unchanged.
+
+## Platinum (v1.15)
+
+Kutaisi's two secret stunt challenges each award one Platinum box once per profile. Open the separate PLATINUM button to roll three fifth-grade parts; duplicates count separately. All fourteen assemblies have fifth-grade previews. Install an owned part free or sell a spare for 1,400 CR. Regular purchases stop at Diamond and ordinary box odds are unchanged. Platinum contributes 4.5 tier units versus Diamond's 4. Shared upgrades and paint travel between both cities. [Unlock and challenge locations](KUTAISI.md).

@@ -117,7 +117,7 @@ test("three car choices have different geometry, dimensions and real upgrade vis
 });
 test("fourteen parts each offer four effective upgrade tiers", () => {
   assert(PARTS.length > 10);
-  assert.equal(TIERS.length, 5);
+  assert.equal(TIERS.length, 6);
   const base = upgradedSpec(carSpec("gt"));
   for (const part of PARTS)
     for (let tier = 1; tier <= 4; tier++) {

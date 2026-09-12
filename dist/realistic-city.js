@@ -1,4 +1,6 @@
 import { facadeMaterial, batchStatic } from "./expansion-visuals.js";
+import { IS_KUTAISI, CITY_NAME } from "./map-selection.js";
+const kutaisi = IS_KUTAISI ? await import("./kutaisi-city.js") : null;
 import { reservedExpansion } from "./world-sites.js";
 import { buildGrass } from "./grass.js";
 import * as THREE from "./vendor/three.module.js";
@@ -49,6 +51,7 @@ function mountains(v) {
   const terrain = new THREE.Mesh(geometry, v.terrainMaterial);
   terrain.receiveShadow = true;
   v.decor.add(terrain);
+  if (IS_KUTAISI) return;
   const statue = makeKartlisDeda();
   const sx = LANDMARKS.mother.x,
     sz = LANDMARKS.mother.z;
@@ -153,17 +156,18 @@ export function buildRealisticCity(v) {
     concrete = mat("#b7b5a9"),
     curb = mat("#d0ccc0"),
     line = mat("#e4e1cb"),
-    roof = mat("#7d817d");
+    roof = mat(IS_KUTAISI ? "#8c5947" : "#7d817d");
   v.roadMaterial = road;
   v.buildingMaterials = [];
   v.oldTownMaterials = [];
-  const facades = ["#f4ecda", "#d8cfbb", "#dad3c6", "#bfc5bf", "#d1bca5"].map(
-    (c) => {
-      const m = mat(c);
-      v.buildingMaterials.push(m);
-      return m;
-    },
-  );
+  const facades = IS_KUTAISI
+    ? kutaisi.kutaisiFacades()
+    : ["#f4ecda", "#d8cfbb", "#dad3c6", "#bfc5bf", "#d1bca5"].map((c) => {
+        const m = mat(c);
+        v.buildingMaterials.push(m);
+        return m;
+      });
+  if (IS_KUTAISI) v.buildingMaterials.push(...facades);
   const newFacades = [0, 1, 2, 3].map(facadeMaterial);
   v.buildingMaterials.push(...newFacades);
   v.expansionFacades = newFacades;
@@ -226,9 +230,20 @@ export function buildRealisticCity(v) {
         b.tint === 0
           ? newFacades[Math.abs(Math.round(b.x + b.z)) % 3]
           : facades[b.tint],
-      m = v.box(b.w, b.h, b.d, facade, b.x, b.h / 2, b.z, staticCity);
+      m = v.box(
+        b.w,
+        b.h,
+        b.d,
+        IS_KUTAISI ? facades[b.tint] : facade,
+        b.x,
+        b.h / 2,
+        b.z,
+        staticCity,
+      );
     m.rotation.y = b.angle;
-    for (const y of [1, b.h * 0.25, b.h * 0.5, b.h * 0.75, b.h + 0.3]) {
+    for (const y of IS_KUTAISI
+      ? [1, b.h * 0.5, b.h + 0.3]
+      : [1, b.h * 0.25, b.h * 0.5, b.h * 0.75, b.h + 0.3]) {
       const cornice = v.box(
         b.w + 0.65,
         0.32,
@@ -252,16 +267,28 @@ export function buildRealisticCity(v) {
       staticCity,
     );
     cap.rotation.y = b.angle;
+    if (IS_KUTAISI && b.tint !== 3) {
+      const top = new THREE.Mesh(
+        new THREE.ConeGeometry(1, 1, 4).rotateY(Math.PI / 4),
+        roof,
+      );
+      top.rotation.y = b.angle;
+      top.scale.set((b.w + 1) / Math.sqrt(2), 3.2, (b.d + 1) / Math.sqrt(2));
+      top.position.set(b.x, b.h + 2.1, b.z);
+      top.castShadow = top.receiveShadow = true;
+      staticCity.add(top);
+    }
     // Light wells and chimneys give the roof a believable silhouette from high chase.
     if (b.h > 20)
       v.box(2, 2.5, 2, concrete, b.x + 3, b.h + 2.1, b.z - 3, staticCity);
   }
   batchStatic(staticCity);
   streetDetails(v, line);
-  clockBuilding(v, facades[1]);
+  if (!IS_KUTAISI) clockBuilding(v, facades[1]);
   mountains(v);
   buildTechcrushGarage(v);
-  buildTbilisiDistricts(v);
+  if (IS_KUTAISI) kutaisi.buildKutaisiCity(v);
+  else buildTbilisiDistricts(v);
   buildGrass(v);
   for (const i of [15, 48, 93, 134, 177]) {
     const n = NODES[i];
@@ -276,11 +303,12 @@ function streetDetails(v, line) {
   v.streetLampMaterials = [lamp];
   const trees = [];
   for (const r of ROADS) {
+    if (IS_KUTAISI && r.length < 48) continue;
     const fx = Math.sin(r.angle),
       fz = Math.cos(r.angle),
       rx = fz,
       rz = -fx;
-    for (let t = 18; t < r.length - 9; t += 38) {
+    for (let t = 18; t < r.length - 9; t += IS_KUTAISI ? 74 : 38) {
       for (const side of [-1, 1]) {
         const x = r.start.x + fx * t + rx * (r.width / 2 + 2.4) * side,
           z = r.start.z + fz * t + rz * (r.width / 2 + 2.4) * side;
@@ -339,9 +367,17 @@ function streetDetails(v, line) {
   c.fillStyle = "#fff";
   c.font = "bold 58px Arial";
   c.textAlign = "center";
-  c.fillText("ბარათაშვილის გამზირი", 512, 102);
+  c.fillText(
+    IS_KUTAISI ? "ქუთაისი · რიონის სანაპირო" : "ბარათაშვილის გამზირი",
+    512,
+    102,
+  );
   c.font = "44px Arial";
-  c.fillText("BARATASHVILI AVENUE", 512, 184);
+  c.fillText(
+    IS_KUTAISI ? "KUTAISI / RIONI RIVERSIDE" : "BARATASHVILI AVENUE",
+    512,
+    184,
+  );
   const sign = new THREE.Mesh(
     new THREE.PlaneGeometry(8, 2),
     new THREE.MeshStandardMaterial({

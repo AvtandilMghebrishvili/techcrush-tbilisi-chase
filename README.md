@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**New: Kutaisi is playable** — clear **Tbilisi level 3**, then select **02 / KUTAISI** above the car selector. Explore the Rioni, White/Red/Rustaveli/Chain bridges, Colchis Fountain, Bagrati Cathedral, the royal quarter and more. Two stunt challenges award secret **Platinum boxes**, each containing three parts. Cities have separate endless levels and leaderboards; your cars, paint, upgrades, inventory and credits are shared. [Kutaisi map, unlock and challenge guide](docs/KUTAISI.md).
+
 **New: community statistics** — see all-time unique player profiles, drivers in your selected ranking, and your position out of that total. Guests count after starting a chase; returning with the same saved garage counts once. [Counting and ranking rules](docs/COMMUNITY.md#player-statistics).
 
 **New: clear results & sharing** — a large finish clock, automatic overall/time ranks, Garage / Next Level choices and a Facebook result link. Checkpoints have a musical cue. Levels use varied fair routes and shuffled day/night/dusk starts; occasional brief showers stay lightweight. Roadside props now clear the rendered street outlines. [Results, conditions and sharing](docs/RESULTS.md).
@@ -152,19 +154,19 @@ Authored browser modules remain in `dist/`. Build output goes into `dist/client/
 
 ## English documentation
 
-| Guide                                      | Contents                                      |
-| ------------------------------------------ | --------------------------------------------- |
-| [Getting started](docs/GETTING_STARTED.md) | Local play, saves, troubleshooting            |
-| [Architecture](docs/ARCHITECTURE.md)       | Simulation, rendering, modules                |
-| [Career and API](docs/CAREER.md)           | Progression, storage, recovery, concurrency   |
-| [Development](docs/DEVELOPMENT.md)         | Assets, roads, migrations, browser tools      |
-| [Testing](docs/TESTING.md)                 | Unit checks, route controller, browser review |
-| [Deployment](docs/DEPLOYMENT.md)           | Access, Sites, Worker/D1 self-hosting         |
-| [Gameplay trailer](docs/TRAILER.md)       | Watch, download and share the 46-second video |
-| [Mobile driving](docs/MOBILE.md)         | Touch, gyro, calibration, fullscreen and phone graphics |
-| [Validation](VALIDATION.md)                | Observed results and limitations              |
-| [Changelog](CHANGELOG.md)                  | Release changes                               |
-| [Assets](ASSETS.md)                        | Attributions and licenses                     |
+| Guide                                      | Contents                                                |
+| ------------------------------------------ | ------------------------------------------------------- |
+| [Getting started](docs/GETTING_STARTED.md) | Local play, saves, troubleshooting                      |
+| [Architecture](docs/ARCHITECTURE.md)       | Simulation, rendering, modules                          |
+| [Career and API](docs/CAREER.md)           | Progression, storage, recovery, concurrency             |
+| [Development](docs/DEVELOPMENT.md)         | Assets, roads, migrations, browser tools                |
+| [Testing](docs/TESTING.md)                 | Unit checks, route controller, browser review           |
+| [Deployment](docs/DEPLOYMENT.md)           | Access, Sites, Worker/D1 self-hosting                   |
+| [Gameplay trailer](docs/TRAILER.md)        | Watch, download and share the 46-second video           |
+| [Mobile driving](docs/MOBILE.md)           | Touch, gyro, calibration, fullscreen and phone graphics |
+| [Validation](VALIDATION.md)                | Observed results and limitations                        |
+| [Changelog](CHANGELOG.md)                  | Release changes                                         |
+| [Assets](ASSETS.md)                        | Attributions and licenses                               |
 
 The public repository includes code, runtime assets, preparation scripts, map source data, tests, schema/migrations and the dependency lockfile. It excludes player saves, private keys, caches and personal reference photos. Public source access does not grant write access.
 

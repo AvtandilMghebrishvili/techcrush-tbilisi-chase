@@ -1,7 +1,8 @@
+import { IS_KUTAISI } from "./map-selection.js";
 export const GRID = 140;
 export const GRID_RADIUS = 4;
 export const ROAD_EDGE = 1650;
-export const LIMIT = 1900;
+export const LIMIT = IS_KUTAISI ? 2100 : 1900;
 export const MAP_SIZE = (LIMIT + 32) * 2;
 export const TOWER = { x: 1070, z: -430, y: 278 };
 export const CARS = [

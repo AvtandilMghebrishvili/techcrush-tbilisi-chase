@@ -980,6 +980,30 @@
   gap: 10px;
   margin: 14px 0 6px;
 }
+.board-city-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  color: #bad2df;
+  font:
+    700 11px Barlow,
+    Arial,
+    sans-serif;
+  letter-spacing: 0.12em;
+}
+.board-city-label select {
+  border: 1px solid #7397a6;
+  border-radius: 8px;
+  background: #17323f;
+  color: #e7fbff;
+  padding: 9px 32px 9px 12px;
+  font:
+    800 13px Barlow,
+    Arial,
+    sans-serif;
+  min-height: 40px;
+}
 .board-stats > div {
   min-width: 0;
   padding: 12px;

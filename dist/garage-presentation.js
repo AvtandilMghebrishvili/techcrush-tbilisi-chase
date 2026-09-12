@@ -1,7 +1,7 @@
 import { PARTS, upgradedSpec } from "./progression.js";
 export function partArtwork(part, extraClass = "", tier = 1) {
   const index = PARTS.findIndex((p) => p.id === part.id);
-  return `<div class="part-art ${extraClass}" data-art-part="${part.id}" data-art-tier="${tier}" role="img" aria-label="${["Stock", "Bronze", "Silver", "Gold", "Diamond"][tier]} ${part.name} assembly" style="--art-x:${((index % 4) / 3) * 100}%;--art-y:${(Math.floor(index / 4) / 3) * 100}%"></div>`;
+  return `<div class="part-art ${extraClass}" data-art-part="${part.id}" data-art-tier="${tier}" role="img" aria-label="${["Stock", "Bronze", "Silver", "Gold", "Diamond", "Platinum"][tier]} ${part.name} assembly" style="--art-x:${((index % 4) / 3) * 100}%;--art-y:${(Math.floor(index / 4) / 3) * 100}%"></div>`;
 }
 export const PART_DETAILS = {
   engine:

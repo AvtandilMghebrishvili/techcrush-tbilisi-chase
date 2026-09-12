@@ -1,4 +1,11 @@
 import { formatRaceTime } from "./race-timing.js";
+import {
+  ACTIVE_MAP,
+  CITY_NAME,
+  MAP_COURSES,
+  cityCommunity,
+  cityLevel,
+} from "./map-selection.js";
 import { carSpec } from "./config.js";
 import { PARTS } from "./progression.js";
 import {
@@ -27,11 +34,32 @@ export class CommunityUI {
     this.store = store;
     this.actions = actions;
     this.mode = "progress";
+    this.map = ACTIVE_MAP;
     this.page = 0;
     this.tab = "board";
     this.color = "red";
     this.guest = false;
     const dialog = $("community-dialog");
+    $("board-map").value = this.map;
+    const courses = () => {
+      $("time-course").innerHTML = (
+        this.map === "kutaisi"
+          ? [["kutaisi-1.0", "KUTAISI · 1.0"]]
+          : [
+              ["tbilisi-1.14", "CURRENT · 1.14"],
+              ["tbilisi-1.13", "ARCHIVE · 1.13"],
+            ]
+      )
+        .map(([value, label]) => `<option value="${value}">${label}</option>`)
+        .join("");
+    };
+    courses();
+    $("board-map").onchange = () => {
+      this.map = $("board-map").value;
+      this.page = 0;
+      courses();
+      this.load();
+    };
     $("leaderboard-open").onclick = () => this.open("board");
     $("leaderboard-menu").onclick = () => this.open("board");
     $("time-filters").onsubmit = (e) => {
@@ -198,12 +226,12 @@ export class CommunityUI {
   changed() {
     const p = this.store.profile;
     if (!p) return;
-    const c = p.community,
+    const c = cityCommunity(p),
       d = p.driver,
-      rates = levelRewards(p.level);
+      rates = levelRewards(cityLevel(p));
     $("driver-name-label").textContent = d.name || "CHOOSE YOUR DRIVER NAME";
     $("menu-multiplier").textContent =
-      `LVL ${p.level}\n${rates.score.toFixed(2)}× SCORE · ${rates.cash.toFixed(2)}× CR`;
+      `LVL ${cityLevel(p)}\n${rates.score.toFixed(2)}× SCORE · ${rates.cash.toFixed(2)}× CR`;
     $("community-close").disabled = this.store.busy;
     if (!$("community-dialog").open || this.tab !== "profile") return;
     $("driver-save").disabled = this.store.busy;
@@ -216,9 +244,9 @@ export class CommunityUI {
         : "SAVE DRIVER ↗";
     $("driver-heading").textContent = d.name
       ? `${d.name} · ${driverTitle(c)}`
-      : "Make a name in Tbilisi.";
+      : "Make a name in " + CITY_NAME + ".";
     $("driver-career").innerHTML = [
-      ["LEVEL", p.level],
+      ["LEVEL", cityLevel(p)],
       ["BEST SCORE", num(c.bestScore)],
       ["CLEARS", c.wins],
       [
@@ -234,7 +262,7 @@ export class CommunityUI {
       .join("");
     const daily = c.lastDaily === new Date().toISOString().slice(0, 10);
     $("driver-challenges").innerHTML =
-      `<article><span>DAILY GETAWAY</span><strong>${daily ? "BONUS COLLECTED" : "FIRST CLEAR · +500 CR"}</strong><p>Escape once today. Resets at midnight UTC.</p></article><article><span>ESCAPE STREAK</span><strong>${c.streak % 3} / 3 · +1 EXTRA BOX</strong><p>Clear three levels in a row. Best streak: ${c.bestStreak}.</p></article><article><span>LEVEL ${p.level} REWARDS</span><strong>${rates.score.toFixed(2)}× SCORE · ${rates.cash.toFixed(2)}× CR</strong><p>Each level adds +15% score and +10% credits to the base rate.</p></article>`;
+      `<article><span>DAILY GETAWAY</span><strong>${daily ? "BONUS COLLECTED" : "FIRST CLEAR · +500 CR"}</strong><p>Escape once today. Resets at midnight UTC.</p></article><article><span>ESCAPE STREAK</span><strong>${c.streak % 3} / 3 · +1 EXTRA BOX</strong><p>Clear three levels in a row. Best streak: ${c.bestStreak}.</p></article><article><span>LEVEL ${cityLevel(p)} REWARDS</span><strong>${rates.score.toFixed(2)}× SCORE · ${rates.cash.toFixed(2)}× CR</strong><p>Each level adds +15% score and +10% credits to the base rate.</p></article>`;
     $("achievement-count").textContent =
       `${c.badges.length} / ${ACHIEVEMENTS.length} UNLOCKED`;
     $("driver-achievements").innerHTML = ACHIEVEMENTS.map((a, i) => {
@@ -257,7 +285,8 @@ export class CommunityUI {
     }
     if (
       this.data &&
-      (this.data.mode !== this.mode ||
+      ((this.data.map || "tbilisi") !== this.map ||
+        this.data.mode !== this.mode ||
         (timed &&
           (this.data.course !== $("time-course").value ||
             this.data.level !== Number($("time-level").value) ||
@@ -284,7 +313,7 @@ export class CommunityUI {
       );
     try {
       const response = await fetch(
-        `/api/leaderboard?${new URLSearchParams({ mode: this.mode, page: this.page, ...(timed ? { course: $("time-course").value, level: $("time-level").value, car: $("time-car").value, build: $("time-build").value } : {}) })}`,
+        `/api/leaderboard?${new URLSearchParams({ map: this.map, mode: this.mode, page: this.page, ...(timed ? { course: $("time-course").value, level: $("time-level").value, car: $("time-car").value, build: $("time-build").value } : {}) })}`,
         {
           headers: { Authorization: "Bearer " + this.store.token },
           cache: "no-store",
@@ -362,7 +391,7 @@ export class CommunityUI {
     $("board-count").textContent =
       `${num(data.total)} DRIVERS · LEVEL ${data.level}`;
     const build = (r) =>
-      `${carSpec(r.car).name} · ${r.buildPoints ? "TUNED " + r.buildPoints + "/" + PARTS.length * 4 : "STOCK"}`;
+      `${carSpec(r.car).name} · ${r.buildPoints ? "TUNED " + r.buildPoints + "/" + PARTS.length * 5 : "STOCK"}`;
     $("board-rows").innerHTML = data.entries
       .map(
         (row) =>

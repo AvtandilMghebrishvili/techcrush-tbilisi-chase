@@ -1,5 +1,6 @@
 import { weekKey, driverTitle, ACHIEVEMENTS } from "../dist/community-rules.js";
 import { TIME_COURSE, TIME_COURSES } from "../dist/race-timing.js";
+import { MAP_COURSES } from "../dist/map-selection.js";
 const SORTS = {
   progress:
     "rank_level DESC,rank_checkpoints DESC,best_score DESC,rank_at ASC,public_id ASC",
@@ -44,6 +45,8 @@ function publicRow(row, rank) {
   };
 }
 export async function readLeaderboard(DB, url, hash, now = Date.now()) {
+  const map = url.searchParams.get("map") || "tbilisi";
+  if (!Object.hasOwn(MAP_COURSES, map)) throw Error("Invalid leaderboard map.");
   const mode = url.searchParams.get("mode") || "progress";
   if (mode === "times") return readLevelTimes(DB, url, hash, now);
   if (!Object.hasOwn(SORTS, mode))
@@ -53,31 +56,36 @@ export async function readLeaderboard(DB, url, hash, now = Date.now()) {
     throw Error("Invalid leaderboard page.");
   const week = weekKey(now),
     values = mode === "weekly" ? [week] : [];
+  const table =
+    map === "tbilisi"
+      ? "garages"
+      : `(SELECT g.key_hash,g.public_id,g.display_name,g.avatar,g.listed,c.ranked_runs,c.rank_level,c.rank_checkpoints,c.best_score,c.total_score,c.wins,c.badges,c.week_key,c.week_score,c.week_wins,c.rank_at FROM garages g JOIN city_rankings c ON c.key_hash=g.key_hash WHERE c.map='kutaisi')`;
   const where =
     "listed=1 AND ranked_runs>0" +
     (mode === "weekly" ? " AND week_key=? AND week_score>0" : "");
   const count = await DB.prepare(
-    `SELECT COUNT(*) AS total FROM garages WHERE ${where}`,
+    `SELECT COUNT(*) AS total FROM ${table} WHERE ${where}`,
   )
     .bind(...values)
     .first();
   const total = Number(count.total),
     offset = Math.min(page * 25, Math.max(0, Math.ceil(total / 25) - 1) * 25);
   const data = await DB.prepare(
-    `SELECT ${fields} FROM garages WHERE ${where} ORDER BY ${SORTS[mode]} LIMIT 25 OFFSET ?`,
+    `SELECT ${fields} FROM ${table} WHERE ${where} ORDER BY ${SORTS[mode]} LIMIT 25 OFFSET ?`,
   )
     .bind(...values, offset)
     .all();
   let me = null;
   if (hash) {
     const mine = await DB.prepare(
-      `SELECT * FROM (SELECT key_hash,${fields},ROW_NUMBER() OVER (ORDER BY ${SORTS[mode]}) AS position FROM garages WHERE ${where}) WHERE key_hash=?`,
+      `SELECT * FROM (SELECT key_hash,${fields},ROW_NUMBER() OVER (ORDER BY ${SORTS[mode]}) AS position FROM ${table} WHERE ${where}) WHERE key_hash=?`,
     )
       .bind(...values, hash)
       .first();
     me = publicRow(mine, mine?.position);
   }
   return {
+    map,
     mode,
     total,
     stats: await playerStats(DB),
@@ -93,13 +101,15 @@ export async function readLeaderboard(DB, url, hash, now = Date.now()) {
   };
 }
 async function readLevelTimes(DB, url, hash, now) {
-  const course = url.searchParams.get("course") || TIME_COURSE;
+  const map = url.searchParams.get("map") || "tbilisi";
+  const course = url.searchParams.get("course") || MAP_COURSES[map];
   const level = Number(url.searchParams.get("level") || 1),
     page = Number(url.searchParams.get("page") || 0),
     car = url.searchParams.get("car") || "all",
     build = url.searchParams.get("build") || "all";
   if (
     !TIME_COURSES.includes(course) ||
+    !course.startsWith(map + "-") ||
     !Number.isSafeInteger(level) ||
     level < 1 ||
     level > 1000000 ||
@@ -158,6 +168,7 @@ async function readLevelTimes(DB, url, hash, now) {
         }
       : null;
   return {
+    map,
     mode: "times",
     total,
     stats: await playerStats(DB),
@@ -167,7 +178,7 @@ async function readLevelTimes(DB, url, hash, now) {
     car,
     build,
     course,
-    courseLabel: "TBILISI · COURSE " + course.slice(8),
+    courseLabel: map.toUpperCase() + " · COURSE " + course.split("-")[1],
     entries: rows.results.map(publicTime),
     me: publicTime(mine),
     updatedAt: new Date(now).toISOString(),

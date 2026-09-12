@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { IS_KUTAISI, CITY_NAME } from "./map-selection.js";
 import { registerBreakable } from "./breakable-props.js";
 import { makeKartlisDeda } from "./kartlis-deda.js";
 import { ROADS, nearestRoad } from "./city-map.js";
@@ -96,7 +97,7 @@ export function buildTechcrushGarage(v) {
   c.fillText("TECHCRUSH", 512, 136);
   c.fillStyle = "#a5ddd9";
   c.font = "bold 35px Arial";
-  c.fillText("TBILISI  /  NIGHT RUN GARAGE", 512, 202);
+  c.fillText(CITY_NAME + "  /  NIGHT RUN GARAGE", 512, 202);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   v.garageSignCanvas = canvas;
@@ -106,10 +107,12 @@ export function buildTechcrushGarage(v) {
     side: THREE.FrontSide,
   });
   // Road-facing signs on opposite blocks are visible from both driving directions.
-  const placements = [
-    [-495, -252, -Math.PI / 2],
-    [-550, -297, Math.PI / 2],
-  ];
+  const placements = IS_KUTAISI
+    ? []
+    : [
+        [-495, -252, -Math.PI / 2],
+        [-550, -297, Math.PI / 2],
+      ];
   for (const r of ROADS.filter((r) => r.length > 55 && r.id % 4 === 0)) {
     const x = (r.start.x + r.end.x) / 2 + Math.cos(r.angle) * (r.width / 2 + 4),
       z = (r.start.z + r.end.z) / 2 - Math.sin(r.angle) * (r.width / 2 + 4);
@@ -169,6 +172,6 @@ export function applyTechcrushBrand(v, logo, wordmark) {
   c.fillStyle = "#c9d5d9";
   c.textAlign = "center";
   c.font = "bold 25px Arial";
-  c.fillText("TBILISI  /  NIGHT RUN GARAGE", 615, 221);
+  c.fillText(CITY_NAME + "  /  NIGHT RUN GARAGE", 615, 221);
   v.garageSignTexture.needsUpdate = true;
 }

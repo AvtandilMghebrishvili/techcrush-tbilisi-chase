@@ -24,6 +24,14 @@ The police sedan and civilian modern sedan, classic 1980s/1990s sedans, wagon an
 
 ## Street geography
 
+### Kutaisi (13 September 2026)
+
+`data/kutaisi-osm-raw.json` and `data/kutaisi-buildings-raw.json` archive the Overpass responses used by `scripts/build-kutaisi.py`. Generated `kutaisi-road-data.js`, `kutaisi-geo-data.js` and `kutaisi-road-surface-data.js` are adapted OpenStreetMap data under ODbL 1.0. Original Tbilisi data now lives in `tbilisi-road-data.js` and `tbilisi-road-surface-data.js`; the old module paths select the active map. All derived data remains downloadable from Credits and available in source.
+
+Fourteen supplied Kutaisi photos and [Google Maps](https://www.google.com/maps/@42.269,42.703,15z) were visual references. The supplied folder is excluded from Git and deployment. Reference identities were checked against [Georgia Travel: Kutaisi](https://georgia.travel/cities-towns/kutaisi), [White Bridge](https://georgia.travel/the-white-bridge), [Royal District](https://georgia.travel/kutaisi-royal-district) and [Kutaisi tourism: Picasso Boy](https://kutaisi.travel/en/7495/picaso-boy-ka-2-2/). No Google imagery or photo crops are runtime textures.
+
+Kutaisi facades, terracotta roofs, landmarks, fountain figures, the White Bridge bronze-boy interpretation, lawns, bridge framing and stunt structures are original procedural geometry/Canvas material work. Existing CC0 trees, rock textures, HDRI and the previously generated asphalt are reused unchanged. See [Kutaisi accuracy and adaptation notes](docs/KUTAISI.md#places-and-roads). Platinum part assemblies extend the existing procedural studio models; they are not downloaded product photographs.
+
 `dist/road-data.js`, `dist/road-surface-data.js` and OSM responses in `data/`: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). Overpass snapshot: 2026-09-11. Adaptations: local metre coordinates, simplified junctions, selected connected roads, widened lanes, bidirectional game traffic and reopened construction roads. The road surface unions those widened roads into continuous asphalt with sidewalk differences. Derived data is downloadable from the credits page; original responses are included in the source archive.
 
 ## Expanded district references

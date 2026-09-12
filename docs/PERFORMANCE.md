@@ -34,13 +34,13 @@ All **21 shipped assets (41,110,441 bytes)** are byte-identical to source. No ge
 
 Local cold-load comparison in headless Chrome 153 on Windows, mobile emulation 844×390 / DPR 3, simulated 40 ms latency and 4 MiB/s download:
 
-| Measurement | 1.7.1 | 1.8 |
-| --- | ---: | ---: |
-| Resource requests before ready + 300 ms | 83 | 18 |
-| JS requests | 59 | 1 |
-| JS encoded bytes | 2,789,414 | 1,049,339 |
-| Total encoded resource bytes | 29,738,274 | 25,224,593 |
-| Observed load, including warm-up + 300 ms | 10,229 ms | 8,657 ms |
+| Measurement                               |      1.7.1 |        1.8 |
+| ----------------------------------------- | ---------: | ---------: |
+| Resource requests before ready + 300 ms   |         83 |         18 |
+| JS requests                               |         59 |          1 |
+| JS encoded bytes                          |  2,789,414 |  1,049,339 |
+| Total encoded resource bytes              | 29,738,274 | 25,224,593 |
+| Observed load, including warm-up + 300 ms |  10,229 ms |   8,657 ms |
 
 This sample is approximately 15% faster to the observed ready state and 62% smaller in JS. It is a single before/after trace, not a statistical or physical-phone FPS/thermal benchmark. Later small layout/copy edits can slightly change bundle bytes. The visual assets are unchanged.
 
@@ -65,13 +65,13 @@ The shared city, car templates, decoded sounds and bounded part-art cache remain
 
 Local headless Chrome 153.0.8010.36 on Windows, desktop viewport 960 × 540, default desktop graphics, same machine and isolated in-memory save database. Each sample waits for settling, then measures about three seconds using Chrome DevTools Protocol `Performance.getMetrics` (`TaskDuration`) and instrumented renderer-call counters. The game-over sample waits for destruction effects to finish.
 
-| State | Before: world / garage frames in ~3s | After: world / garage frames | Before: main-thread task time | After: main-thread task time |
-| --- | ---: | ---: | ---: | ---: |
-| Start menu | 181 / 0 | 0 / 0 | 1,963 ms | 1 ms |
-| Paused chase | 181 / 0 | 0 / 0 | 2,980 ms | 1 ms |
-| Stationary garage | 0 / 181 | 0 / 0 | 175 ms | 1 ms |
-| Garage closed, back to menu | 181 / 0 | 0 / 0 | 2,083 ms | <1 ms |
-| Settled wreck/result screen | 179 / 0 | 0 / 0 | 3,029 ms | 1 ms |
+| State                       | Before: world / garage frames in ~3s | After: world / garage frames | Before: main-thread task time | After: main-thread task time |
+| --------------------------- | -----------------------------------: | ---------------------------: | ----------------------------: | ---------------------------: |
+| Start menu                  |                              181 / 0 |                        0 / 0 |                      1,963 ms |                         1 ms |
+| Paused chase                |                              181 / 0 |                        0 / 0 |                      2,980 ms |                         1 ms |
+| Stationary garage           |                              0 / 181 |                        0 / 0 |                        175 ms |                         1 ms |
+| Garage closed, back to menu |                              181 / 0 |                        0 / 0 |                      2,083 ms |                        <1 ms |
+| Settled wreck/result screen |                              179 / 0 |                        0 / 0 |                      3,029 ms |                         1 ms |
 
 The initialized AudioContext was `running` in all four previously played idle states before the fix, and `suspended` in each afterward. This is over 99% less **measured idle main-thread task time** in this controlled run, not an overall computer CPU percentage or an in-game FPS claim. Timing varies by hardware, browser, graphics driver and measurement overhead.
 
@@ -100,3 +100,11 @@ Using `node scripts/benchmark-simulation.mjs` on this Windows host, the warm med
 Six additional warmed start/pause/garage/close cycles held world geometry/textures constant at 5,599 / 86 and the garage at 67 / 5. Effects and sample voices returned to zero each cycle. Retained heap ranged from 71.74 to 72.56 MiB; bounded road/shader caches can warm further, so this short run is not an assertion that every possible leak is excluded. Idle frame/audio suspension, hidden-tab pause and rewind from a settled wreck passed.
 
 All 21 deployed media assets remain byte-identical (41,110,441 bytes). Four new facade atlases and a concrete grain map are generated once, without additional image downloads. The final bundled browser code is 1,124,714 bytes and CSS 98,054 bytes; reference-only assets remain excluded from deployment. The visual additions have a small memory/code cost; the physics optimization does not reduce graphics settings or asset quality.
+
+## v1.15 Kutaisi map
+
+The two cities share cars, texture/audio files and gameplay modules. Map data is imported per city; switching banks progress and reloads the document, releasing the previous world's WebGL and route caches. The published build splits city geometry into lazy chunks. All 21 runtime media assets remain byte-identical (41,110,441 bytes). The source-only map reference photos are not deployed.
+
+Kutaisi static architecture is merged by material and spatial tile. Repeated street lamps are instanced in 180 m tiles while retaining individual contact definitions. Falling lamps update their instance transforms; intact/stable prop poses do not repeat transform work every frame. Rewind restores exact matrices, and broken lamps stop emitting light. Existing tree detail levels, dynamic shadows, mobile graphics settings and the maximum patrol cap are preserved.
+
+In the local Chromium 1440×900 gameplay fixture, a driving frame reported 1,551 render calls, 3,806,285 triangles and 1,649 uploaded geometries / 47 textures, with 524 spatial lamp batches. These are one view/configuration's renderer counters, not universal budgets or an FPS claim. After pausing, frame 156 remained unchanged for the 800 ms observation and no game frame callback was pending. Source city switching and workshop interactions produced no page/HTTP errors. Phone screenshots were Chromium touch emulation, not a physical-device thermal or sensor test.

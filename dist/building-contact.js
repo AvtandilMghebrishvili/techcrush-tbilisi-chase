@@ -15,15 +15,17 @@ export function buildingContact(car, rect) {
     d = rect.d ?? rect.maxZ - rect.minZ;
   const low = car.y || 0,
     high = low + (car.height || 1.6);
-  if (rect.dome) {
+  if (rect.dome || rect.cylinder) {
+    const base = rect.base || 0;
     const radius =
+      rect.cylinder?.radius ??
       rect.dome.radius *
-      Math.sqrt(
-        Math.max(
-          0,
-          1 - ((Math.max(low, rect.base) - rect.base) / rect.dome.height) ** 2,
-        ),
-      );
+        Math.sqrt(
+          Math.max(
+            0,
+            1 - ((Math.max(low, base) - base) / rect.dome.height) ** 2,
+          ),
+        );
     const beforeX = car.x,
       beforeZ = car.z;
     treeContact(car, { x, z, radius, breakSpeed: Infinity });

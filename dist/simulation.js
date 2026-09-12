@@ -1,4 +1,5 @@
 import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
+import { IS_KUTAISI } from "./map-selection.js";
 import { buildingContact } from "./building-contact.js";
 import { levelRewards, creditAward } from "./community-rules.js";
 import { TREES } from "./world-props.js";
@@ -1345,14 +1346,25 @@ export class ChaseSimulation {
         Math.abs(p.y - ROOFTOP.h) < 0.2 &&
         distance(p, QUEST_BOX) < 7
       )
-        unlock(ROOFTOP.id, "SKYBOX FOUND · +1 BOX / 2,500 CR");
+        unlock(
+          ROOFTOP.id,
+          IS_KUTAISI
+            ? "PLATINUM SKYBOX · +1 PLATINUM BOX / 2,500 CR"
+            : "SKYBOX FOUND · +1 BOX / 2,500 CR",
+        );
       if (
         p.lastLandingRamp === 5 &&
         p.launchSpeed >= 50 &&
-        p.x < -850 &&
-        Math.abs(p.z + 440) < 32
+        (IS_KUTAISI
+          ? p.x > 44 && p.x < 220 && Math.abs(p.z + 665) < 32
+          : p.x < -850 && Math.abs(p.z + 440) < 32)
       )
-        unlock("mtkvari-gap-v1", "MTKVARI GAP · +1 BOX / 1,500 CR");
+        unlock(
+          IS_KUTAISI ? "rioni-gap-v1" : "mtkvari-gap-v1",
+          IS_KUTAISI
+            ? "RIONI GAP · +1 PLATINUM BOX / 1,500 CR"
+            : "MTKVARI GAP · +1 BOX / 1,500 CR",
+        );
     }
     let closest = Infinity;
     for (const cop of this.police)

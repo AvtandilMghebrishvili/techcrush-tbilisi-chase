@@ -62,6 +62,12 @@ for (const file of [
   "manifest.webmanifest",
   "road-data.js",
   "road-surface-data.js",
+  "map-selection.js",
+  "tbilisi-road-data.js",
+  "tbilisi-road-surface-data.js",
+  "kutaisi-road-data.js",
+  "kutaisi-road-surface-data.js",
+  "kutaisi-geo-data.js",
 ])
   await copyFile("dist/" + file, "dist/client/" + file);
 await mkdir("dist/client/vendor", { recursive: true });

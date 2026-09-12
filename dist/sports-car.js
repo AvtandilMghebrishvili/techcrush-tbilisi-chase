@@ -79,9 +79,14 @@ export function sportsCar(
     const m = body.getObjectByName(name);
     if (m)
       m.material = new THREE.MeshStandardMaterial({
-        color: ["#b4bcc0", "#bd8b59", "#d5e2e8", "#dfc15e", "#8cdeec"][
-          equipment.rims || 0
-        ],
+        color: [
+          "#b4bcc0",
+          "#bd8b59",
+          "#d5e2e8",
+          "#dfc15e",
+          "#8cdeec",
+          "#d9b9ff",
+        ][equipment.rims || 0],
         metalness: 0.95,
         roughness: 0.24,
       });

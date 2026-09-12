@@ -2,6 +2,7 @@ import * as THREE from "./vendor/three.module.js";
 import { roadClear } from "./road-clearance.js";
 import { overOpenWater } from "./surface-support.js";
 import { BUILDINGS, containsPoint, nearestRoad } from "./city-map.js";
+import { syncLampInstances } from "./lamp-batches.js";
 
 export function calibrateRoadsideProps(view) {
   const groups = new Map();
@@ -97,6 +98,11 @@ export function updateBreakables(view, sim) {
   for (const entry of view.breakableProps || []) {
     const state = sim.poles?.[entry.definition.id];
     const age = state?.broken ? Math.max(0, sim.time - state.fallenAt) : 0;
+    const pose = state?.broken ? Math.min(14, age) : -1;
+    if (entry.lastPose === pose && entry.lastFallAngle === state?.fallAngle)
+      continue;
+    entry.lastPose = pose;
+    entry.lastFallAngle = state?.fallAngle;
     entry.root.visible = !state?.broken || age < 14;
     entry.root.position.copy(entry.position);
     entry.root.quaternion.copy(entry.base);
@@ -107,5 +113,6 @@ export function updateBreakables(view, sim) {
       fall.setFromAxisAngle(axis, amount * Math.PI * 0.49);
       entry.root.quaternion.premultiply(fall);
     }
+    syncLampInstances(entry.root, !!state?.broken);
   }
 }

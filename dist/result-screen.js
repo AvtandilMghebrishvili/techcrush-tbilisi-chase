@@ -105,8 +105,10 @@ export class ResultScreen {
         return r.json();
       };
       const [overall, timed] = await Promise.all([
-        get("mode=progress"),
-        get(`mode=times&level=${record.level}&car=all&build=all`),
+        get(`mode=progress&map=${record.map || "tbilisi"}`),
+        get(
+          `mode=times&map=${record.map || "tbilisi"}&course=${record.course}&level=${record.level}&car=all&build=all`,
+        ),
       ]);
       if (generation !== this.generation || this.controller !== controller)
         return;

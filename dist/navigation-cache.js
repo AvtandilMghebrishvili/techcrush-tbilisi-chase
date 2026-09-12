@@ -1,4 +1,5 @@
 import { ROOFTOP, QUEST_BOX, SPECIAL_RAMPS, roofAt } from "./world-sites.js";
+import { IS_KUTAISI } from "./map-selection.js";
 import { routeBetween } from "./simulation.js";
 const routes = new WeakMap();
 const approach = SPECIAL_RAMPS.map((r) => ({
@@ -12,7 +13,9 @@ const lips = SPECIAL_RAMPS.map((r) => ({
   name: r.name,
 }));
 const boxTarget = { ...QUEST_BOX, name: "SKYBOX · COLLECT THE ROOF CRATE" };
-const riverTarget = { x: -925, z: -440, name: "MTKVARI GAP · LAND UPRIGHT" };
+const riverTarget = IS_KUTAISI
+  ? { x: 83, z: -665, name: "RIONI GAP · LAND UPRIGHT" }
+  : { x: -925, z: -440, name: "MTKVARI GAP · LAND UPRIGHT" };
 export function navigationTarget(sim) {
   const p = sim.player;
   if (

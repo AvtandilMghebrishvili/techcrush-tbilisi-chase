@@ -143,14 +143,20 @@
           <p id="car-details" class="car-details"></p>
           <p id="intro-career" class="career-line"></p>
           <div class="map-slots" aria-label="City maps">
-            <span class="active-map"
-              ><b>01 / TBILISI</b><small>LIVE · ENDLESS LEVELS</small></span
-            ><span aria-disabled="true"
-              ><b>02 / KUTAISI</b><small>COMING SOON · მალე</small></span
-            ><span aria-disabled="true"
+            <button type="button" data-map="tbilisi" class="active-map">
+              <b>01 / TBILISI</b><small>LIVE · ENDLESS LEVELS</small>
+            </button>
+            <button type="button" data-map="kutaisi" disabled>
+              <b>02 / KUTAISI</b><small>CLEAR TBILISI LEVEL 3</small>
+            </button>
+            <span aria-disabled="true"
               ><b>03 / BATUMI</b><small>COMING SOON · მალე</small></span
             >
           </div>
+          <p id="map-access-note" class="stunt-record">
+            Clear Tbilisi level 3 to unlock Kutaisi. Cars and upgrades travel
+            with you.
+          </p>
           <p id="stunt-record" class="stunt-record"></p>
           <div class="community-entry">
             <button id="driver-open" type="button">
@@ -338,6 +344,9 @@
             <button id="restart" class="secondary">RESTART RUN</button>
             <button id="garage-back" class="secondary">CHANGE CAR</button>
             <button id="result-community" class="secondary">LEADERBOARD</button>
+            <button id="result-kutaisi" class="secondary" hidden>
+              KUTAISI UNLOCKED · TRAVEL ↗
+            </button>
           </div>
           <div id="result-sharing" hidden>
             <div class="share-actions">
@@ -371,6 +380,13 @@
           </button>
         </nav>
         <section id="community-board">
+          <label class="board-city-label"
+            >CITY
+            <select id="board-map">
+              <option value="tbilisi">TBILISI</option>
+              <option value="kutaisi">KUTAISI</option>
+            </select></label
+          >
           <div class="board-heading">
             <div>
               <h3>Race your community.</h3>
@@ -643,12 +659,15 @@
         <section id="box-bench" class="box-bench">
           <div>
             <h3>YOUR NEXT UPGRADE.</h3>
-            <p>14 parts · four tiers · repeated drops are possible.</p>
+            <p>14 parts · 5 grades · Platinum from Kutaisi secret boxes.</p>
             <small
               >Bronze 55% · Silver 28% · Gold 13% · Diamond 4% per slot</small
             >
           </div>
           <button id="open-box" class="primary">OPEN A BOX ↗</button>
+          <button id="open-platinum-box" class="secondary" disabled>
+            PLATINUM · 0 BOXES
+          </button>
         </section>
         <p id="last-drop" class="last-drop"></p>
         <p id="save-error" role="status"></p>

@@ -1,4 +1,12 @@
 import { ResultScreen } from "./result-screen.js";
+import {
+  ACTIVE_MAP,
+  IS_KUTAISI,
+  cityLevel,
+  cityCommunity,
+  mapUnlocked,
+} from "./map-selection.js";
+import { cityMenu } from "./city-menu.js";
 import { levelCondition } from "./level-conditions.js";
 import { CommunityUI } from "./community-ui.js";
 import { RaceClock, TIME_COURSE, formatRaceTime } from "./race-timing.js";
@@ -21,7 +29,7 @@ let workshop,
   runId = null,
   settlement = null,
   transitioning = false;
-import { RIVER_POLYGON } from "./district-data.js";
+import { RIVER_POLYGON, LANDMARKS } from "./district-data.js";
 import { RAMPS } from "./stunts.js";
 import { SceneView } from "./view.js";
 import {
@@ -343,12 +351,13 @@ async function start() {
       await career.mutate({ type: "select", car: selectedCar });
     await career.mutate({
       type: "begin-run",
+      map: ACTIVE_MAP,
       car: selectedCar,
       course: TIME_COURSE,
     });
     results.reset();
     sim.start(selectedCar, {
-      level: career.profile.level,
+      level: cityLevel(career.profile),
       equipment: career.profile.cars[selectedCar],
       completedQuests: career.profile.quests?.completed || [],
     });
@@ -438,19 +447,19 @@ function finish() {
     void bankRun()
       .then(() => {
         if (results.generation !== resultGeneration) return;
-        const reward = career.profile.community.lastReward;
+        const reward = cityCommunity(career.profile).lastReward;
         const badges = reward.badges
           .map((id) => ACHIEVEMENTS.find((a) => a.id === id)?.name)
           .join(", ");
         $("result-reward").textContent =
-          `+${reward.cash.toLocaleString()} CR · +${reward.boxes} BOX${reward.boxes === 1 ? "" : "ES"} · LEVEL ${career.profile.level} UNLOCKED${reward.daily ? " · DAILY +500 CR" : ""}${badges ? " · NEW: " + badges : ""}`;
+          `+${reward.cash.toLocaleString()} CR · +${reward.boxes} BOX${reward.boxes === 1 ? "" : "ES"}${reward.platinumBoxes ? ` · +${reward.platinumBoxes} PLATINUM BOX` : ""} · LEVEL ${cityLevel(career.profile)} UNLOCKED${reward.daily ? " · DAILY +500 CR" : ""}${badges ? " · NEW: " + badges : ""}`;
         const next =
           view.lighting.mode === "auto"
-            ? levelCondition(career.profile.level).label
+            ? levelCondition(cityLevel(career.profile)).label
             : view.lighting.mode.toUpperCase();
         $("restart").textContent =
-          `NEXT · LEVEL ${career.profile.level} · ${next} ↗`;
-        results.saved(career.profile.community.lastTime);
+          `NEXT · LEVEL ${cityLevel(career.profile)} · ${next} ↗`;
+        results.saved(cityCommunity(career.profile).lastTime);
         $("garage-back").textContent = "GARAGE · OPEN BOX & UPGRADE";
       })
       .catch((error) => {
@@ -647,7 +656,8 @@ function drawMap() {
     c.stroke();
   }
   c.fillStyle = "#d3b37a";
-  c.fillRect(ox - TOWER.x * s - 2, oz - TOWER.z * s - 2, 4, 4);
+  const landmark = IS_KUTAISI ? LANDMARKS.bagrati : TOWER;
+  c.fillRect(ox - landmark.x * s - 2, oz - landmark.z * s - 2, 4, 4);
   for (const ramp of RAMPS) {
     const x = ox - ramp.x * s,
       y = oz - ramp.z * s;
@@ -875,10 +885,16 @@ function registerTools() {
 }
 try {
   loadingProgress(3, "BUILDING THE CITY");
+  await career.init();
+  if (!mapUnlocked(career.profile, ACTIVE_MAP)) {
+    location.replace("/?unlock=kutaisi");
+    // Navigation destroys this suspended initialization without starting WebGL.
+    await new Promise(() => {});
+  }
   await new Promise(requestAnimationFrame);
   sim = new ChaseSimulation();
   view = new SceneView($("world"));
-  await Promise.all([view.loadTextures(loadingProgress), career.init()]);
+  await view.loadTextures(loadingProgress);
   view.setupGame(sim);
   try {
     view.lighting.setMode(localStorage.getItem("techcrush-lighting"));
@@ -909,6 +925,7 @@ try {
       mobile?.clear();
     },
   });
+  cityMenu(career, () => leaveRun(false));
   $("leaderboard-open").disabled = false;
   $("community-dialog").addEventListener("close", () => {
     if (sim.phase === "won" && results.record && !$("modal").hidden)

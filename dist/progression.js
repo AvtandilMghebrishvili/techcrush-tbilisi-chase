@@ -1,4 +1,5 @@
 import { TIME_COURSES } from "./race-timing.js";
+import { mapUnlocked, cityLevel, MAP_COURSES } from "./map-selection.js";
 import {
   newCommunity,
   normalizeName,
@@ -13,6 +14,7 @@ export const TIERS = [
   { name: "Silver", color: "#c2d2df", weight: 28 },
   { name: "Gold", color: "#f5cc58", weight: 13 },
   { name: "Diamond", color: "#89efff", weight: 4 },
+  { name: "Platinum", color: "#d9b9ff", weight: 0 },
 ];
 export const PARTS = [
   {
@@ -116,11 +118,13 @@ export const PARTS = [
 ];
 export const CAR_IDS = ["classic", "gt", "rally", "suv"];
 export const upgradeCost = (tier) => [0, 600, 1500, 3600, 7800][tier] || 0;
-export const salvageValue = (tier) => [0, 75, 180, 420, 960][tier] || 0;
+export const salvageValue = (tier) => [0, 75, 180, 420, 960, 1400][tier] || 0;
 export const partKey = (id, tier) => `${id}:${tier}`;
 export function newProfile() {
   return {
     schema: 4,
+    maps: { kutaisi: { level: 1, community: newCommunity() } },
+    platinumBoxes: 0,
     quests: { completed: [] },
     driver: { name: "", avatar: "red", listed: false },
     community: newCommunity(),
@@ -142,6 +146,9 @@ export function migrateProfile(profile) {
   p.driver ||= { name: "", avatar: "red", listed: false };
   p.community = { ...newCommunity(p.level), ...p.community };
   p.activeRun ||= null;
+  p.maps ||= {};
+  p.maps.kutaisi = { level: 1, community: newCommunity(), ...p.maps.kutaisi };
+  p.platinumBoxes ||= 0;
   for (const id of CAR_IDS) p.cars[id] ||= {};
   return p;
 }
@@ -158,7 +165,8 @@ export function upgradedSpec(base, equipment = {}) {
     landingScale: 1,
   };
   for (const part of PARTS) {
-    const tier = Math.max(0, Math.min(4, Math.floor(equipment[part.id] || 0)));
+    const grade = Math.max(0, Math.min(5, Math.floor(equipment[part.id] || 0)));
+    const tier = grade === 5 ? 4.5 : grade;
     for (const [stat, value] of Object.entries(part.stats)) {
       if (stat === "protection") spec.damageScale *= 1 - value * tier;
       else if (stat === "landingProtection")
@@ -222,10 +230,18 @@ export function applyProgressAction(
     if (!context.runId || !Number.isFinite(context.now))
       throw Error("Start your chase online.");
     if (!CAR_IDS.includes(action.car)) throw Error("Choose a valid car.");
+    const map = action.map || "tbilisi";
+    if (!mapUnlocked(p, map))
+      throw Error("Clear Tbilisi level 3 to unlock Kutaisi.");
+    if (action.course && !action.course.startsWith(map + "-"))
+      throw Error("This timing course belongs to another city.");
+    if (map === "kutaisi" && action.course !== MAP_COURSES.kutaisi)
+      throw Error("Reload Kutaisi to use its current course.");
     p.activeRun = {
       id: context.runId,
       startedAt: context.now,
-      level: p.level,
+      level: cityLevel(p, map),
+      map,
       car: action.car,
       ...(TIME_COURSES.includes(action.course)
         ? {
@@ -257,6 +273,20 @@ export function applyProgressAction(
       p.inventory[key] = (p.inventory[key] || 0) + 1;
     }
     p.lastBox = { id: action.id, items };
+  } else if (action.type === "open-platinum-box") {
+    if (p.platinumBoxes < 1)
+      throw Error("Find a secret stunt box in Kutaisi first.");
+    p.platinumBoxes--;
+    const items = Array.from({ length: 3 }, () => ({
+      part: PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))]
+        .id,
+      tier: 5,
+    }));
+    for (const reward of items) {
+      const key = partKey(reward.part, 5);
+      p.inventory[key] = (p.inventory[key] || 0) + 1;
+    }
+    p.lastBox = { id: action.id, items, kind: "platinum" };
   } else if (
     action.type === "upgrade" ||
     action.type === "equip" ||
@@ -265,8 +295,12 @@ export function applyProgressAction(
     if (!item) throw Error("Unknown upgrade.");
     const equipped = p.cars[car][item.id] || 0;
     const tier = action.type === "upgrade" ? equipped + 1 : Number(action.tier);
-    if (!Number.isInteger(tier) || tier < 1 || tier > 4)
+    if (!Number.isInteger(tier) || tier < 1 || tier > 5)
       throw Error("Choose a valid part tier.");
+    if (action.type === "upgrade" && tier === 5)
+      throw Error(
+        "Platinum parts are found in Kutaisi secret boxes. Install an owned part.",
+      );
     const key = partKey(item.id, tier);
     if (action.type === "sell") {
       if (!(p.inventory[key] > 0))
@@ -299,8 +333,9 @@ export function applyProgressAction(
       throw Error("Invalid run.");
     if (p.settled.includes(action.runId)) return p;
     const level = Number(action.level);
+    const map = p.activeRun?.map || "tbilisi";
     if (
-      level !== p.level ||
+      level !== cityLevel(p, map) ||
       !["won", "busted", "wrecked", "abandoned"].includes(action.result)
     )
       throw Error("This run does not match the current level.");
@@ -319,8 +354,16 @@ export function applyProgressAction(
         action.result,
         context.now,
       );
-      settleCommunity(p, metrics, action.result, level, context.now);
-      p.community.lastTime =
+      const runProfile =
+        map === "kutaisi"
+          ? {
+              ...p,
+              level: p.maps.kutaisi.level,
+              community: p.maps.kutaisi.community,
+            }
+          : p;
+      settleCommunity(runProfile, metrics, action.result, level, context.now);
+      runProfile.community.lastTime =
         action.result === "won" && metrics.timing
           ? {
               ...metrics.timing,
@@ -330,8 +373,18 @@ export function applyProgressAction(
               score: metrics.score,
               runId: p.activeRun.id,
               recordedAt: context.now,
+              map,
             }
           : null;
+      if (map === "kutaisi") {
+        p.maps.kutaisi = {
+          level: runProfile.level,
+          community: runProfile.community,
+        };
+        for (const key of ["credits", "boxes", "platinumBoxes", "quests"])
+          p[key] = runProfile[key];
+      }
+      p.lastRunMap = map;
       p.activeRun = null;
     } else {
       // Already-open pre-community clients may finish their old chase. They do

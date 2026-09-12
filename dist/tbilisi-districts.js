@@ -1039,6 +1039,7 @@ export function buildTbilisiDistricts(v) {
   }
 }
 export function animateDistricts(v, time) {
+  if (v.kutaisiWheel) v.kutaisiWheel.rotation.z = time * 0.045;
   if (v.waterTime) v.waterTime.value = time;
   for (const cabin of v.gondolas || []) {
     const t = (time * 0.025 + cabin.offset) % 1,

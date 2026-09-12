@@ -1,3 +1,5 @@
+import { IS_KUTAISI } from "./map-selection.js";
+const { KUTAISI_GEO } = IS_KUTAISI ? await import("./kutaisi-geo-data.js") : {};
 import { reservedExpansion, EXPANSION_SOLIDS } from "./world-sites.js";
 import { ROAD_DATA } from "./road-data.js";
 import { overlapsRoad, placeOffRoad } from "./map-clearance.js";
@@ -33,6 +35,8 @@ export const ROADS = ROAD_DATA.edges.map(([a, b, width, name], id) => {
 });
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function geo(lat, lon) {
+  if (IS_KUTAISI)
+    return { x: -(lon - 42.704) * 82380, z: (lat - 42.269) * 111320 };
   return { x: -(lon - 44.799) * 83140, z: (lat - 41.699) * 111320 };
 }
 // A static bounding hierarchy prunes distant streets without approximating the
@@ -206,54 +210,83 @@ const point = (lat, lon, name, street) => {
   const p = nearestRoad(geo(lat, lon), street);
   return { x: p.x, z: p.z, angle: p.angle, name };
 };
-export const START = {
-  ...point(41.69657, 44.80615, "Baratashvili"),
-  angle: 1.66,
-};
-export const CLOCK_PARTS = [
-  // World transform of the renderer's -PI/2 group, including its separate wing.
-  { x: 9, z: 0, w: 34, d: 27, h: 31, angle: 0 },
-  { x: 14, z: -30, w: 25, d: 46, h: 27, angle: 0 },
-  { x: -9, z: 0, w: 2, d: 14, h: 30, angle: 0 },
-  ...[-5.2, -3.6, 3.6, 5.2].map((z) => ({
-    x: -10.5,
-    z,
-    w: 1.1,
-    d: 0.7,
-    base: 1,
-    h: 27,
-    angle: 0,
-  })),
-  ...[3.5, 8.7, 14, 19.3, 24.6, 29.8].map((y) => ({
-    x: 9,
-    z: 0,
-    w: 35,
-    d: 28,
-    base: y - 0.175,
-    h: y + 0.175,
-    angle: 0,
-  })),
-  ...[3, 8, 13, 18, 23, 27.5].map((y) => ({
-    x: 14,
-    z: -30,
-    w: 26,
-    d: 47,
-    base: y - 0.2,
-    h: y + 0.2,
-    angle: 0,
-  })),
-];
-export const CLOCK_BUILDING = placeOffRoad({ x: -410, z: -234 }, CLOCK_PARTS);
-export const CHECKPOINTS = [
-  point(41.6964, 44.80348, "Baratashvili Avenue"),
-  point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
-  point(41.6969, 44.80835, "Baratashvili Bridge", "Baratashvili Bridge"),
-  point(41.6912, 44.81174, "Europe Square", "Europe Square"),
-  point(41.68805, 44.8111, "Abanotubani", "Abano Street"),
-  point(41.694, 44.8015, "Freedom Square", "Freedom"),
-];
+export const START = IS_KUTAISI
+  ? { ...point(42.2707, 42.7049, "COLCHIS SQUARE"), angle: Math.PI / 2 }
+  : {
+      ...point(41.69657, 44.80615, "Baratashvili"),
+      angle: 1.66,
+    };
+export const CLOCK_PARTS = IS_KUTAISI
+  ? []
+  : [
+      // World transform of the renderer's -PI/2 group, including its separate wing.
+      { x: 9, z: 0, w: 34, d: 27, h: 31, angle: 0 },
+      { x: 14, z: -30, w: 25, d: 46, h: 27, angle: 0 },
+      { x: -9, z: 0, w: 2, d: 14, h: 30, angle: 0 },
+      ...[-5.2, -3.6, 3.6, 5.2].map((z) => ({
+        x: -10.5,
+        z,
+        w: 1.1,
+        d: 0.7,
+        base: 1,
+        h: 27,
+        angle: 0,
+      })),
+      ...[3.5, 8.7, 14, 19.3, 24.6, 29.8].map((y) => ({
+        x: 9,
+        z: 0,
+        w: 35,
+        d: 28,
+        base: y - 0.175,
+        h: y + 0.175,
+        angle: 0,
+      })),
+      ...[3, 8, 13, 18, 23, 27.5].map((y) => ({
+        x: 14,
+        z: -30,
+        w: 26,
+        d: 47,
+        base: y - 0.2,
+        h: y + 0.2,
+        angle: 0,
+      })),
+    ];
+export const CLOCK_BUILDING = IS_KUTAISI
+  ? { x: 9999, z: 9999 }
+  : placeOffRoad({ x: -410, z: -234 }, CLOCK_PARTS);
+export const CHECKPOINTS = IS_KUTAISI
+  ? [
+      point(42.2707, 42.703, "ROYAL BOULEVARD"),
+      point(42.27005, 42.6958, "RUSTAVELI AVENUE"),
+      point(42.2729, 42.6995, "RED BRIDGE DISTRICT"),
+      point(42.2766, 42.703, "BAGRATI APPROACH"),
+      point(42.2729, 42.7085, "GELATI STREET"),
+      point(42.2633, 42.7055, "RIONI EMBANKMENT"),
+    ]
+  : [
+      point(41.6964, 44.80348, "Baratashvili Avenue"),
+      point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
+      point(41.6969, 44.80835, "Baratashvili Bridge", "Baratashvili Bridge"),
+      point(41.6912, 44.81174, "Europe Square", "Europe Square"),
+      point(41.68805, 44.8111, "Abanotubani", "Abano Street"),
+      point(41.694, 44.8015, "Freedom Square", "Freedom"),
+    ];
 // Deterministic street-front lots; the same rotated footprints drive rendering and collision.
 export const BUILDINGS = [];
+if (IS_KUTAISI)
+  for (const [i, b] of (KUTAISI_GEO.lots || []).entries()) {
+    if (
+      !reservedDistrict(b, Math.max(b.w, b.d) / 2) &&
+      !reservedExpansion(b) &&
+      !overlapsRoad(b, 3)
+    )
+      BUILDINGS.push({
+        ...b,
+        tint: i % 5,
+        name: "Kutaisi historic lot",
+        cornices: [1, b.h * 0.5, b.h + 0.3],
+      });
+  }
 let seed = 197;
 const rand = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
 for (const road of ROADS) {
@@ -265,7 +298,9 @@ for (const road of ROADS) {
     for (const side of [-1, 1]) {
       const w = 24 + rand() * 9,
         d = 18 + rand() * 10,
-        h = 14 + Math.floor(rand() * 4) * 4;
+        h = IS_KUTAISI
+          ? 8 + Math.floor(rand() * 4) * 3.2
+          : 14 + Math.floor(rand() * 4) * 4;
       const offset = road.width / 2 + 5 + d / 2;
       const x = road.start.x + fx * along + rx * offset * side,
         z = road.start.z + fz * along + rz * offset * side;
@@ -301,13 +336,15 @@ for (const road of ROADS) {
         angle: road.angle - Math.PI / 2,
         tint: Math.floor(rand() * 5),
         name: road.name,
-        cornices: [1, h * 0.25, h * 0.5, h * 0.75, h + 0.3],
+        cornices: IS_KUTAISI
+          ? [1, h * 0.5, h + 0.3]
+          : [1, h * 0.25, h * 0.5, h * 0.75, h + 0.3],
       });
     }
   }
 }
 // Keep the pedestrian bridge approaches open without perturbing other seeded lots.
-for (let i = BUILDINGS.length - 1; i >= 0; i--) {
+for (let i = IS_KUTAISI ? -1 : BUILDINGS.length - 1; i >= 0; i--) {
   const b = BUILDINGS[i];
   if (
     [-65, 65].some((x) =>

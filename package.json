@@ -1,7 +1,7 @@
 {
   "name": "nightshift-chase",
-  "version": "1.14.1",
-  "description": "A browser 3D car chase through Tbilisi with sports cars, police pursuit, checkpoints, stunts and rewind.",
+  "version": "1.15.0",
+  "description": "A browser 3D car chase through Tbilisi and unlockable Kutaisi with shared garages, police pursuit, checkpoints, Platinum stunts and rewind.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase.git"
