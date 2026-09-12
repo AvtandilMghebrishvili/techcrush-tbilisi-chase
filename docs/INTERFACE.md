@@ -1,27 +1,27 @@
 # Interface guide
 
-Choose one of four cars and press **Start Chase**. **Your Garage** opens saved customization. On shorter displays, the car details scroll inside the menu while the main actions remain reachable.
+Choose a city, choose an available car and press **Start Chase**. Four stock cars are immediately available; four more show their achievement requirements. **Your Garage** opens customization and **Leaderboard** opens shared city rankings. Start and the two secondary actions remain visible while the menu content scrolls.
 
-## City selection and unlock progress (1.18)
+## City selection and mastery (2.0)
 
-The start menu has two numbered sections: **01 Choose your city** and **02 Choose your car**. They sit side by side on wide screens and stack on phones. The launch area remains visible while scrolling, with Start Chase, Your Garage and Leaderboard. The current city/level and selected car stay beside Start. Press the car's **Change** shortcut to scroll to and focus its selection button; choosing another car updates the shortcut immediately.
+Tbilisi, Kutaisi and Batumi are all open from the first visit. The selected city has a red outline and checkmark; the other two show Play Now. Each city displays its own current level and progress out of five completed levels. **Your Mystery Cars & Rewards** expands the three car milestones and creator-box progress. Complete level 5, then open that city’s car box here or from the finish screen. The car becomes available in both selectors.
 
-Tbilisi is available from the start. **Complete Tbilisi levels 1, 2 and 3**, including each final police escape, to unlock Kutaisi. Being on Tbilisi level 3 means two levels are complete: the menu shows **2 / 3**, two completed steps and one remaining level. After winning level 3 the saved Tbilisi level becomes 4, and Kutaisi becomes selectable with a green **Unlocked** label. An accessible progress bar supplies the same information without relying on color.
+The launch area shows saved coins, the selected city/level and a Change shortcut to the current car. The in-game coin balance sits beside the logo, separate from the level’s unbanked earnings. Cars, parts and currency follow the same private garage between cities. Changing city banks the current run and reloads the page to release the old world.
 
-City cards show each city's own current endless level. The available-city count excludes upcoming Batumi. Both cities share cars, parts and credits. Unlock status refreshes through the existing profile change callback. Choosing Kutaisi still performs the normal safe city reload. The menu changes no driving physics, rewards, save schema or timing-course IDs, and adds no image downloads, animation loop or network polling.
+Setup includes **Steering response** (70–130%), **Drift strength** (65–140%), **Reset to Classic**, music volume and **Reset Music & Sound**. The speaker button mutes effects and music together; preferences persist in this browser. Music can begin only after a click, tap or keypress. Auto lighting is the default unless a fixed mode was saved; every active three-minute cycle starts/ends at night.
 
 ## Driving screen
 
 The upper-left panel shows level, run earnings, score and six checkpoint marks. The upper-right panel shows pursuit units, heat and reinforcement timing. The central arrow and distance have no background so the road stays visible. Speed and condition sit above the pedals on touch screens; the circular radar, Rewind and Reset Car have separate targets.
 
-| Toolbar control | Action |
-| --- | --- |
-| Trophy / Ranks | Shared leaderboard, driver name and achievements |
-| Sliders / Setup | Pause and open driver settings |
-| Camera / C | Switch chase, cockpit, hood and high chase |
-| Sun | Cycle automatic lighting, night, day and dusk |
-| Speaker / M | Enable or mute sound |
-| Pause / P | Pause; choose Resume, Restart or Change Car |
+| Toolbar control | Action                                           |
+| --------------- | ------------------------------------------------ |
+| Trophy / Ranks  | Shared leaderboard, driver name and achievements |
+| Sliders / Setup | Pause and open driver settings                   |
+| Camera / C      | Switch chase, cockpit, hood and high chase       |
+| Sun             | Cycle automatic lighting, night, day and dusk    |
+| Speaker / M     | Enable or mute sound                             |
+| Pause / P       | Pause; choose Resume, Restart or Change Car      |
 
 Desktop buttons include labels and shortcut hints. Smaller screens use icons with accessible names. Touch steering, drift and nitro still accept independent fingers; the interface introduces no changes to vehicle physics or saved progress.
 

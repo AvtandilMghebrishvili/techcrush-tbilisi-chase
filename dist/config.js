@@ -1,8 +1,8 @@
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 export const GRID = 140;
 export const GRID_RADIUS = 4;
 export const ROAD_EDGE = 1650;
-export const LIMIT = IS_KUTAISI ? 2100 : 1900;
+export const LIMIT = IS_BATUMI ? 3000 : IS_KUTAISI ? 2100 : 1900;
 export const MAP_SIZE = (LIMIT + 32) * 2;
 export const TOWER = { x: 1070, z: -430, y: 278 };
 export const CARS = [
@@ -69,6 +69,70 @@ export const CARS = [
     speedRating: 3,
     gripRating: 3,
     armorRating: 5,
+  },
+  {
+    id: "falcon",
+    name: "Falcon RS",
+    type: "TBILISI MYSTERY",
+    color: "#ff683a",
+    topSpeed: 73,
+    acceleration: 31,
+    width: 2.02,
+    length: 4.7,
+    handling: 1.12,
+    damageScale: 0.73,
+    description: "Tbilisi level 5 · sculpted rally coupe",
+    speedRating: 5,
+    gripRating: 5,
+    armorRating: 3,
+  },
+  {
+    id: "rioni",
+    name: "Rioni GT",
+    type: "KUTAISI MYSTERY",
+    color: "#56d7b0",
+    topSpeed: 77,
+    acceleration: 32,
+    width: 2.04,
+    length: 5.15,
+    handling: 1.04,
+    damageScale: 0.65,
+    description: "Kutaisi level 5 · long-hood grand tourer",
+    speedRating: 5,
+    gripRating: 4,
+    armorRating: 4,
+  },
+  {
+    id: "coast",
+    name: "Coast X",
+    type: "BATUMI MYSTERY",
+    color: "#52a6ff",
+    topSpeed: 80,
+    acceleration: 34,
+    width: 2.14,
+    length: 4.85,
+    handling: 1.08,
+    damageScale: 0.66,
+    description: "Batumi level 5 · low coastal hypercar",
+    speedRating: 5,
+    gripRating: 4,
+    armorRating: 4,
+  },
+  {
+    id: "creator",
+    name: "TECHCRUSH YouTuber",
+    type: "SIGNATURE EDITION",
+    color: "#e91b3d",
+    topSpeed: 82,
+    acceleration: 35,
+    width: 2.18,
+    length: 4.95,
+    handling: 1.13,
+    damageScale: 0.62,
+    description: "10 patrol takedowns · exclusive four-tier creator parts",
+    speedRating: 5,
+    gripRating: 5,
+    armorRating: 4,
   },
 ];
 export function carSpec(id) {

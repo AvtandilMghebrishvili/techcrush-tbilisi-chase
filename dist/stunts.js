@@ -1,23 +1,30 @@
 import { SPECIAL_RAMPS, roofAt } from "./world-sites.js";
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 import { nearbyObstacles } from "./spatial-index.js";
 import { nearestRoad, geo } from "./city-map.js";
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // Roadside ramps leave the other lane clear. Locations are shared by rendering and physics.
 export const RAMPS = (
-  IS_KUTAISI
+  IS_BATUMI
     ? [
-        [42.2701, 42.6948, "RUSTAVELI LAUNCH"],
-        [42.2734, 42.7092, "GELATI STREET HOP"],
-        [42.2616, 42.7033, "RIONI EMBANKMENT HOP"],
-        [42.2753, 42.699, "BAGRATI LAUNCH"],
+        [41.6515, 41.634, "BOULEVARD LAUNCH"],
+        [41.649, 41.641, "PIAZZA HOP"],
+        [41.635, 41.612, "TWIN TOWER LAUNCH"],
+        [41.637, 41.624, "BAGRATIONI HOP"],
       ]
-    : [
-        [41.69657, 44.80515, "BARATASHVILI LAUNCH"],
-        [41.70086, 44.79738, "RUSTAVELI HOP"],
-        [41.69599, 44.80847, "BRIDGE JUMP"],
-        [41.69068, 44.80892, "OLD TOWN LAUNCH"],
-      ]
+    : IS_KUTAISI
+      ? [
+          [42.2701, 42.6948, "RUSTAVELI LAUNCH"],
+          [42.2734, 42.7092, "GELATI STREET HOP"],
+          [42.2616, 42.7033, "RIONI EMBANKMENT HOP"],
+          [42.2753, 42.699, "BAGRATI LAUNCH"],
+        ]
+      : [
+          [41.69657, 44.80515, "BARATASHVILI LAUNCH"],
+          [41.70086, 44.79738, "RUSTAVELI HOP"],
+          [41.69599, 44.80847, "BRIDGE JUMP"],
+          [41.69068, 44.80892, "OLD TOWN LAUNCH"],
+        ]
 ).map(([lat, lon, name], id) => {
   const p = nearestRoad(geo(lat, lon)),
     side = id % 2 ? 1 : -1;

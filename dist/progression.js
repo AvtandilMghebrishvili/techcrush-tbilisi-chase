@@ -1,5 +1,10 @@
 import { TIME_COURSES } from "./race-timing.js";
-import { mapUnlocked, cityLevel, MAP_COURSES } from "./map-selection.js";
+import {
+  mapUnlocked,
+  cityLevel,
+  MAP_COURSES,
+  CITY_IDS,
+} from "./map-selection.js";
 import {
   newCommunity,
   normalizeName,
@@ -15,6 +20,9 @@ export const TIERS = [
   { name: "Gold", color: "#f5cc58", weight: 13 },
   { name: "Diamond", color: "#89efff", weight: 4 },
   { name: "Platinum", color: "#d9b9ff", weight: 0 },
+  { name: "Emerald", color: "#62efac", weight: 0 },
+  { name: "Ruby", color: "#ff5981", weight: 0 },
+  { name: "TECHCRUSH", color: "#ffa83d", weight: 0 },
 ];
 export const PARTS = [
   {
@@ -116,9 +124,48 @@ export const PARTS = [
     stats: { acceleration: 0.6, topSpeed: 1 },
   },
 ];
-export const CAR_IDS = ["classic", "gt", "rally", "suv"];
+export const BASE_CARS = ["classic", "gt", "rally", "suv"];
+export const CITY_CARS = {
+  tbilisi: "falcon",
+  kutaisi: "rioni",
+  batumi: "coast",
+};
+export const CAR_IDS = [...BASE_CARS, ...Object.values(CITY_CARS), "creator"];
+export const carUnlocked = (p, id) =>
+  BASE_CARS.includes(id) || (p.unlockedCars || []).includes(id);
+export const totalTakedowns = (p) =>
+  CITY_IDS.reduce(
+    (n, map) =>
+      n +
+      (map === "tbilisi"
+        ? p.community?.takedowns
+        : p.maps?.[map]?.community?.takedowns || 0),
+    0,
+  );
+export function syncMilestones(p) {
+  p.unlockedCars ||= [];
+  p.carBoxes ||= [];
+  p.claimedCityCars ||= [];
+  p.creatorBoxes ||= 0;
+  p.creatorMilestones ||= 0;
+  for (const map of CITY_IDS)
+    if (
+      cityLevel(p, map) >= 6 &&
+      !p.claimedCityCars.includes(map) &&
+      !p.carBoxes.includes(map)
+    )
+      p.carBoxes.push(map);
+  const earned = Math.floor(totalTakedowns(p) / 10);
+  if (earned > p.creatorMilestones) {
+    p.creatorBoxes += earned - p.creatorMilestones;
+    p.creatorMilestones = earned;
+    if (!p.unlockedCars.includes("creator")) p.unlockedCars.push("creator");
+  }
+  return p;
+}
 export const upgradeCost = (tier) => [0, 600, 1500, 3600, 7800][tier] || 0;
-export const salvageValue = (tier) => [0, 75, 180, 420, 960, 1400][tier] || 0;
+export const salvageValue = (tier) =>
+  [0, 75, 180, 420, 960, 1400, 2100, 3200, 5000][tier] || 0;
 export const partKey = (id, tier) => `${id}:${tier}`;
 // Fusion is permanent tuning of a car's part slot; changing rarity keeps it.
 export const FUSION_COSTS = [5, 10, 15, 20, 25];
@@ -126,15 +173,24 @@ export const FUSION_BONUSES = [0, 0.3, 0.5, 0.7, 0.9, 1.1];
 export const partStars = (equipment, id) =>
   Math.max(0, Math.min(5, Math.floor(Number(equipment?.stars?.[id]) || 0)));
 export const partPower = (equipment, id) => {
-  const tier = Math.max(0, Math.min(5, Math.floor(equipment[id] || 0)));
+  const tier = Math.max(0, Math.min(8, Math.floor(equipment[id] || 0)));
   return (
-    (tier === 5 ? 4.5 : tier) * (1 + FUSION_BONUSES[partStars(equipment, id)])
+    (tier > 4 ? 4 + (tier - 4) * 0.5 : tier) *
+    (1 + FUSION_BONUSES[partStars(equipment, id)])
   );
 };
 export function newProfile() {
   return {
-    schema: 4,
-    maps: { kutaisi: { level: 1, community: newCommunity() } },
+    schema: 5,
+    maps: {
+      kutaisi: { level: 1, community: newCommunity() },
+      batumi: { level: 1, community: newCommunity() },
+    },
+    unlockedCars: [],
+    carBoxes: [],
+    claimedCityCars: [],
+    creatorBoxes: 0,
+    creatorMilestones: 0,
     platinumBoxes: 0,
     quests: { completed: [] },
     driver: { name: "", avatar: "red", listed: false },
@@ -144,7 +200,7 @@ export function newProfile() {
     level: 1,
     boxes: 1,
     inventory: {},
-    cars: { classic: {}, gt: {}, rally: {}, suv: {} },
+    cars: Object.fromEntries(CAR_IDS.map((id) => [id, {}])),
     selectedCar: "classic",
     settled: [],
     lastBox: null,
@@ -152,16 +208,18 @@ export function newProfile() {
 }
 export function migrateProfile(profile) {
   const p = structuredClone(profile);
-  p.schema = 4;
+  p.schema = 5;
   p.quests = { completed: [], ...p.quests };
   p.driver ||= { name: "", avatar: "red", listed: false };
   p.community = { ...newCommunity(p.level), ...p.community };
   p.activeRun ||= null;
   p.maps ||= {};
   p.maps.kutaisi = { level: 1, community: newCommunity(), ...p.maps.kutaisi };
+  p.maps.batumi = { level: 1, community: newCommunity(), ...p.maps.batumi };
+  p.cars ||= {};
   p.platinumBoxes ||= 0;
   for (const id of CAR_IDS) p.cars[id] ||= {};
-  return p;
+  return syncMilestones(p);
 }
 export function upgradedSpec(base, equipment = {}) {
   const spec = {
@@ -185,6 +243,11 @@ export function upgradedSpec(base, equipment = {}) {
     }
   }
   spec.landingScale = Math.max(0.1, spec.landingScale);
+  spec.damageScale = Math.max(0.12, spec.damageScale);
+  spec.topSpeed = Math.min(145, spec.topSpeed);
+  spec.boostSpeed = Math.min(45, spec.boostSpeed);
+  spec.nitroDrain = Math.max(6, spec.nitroDrain);
+  spec.boostDelay = Math.max(0.12, spec.boostDelay);
   return spec;
 }
 export function pursuitTuning(level = 1, playerSpeed = 58, map = "tbilisi") {
@@ -203,11 +266,11 @@ export function pursuitTuning(level = 1, playerSpeed = 58, map = "tbilisi") {
     repath: 0.55 - growth * 0.34,
     lead: 1.8 + growth * 1.3,
     ramRecovery: 2.6 - growth * 1.5,
-    waveInterval: (map === "kutaisi" ? 23 : 29) - growth * 12 - endurance * 3,
+    waveInterval: (map !== "tbilisi" ? 23 : 29) - growth * 12 - endurance * 3,
     maxUnits: 12 + Math.min(10, Math.floor((level - 1) / 2)),
     initialUnits:
-      (map === "kutaisi" ? 6 : 4) + Math.min(4, Math.floor((level - 1) / 3)),
-    sight: (map === "kutaisi" ? 350 : 290) + growth * 100,
+      (map !== "tbilisi" ? 6 : 4) + Math.min(4, Math.floor((level - 1) / 3)),
+    sight: (map !== "tbilisi" ? 350 : 290) + growth * 100,
     flank: level >= 3,
     roadblockRange: 100 + growth * 80,
   };
@@ -237,6 +300,13 @@ export function applyProgressAction(
 ) {
   const p = migrateProfile(profile);
   const car = CAR_IDS.includes(action.car) ? action.car : p.selectedCar;
+  if (
+    ["select", "begin-run", "paint", "upgrade", "equip", "fuse"].includes(
+      action.type,
+    ) &&
+    !carUnlocked(p, car)
+  )
+    throw Error("Unlock this car from its milestone box first.");
   const item = PARTS.find((x) => x.id === action.part);
   if (action.type === "driver") {
     const name = normalizeName(action.name);
@@ -248,12 +318,11 @@ export function applyProgressAction(
       throw Error("Start your chase online.");
     if (!CAR_IDS.includes(action.car)) throw Error("Choose a valid car.");
     const map = action.map || "tbilisi";
-    if (!mapUnlocked(p, map))
-      throw Error("Clear Tbilisi level 3 to unlock Kutaisi.");
+    if (!mapUnlocked(p, map)) throw Error("Choose a valid city.");
     if (action.course && !action.course.startsWith(map + "-"))
       throw Error("This timing course belongs to another city.");
-    if (map === "kutaisi" && action.course !== MAP_COURSES.kutaisi)
-      throw Error("Reload Kutaisi to use its current course.");
+    if (action.course && !TIME_COURSES.includes(action.course))
+      throw Error("Reload to use a supported course.");
     p.activeRun = {
       id: context.runId,
       startedAt: context.now,
@@ -284,6 +353,28 @@ export function applyProgressAction(
     )
       throw Error("Choose a valid paint color and car.");
     p.cars[car].paint = action.color.toLowerCase();
+  } else if (action.type === "claim-car-box") {
+    if (!p.carBoxes.includes(action.map))
+      throw Error("Complete level 5 in this city to earn its car.");
+    p.carBoxes = p.carBoxes.filter((m) => m !== action.map);
+    p.claimedCityCars.push(action.map);
+    const reward = CITY_CARS[action.map];
+    if (!p.unlockedCars.includes(reward)) p.unlockedCars.push(reward);
+    p.lastCarReward = { map: action.map, car: reward };
+  } else if (action.type === "open-creator-box") {
+    if (p.creatorBoxes < 1)
+      throw Error("Destroy 10 patrol cars to earn a TECHCRUSH box.");
+    p.creatorBoxes--;
+    const items = Array.from({ length: 3 }, () => ({
+      part: PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))]
+        .id,
+      tier: 5 + Math.min(3, Math.floor(rng() * 4)),
+    }));
+    for (const r of items) {
+      const k = partKey(r.part, r.tier);
+      p.inventory[k] = (p.inventory[k] || 0) + 1;
+    }
+    p.lastBox = { id: action.id, items, kind: "creator" };
   } else if (action.type === "open-box") {
     if (p.boxes < 1) throw Error("Complete a level to earn another box.");
     p.boxes--;
@@ -355,11 +446,15 @@ export function applyProgressAction(
     if (!item) throw Error("Unknown upgrade.");
     const equipped = p.cars[car][item.id] || 0;
     const tier = action.type === "upgrade" ? equipped + 1 : Number(action.tier);
-    if (!Number.isInteger(tier) || tier < 1 || tier > 5)
+    if (!Number.isInteger(tier) || tier < 1 || tier > 8)
       throw Error("Choose a valid part tier.");
-    if (action.type === "upgrade" && tier === 5)
+    if (action.type === "upgrade" && tier >= 5)
       throw Error(
         "Platinum parts are found in Kutaisi secret boxes. Install an owned part.",
+      );
+    if (action.type !== "sell" && tier > 5 && car !== "creator")
+      throw Error(
+        "Emerald, Ruby and TECHCRUSH parts fit the YouTuber Car only.",
       );
     const key = partKey(item.id, tier);
     if (action.type === "sell") {
@@ -415,11 +510,11 @@ export function applyProgressAction(
         context.now,
       );
       const runProfile =
-        map === "kutaisi"
+        map !== "tbilisi"
           ? {
               ...p,
-              level: p.maps.kutaisi.level,
-              community: p.maps.kutaisi.community,
+              level: p.maps[map].level,
+              community: p.maps[map].community,
             }
           : p;
       settleCommunity(runProfile, metrics, action.result, level, context.now);
@@ -436,8 +531,8 @@ export function applyProgressAction(
               map,
             }
           : null;
-      if (map === "kutaisi") {
-        p.maps.kutaisi = {
+      if (map !== "tbilisi") {
+        p.maps[map] = {
           level: runProfile.level,
           community: runProfile.community,
         };
@@ -474,6 +569,7 @@ export function applyProgressAction(
       }
       p.lastBox = { id: action.runId, kind: "level", items };
     }
+    syncMilestones(p);
     p.settled.push(action.runId);
     p.settled = p.settled.slice(-128);
   } else throw Error("Unknown garage action.");

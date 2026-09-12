@@ -15,15 +15,24 @@ export function checkCornering() {
   drive(slow, { steer: 1 }, 0.35);
   drive(fast, { steer: 1 }, 0.35);
   drive(straight, {}, 0.35);
-  assert(fast.understeer > 0.1);
+  assert.equal(fast.understeer, 0);
   assert.equal(slow.understeer, 0);
   assert(
     Math.abs(fast.angle) < Math.abs(slow.angle),
     "high speed must widen the same steering input",
   );
   assert(
-    straight.speed - fast.speed > 1 && straight.speed - fast.speed < 5,
-    "modest corner scrub",
+    straight.speed - fast.speed < 3,
+    "classic cornering does not add the removed speed scrub",
+  );
+  const gentle = vehicle(),
+    sharp = vehicle();
+  gentle.vz = sharp.vz = 35;
+  drive(gentle, { steer: 1, steeringSensitivity: 0.7 }, 0.5);
+  drive(sharp, { steer: 1, steeringSensitivity: 1.3 }, 0.5);
+  assert(
+    Math.abs(sharp.angle) > Math.abs(gentle.angle) * 1.5,
+    "driver steering tuning changes turn response",
   );
   const braked = vehicle(),
     held = vehicle();
@@ -39,7 +48,16 @@ export function checkCornering() {
     Math.abs(braked.angle) > Math.abs(held.angle),
     "braking before entry restores turn authority",
   );
-  for (const id of ["classic", "gt", "rally", "suv"]) {
+  for (const id of [
+    "classic",
+    "gt",
+    "rally",
+    "suv",
+    "falcon",
+    "rioni",
+    "coast",
+    "creator",
+  ]) {
     const eq = Object.fromEntries(PARTS.map((p) => [p.id, 5]));
     eq.stars = Object.fromEntries(PARTS.map((p) => [p.id, 5]));
     const c = vehicle();

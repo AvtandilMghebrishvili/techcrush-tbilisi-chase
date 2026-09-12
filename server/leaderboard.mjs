@@ -1,5 +1,6 @@
 import { weekKey, driverTitle, ACHIEVEMENTS } from "../dist/community-rules.js";
 import { TIME_COURSE, TIME_COURSES } from "../dist/race-timing.js";
+import { CAR_IDS } from "../dist/progression.js";
 import { MAP_COURSES } from "../dist/map-selection.js";
 const SORTS = {
   progress:
@@ -59,7 +60,7 @@ export async function readLeaderboard(DB, url, hash, now = Date.now()) {
   const table =
     map === "tbilisi"
       ? "garages"
-      : `(SELECT g.key_hash,g.public_id,g.display_name,g.avatar,g.listed,c.ranked_runs,c.rank_level,c.rank_checkpoints,c.best_score,c.total_score,c.wins,c.badges,c.week_key,c.week_score,c.week_wins,c.rank_at FROM garages g JOIN city_rankings c ON c.key_hash=g.key_hash WHERE c.map='kutaisi')`;
+      : `(SELECT g.key_hash,g.public_id,g.display_name,g.avatar,g.listed,c.ranked_runs,c.rank_level,c.rank_checkpoints,c.best_score,c.total_score,c.wins,c.badges,c.week_key,c.week_score,c.week_wins,c.rank_at FROM garages g JOIN city_rankings c ON c.key_hash=g.key_hash WHERE c.map='${map}')`;
   const where =
     "listed=1 AND ranked_runs>0" +
     (mode === "weekly" ? " AND week_key=? AND week_score>0" : "");
@@ -116,7 +117,7 @@ async function readLevelTimes(DB, url, hash, now) {
     !Number.isInteger(page) ||
     page < 0 ||
     page > 1000 ||
-    !["all", "classic", "gt", "rally", "suv"].includes(car) ||
+    !["all", ...CAR_IDS].includes(car) ||
     !["all", "stock"].includes(build)
   )
     throw Error("Invalid leaderboard time filter.");

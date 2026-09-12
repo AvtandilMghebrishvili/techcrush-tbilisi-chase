@@ -1,3 +1,5 @@
+import { carUnlocked } from "./progression.js";
+import { carRequirement, refreshRewards } from "./reward-ui.js";
 import { ACTIVE_MAP, CITY_NAME, cityLevel } from "./map-selection.js";
 import { GaragePreview } from "./garage-preview.js";
 import { PAINTS, paintColor } from "./customization.js";
@@ -66,6 +68,11 @@ export class GarageUI {
     });
     $("open-box").onclick = () => this.openBox();
     $("open-platinum-box").onclick = () => this.openBox(true);
+    const special = document.createElement("button");
+    special.id = "open-creator-box";
+    special.className = "creator-box-button";
+    $("open-platinum-box").after(special);
+    special.onclick = () => this.openBox("creator");
     $("loot-done").onclick = () => {
       $("loot-dialog").close();
     };
@@ -198,7 +205,7 @@ export class GarageUI {
     const current = equipment[part.id] || 0,
       rows = comparisonRows(carSpec(this.car), equipment, part, tier, stars);
     const actual = this.store.profile.cars[this.car][part.id] || 0,
-      next = Math.min(5, actual + 1),
+      next = Math.min(this.car === "creator" ? 8 : 5, actual + 1),
       busy = this.store.busy || this.store.pending;
     const canInstall =
       tier > actual &&
@@ -207,6 +214,7 @@ export class GarageUI {
     $("part-inspector").innerHTML =
       `<div class="inspector-art">${partArtwork(part, "", tier)}<span>${TIERS[tier].name} · ${installed ? "FITTED" : "PREVIEW"}</span></div><div class="inspector-copy"><small>${installed ? "UPGRADE COMPLETE" : "INSPECT YOUR NEXT UPGRADE"}</small><h3>${part.name}</h3><p>${PART_DETAILS[part.id]}</p><div class="quality-picker">${TIERS.slice(
         1,
+        this.car === "creator" ? 9 : 6,
       )
         .map(
           (q, i) =>
@@ -214,7 +222,7 @@ export class GarageUI {
         )
         .join(
           "",
-        )}</div><small class="preview-disclaimer">${installed ? "Saved to this car. Ready for the next chase." : tier > current ? "Preview only. Buy the next tier or install an owned part for free." : "This is a visual comparison. Your fitted part is unchanged."}</small><div class="inspector-actions"><button data-inspector-buy ${busy || actual >= 4 || this.store.profile.credits < upgradeCost(next) ? "disabled" : ""}>${actual >= 4 ? (actual === 5 ? "FULLY UPGRADED" : "FIND PLATINUM IN KUTAISI") : `UPGRADE TO ${TIERS[next].name.toUpperCase()} · ${upgradeCost(next).toLocaleString()} CR`}</button>${canInstall ? `<button data-inspector-install ${busy ? "disabled" : ""}>INSTALL ${TIERS[tier].name.toUpperCase()} · FREE</button>` : ""}</div></div><div class="comparison-meters">${rows.map((r) => `<div class="comparison-row"><span>${r.label} ${r.lower ? "↓ better" : "↑ better"}</span><div class="comparison-numbers"><b>${r.before.toFixed(r.unit === "s" ? 2 : 1)}</b><span>→</span><strong data-after="${r.key}">${r.after.toFixed(r.unit === "s" ? 2 : 1)}</strong><small>${r.unit}</small></div><div class="meter" style="--from:${Math.min(100, (r.before / r.max) * 100)}%;--to:${Math.min(100, (r.after / r.max) * 100)}%"><i></i><b></b></div></div>`).join("")}</div>`;
+        )}</div><small class="preview-disclaimer">${installed ? "Saved to this car. Ready for the next chase." : tier > current ? "Preview only. Buy the next tier or install an owned part for free." : "This is a visual comparison. Your fitted part is unchanged."}</small><div class="inspector-actions"><button data-inspector-buy ${busy || actual >= 4 || this.store.profile.credits < upgradeCost(next) ? "disabled" : ""}>${actual >= 4 ? (actual >= (this.car === "creator" ? 8 : 5) ? "TOP GRADE FITTED" : this.car === "creator" ? "FIND TECHCRUSH BOXES" : "FIND PLATINUM STUNT BOXES") : `UPGRADE TO ${TIERS[next].name.toUpperCase()} · ${upgradeCost(next).toLocaleString()} CR`}</button>${canInstall ? `<button data-inspector-install ${busy ? "disabled" : ""}>INSTALL ${TIERS[tier].name.toUpperCase()} · FREE</button>` : ""}</div></div><div class="comparison-meters">${rows.map((r) => `<div class="comparison-row"><span>${r.label} ${r.lower ? "↓ better" : "↑ better"}</span><div class="comparison-numbers"><b>${r.before.toFixed(r.unit === "s" ? 2 : 1)}</b><span>→</span><strong data-after="${r.key}">${r.after.toFixed(r.unit === "s" ? 2 : 1)}</strong><small>${r.unit}</small></div><div class="meter" style="--from:${Math.min(100, (r.before / r.max) * 100)}%;--to:${Math.min(100, (r.after / r.max) * 100)}%"><i></i><b></b></div></div>`).join("")}</div>`;
     $("part-inspector").querySelector("[data-inspector-buy]").onclick = () =>
       void this.run(() =>
         this.store.mutate({ type: "upgrade", car: this.car, part: part.id }),
@@ -257,14 +265,10 @@ export class GarageUI {
       `LEVEL ${cityLevel(p)} · ${p.credits.toLocaleString()} CR · ${p.boxes} BOX${p.boxes === 1 ? "" : "ES"}`;
     $("workshop-cars").innerHTML = CARS.map(
       (c) =>
-        `<button data-choice="${c.id}" ${this.store.busy || this.store.pending ? "disabled" : ""} aria-pressed="${c.id === this.car}">${c.name}</button>`,
+        `<button data-choice="${c.id}" ${this.store.busy || this.store.pending || !carUnlocked(p, c.id) ? "disabled" : ""} aria-pressed="${c.id === this.car}">${c.name}</button>`,
     ).join("");
-    $("workshop-cars").insertAdjacentHTML(
-      "beforeend",
-      `<button disabled class="coming-car">? YOUTUBER CAR <small>COMING SOON</small></button>`,
-    );
     $("stunt-record").textContent =
-      `${p.quests?.completed.length || 0}/4 STUNT BOXES FOUND · Progress survives map updates`;
+      `${p.quests?.completed.length || 0}/5 STUNT BOXES FOUND · Progress survives map updates`;
     for (const b of $("workshop-cars").querySelectorAll("button[data-choice]"))
       b.onclick = () => {
         this.car = b.dataset.choice;
@@ -325,7 +329,10 @@ export class GarageUI {
     this.renderInspector(
       inspected,
       this.inspection?.tier ||
-        Math.min(5, (p.cars[this.car][inspected.id] || 0) + 1),
+        Math.min(
+          this.car === "creator" ? 8 : 5,
+          (p.cars[this.car][inspected.id] || 0) + 1,
+        ),
     );
     const difficulty = pursuitTuning(cityLevel(p), spec.topSpeed, ACTIVE_MAP);
     $("level-threat").textContent =
@@ -345,14 +352,14 @@ export class GarageUI {
         const fusion = tier
           ? `<div class="fusion-panel"><strong>${TIERS[tier].name}${"+".repeat(stars)} <span>${"★".repeat(stars)}${"☆".repeat(5 - stars)}</span></strong><small>${Math.round(FUSION_BONUSES[stars] * 100)}% EXTRA PART EFFECT · tuning stays on this car</small>${fusionCost ? `<p>${copies}/${fusionCost} spare ${TIERS[tier].name} ${part.name} · next +${Math.round(FUSION_BONUSES[stars + 1] * 100)}% total</p><progress max="${fusionCost}" value="${Math.min(fusionCost, copies)}"></progress><button data-fuse="${part.id}" ${copies < fusionCost ? "disabled" : ""}>FUSE ${fusionCost} DUPLICATES → ${"★".repeat(stars + 1)}</button>` : "<p>FIVE-STAR MASTERY COMPLETE</p>"}</div>`
           : "";
-        const owned = [1, 2, 3, 4, 5].filter(
-          (t) => (p.inventory[partKey(part.id, t)] || 0) > 0,
-        );
+        const owned = (
+          this.car === "creator" ? [1, 2, 3, 4, 5, 6, 7, 8] : [1, 2, 3, 4, 5]
+        ).filter((t) => (p.inventory[partKey(part.id, t)] || 0) > 0);
         const best = Math.max(0, ...owned),
           canEquip = best > tier;
-        const previewTier = Math.min(5, tier + 1);
+        const previewTier = Math.min(this.car === "creator" ? 8 : 5, tier + 1);
         const benefits =
-          tier === 5
+          tier >= (this.car === "creator" ? 8 : 5)
             ? []
             : upgradeBenefits(
                 carSpec(this.car),
@@ -366,15 +373,15 @@ export class GarageUI {
             : [];
         return `<article class="part-card" tabindex="-1" data-part="${part.id}" style="--tier:${TIERS[tier || 1].color}">
         <div class="part-photo">${partArtwork(part, "", tier || 1)}<span class="part-quality">${tier ? TIERS[tier].name + " FITTED" : "BRONZE UPGRADE"}</span></div>
-        <div class="part-body"><div class="part-title"><div><h3>${part.name}</h3><span>${TIERS[tier].name} installed</span></div><b class="part-level">${tier}/5</b></div><p>${part.effect}</p>
-        <div class="upgrade-preview"><small>${tier === 5 ? "FULLY UPGRADED" : TIERS[previewTier].name.toUpperCase() + " UPGRADE BENEFITS"}</small>${benefits.map((x) => `<span>${x}</span>`).join("")}${spareBenefits.length ? `<small class="spare-preview">FREE ${TIERS[best].name.toUpperCase()} INSTALL</small>${spareBenefits.map((x) => `<span>${x}</span>`).join("")}` : ""}</div>
-        <div class="tier-track">${TIERS.slice(1)
+        <div class="part-body"><div class="part-title"><div><h3>${part.name}</h3><span>${TIERS[tier].name} installed</span></div><b class="part-level">${tier}/${this.car === "creator" ? 8 : 5}</b></div><p>${part.effect}</p>
+        <div class="upgrade-preview"><small>${tier >= (this.car === "creator" ? 8 : 5) ? "FULLY UPGRADED" : TIERS[previewTier].name.toUpperCase() + " UPGRADE BENEFITS"}</small>${benefits.map((x) => `<span>${x}</span>`).join("")}${spareBenefits.length ? `<small class="spare-preview">FREE ${TIERS[best].name.toUpperCase()} INSTALL</small>${spareBenefits.map((x) => `<span>${x}</span>`).join("")}` : ""}</div>
+        <div class="tier-track">${TIERS.slice(1, this.car === "creator" ? 9 : 6)
           .map(
             (t, i) =>
               `<span class="${i + 1 === tier ? "lit" : ""}" style="--rarity:${t.color}" title="${t.name}: ${p.inventory[partKey(part.id, i + 1)] || 0} spare parts">${t.name}<small>×${p.inventory[partKey(part.id, i + 1)] || 0}</small></span>`,
           )
           .join("")}</div>
-        ${fusion}<div class="part-actions"><button class="inspect-part" data-inspect="${part.id}" data-tier="${previewTier}">INSPECT & COMPARE ↗</button><button data-upgrade="${part.id}" ${tier >= 4 || p.credits < upgradeCost(tier + 1) ? "disabled" : ""}>${tier >= 4 ? (tier === 5 ? "MAXED" : "FIND PLATINUM") : `UPGRADE · ${upgradeCost(tier + 1).toLocaleString()} CR`}</button>
+        ${fusion}<div class="part-actions"><button class="inspect-part" data-inspect="${part.id}" data-tier="${previewTier}">INSPECT & COMPARE ↗</button><button data-upgrade="${part.id}" ${tier >= 4 || p.credits < upgradeCost(tier + 1) ? "disabled" : ""}>${tier >= 4 ? (tier >= (this.car === "creator" ? 8 : 5) ? "MAXED" : this.car === "creator" ? "FIND TECHCRUSH BOXES" : "FIND PLATINUM") : `UPGRADE · ${upgradeCost(tier + 1).toLocaleString()} CR`}</button>
         ${canEquip ? `<button class="install" data-equip="${part.id}" data-tier="${best}">INSTALL ${TIERS[best].name.toUpperCase()} · FREE</button>` : ""}
         ${best ? `<button class="sell" data-sell="${part.id}" data-tier="${best}">SELL SPARE · +${salvageValue(best)} CR</button>` : ""}</div></div></article>`;
       })
@@ -408,6 +415,14 @@ export class GarageUI {
         ).catch(() => {});
       };
     }
+    refreshRewards(this.store);
+    $("open-creator-box").textContent =
+      `TECHCRUSH · ${p.creatorBoxes || 0} BOXES ↗`;
+    $("open-creator-box").disabled =
+      !p.creatorBoxes ||
+      this.store.busy ||
+      !!this.store.pending ||
+      this.rolling;
     $("open-box").disabled =
       p.boxes < 1 || this.store.busy || !!this.store.pending || this.rolling;
     $("open-platinum-box").disabled =
@@ -448,9 +463,15 @@ export class GarageUI {
         ? this.store.profile
         : await this.run(() =>
             this.store.mutate({
-              type: platinum ? "open-platinum-box" : "open-box",
+              type:
+                platinum === "creator"
+                  ? "open-creator-box"
+                  : platinum
+                    ? "open-platinum-box"
+                    : "open-box",
             }),
           );
+      if (profile.lastBox.kind === "creator") this.car = "creator";
       this.lootBoxId = profile.lastBox.id;
       try {
         this.preview ||= new GaragePreview($("garage-preview"), this.view);
@@ -504,7 +525,12 @@ export class GarageUI {
                 ? results[i]
                 : {
                     part: PARTS[Math.floor(Math.random() * PARTS.length)].id,
-                    tier: platinum ? 5 : 1 + Math.floor(Math.random() * 4),
+                    tier:
+                      platinum === "creator"
+                        ? 5 + Math.floor(Math.random() * 4)
+                        : platinum
+                          ? 5
+                          : 1 + Math.floor(Math.random() * 4),
                   },
               done,
             );
@@ -531,7 +557,9 @@ export class GarageUI {
     [...$("loot-slots").children].forEach((slot, index) => {
       slot.querySelector(".loot-choices")?.remove();
       const reward = box.items[index];
-      const stronger = reward.tier > (equipment[reward.part] || 0);
+      const stronger =
+        reward.tier > (equipment[reward.part] || 0) &&
+        (reward.tier <= 5 || this.car === "creator");
       const owned =
         this.store.profile.inventory[partKey(reward.part, reward.tier)] || 0;
       const disabled = this.store.busy || this.store.pending || !owned;

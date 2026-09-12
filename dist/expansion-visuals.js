@@ -121,6 +121,17 @@ export function batchStatic(group, tile = 160) {
       Math.floor(pos.z / tile);
     if (!batches.has(key)) batches.set(key, { mat: o.material, geos: [] });
     const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+    if (o.material.userData.metricFacade && g.attributes.uv) {
+      const p = g.attributes.position,
+        n = g.attributes.normal,
+        uv = g.attributes.uv;
+      for (let i = 0; i < p.count; i++)
+        uv.setXY(
+          i,
+          (Math.abs(n.getX(i)) > 0.5 ? p.getZ(i) : p.getX(i)) / 16,
+          p.getY(i) / 14,
+        );
+    }
     g.applyMatrix4(o.matrixWorld);
     if (!g.attributes.uv)
       g.setAttribute(

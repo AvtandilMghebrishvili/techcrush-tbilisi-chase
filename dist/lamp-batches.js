@@ -4,6 +4,7 @@ import * as THREE from "./vendor/three.module.js";
 export function batchStreetLamps(view) {
   const tiles = new Map(),
     unit = new THREE.BoxGeometry(1, 1, 1),
+    heads = new Set((view.streetLamps || []).map((l) => l.head)),
     roots = new Set((view.streetLamps || []).map((l) => l.head.parent));
   for (const root of roots) {
     root.updateWorldMatrix(true, true);
@@ -24,7 +25,7 @@ export function batchStreetLamps(view) {
         local: mesh.matrix
           .clone()
           .multiply(new THREE.Matrix4().makeScale(p.width, p.height, p.depth)),
-        lamp: view.streetLamps.some((l) => l.head === mesh),
+        lamp: heads.has(mesh),
       };
       tiles.get(key).items.push(item);
       root.userData.lampInstances.push(item);

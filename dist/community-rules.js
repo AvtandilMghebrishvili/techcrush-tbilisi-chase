@@ -1,5 +1,12 @@
 import { TIME_COURSES } from "./race-timing.js";
 export const STUNT_REWARDS = {
+  "batumi-skybox-v1": {
+    cash: 3500,
+    boxes: 0,
+    platinum: 1,
+    map: "batumi",
+    name: "Coast skybox",
+  },
   "tbilisi-skybox-v1": { cash: 2500, boxes: 1, name: "Skybox" },
   "mtkvari-gap-v1": { cash: 1500, boxes: 1, name: "Mtkvari gap" },
   "kutaisi-skybox-v1": {

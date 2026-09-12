@@ -1,13 +1,15 @@
 # Tbilisi expeditions — v1.12
 
+> Current 2.0 rules: all three cities start open; classic cornering and adjustable driving feel; a 180-second night-first Auto cycle; four new earned cars; visual result cards. See [version 2.0 details](BATUMI.md). Earlier measurements and release descriptions below retain their original context.
+
 ## Find the new challenges
 
 During a chase, use **ROUTE** inside the pursuit panel (top right). Choose Checkpoints, Skybox or River Gap. The road arrows and distance display change together. Near the ramp, guidance points to the launch edge; in flight it points toward the landing zone. Main checkpoint progress stays intact while you explore. The original four street ramps remain available.
 
-| Challenge | How to complete it | One-time reward per garage |
-| --- | --- | --- |
-| Skybox | Use the northern ramp at roughly 200–230 km/h, keep the car straight, land upright on the 14 m roof and drive into the red crate | 1 three-part upgrade box + 2,500 CR |
-| Mtkvari Gap | Use the embankment ramp at around 220 km/h and land upright on the opposite bank | 1 three-part upgrade box + 1,500 CR |
+| Challenge   | How to complete it                                                                                                               | One-time reward per garage          |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Skybox      | Use the northern ramp at roughly 200–230 km/h, keep the car straight, land upright on the 14 m roof and drive into the red crate | 1 three-part upgrade box + 2,500 CR |
+| Mtkvari Gap | Use the embankment ramp at around 220 km/h and land upright on the opposite bank                                                 | 1 three-part upgrade box + 1,500 CR |
 
 Keep accelerating up the ramp; letting off early loses speed. Excessive turbo can overshoot the roof. Release steering in the air to avoid a roll. Hold Q or the mobile rewind button to retry the last five seconds. If you fall into the river, the existing sinking and road recovery rules apply. A living overturned car recovers automatically.
 

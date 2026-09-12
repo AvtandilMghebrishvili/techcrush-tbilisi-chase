@@ -20,10 +20,10 @@ import worker from "../server/worker.mjs";
 import { openLocalDatabase } from "../server/local-db.mjs";
 import { TIME_COURSE } from "../dist/race-timing.js";
 
-test("ranked levels use reproducible shuffled conditions and roomy road gates", () => {
+test("ranked levels use the same night start and and roomy road gates", () => {
   assert.deepEqual(
     [1, 2, 3].map((l) => levelCondition(l).mode),
-    ["dawn", "night", "day"],
+    ["night", "night", "night"],
   );
   const fingerprints = new Set();
   for (let level = 1; level <= 300; level++) {
@@ -31,7 +31,7 @@ test("ranked levels use reproducible shuffled conditions and roomy road gates", 
     if (level % 3 === 1)
       assert.equal(
         new Set([0, 1, 2].map((d) => levelCondition(level + d).mode)).size,
-        3,
+        1,
       );
     const points = checkpointsForLevel(level);
     fingerprints.add(JSON.stringify(points));

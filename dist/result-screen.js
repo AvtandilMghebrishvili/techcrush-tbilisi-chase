@@ -4,6 +4,10 @@ export class ResultScreen {
   constructor(store) {
     this.store = store;
     this.generation = 0;
+    $("result-sharing").insertAdjacentHTML(
+      "beforeend",
+      '<img id="result-card-preview" hidden alt="Your shareable race card" style="width:100%;max-width:440px;border-radius:10px;margin-top:12px"><a id="result-card-download" download="techcrush-result.png" target="_blank" rel="noopener">SAVE RACE CARD ↓</a>',
+    );
     $("result-rank-retry").onclick = () => this.loadRanks();
     $("result-copy").onclick = async () => {
       if (!this.url) return;
@@ -82,7 +86,11 @@ export class ResultScreen {
       "https://www.facebook.com/sharer/sharer.php?u=" +
       encodeURIComponent(this.url);
     $("result-share-status").textContent =
-      "Share this level, time and score. You confirm the post on Facebook.";
+      "Share your visual race card. Facebook previews can take a moment to refresh.";
+    const preview = document.getElementById("result-card-preview");
+    preview.src = this.url + "/image.png";
+    preview.hidden = false;
+    document.getElementById("result-card-download").href = preview.src;
     void this.loadRanks();
   }
   async loadRanks() {

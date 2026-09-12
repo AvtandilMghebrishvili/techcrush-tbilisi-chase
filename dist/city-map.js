@@ -1,4 +1,4 @@
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 const { KUTAISI_GEO } = IS_KUTAISI ? await import("./kutaisi-geo-data.js") : {};
 import { reservedExpansion, EXPANSION_SOLIDS } from "./world-sites.js";
 import { ROAD_DATA } from "./road-data.js";
@@ -35,6 +35,8 @@ export const ROADS = ROAD_DATA.edges.map(([a, b, width, name], id) => {
 });
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function geo(lat, lon) {
+  if (IS_BATUMI)
+    return { x: -(lon - 41.621) * 83180, z: (lat - 41.64) * 111320 };
   if (IS_KUTAISI)
     return { x: -(lon - 42.704) * 82380, z: (lat - 42.269) * 111320 };
   return { x: -(lon - 44.799) * 83140, z: (lat - 41.699) * 111320 };
@@ -210,67 +212,80 @@ const point = (lat, lon, name, street) => {
   const p = nearestRoad(geo(lat, lon), street);
   return { x: p.x, z: p.z, angle: p.angle, name };
 };
-export const START = IS_KUTAISI
-  ? { ...point(42.2707, 42.7049, "COLCHIS SQUARE"), angle: Math.PI / 2 }
-  : {
-      ...point(41.69657, 44.80615, "Baratashvili"),
-      angle: 1.66,
-    };
-export const CLOCK_PARTS = IS_KUTAISI
-  ? []
-  : [
-      // World transform of the renderer's -PI/2 group, including its separate wing.
-      { x: 9, z: 0, w: 34, d: 27, h: 31, angle: 0 },
-      { x: 14, z: -30, w: 25, d: 46, h: 27, angle: 0 },
-      { x: -9, z: 0, w: 2, d: 14, h: 30, angle: 0 },
-      ...[-5.2, -3.6, 3.6, 5.2].map((z) => ({
-        x: -10.5,
-        z,
-        w: 1.1,
-        d: 0.7,
-        base: 1,
-        h: 27,
-        angle: 0,
-      })),
-      ...[3.5, 8.7, 14, 19.3, 24.6, 29.8].map((y) => ({
-        x: 9,
-        z: 0,
-        w: 35,
-        d: 28,
-        base: y - 0.175,
-        h: y + 0.175,
-        angle: 0,
-      })),
-      ...[3, 8, 13, 18, 23, 27.5].map((y) => ({
-        x: 14,
-        z: -30,
-        w: 26,
-        d: 47,
-        base: y - 0.2,
-        h: y + 0.2,
-        angle: 0,
-      })),
-    ];
-export const CLOCK_BUILDING = IS_KUTAISI
-  ? { x: 9999, z: 9999 }
-  : placeOffRoad({ x: -410, z: -234 }, CLOCK_PARTS);
-export const CHECKPOINTS = IS_KUTAISI
+export const START = IS_BATUMI
+  ? point(41.6515, 41.633, "BATUMI BOULEVARD")
+  : IS_KUTAISI
+    ? { ...point(42.2707, 42.7049, "COLCHIS SQUARE"), angle: Math.PI / 2 }
+    : {
+        ...point(41.69657, 44.80615, "Baratashvili"),
+        angle: 1.66,
+      };
+export const CLOCK_PARTS =
+  IS_KUTAISI || IS_BATUMI
+    ? []
+    : [
+        // World transform of the renderer's -PI/2 group, including its separate wing.
+        { x: 9, z: 0, w: 34, d: 27, h: 31, angle: 0 },
+        { x: 14, z: -30, w: 25, d: 46, h: 27, angle: 0 },
+        { x: -9, z: 0, w: 2, d: 14, h: 30, angle: 0 },
+        ...[-5.2, -3.6, 3.6, 5.2].map((z) => ({
+          x: -10.5,
+          z,
+          w: 1.1,
+          d: 0.7,
+          base: 1,
+          h: 27,
+          angle: 0,
+        })),
+        ...[3.5, 8.7, 14, 19.3, 24.6, 29.8].map((y) => ({
+          x: 9,
+          z: 0,
+          w: 35,
+          d: 28,
+          base: y - 0.175,
+          h: y + 0.175,
+          angle: 0,
+        })),
+        ...[3, 8, 13, 18, 23, 27.5].map((y) => ({
+          x: 14,
+          z: -30,
+          w: 26,
+          d: 47,
+          base: y - 0.2,
+          h: y + 0.2,
+          angle: 0,
+        })),
+      ];
+export const CLOCK_BUILDING =
+  IS_KUTAISI || IS_BATUMI
+    ? { x: 9999, z: 9999 }
+    : placeOffRoad({ x: -410, z: -234 }, CLOCK_PARTS);
+export const CHECKPOINTS = IS_BATUMI
   ? [
-      point(42.2707, 42.703, "ROYAL BOULEVARD"),
-      point(42.27005, 42.6958, "RUSTAVELI AVENUE"),
-      point(42.2729, 42.6995, "RED BRIDGE DISTRICT"),
-      point(42.2766, 42.703, "BAGRATI APPROACH"),
-      point(42.2729, 42.7085, "GELATI STREET"),
-      point(42.2633, 42.7055, "RIONI EMBANKMENT"),
+      point(41.654, 41.641, "MIRACLE PARK"),
+      point(41.65, 41.635, "EUROPE SQUARE"),
+      point(41.646, 41.628, "OLD BOULEVARD"),
+      point(41.635, 41.612, "NEW BOULEVARD"),
+      point(41.631, 41.625, "BAGRATIONI AVENUE"),
+      point(41.648, 41.642, "PIAZZA DISTRICT"),
     ]
-  : [
-      point(41.6964, 44.80348, "Baratashvili Avenue"),
-      point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
-      point(41.6969, 44.80835, "Baratashvili Bridge", "Baratashvili Bridge"),
-      point(41.6912, 44.81174, "Europe Square", "Europe Square"),
-      point(41.68805, 44.8111, "Abanotubani", "Abano Street"),
-      point(41.694, 44.8015, "Freedom Square", "Freedom"),
-    ];
+  : IS_KUTAISI
+    ? [
+        point(42.2707, 42.703, "ROYAL BOULEVARD"),
+        point(42.27005, 42.6958, "RUSTAVELI AVENUE"),
+        point(42.2729, 42.6995, "RED BRIDGE DISTRICT"),
+        point(42.2766, 42.703, "BAGRATI APPROACH"),
+        point(42.2729, 42.7085, "GELATI STREET"),
+        point(42.2633, 42.7055, "RIONI EMBANKMENT"),
+      ]
+    : [
+        point(41.6964, 44.80348, "Baratashvili Avenue"),
+        point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
+        point(41.6969, 44.80835, "Baratashvili Bridge", "Baratashvili Bridge"),
+        point(41.6912, 44.81174, "Europe Square", "Europe Square"),
+        point(41.68805, 44.8111, "Abanotubani", "Abano Street"),
+        point(41.694, 44.8015, "Freedom Square", "Freedom"),
+      ];
 // Deterministic street-front lots; the same rotated footprints drive rendering and collision.
 export const BUILDINGS = [];
 if (IS_KUTAISI)
@@ -294,13 +309,17 @@ for (const road of ROADS) {
     fz = Math.cos(road.angle),
     rx = fz,
     rz = -fx;
-  for (let along = 19; along < road.length - 6; along += 34) {
+  for (let along = 19; along < road.length - 6; along += IS_BATUMI ? 65 : 34) {
     for (const side of [-1, 1]) {
       const w = 24 + rand() * 9,
         d = 18 + rand() * 10,
-        h = IS_KUTAISI
-          ? 8 + Math.floor(rand() * 4) * 3.2
-          : 14 + Math.floor(rand() * 4) * 4;
+        h = IS_BATUMI
+          ? road.start.z < 0
+            ? 18 + Math.floor(rand() * 10) * 3.3
+            : 10 + Math.floor(rand() * 5) * 3.3
+          : IS_KUTAISI
+            ? 8 + Math.floor(rand() * 4) * 3.2
+            : 14 + Math.floor(rand() * 4) * 4;
       const offset = road.width / 2 + 5 + d / 2;
       const x = road.start.x + fx * along + rx * offset * side,
         z = road.start.z + fz * along + rz * offset * side;
@@ -344,7 +363,7 @@ for (const road of ROADS) {
   }
 }
 // Keep the pedestrian bridge approaches open without perturbing other seeded lots.
-for (let i = IS_KUTAISI ? -1 : BUILDINGS.length - 1; i >= 0; i--) {
+for (let i = IS_KUTAISI || IS_BATUMI ? -1 : BUILDINGS.length - 1; i >= 0; i--) {
   const b = BUILDINGS[i];
   if (
     [-65, 65].some((x) =>

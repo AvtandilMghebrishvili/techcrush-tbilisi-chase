@@ -48,10 +48,10 @@ test("paint is validated, survives profile serialization and changes only the ch
     applyProgressAction(p, { type: "paint", car: "missing", color: "#123456" }),
   );
 });
-test("all 70 part grades have finite geometry and distinct machining within each part", () => {
+test("all 112 part grades have finite geometry and distinct machining within each part", () => {
   for (const part of PARTS) {
     const hashes = new Set();
-    for (let t = 1; t <= 5; t++) {
+    for (let t = 1; t <= 8; t++) {
       const model = makePartModel(part.id, t),
         hash = createHash("sha256");
       model.updateMatrixWorld(true);
@@ -69,7 +69,7 @@ test("all 70 part grades have finite geometry and distinct machining within each
     }
     assert.equal(
       hashes.size,
-      5,
+      8,
       part.id + " must change geometry, not only its label",
     );
   }

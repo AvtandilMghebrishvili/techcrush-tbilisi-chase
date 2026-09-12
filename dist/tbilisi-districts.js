@@ -1039,6 +1039,9 @@ export function buildTbilisiDistricts(v) {
   }
 }
 export function animateDistricts(v, time) {
+  if (v.batumiWheel) v.batumiWheel.rotation.z = time * 0.035;
+  for (const f of v.batumiFigures || [])
+    f.group.position.x = f.side * (1.2 + Math.cos(time * 0.035) * 1.8);
   if (v.kutaisiWheel) v.kutaisiWheel.rotation.z = time * 0.045;
   if (v.waterTime) v.waterTime.value = time;
   for (const cabin of v.gondolas || []) {

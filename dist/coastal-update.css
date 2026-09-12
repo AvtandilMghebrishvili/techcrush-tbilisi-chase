@@ -1,0 +1,450 @@
+/* Three-city launchpad: restrained SVG graphics, no continuously running effects. */
+.map-slots {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+.map-slots button {
+  min-width: 0;
+  padding: 13px 11px !important;
+  min-height: 158px;
+}
+.map-slots b {
+  font-size: 22px !important;
+}
+.map-slots small {
+  font-size: 9px !important;
+  letter-spacing: 0.04em;
+}
+.map-slots .city-caption {
+  font-size: 11px;
+  max-width: 160px;
+}
+.map-slots svg {
+  opacity: 0.42;
+}
+.garage {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 7px !important;
+}
+.garage button {
+  padding: 8px !important;
+  min-height: 102px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  overflow: hidden;
+}
+.car-silhouette {
+  display: block;
+  width: 100%;
+  height: 50px;
+  flex-shrink: 0;
+}
+.garage button b {
+  font-size: 13px;
+}
+.garage button small {
+  font-size: 8px;
+  line-height: 1.5;
+  text-align: left;
+}
+.garage button.car-locked {
+  opacity: 0.52;
+  filter: saturate(0.25);
+}
+.garage button[aria-pressed="true"] {
+  border-color: #f34865;
+  background: linear-gradient(135deg, #461e30, #182b3b);
+}
+.intro-actions {
+  display: grid !important;
+  grid-template-columns: 1.45fr 1fr 1fr !important;
+  gap: 10px !important;
+}
+.intro-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 58px !important;
+  border-radius: 13px !important;
+  font-size: 13px !important;
+  padding: 13px !important;
+  letter-spacing: 0.045em;
+}
+.intro-actions button svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  flex-shrink: 0;
+}
+#start {
+  background: linear-gradient(130deg, #f53655, #ce2648) !important;
+  color: white !important;
+  box-shadow: 0 7px 22px #e7234430;
+}
+.wallet {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #ffe4a0;
+  font-variant-numeric: tabular-nums;
+  font-size: 19px;
+  font-weight: 800;
+}
+.wallet small {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: #cabd9c;
+}
+.coin-icon {
+  width: 25px;
+  height: 25px;
+  fill: #8b5b17;
+  stroke: #ffe1a0;
+  stroke-width: 1.4;
+  flex-shrink: 0;
+}
+.hud-wallet {
+  position: absolute;
+  top: 116px;
+  left: 25px;
+  font-size: 16px;
+  pointer-events: none;
+  z-index: 3;
+}
+.hud-wallet .coin-icon {
+  width: 22px;
+  height: 22px;
+}
+.milestone-details {
+  margin-top: 10px;
+  border: 1px solid #42526a;
+  border-radius: 12px;
+  background: #111e2b;
+}
+.milestone-details summary {
+  padding: 12px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  display: flex;
+  justify-content: space-between;
+}
+#milestone-rewards {
+  padding: 0 10px 10px;
+  display: grid;
+  gap: 6px;
+}
+.milestone-card,
+.creator-milestone {
+  display: grid;
+  grid-template-columns: 85px 1fr;
+  gap: 10px;
+  padding: 10px;
+  background: #1b2a3b;
+  border-radius: 9px;
+}
+.milestone-card > div,
+.creator-milestone > div {
+  display: grid;
+  gap: 4px;
+}
+.milestone-card small,
+.creator-milestone small {
+  font-size: 9px;
+  color: #99aec3;
+}
+.milestone-card span,
+.creator-milestone span {
+  font-size: 10px;
+  color: #dbe9f3;
+}
+.milestone-card progress,
+.creator-milestone progress {
+  width: 100%;
+  height: 5px;
+  accent-color: #fc4c6b;
+}
+.milestone-card button {
+  grid-column: 1/-1;
+  background: #d62f51;
+  border: 0;
+  padding: 11px;
+  border-radius: 7px;
+  color: white;
+  font-weight: bold;
+}
+.milestone-card.claimed {
+  border: 1px solid #488f83;
+}
+.creator-milestone {
+  border: 1px solid #a54963;
+}
+#car-reveal {
+  width: min(520px, 90vw);
+  padding: 32px;
+  background: radial-gradient(ellipse at top, #71324e, #101d2d 70%);
+  border: 1px solid #f96588;
+  border-radius: 22px;
+  color: white;
+  text-align: center;
+}
+#car-reveal .car-silhouette {
+  height: 160px;
+}
+#car-reveal small {
+  letter-spacing: 0.18em;
+  color: #ffb6ca;
+}
+#car-reveal p {
+  color: #b8c9db;
+  font-size: 13px;
+}
+.reward-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 14px 0;
+}
+.reward-tiles > div {
+  background: linear-gradient(150deg, #263347, #172635);
+  border: 1px solid #506278;
+  border-radius: 12px;
+  padding: 13px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+.reward-tiles strong {
+  font-size: 24px;
+  color: #ffe0a0;
+}
+.reward-tiles small {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #abc1d7;
+}
+.box-symbol {
+  font-size: 24px;
+  color: #f48caf;
+}
+.creator-box-button {
+  border-color: #fc567d !important;
+  color: #ffb3c7 !important;
+  background: linear-gradient(110deg, #502234, #22213d) !important;
+}
+.driving-feel {
+  padding: 16px;
+  border: 1px solid #415570;
+  border-radius: 14px;
+  margin-top: 18px;
+}
+.driving-feel label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 13px 0;
+  font-size: 12px;
+}
+.driving-feel input[type="range"] {
+  flex: 1;
+  accent-color: #f14565;
+  min-width: 60px;
+}
+.driving-feel output {
+  min-width: 42px;
+  font-variant-numeric: tabular-nums;
+}
+.driving-feel p {
+  font-size: 12px;
+  color: #a6bbd0;
+}
+.quality-picker,
+.tier-track {
+  flex-wrap: wrap;
+}
+.tier-track {
+  display: flex !important;
+  gap: 4px;
+}
+.tier-track > span {
+  min-width: 60px;
+  flex: 1;
+}
+@media (max-width: 760px) {
+  .map-slots b {
+    font-size: 18px !important;
+  }
+  .map-slots button {
+    min-height: 136px;
+    padding: 10px 8px !important;
+  }
+  .map-slots .city-caption {
+    font-size: 9px;
+  }
+  .garage {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  .garage button b {
+    font-size: 10px;
+  }
+  .garage button small {
+    font-size: 7px;
+  }
+  .garage button {
+    min-height: 88px !important;
+  }
+  .car-silhouette {
+    height: 36px;
+  }
+  .intro-actions {
+    gap: 6px !important;
+  }
+  .intro-actions button {
+    font-size: 10px !important;
+    gap: 5px;
+    padding: 10px 6px !important;
+    min-height: 48px !important;
+  }
+  .intro-actions button svg {
+    width: 19px;
+    height: 19px;
+  }
+  .hud-wallet {
+    top: 91px;
+    left: 13px;
+    font-size: 13px;
+  }
+  .wallet {
+    font-size: 16px;
+  }
+  .wallet small {
+    display: none;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .hud-wallet {
+    top: 65px;
+    left: 14px;
+  }
+  .map-slots button {
+    min-height: 100px;
+  }
+  .garage button {
+    min-height: 75px !important;
+  }
+  .garage .car-silhouette {
+    height: 27px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #car-reveal * {
+    animation: none !important;
+  }
+}
+
+body:not(.playing) .hud-wallet {
+  display: none;
+}
+#garage button b {
+  font-family: inherit !important;
+  font-size: 12px !important;
+  white-space: normal !important;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+#garage button small {
+  white-space: normal !important;
+}
+#garage button {
+  justify-content: flex-start !important;
+}
+.intro-actions #leaderboard-menu {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+}
+.intro-actions #leaderboard-menu small {
+  width: 100%;
+  font-size: 8px;
+}
+.intro-actions #start {
+  min-height: 58px !important;
+}
+
+.hud-wallet {
+  top: 19px;
+  left: 240px;
+  font-size: 16px;
+}
+.hud-wallet .coin-icon {
+  width: 22px;
+  height: 22px;
+}
+@media (max-width: 760px) {
+  #intro .intro-actions {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  #intro #start {
+    grid-column: 1/-1 !important;
+  }
+  #intro #workshop-open,
+  #intro #leaderboard-menu {
+    grid-column: auto !important;
+    width: 100% !important;
+    min-height: 52px !important;
+    align-self: stretch;
+  }
+  #intro #leaderboard-menu {
+    gap: 5px !important;
+    flex-wrap: nowrap !important;
+  }
+  #intro #leaderboard-menu small {
+    display: none;
+  }
+  .hud-wallet {
+    top: 20px;
+    left: 55px;
+    font-size: 11px;
+    gap: 3px;
+  }
+  .hud-wallet .coin-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.mobile-wallet {
+  display: none;
+}
+@media (max-width: 760px) {
+  .hud-wallet {
+    display: none;
+  }
+  .score-panel .mobile-wallet {
+    display: flex;
+    position: static;
+    margin-top: 8px;
+    font-size: 11px;
+    gap: 4px;
+    line-height: 1;
+  }
+  .mobile-wallet .coin-icon {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (max-width: 760px) {
+  #intro #workshop-open,
+  #intro #leaderboard-menu {
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+}

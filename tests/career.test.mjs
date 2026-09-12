@@ -115,9 +115,9 @@ test("three car choices have different geometry, dimensions and real upgrade vis
     "Rim spoke geometry changes",
   );
 });
-test("fourteen parts each offer four effective upgrade tiers", () => {
+test("fourteen parts retain four purchasable tiers and add discovery grades", () => {
   assert(PARTS.length > 10);
-  assert.equal(TIERS.length, 6);
+  assert.equal(TIERS.length, 9);
   const base = upgradedSpec(carSpec("gt"));
   for (const part of PARTS)
     for (let tier = 1; tier <= 4; tier++) {

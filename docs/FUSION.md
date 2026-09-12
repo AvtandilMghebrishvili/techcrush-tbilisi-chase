@@ -1,5 +1,7 @@
 # Drift, rewards and fusion
 
+> Current 2.0 rules: all three cities start open; classic cornering and adjustable driving feel; a 180-second night-first Auto cycle; four new earned cars; visual result cards. See [version 2.0 details](BATUMI.md). Earlier measurements and release descriptions below retain their original context.
+
 ## Open a level-clear box immediately
 
 Clear six checkpoints and lose the police. The server saves your run and opens **one of the newly earned boxes in the same operation**. Three independent rewards then appear, with these choices:

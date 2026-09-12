@@ -11,7 +11,7 @@ import {
 import { ChaseAudio } from "../dist/chase-audio.js";
 import { ChaseSimulation, vehicle } from "../dist/simulation.js";
 
-test("four engine voices respond to throttle, settle at idle and stay below their own redline", () => {
+test("eight engine voices respond to throttle, settle at idle and stay below their own redline", () => {
   const signatures = new Set();
   for (const [carId, voice] of Object.entries(ENGINE_VOICES)) {
     const p = { carId, speed: 0, performance: { topSpeed: 64 } },
@@ -36,7 +36,7 @@ test("four engine voices respond to throttle, settle at idle and stay below thei
       JSON.stringify([voice.harmonics, voice.pitch, voice.redline]),
     );
   }
-  assert.equal(signatures.size, 4);
+  assert.equal(signatures.size, 8);
 });
 test("upshifts drop RPM, use hysteresis at a gear boundary, and reverse has its own label", () => {
   const p = { carId: "gt", speed: 15.7, performance: { topSpeed: 64 } };

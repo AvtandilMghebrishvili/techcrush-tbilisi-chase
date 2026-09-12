@@ -3,7 +3,7 @@ import { ROADS } from "./city-map.js";
 import { RIVER_POLYGON } from "./district-data.js";
 import { SPECIAL_RAMPS, QUEST_BOX } from "./world-sites.js";
 import { RAMPS } from "./stunts.js";
-import { CITY_NAME, IS_KUTAISI } from "./map-selection.js";
+import { CITY_NAME, IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 import { navigationTarget, playerRoute } from "./navigation-cache.js";
 
 export const MAP_EXTENT = LIMIT + 80;
@@ -13,7 +13,7 @@ export const QUEST_PINS = SPECIAL_RAMPS.map((r, i) => ({
   symbol: i ? "R" : "S",
   color: i ? "#72edf2" : "#e3adff",
   title: i ? (IS_KUTAISI ? "RIONI GAP" : "MTKVARI GAP") : "ROOFTOP SKYBOX",
-  reward: IS_KUTAISI ? "PLATINUM BOX" : "PARTS BOX + CREDITS",
+  reward: IS_KUTAISI || IS_BATUMI ? "PLATINUM BOX" : "PARTS BOX + CREDITS",
 }));
 export const mapPoint = (point, size = 900) => ({
   x: ((MAP_EXTENT - point.x) / (MAP_EXTENT * 2)) * size,

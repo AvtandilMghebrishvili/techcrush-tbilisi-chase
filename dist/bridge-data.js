@@ -1,48 +1,52 @@
 import { onAsphalt } from "./road-clearance.js";
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 const { KUTAISI_GEO } = IS_KUTAISI ? await import("./kutaisi-geo-data.js") : {};
 import { ROAD_DATA } from "./road-data.js";
 import { LANDMARKS, RIVER_BANKS } from "./district-data.js";
 
 // Deck and barrier dimensions are shared with the renderer.
-export const BRIDGE_DECKS = IS_KUTAISI
-  ? KUTAISI_GEO.bridges.filter((b) => b.name !== "WHITE BRIDGE")
-  : [
-      {
-        name: "BARATASHVILI BRIDGE",
-        x: -770.57,
-        z: -237.75,
-        angle: -1.45,
-        length: 145,
-        width: 31,
-      },
-      ...ROAD_DATA.edges
-        .filter((r) => r[3] === "Metekhi Bridge")
-        .map(([a, b, width]) => {
-          const p = ROAD_DATA.nodes[a],
-            q = ROAD_DATA.nodes[b],
-            dx = q[0] - p[0],
-            dz = q[1] - p[1];
-          return {
-            name: "METEKHI BRIDGE",
-            x: (p[0] + q[0]) / 2,
-            z: (p[1] + q[1]) / 2,
-            angle: Math.atan2(dx, dz),
-            length: Math.hypot(dx, dz) + 1,
-            width: width + 2,
-          };
-        }),
-    ];
-export const PEACE_DECK = IS_KUTAISI
-  ? KUTAISI_GEO.bridges.find((b) => b.name === "WHITE BRIDGE")
-  : {
-      name: "PEACE BRIDGE",
-      x: LANDMARKS.peace.x,
-      z: LANDMARKS.peace.z,
-      angle: Math.PI / 2 + 0.12,
-      length: 150,
-      width: 8,
-    };
+export const BRIDGE_DECKS = IS_BATUMI
+  ? []
+  : IS_KUTAISI
+    ? KUTAISI_GEO.bridges.filter((b) => b.name !== "WHITE BRIDGE")
+    : [
+        {
+          name: "BARATASHVILI BRIDGE",
+          x: -770.57,
+          z: -237.75,
+          angle: -1.45,
+          length: 145,
+          width: 31,
+        },
+        ...ROAD_DATA.edges
+          .filter((r) => r[3] === "Metekhi Bridge")
+          .map(([a, b, width]) => {
+            const p = ROAD_DATA.nodes[a],
+              q = ROAD_DATA.nodes[b],
+              dx = q[0] - p[0],
+              dz = q[1] - p[1];
+            return {
+              name: "METEKHI BRIDGE",
+              x: (p[0] + q[0]) / 2,
+              z: (p[1] + q[1]) / 2,
+              angle: Math.atan2(dx, dz),
+              length: Math.hypot(dx, dz) + 1,
+              width: width + 2,
+            };
+          }),
+      ];
+export const PEACE_DECK = IS_BATUMI
+  ? { name: "NO BRIDGE", x: 9999, z: 9999, width: 1, length: 1, angle: 0 }
+  : IS_KUTAISI
+    ? KUTAISI_GEO.bridges.find((b) => b.name === "WHITE BRIDGE")
+    : {
+        name: "PEACE BRIDGE",
+        x: LANDMARKS.peace.x,
+        z: LANDMARKS.peace.z,
+        angle: Math.PI / 2 + 0.12,
+        length: 150,
+        width: 8,
+      };
 export const BANK_CAPS = RIVER_BANKS.flatMap((bank) =>
   bank.slice(1).map((b, i) => {
     const a = bank[i];

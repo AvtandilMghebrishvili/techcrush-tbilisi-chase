@@ -1,5 +1,7 @@
 # Shared level times
 
+> Current 2.0 rules: all three cities start open; classic cornering and adjustable driving feel; a 180-second night-first Auto cycle; four new earned cars; visual result cards. See [version 2.0 details](BATUMI.md). Earlier measurements and release descriptions below retain their original context.
+
 Open the gold **LEADERBOARD** button above Garage / Start, or the trophy in the top toolbar. Select **LEVEL TIMES**, enter a level and press **SHOW**. Everyone on the same public game URL reads the same server standings, including players using other computers. Public visibility must be enabled in My Driver. This shows banked results, not a live video or spectator session.
 
 Each level has its own table. Only successful clears count: all six checkpoints followed by the required police escape. The HUD shows active elapsed time and the result screen shows the completed time. Loading, pause, menus and hidden tabs do not count. Slow rendered frames count their real elapsed time. Rewinding never reduces the clock; the time spent reversing and driving again is included, and the row shows the number of rewind attempts. Resetting an overturned car also leaves the clock running.

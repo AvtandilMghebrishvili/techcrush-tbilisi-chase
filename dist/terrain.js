@@ -1,10 +1,11 @@
 import { nearestRoad } from "./city-map.js";
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 import { LANDMARKS, RIVER, riverDistance } from "./district-data.js";
 import { STUNT_ZONES } from "./world-sites.js";
 const riverMinX = Math.min(...RIVER.map((p) => p.x)) - 85;
 const riverMaxX = Math.max(...RIVER.map((p) => p.x)) + 85;
 export function terrainHeight(x, z) {
+  if (IS_BATUMI) return -9;
   if (IS_KUTAISI) {
     const north = 170 * Math.exp(-(((z - 2200) / 640) ** 2) - (x / 2400) ** 2),
       west =
@@ -43,13 +44,14 @@ export function terrainHeight(x, z) {
     3
   );
 }
-export const MOUNDS = IS_KUTAISI
-  ? []
-  : [
-      { ...LANDMARKS.mother, rx: 165, rz: 135, height: 93 },
-      { ...LANDMARKS.narikala, rx: 155, rz: 115, height: 65 },
-      { ...LANDMARKS.metekhi, rx: 54, rz: 48, height: 25 },
-    ];
+export const MOUNDS =
+  IS_KUTAISI || IS_BATUMI
+    ? []
+    : [
+        { ...LANDMARKS.mother, rx: 165, rz: 135, height: 93 },
+        { ...LANDMARKS.narikala, rx: 155, rz: 115, height: 65 },
+        { ...LANDMARKS.metekhi, rx: 54, rz: 48, height: 25 },
+      ];
 export function moundHeight(x, z, mound) {
   const dx = x - mound.x,
     dz = z - mound.z;

@@ -182,17 +182,18 @@ export async function handleApi(request, DB) {
             ? cityCommunity(profile, settledMap).lastTime
             : null;
         const recordPath =
-          settledMap === "kutaisi"
-            ? "$.maps.kutaisi.community.lastTime.runId"
+          settledMap !== "tbilisi"
+            ? `$.maps.${settledMap}.community.lastTime.runId`
             : "$.community.lastTime.runId";
         const statements = [update];
-        if (body.action.type === "settle" && settledMap === "kutaisi") {
-          const c = profile.maps.kutaisi.community;
+        if (body.action.type === "settle" && settledMap !== "tbilisi") {
+          const c = profile.maps[settledMap].community;
           statements.push(
             DB.prepare(
-              "INSERT INTO city_rankings(key_hash,map,ranked_runs,rank_level,rank_checkpoints,best_score,total_score,wins,badges,week_key,week_score,week_wins,rank_at) SELECT ?,'kutaisi',?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(key_hash,map) DO UPDATE SET ranked_runs=excluded.ranked_runs,rank_level=excluded.rank_level,rank_checkpoints=excluded.rank_checkpoints,best_score=excluded.best_score,total_score=excluded.total_score,wins=excluded.wins,badges=excluded.badges,week_key=excluded.week_key,week_score=excluded.week_score,week_wins=excluded.week_wins,rank_at=excluded.rank_at",
+              "INSERT INTO city_rankings(key_hash,map,ranked_runs,rank_level,rank_checkpoints,best_score,total_score,wins,badges,week_key,week_score,week_wins,rank_at) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(key_hash,map) DO UPDATE SET ranked_runs=excluded.ranked_runs,rank_level=excluded.rank_level,rank_checkpoints=excluded.rank_checkpoints,best_score=excluded.best_score,total_score=excluded.total_score,wins=excluded.wins,badges=excluded.badges,week_key=excluded.week_key,week_score=excluded.week_score,week_wins=excluded.week_wins,rank_at=excluded.rank_at",
             ).bind(
               hash,
+              settledMap,
               c.runs,
               c.furthestLevel,
               c.checkpoints,

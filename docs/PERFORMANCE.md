@@ -1,9 +1,10 @@
 # Rendering and audio lifecycle
 
+> Current 2.0 rules: all three cities start open; classic cornering and adjustable driving feel; a 180-second night-first Auto cycle; four new earned cars; visual result cards. See [version 2.0 details](BATUMI.md). Earlier measurements and release descriptions below retain their original context.
+
 ## Bonus feedback 1.17.0
 
 The feed retains at most 16 pending simulation events and three DOM rows, expiring on active simulation time. It introduces no independent RAF, timer, network call or media download. Finite opacity/transform animation pauses with the existing idle lifecycle. HUD checkpoint dots are rebuilt only when checkpoint count/progress changes, instead of every HUD update. The near-pass test reuses existing physics-step positions; it does not maintain a second motion history. Rendering quality and runtime media are unchanged. These are bounded-work improvements, not a measured universal FPS increase.
-
 
 ## Drift, Fusion and map UI (1.16)
 

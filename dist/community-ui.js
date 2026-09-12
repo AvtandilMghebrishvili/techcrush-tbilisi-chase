@@ -1,4 +1,4 @@
-import { formatRaceTime } from "./race-timing.js";
+import { formatRaceTime, TIME_COURSES } from "./race-timing.js";
 import {
   ACTIVE_MAP,
   CITY_NAME,
@@ -6,7 +6,7 @@ import {
   cityCommunity,
   cityLevel,
 } from "./map-selection.js";
-import { carSpec } from "./config.js";
+import { carSpec, CARS } from "./config.js";
 import { PARTS } from "./progression.js";
 import {
   ACHIEVEMENTS,
@@ -42,23 +42,21 @@ export class CommunityUI {
     const dialog = $("community-dialog");
     $("board-map").value = this.map;
     const courses = () => {
-      $("time-course").innerHTML = (
-        this.map === "kutaisi"
-          ? [
-              ["kutaisi-1.2", "CURRENT · 1.2"],
-              ["kutaisi-1.1", "ARCHIVE · 1.1"],
-              ["kutaisi-1.0", "ARCHIVE · 1.0"],
-            ]
-          : [
-              ["tbilisi-1.17", "CURRENT · 1.17"],
-              ["tbilisi-1.16", "ARCHIVE · 1.16"],
-              ["tbilisi-1.14", "ARCHIVE · 1.14"],
-              ["tbilisi-1.13", "ARCHIVE · 1.13"],
-            ]
-      )
-        .map(([value, label]) => `<option value="${value}">${label}</option>`)
+      $("time-course").innerHTML = [
+        MAP_COURSES[this.map],
+        ...TIME_COURSES.filter(
+          (c) => c.startsWith(this.map + "-") && c !== MAP_COURSES[this.map],
+        ).reverse(),
+      ]
+        .map(
+          (value, i) =>
+            `<option value="${value}">${i ? "ARCHIVE" : "CURRENT"} · ${value.split("-")[1]}</option>`,
+        )
         .join("");
     };
+    $("time-car").innerHTML =
+      '<option value="all">ALL CARS</option>' +
+      CARS.map((c) => `<option value="${c.id}">${c.name}</option>`).join("");
     courses();
     $("board-map").onchange = () => {
       this.map = $("board-map").value;

@@ -25,7 +25,10 @@ export function navigationTarget(sim) {
     return boxTarget;
   if (sim.navQuest === "river" && p.airborne && p.lastRamp === 5)
     return riverTarget;
-  if (sim.navQuest === "skybox" || sim.navQuest === "river") {
+  if (
+    sim.navQuest === "skybox" ||
+    (sim.navQuest === "river" && SPECIAL_RAMPS[1])
+  ) {
     const i = sim.navQuest === "skybox" ? 0 : 1,
       r = SPECIAL_RAMPS[i],
       dx = p.x - r.x,

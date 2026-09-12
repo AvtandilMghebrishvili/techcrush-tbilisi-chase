@@ -1,9 +1,20 @@
+import { BackgroundMusic } from "./background-music.js";
+import {
+  carSilhouette,
+  carRequirement,
+  refreshRewards,
+  rewardTiles,
+  openCarReward,
+} from "./reward-ui.js";
+import { carUnlocked, totalTakedowns } from "./progression.js";
+import { drivingFeel, setupDrivingFeel } from "./driving-feel.js";
 import { QuestMap, QUEST_PINS, mapAtlas, MAP_EXTENT } from "./quest-map.js";
 import { ScoreFeedback } from "./score-feedback.js";
 import { ResultScreen } from "./result-screen.js";
 import {
   ACTIVE_MAP,
   IS_KUTAISI,
+  IS_BATUMI,
   cityLevel,
   cityCommunity,
   mapUnlocked,
@@ -51,12 +62,13 @@ import {
 const $ = (id) => document.getElementById(id),
   keys = new Set();
 setupInterface();
+setupDrivingFeel();
 const scoreFeedbackUI = new ScoreFeedback($("score-feedback"), $("score"));
 const results = new ResultScreen(career);
 let sim,
   view,
   mobile,
-  muted = true,
+  muted = false,
   accumulator = 0,
   toastUntil = 0,
   uiTime = 0,
@@ -65,6 +77,48 @@ let lastDotsKey = "";
 let agentInput = null;
 let selectedCar = "gt";
 const soundscape = new ChaseAudio();
+const music = new BackgroundMusic();
+try {
+  muted = localStorage.getItem("techcrush-muted") === "true";
+} catch {}
+soundscape.setMuted(muted);
+actionLabel($("sound"), muted ? "MUTED" : "SOUND");
+$("sound").setAttribute("aria-pressed", String(!muted));
+try {
+  const volume = Number(localStorage.getItem("techcrush-music-volume"));
+  if (
+    localStorage.getItem("techcrush-music-volume") !== null &&
+    Number.isFinite(volume)
+  )
+    music.audio.volume = Math.max(0, Math.min(1, volume));
+} catch {}
+$("music-volume").value = Math.round(music.audio.volume * 100);
+$("music-volume").oninput = (e) => {
+  music.audio.volume = Number(e.target.value) / 100;
+  try {
+    localStorage.setItem("techcrush-music-volume", String(music.audio.volume));
+  } catch {}
+};
+$("music-reset").onclick = () => {
+  muted = false;
+  soundscape.setMuted(false);
+  music.audio.volume = 0.28;
+  music.reset();
+  $("music-volume").value = 28;
+  actionLabel($("sound"), "SOUND");
+  $("sound").setAttribute("aria-pressed", "true");
+  try {
+    localStorage.setItem("techcrush-muted", "false");
+    localStorage.removeItem("techcrush-music-volume");
+  } catch {}
+  refreshActivity();
+};
+const unlockMusic = () => {
+  music.unlock();
+};
+addEventListener("pointerdown", unlockMusic, { once: true });
+addEventListener("keydown", unlockMusic, { once: true });
+
 const loop = new FrameLoop(frame);
 const wake = () => loop.invalidate();
 function dialogOpen() {
@@ -74,6 +128,7 @@ function dialogOpen() {
     "controls-dialog",
     "community-dialog",
     "quest-map",
+    "car-reveal",
   ].some((id) => $(id).open);
 }
 function refreshActivity() {
@@ -84,6 +139,12 @@ function refreshActivity() {
   );
   loop.setEnabled(!document.hidden);
   soundscape.setForeground(!document.hidden && !dialogOpen());
+  music.sync(
+    !document.hidden &&
+      !dialogOpen() &&
+      ["ready", "running"].includes(sim?.phase),
+    !muted,
+  );
   mobile?.syncActivity();
   document.body.classList.toggle(
     "idle",
@@ -153,7 +214,11 @@ if (document.modelContext?.registerTool) {
 function input() {
   if (agentInput && keys.size === 0 && !mobile?.touch.size) return agentInput;
   const keyboard = drivingInput(keys);
-  return mobile ? mobile.read(keyboard, keys, sim?.phase) : keyboard;
+  keyboard.steeringSensitivity = drivingFeel.steeringSensitivity;
+  keyboard.driftStrength = drivingFeel.driftStrength;
+  const controls = mobile ? mobile.read(keyboard, keys, sim?.phase) : keyboard;
+  Object.assign(controls, drivingFeel);
+  return controls;
 }
 function chooseCar(id) {
   selectedCar = carSpec(id).id;
@@ -182,12 +247,8 @@ function setupGarage() {
   const garage = $("garage");
   garage.innerHTML = CARS.map(
     (c) =>
-      `<button type="button" data-car="${c.id}" aria-pressed="${c.id === selectedCar}"><i style="background:${c.color}"></i><b>${c.name}</b><small>${c.type}</small></button>`,
+      `<button type="button" data-car="${c.id}" aria-pressed="${c.id === selectedCar}">${carSilhouette(c.id)}<b>${c.name}</b><small>${c.type}</small></button>`,
   ).join("");
-  garage.insertAdjacentHTML(
-    "beforeend",
-    `<button type="button" disabled class="coming-car"><b>?</b><span>YOUTUBER CAR</span><small>COMING SOON · მალე</small></button>`,
-  );
   $("route-selector").onchange = () => {
     sim.navQuest = $("route-selector").value || null;
     $("route-selector").blur();
@@ -196,6 +257,7 @@ function setupGarage() {
   for (const button of garage.querySelectorAll("button[data-car]"))
     button.onclick = () => chooseCar(button.dataset.car);
   chooseCar(selectedCar);
+  if (career) refreshRewards(career);
   $("menu-car-jump").onclick = () => {
     const selected = garage.querySelector('[data-car][aria-pressed="true"]');
     selected.focus({ preventScroll: true });
@@ -329,9 +391,12 @@ function loadingProgress(amount, stage) {
 }
 async function toggleSound() {
   try {
-    if (!(await soundscape.unlock())) throw Error("Web Audio unavailable");
     muted = !muted;
     soundscape.setMuted(muted);
+    try {
+      localStorage.setItem("techcrush-muted", String(muted));
+    } catch {}
+    music.sync(undefined, !muted);
     wake();
     actionLabel($("sound"), muted ? "MUTED" : "SOUND");
     $("sound").setAttribute("aria-pressed", String(!muted));
@@ -339,6 +404,8 @@ async function toggleSound() {
       "aria-label",
       muted ? "Enable sound" : "Mute sound",
     );
+    // Muting is immediate; only enabling sound needs the browser audio unlock.
+    if (!muted) await soundscape.unlock();
   } catch {
     actionLabel($("sound"), "NO AUDIO");
   }
@@ -375,6 +442,7 @@ async function start() {
       level: cityLevel(career.profile),
       equipment: career.profile.cars[selectedCar],
       completedQuests: career.profile.quests?.completed || [],
+      bankedTakedowns: totalTakedowns(career.profile),
     });
     sim.navQuest = $("route-selector").value || null;
     runId = career.profile.activeRun.id;
@@ -466,8 +534,27 @@ function finish() {
         const badges = reward.badges
           .map((id) => ACHIEVEMENTS.find((a) => a.id === id)?.name)
           .join(", ");
-        $("result-reward").textContent =
-          `+${reward.cash.toLocaleString()} CR · +${reward.boxes} BOX${reward.boxes === 1 ? "" : "ES"}${reward.platinumBoxes ? ` · +${reward.platinumBoxes} PLATINUM BOX` : ""} · LEVEL ${cityLevel(career.profile)} UNLOCKED${reward.daily ? " · DAILY +500 CR" : ""}${badges ? " · NEW: " + badges : ""}`;
+        $("result-reward").innerHTML = rewardTiles(
+          reward,
+          cityLevel(career.profile),
+        );
+        refreshRewards(career);
+        if (career.profile.carBoxes.includes(ACTIVE_MAP)) {
+          const rewardButton = document.createElement("button");
+          rewardButton.className = "primary";
+          rewardButton.textContent = "MYSTERY CAR EARNED · OPEN BOX ↗";
+          rewardButton.onclick = async () => {
+            rewardButton.disabled = true;
+            try {
+              await openCarReward(career, ACTIVE_MAP);
+              rewardButton.textContent = "CAR SAVED TO YOUR GARAGE ✓";
+            } catch (e) {
+              rewardButton.textContent = e.message;
+              rewardButton.disabled = false;
+            }
+          };
+          $("result-reward").append(rewardButton);
+        }
         const next =
           view.lighting.mode === "auto"
             ? levelCondition(cityLevel(career.profile)).label
@@ -677,7 +764,11 @@ function drawMap() {
     c.stroke();
   }
   c.fillStyle = "#d3b37a";
-  const landmark = IS_KUTAISI ? LANDMARKS.bagrati : TOWER;
+  const landmark = IS_BATUMI
+    ? LANDMARKS.alphabet
+    : IS_KUTAISI
+      ? LANDMARKS.bagrati
+      : TOWER;
   c.fillRect(ox - landmark.x * s - 2, oz - landmark.z * s - 2, 4, 4);
   for (const ramp of RAMPS) {
     const x = ox - ramp.x * s,
@@ -1068,6 +1159,7 @@ try {
     if (["running", "rewinding"].includes(sim.phase)) pause();
     loop.setEnabled(false);
     soundscape.setForeground(false);
+    music.sync(false);
     mobile?.syncActivity(false);
   });
   addEventListener("pageshow", refreshActivity);
@@ -1078,6 +1170,7 @@ try {
     "controls-dialog",
     "community-dialog",
     "quest-map",
+    "car-reveal",
   ])
     dialogs.observe($(id), { attributes: true, attributeFilter: ["open"] });
   registerTools();

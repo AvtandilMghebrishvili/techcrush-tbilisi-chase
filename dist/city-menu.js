@@ -1,3 +1,4 @@
+import { refreshRewards } from "./reward-ui.js";
 import {
   ACTIVE_MAP,
   IS_KUTAISI,
@@ -12,6 +13,12 @@ export function cityMenu(store, leave) {
     CITY_NAME + " <em>CHASE.</em>";
   document.querySelector("#intro .eyebrow").textContent =
     "TECHCRUSH / " + CITY_NAME + " STREETS";
+  if (ACTIVE_MAP === "batumi") {
+    document.title = "TECHCRUSH · Batumi Chase";
+    document.querySelector("#intro .intro-copy").textContent =
+      "Black Sea nights. Boulevard chases. Your next getaway.";
+    $("route-selector").querySelector('[value="river"]')?.remove();
+  }
   if (IS_KUTAISI) {
     document.title = "TECHCRUSH · Kutaisi Chase";
     document.querySelector("#intro .intro-copy").innerHTML =
@@ -36,53 +43,35 @@ export function cityMenu(store, leave) {
   }
   const render = () => {
     const p = store.profile;
-    const unlocked = mapUnlocked(p, "kutaisi"),
-      cleared = Math.max(0, Math.min(3, p.level - 1));
     for (const b of document.querySelectorAll("[data-map]")) {
       const map = b.dataset.map,
-        allowed = mapUnlocked(p, map),
         selected = map === ACTIVE_MAP;
-      b.disabled = !allowed || store.busy;
+      b.disabled = store.busy;
       b.classList.toggle("active-map", selected);
-      b.classList.toggle("city-available", allowed && !selected);
-      b.classList.toggle("city-locked", !allowed);
+      b.classList.toggle("city-available", !selected);
+      b.classList.remove("city-locked");
       b.setAttribute("aria-pressed", String(selected));
       b.querySelector(".city-state").textContent = selected
         ? "✓ SELECTED"
-        : allowed
-          ? "UNLOCKED ↗"
-          : "LOCKED";
-      b.querySelector("small").textContent = allowed
-        ? `LEVEL ${cityLevel(p, map)} · ENDLESS`
-        : `${cleared} / 3 TBILISI LEVELS CLEARED`;
+        : "PLAY NOW ↗";
+      b.querySelector("small").textContent =
+        `LEVEL ${cityLevel(p, map)} · ${Math.min(5, cityLevel(p, map) - 1)}/5 TO MYSTERY CAR`;
     }
-    $("menu-city-count").textContent = `${unlocked ? 2 : 1} / 2 AVAILABLE`;
+    $("menu-city-count").textContent = "3 / 3 OPEN";
     $("menu-race-label").textContent = `${CITY_NAME} · LEVEL ${cityLevel(p)}`;
-    $("city-unlock").classList.toggle("is-unlocked", unlocked);
-    $("unlock-title").textContent = unlocked
-      ? "KUTAISI IS UNLOCKED"
-      : `UNLOCK KUTAISI · ${cleared} / 3 COMPLETE`;
-    $("map-access-note").textContent = unlocked
-      ? "Choose either city above. Your cars, upgrades and credits travel with you."
-      : `Finish ${3 - cleared} more Tbilisi ${3 - cleared === 1 ? "level" : "levels"}: pass all six checkpoints and escape the police. Kutaisi opens after level 3.`;
-    $("unlock-progress").setAttribute("aria-valuenow", String(cleared));
-    $("unlock-progress").setAttribute(
-      "aria-valuetext",
-      unlocked
-        ? "3 of 3 levels complete. Kutaisi unlocked."
-        : `${cleared} of 3 Tbilisi levels complete.`,
-    );
-    for (const step of document.querySelectorAll("[data-unlock-step]")) {
-      const complete = Number(step.dataset.unlockStep) <= cleared;
-      step.classList.toggle("complete", complete);
-      step.textContent = complete ? "✓" : step.dataset.unlockStep;
-      step.setAttribute("aria-hidden", "true");
-    }
-    $("result-kutaisi").hidden = IS_KUTAISI || !mapUnlocked(p, "kutaisi");
+    $("unlock-title").textContent = "THREE CITIES. THREE MYSTERY CARS.";
+    $("map-access-note").textContent =
+      "Every city is open. Clear level 5 in each to earn its exclusive car. Your garage travels with you.";
+    refreshRewards(store);
+    $("result-kutaisi").hidden = false;
+    $("result-kutaisi").textContent = "CHOOSE CITY · 3 MAPS ↗";
   };
   for (const b of document.querySelectorAll("[data-map]"))
     b.onclick = () => void change(b.dataset.map);
-  $("result-kutaisi").onclick = () => void change("kutaisi");
+  $("result-kutaisi").onclick = async () => {
+    if (!(await leave())) return;
+    document.querySelector(".map-slots").scrollIntoView({ block: "center" });
+  };
   const previous = store.onchange;
   store.onchange = () => {
     previous();

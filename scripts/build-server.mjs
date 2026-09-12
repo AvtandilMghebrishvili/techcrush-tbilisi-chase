@@ -68,6 +68,9 @@ for (const file of [
   "kutaisi-road-data.js",
   "kutaisi-road-surface-data.js",
   "kutaisi-geo-data.js",
+  "batumi-road-data.js",
+  "batumi-road-surface-data.js",
+  "batumi-geo-data.js",
 ])
   await copyFile("dist/" + file, "dist/client/" + file);
 await mkdir("dist/client/vendor", { recursive: true });

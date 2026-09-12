@@ -1,5 +1,6 @@
+import { supportedVisualY } from "./vehicle-ground.js";
 import { updateExpansion } from "./expansion-visuals.js";
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 import { batchStreetLamps } from "./lamp-batches.js";
 import { updateBridgeRails } from "./bridge-visuals.js";
 import { createWaterSplash, animateWaterSplash } from "./crash-effects.js";
@@ -107,7 +108,7 @@ export class SceneView {
     this.sun = sun;
     buildRealisticCity(this);
     calibrateRoadsideProps(this);
-    if (IS_KUTAISI) batchStreetLamps(this);
+    batchStreetLamps(this);
     this.cameraMode = 0;
     this.cockpit = makeCockpit();
     this.camera.add(this.cockpit.root);
@@ -115,7 +116,7 @@ export class SceneView {
     this.fx = new Map();
     this.routeGuide = makeRouteGuide(this.scene);
     this.player = this.makeCar("#eecb39");
-    this.player.position.set(START.x, 0, START.z);
+    this.player.position.set(START.x, supportedVisualY({ ...START }), START.z);
     this.scene.add(this.player);
     this.camera.position.set(START.x - 12, 5.2, START.z + 6);
     this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
@@ -412,7 +413,7 @@ export class SceneView {
     this.policeMeshes = [];
     this.player.visible = true;
     this.cockpit.root.visible = false;
-    this.player.position.set(START.x, 0, START.z);
+    this.player.position.set(START.x, supportedVisualY({ ...START }), START.z);
     this.player.rotation.set(0, START.angle, 0);
     this.camera.position.set(START.x - 12, 5.2, START.z + 6);
     this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
@@ -425,7 +426,17 @@ export class SceneView {
     const ready = sim.phase === "ready";
     if (!ready) {
       const p = sim.player;
-      this.player.position.set(p.x, p.y || 0, p.z);
+      this.player.position.set(
+        p.x,
+        supportedVisualY(
+          p,
+          (p.roll || 0) -
+            (p.steering || 0) *
+              Math.min(Math.abs(p.speed || 0) / 50, 1) *
+              0.035,
+        ),
+        p.z,
+      );
       this.player.rotation.order = "YXZ";
       this.player.rotation.set(p.pitch || 0, p.angle, p.roll || 0, "YXZ");
       updateVehicleDamage(this.player, p);
@@ -472,7 +483,7 @@ export class SceneView {
       ])
         cars.forEach((car, i) => {
           meshes[i].visible = Math.hypot(car.x - p.x, car.z - p.z) < 330;
-          meshes[i].position.set(car.x, car.y || 0, car.z);
+          meshes[i].position.set(car.x, supportedVisualY(car), car.z);
           meshes[i].rotation.set(
             car.pitch || 0,
             car.angle,
@@ -498,7 +509,7 @@ export class SceneView {
                 car.x - this.camera.position.x,
                 car.z - this.camera.position.z,
               ) > 10;
-          meshes[i].position.set(car.x, car.y || 0, car.z);
+          meshes[i].position.set(car.x, supportedVisualY(car), car.z);
           meshes[i].rotation.set(
             car.pitch || 0,
             car.angle,

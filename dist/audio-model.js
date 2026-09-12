@@ -51,6 +51,32 @@ export const ENGINE_VOICES = {
     ],
   },
 };
+Object.assign(ENGINE_VOICES, {
+  falcon: {
+    ...ENGINE_VOICES.gt,
+    name: "RS flat six",
+    pitch: 1.02,
+    redline: 8100,
+  },
+  rioni: {
+    ...ENGINE_VOICES.classic,
+    name: "GT V8",
+    pitch: 0.91,
+    redline: 7900,
+  },
+  coast: {
+    ...ENGINE_VOICES.rally,
+    name: "Coast V10",
+    pitch: 1.1,
+    redline: 9100,
+  },
+  creator: {
+    ...ENGINE_VOICES.suv,
+    name: "TECHCRUSH V8 twin turbo",
+    pitch: 0.85,
+    redline: 8400,
+  },
+});
 export function engineTelemetry(
   player,
   input = {},

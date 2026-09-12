@@ -1,5 +1,5 @@
 import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
-import { IS_KUTAISI, ACTIVE_MAP } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI, ACTIVE_MAP } from "./map-selection.js";
 import { buildingContact } from "./building-contact.js";
 import { levelRewards, creditAward } from "./community-rules.js";
 import { TREES } from "./world-props.js";
@@ -233,18 +233,9 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
     Math.max(0.35, 1.25 - 0.006 * Math.abs(forward)) *
     (input.brake ? 1.5 : 1) *
     Math.sign(forward);
-  // Arcade grip budget: gentle steering is unchanged. Excess corner demand
-  // widens the turn at speed instead of snapping the velocity onto a tight arc.
-  const gripBudget =
-    (36 + Math.max(0, spec.grip - 8.5) * 2.5) * (input.brake ? 1.3 : 1);
-  const demand = Math.abs(requestedTurn * forward);
-  const steeringGrip = Math.min(1, gripBudget / Math.max(gripBudget, demand));
-  const turn = requestedTurn * steeringGrip;
-  car.understeer = 1 - steeringGrip;
-  const scrub =
-    Math.min(0.1, (demand / gripBudget) ** 2 * 0.045) *
-    Math.min(1, Math.abs(forward) / 18);
-  forward *= Math.exp(-scrub * dt);
+  // Restore the responsive pre-1.17 arcade steering. Driver tuning is bounded.
+  const turn = requestedTurn * clamp(input.steeringSensitivity ?? 1, 0.7, 1.3);
+  car.understeer = 0;
   car.angle += turn * dt;
   if (input.brake && Math.abs(steer) > 0.1 && forward > 8)
     car.driftSign = Math.sign(steer);
@@ -255,7 +246,12 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
       (car.drift > 0.3 && throttle > 0 && Math.sign(steer) === car.driftSign));
   car.drift +=
     (Number(sliding) - car.drift) * (1 - Math.exp(-dt * (sliding ? 10 : 8)));
-  lateral -= forward * turn * dt * car.drift;
+  lateral -=
+    forward *
+    turn *
+    dt *
+    car.drift *
+    clamp(input.driftStrength ?? 1, 0.65, 1.4);
   // Handbrake releases rear traction even with high-tier/fused tires. Normal
   // traction returns smoothly when steering centres or the car slows down.
   const rearGrip = spec.grip * (1 - car.drift) + 1.25 * car.drift;
@@ -586,6 +582,8 @@ export class ChaseSimulation {
     cop.respawnAt = this.time + 5;
     if (credit) {
       this.takedowns++;
+      if (((this.runOptions.bankedTakedowns || 0) + this.takedowns) % 10 === 0)
+        this.events.push("TECHCRUSH BOX EARNED · BANK YOUR RUN TO KEEP IT");
       const points = Math.round(750 * this.rewardRates.score + 1e-8),
         cash = creditAward(350, this.level);
       this.score += points;
@@ -1386,7 +1384,7 @@ export class ChaseSimulation {
       )
         unlock(
           ROOFTOP.id,
-          IS_KUTAISI
+          IS_KUTAISI || IS_BATUMI
             ? "PLATINUM SKYBOX · +1 PLATINUM BOX / 2,500 CR"
             : "SKYBOX FOUND · +1 BOX / 2,500 CR",
         );
@@ -1399,7 +1397,7 @@ export class ChaseSimulation {
       )
         unlock(
           IS_KUTAISI ? "rioni-gap-v1" : "mtkvari-gap-v1",
-          IS_KUTAISI
+          IS_KUTAISI || IS_BATUMI
             ? "RIONI GAP · +1 PLATINUM BOX / 1,500 CR"
             : "MTKVARI GAP · +1 BOX / 1,500 CR",
         );

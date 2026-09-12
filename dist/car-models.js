@@ -61,6 +61,79 @@ export const MODEL_SHAPES = {
     ],
   },
 };
+// Distinct silhouettes; all lamps, mirrors, tires and kits sample their own shell.
+Object.assign(MODEL_SHAPES, {
+  falcon: {
+    name: "Falcon RS",
+    length: 4.7,
+    width: 2.02,
+    roof: 1.43,
+    wheelbase: 2.74,
+    stations: [
+      [-2.35, 0.8, 0.75],
+      [-1.75, 1.01, 0.94],
+      [-1.37, 1.01, 0.99],
+      [-0.5, 0.88, 0.9],
+      [0.5, 0.9, 0.85],
+      [1.37, 1.01, 0.94],
+      [1.9, 0.86, 0.65],
+      [2.35, 0.77, 0.48],
+    ],
+  },
+  rioni: {
+    name: "Rioni GT",
+    length: 5.15,
+    width: 2.04,
+    roof: 1.32,
+    wheelbase: 2.96,
+    stations: [
+      [-2.575, 0.82, 0.73],
+      [-2, 0.97, 0.87],
+      [-1.48, 1.02, 0.92],
+      [-0.5, 0.92, 0.87],
+      [0.5, 0.94, 0.89],
+      [1.48, 1.02, 0.84],
+      [2.12, 0.94, 0.72],
+      [2.575, 0.71, 0.56],
+    ],
+  },
+  coast: {
+    name: "Coast X",
+    length: 4.85,
+    width: 2.14,
+    roof: 1.22,
+    wheelbase: 2.86,
+    angular: true,
+    stations: [
+      [-2.425, 0.91, 0.82],
+      [-1.85, 1.07, 0.98],
+      [-1.43, 1.07, 0.92],
+      [-0.5, 0.92, 0.78],
+      [0.5, 0.91, 0.75],
+      [1.43, 1.07, 0.88],
+      [2.1, 0.96, 0.54],
+      [2.425, 0.83, 0.43],
+    ],
+  },
+  creator: {
+    name: "TECHCRUSH YouTuber",
+    length: 4.95,
+    width: 2.18,
+    roof: 1.34,
+    wheelbase: 2.9,
+    angular: true,
+    stations: [
+      [-2.475, 1, 0.88],
+      [-1.9, 1.09, 1.02],
+      [-1.45, 1.09, 1.0],
+      [-0.5, 0.9, 0.81],
+      [0.5, 0.94, 0.81],
+      [1.45, 1.09, 0.97],
+      [2.1, 1.03, 0.62],
+      [2.475, 0.93, 0.51],
+    ],
+  },
+});
 export function bodySurface(shape, rounded = true) {
   const curve = new THREE.CatmullRomCurve3(
     shape.stations.map((p) => new THREE.Vector3(...p)),
@@ -103,7 +176,7 @@ export function bodySurface(shape, rounded = true) {
 export function makeOriginalSportsCar(id, color, equipment = {}) {
   const shape = MODEL_SHAPES[id] || MODEL_SHAPES.gt,
     group = new THREE.Group(),
-    skin = bodySurface(shape, id !== "rally");
+    skin = bodySurface(shape, id !== "rally" && !shape.angular);
   group.name = shape.name;
   const paint = new THREE.MeshPhysicalMaterial({
     color,
@@ -312,9 +385,43 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
         }
     }
     const m = mesh(points, ix, mat, "fitted-surface-detail");
+    m.geometry.setAttribute(
+      "uv",
+      new THREE.Float32BufferAttribute(
+        points.flatMap((p) => [(p[0] - cx) / w + 0.5, (p[2] - cz) / d + 0.5]),
+        2,
+      ),
+    );
     m.userData.surfaceMounted = true;
     m.userData.mountOffset = offset;
     return m;
+  }
+  if (id === "creator") {
+    for (const x of [-0.18, 0.18]) patch(x, 1.4, 0.15, 1.3, chrome);
+    const c = document.createElement("canvas");
+    c.width = 512;
+    c.height = 128;
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#ed1941";
+    ctx.fillRect(0, 0, 512, 128);
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.font = "bold 65px Arial";
+    ctx.fillText("TECHCRUSH", 256, 85, 480);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    const brand = new THREE.MeshStandardMaterial({
+      map: t,
+      color: "#fff",
+      roughness: 0.4,
+    });
+    patch(0, 1.52, 0.82, 0.27, brand);
+    for (const side of [-1, 1]) {
+      const z = -shape.length * 0.37,
+        y = skin.top(side * 0.65, z);
+      box(0.07, 0.35, 0.1, dark, side * 0.65, y + 0.17, z);
+      box(0.7, 0.04, 0.35, paint, side * 0.65, y + 0.36, z);
+    }
   }
   const frontZ = shape.length / 2,
     rearZ = -frontZ;

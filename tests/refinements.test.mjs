@@ -41,7 +41,7 @@ function checkSteering(car) {
 }
 test("the original licensed 458 remains selectable with centered shaft steering and upgrades", async () => {
   assert.deepEqual(
-    CARS.map((c) => c.id),
+    CARS.slice(0, 4).map((c) => c.id),
     ["classic", "gt", "rally", "suv"],
   );
   const bytes = await readFile(
@@ -132,9 +132,9 @@ test("existing garages gain the original car without losing credits or installed
     lastBox: null,
   };
   const p = migrateProfile(old);
-  assert.equal(p.schema, 4);
+  assert.equal(p.schema, 5);
   assert.deepEqual(p.cars.classic, {});
-  const { classic, ...cars } = p.cars;
+  const { classic, falcon, rioni, coast, creator, ...cars } = p.cars;
   assert.deepEqual(cars, old.cars);
   for (const key of [
     "credits",

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0 — 2026-09-13
+
+- Open every city immediately and add Batumi: connected real-street data, Black Sea, boulevard planting, original palm geometry, thirteen landmark interpretations and a distant airport. Share pursuit, traffic, checkpoints, rewind, weather and garage logic. Add a connected Platinum rooftop stunt.
+- Restore classic responsive cornering; add bounded steering/drift controls and reset. Match visual tire support to asphalt/sidewalks and body lean.
+- Add three city-level-five mystery cars and the signature TECHCRUSH YouTuber Car, unlocked by ten cumulative banked patrol takedowns. Every ten earn a three-part creator box. Add Emerald/Ruby/TECHCRUSH beyond existing Platinum, with exclusive installation rules and bounded fused performance.
+- Preserve old profiles with additive schema 5 migration and idempotent reward claims. Keep independent city rankings; archive prior timed courses and start Tbilisi 2.0, Kutaisi 2.0 and Batumi 1.0.
+- Redesign city/car cards, launch actions, graphical reward summaries, mystery-car reveals and persistent coin balance. Show each city’s milestone progress.
+- Generate public result PNG cards server-side with city/car artwork and Georgian names. Check visibility on both HTML and image endpoints. No browser renderer or new native dependency on the server.
+- Default to enabled music after a gesture, with mute/volume/reset; start Auto at night with a full 180-second cycle. Keep audio and rendering suspended when hidden/paused.
+- Batch individually breakable lamps on all maps, use O(1) lamp membership during batching, retain selected-city lazy loading, bounded tree LOD and unchanged existing media quality.
+
 ## 1.18.0 — 2026-09-13
 
 - Redesign the start menu around city selection, car selection and one prominent Start action. Use balanced columns on wide screens, a scrollable phone layout and a persistent launch area with garage/ranking access.

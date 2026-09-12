@@ -4,13 +4,7 @@
 
 ## Unlock and travel
 
-1. Clear Tbilisi levels 1, 2 and 3, including the police escape after the sixth checkpoint. A saved Tbilisi career showing level 4 or higher already qualifies.
-2. Select **02 / KUTAISI** above the car selector, or use **KUTAISI UNLOCKED** on the finish screen. The server checks the unlock; opening `/?map=kutaisi` on a locked profile returns to Tbilisi with the requirement shown.
-3. Kutaisi starts at its own level 1. Select Tbilisi again to continue its existing level. Neither city's level has a gameplay cap.
-
-Cars, paint, fitted parts, spare parts, credits, ordinary boxes and Platinum boxes belong to the same saved garage. Each city has independent levels, achievements/streaks, best scores and race records. Public identity and privacy preference apply to both. The leaderboard's **City** selector switches Progress, High Score, Weekly and Level Times together. Unique player statistics count the same garage once across both cities; ranking denominators count the selected board's participants.
-
-Switching cities first banks the current run using the normal Garage behavior, then reloads the page. A failed save prevents switching. Reloading releases the previous WebGL world, audio and navigation caches; both worlds are never held at once. The private garage key stays the same.
+Select **KUTAISI** in the start menu. As of 2.0 it is open immediately, with no Tbilisi prerequisite. The cities retain separate endless levels and rankings; cars, credits, inventory and upgrades are shared. Clear Kutaisi level 5 to receive the **Rioni GT** mystery car box. City switching banks the run, then reloads to free the old scene.
 
 ## Places and roads
 

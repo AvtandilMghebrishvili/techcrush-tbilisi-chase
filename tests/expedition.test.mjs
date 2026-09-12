@@ -163,7 +163,7 @@ test("old garages preserve keys, every installed part, inventory, paint, achieve
   p.community.badges = ["first-escape"];
   const before = structuredClone(p),
     next = migrateProfile(p);
-  assert.equal(next.schema, 4);
+  assert.equal(next.schema, 5);
   assert.deepEqual(next.quests, { completed: [] });
   for (const key of [
     "credits",

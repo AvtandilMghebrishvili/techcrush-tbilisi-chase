@@ -1,5 +1,7 @@
 # Finish screen, sharing and level conditions
 
+> Current 2.0 rules: all three cities start open; classic cornering and adjustable driving feel; a 180-second night-first Auto cycle; four new earned cars; visual result cards. See [version 2.0 details](BATUMI.md). Earlier measurements and release descriptions below retain their original context.
+
 A successful level requires six checkpoints and eight seconds of escaping the police. The result overlay opens immediately with the level, score and a large **clear time**. The timer counts active wall time, including rewind; pauses, menus, loading and hidden tabs are excluded. Checkpoints play a short two-note cue and a completed level plays a distinct four-note finish. Enable **Sound** in the toolbar to hear them.
 
 After the server saves the finish and reward, the screen fetches **Overall position** and **Level time rank** once. Overall ranks use career progress; time ranks compare the current level/course across all cars and builds. They are separate measures. Equal displayed times share a time rank. The full leaderboard has car/stock filters for closer comparisons. Positions may change as other people finish. A network error leaves the saved result and continuation buttons usable, with a manual ranking retry. Guest/private drivers see a prompt to choose a public name instead of a fictitious rank.

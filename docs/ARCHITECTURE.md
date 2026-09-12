@@ -143,6 +143,14 @@ Water entry disables ground contacts, propulsion and capture participation. `wat
 
 ## City selection (v1.15)
 
-`map-selection.js` defines the active city from the URL, the server-checked Tbilisi level-3 unlock and city-specific course IDs. `road-data.js`, `road-surface-data.js`, `district-data.js` and `world-sites.js` select one city's modules with conditional dynamic imports. Tbilisi's original data is retained under `tbilisi-*` names. Kutaisi adds `kutaisi-city.js` and OSM-derived graph/lot/river data. Shared simulation, traffic, police, lighting, audio and mobile input run unchanged against the selected city.
+`map-selection.js` defines the active city from the URL and city-specific course IDs. All three cities are open from the start. `road-data.js`, `road-surface-data.js`, `district-data.js` and `world-sites.js` select one city's modules with conditional dynamic imports. Tbilisi's original data is retained under `tbilisi-*` names. Kutaisi and Batumi add their own city renderers and OSM-derived graphs/surfaces. Shared simulation, traffic, police, lighting, audio and mobile input run against the selected city.
 
 The top-level profile level/community stays Tbilisi for compatibility; `maps.kutaisi` contains its independent level/community. Shared balances, parts and paint remain top-level. Server tickets carry map/course and settlement updates the garage plus the new `city_rankings` table atomically. Level records are separated by course. `city-menu.js` saves and reloads between cities, avoiding a second retained scene. [Full contract and rebuild instructions](KUTAISI.md).
+
+### Version 2.0 integration
+
+Profile schema 5 adds Batumi progress, owned/queued city cars and banked creator-box milestones without removing earlier fields. `syncMilestones` is shared by migration and run settlement; `claim-car-box` and `open-creator-box` are server-validated actions. Grade 6+ requires the creator car. Derived performance has physical bounds even at maximum rarity/fusion.
+
+`reward-ui.js` renders mastery, coins, car eligibility and reveal dialogs. `driving-feel.js` stores bounded local control preferences. `vehicle-ground.js` uses indexed tire contact samples and a per-car WeakMap cache to align wheel presentation with asphalt and kerbs. `background-music.js` owns one native media element and uses the existing activity lifecycle rather than an extra render loop.
+
+`server/result-image.mjs` and `server/share-glyphs.mjs` generate public PNG cards using the Worker's native CompressionStream API. `/result/:id/image.png` shares the same listed-record permission check as its HTML page. The client loads the image only in result sharing; no continuous PNG rendering occurs during play.

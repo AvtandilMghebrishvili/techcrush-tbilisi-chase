@@ -6,20 +6,7 @@ export function levelHash(value) {
   x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
   return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
 }
-export function levelCondition(level = 1) {
-  level = Math.max(1, Math.floor(level));
-  const bag = ["dawn", "night", "day"];
-  const block = Math.floor((level - 1) / 3);
-  if (block) {
-    for (let i = 2; i > 0; i--) {
-      const j = Math.floor(levelHash(block * 13 + i) * (i + 1));
-      [bag[i], bag[j]] = [bag[j], bag[i]];
-    }
-  }
-  const mode = bag[(level - 1) % 3];
-  return {
-    mode,
-    label: mode.toUpperCase(),
-    offset: { dawn: 0, night: 175, day: 45 }[mode],
-  };
+// Every new run starts at night; Auto completes the same full 180-second cycle.
+export function levelCondition() {
+  return { mode: "night", label: "NIGHT", offset: 0 };
 }

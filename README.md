@@ -1,30 +1,16 @@
-# TECHCRUSH — Tbilisi Chase
+# TECHCRUSH — Georgian City Chase
 
 ## [▶ PLAY ONLINE — open to everyone](https://nightshift-chase-september.avtandilmghebrishvili.chatgpt.site/)
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
-**New: clearer city selection** — the start menu shows Kutaisi's **0/3 → 3/3 unlock progress**, the remaining requirement, a green unlocked state, and each city's current level. Choose city and car side by side on wide screens; on phones, Start stays visible and **Change** jumps to your selected car. [Menu guide](docs/INTERFACE.md#city-selection-and-unlock-progress-118).
+**Version 2.0 — three cities, one garage.** Tbilisi, Kutaisi and Batumi are all available from the start. Batumi adds the Black Sea waterfront, palms, Alphabet Tower, Ali & Nino, a Ferris wheel, landmark hotels and a distant airport. Streets follow adapted OpenStreetMap geometry; the environment is an original game interpretation, not a Google Maps scan. [Batumi and version 2.0 guide](docs/BATUMI.md).
 
-**New: Bonus feedback & cornering** — animated notices beside the score show patrol takedown, near-pass, drift, jump and checkpoint rewards. Real close passes earn bonuses; following or colliding does not. Fast, sharp turns scrub a little speed and run wider until you ease off or brake. Keyboard/mobile drift and nitro stay available. [Scoring and driving guide](docs/SCORE_FEEDBACK.md).
+**Earn four new cars.** Clear level 5 in each city to earn its mystery car: Falcon RS (Tbilisi), Rioni GT (Kutaisi) and Coast X (Batumi). The first 10 banked patrol takedowns unlock the TECHCRUSH YouTuber Car. Every 10 takedowns across cities award a three-part creator box. Platinum, Emerald, Ruby and TECHCRUSH are the four grades above Diamond; Emerald and above fit the signature car. The original four cars remain available. [Reward rules](docs/BATUMI.md#cars-and-rewards).
 
-**New: Drift & Fusion update** — reliable handbrake turns on both maps (including after clicking the camera), stronger player-matched police, a **four-minute Auto day/night cycle**, and **MAP + SIDE QUESTS** with rooftop/river route selection. Level-clear boxes now reveal immediately: equip stronger drops, sell spares or keep duplicates for **five fusion stars**. Existing saves are preserved. [Fusion rules and update guide](docs/FUSION.md).
+**Classic handling returns.** Steering and drift sensitivity are adjustable in Setup; wheel presentation follows asphalt and kerb height. Auto lighting starts at night and completes a smooth **180-second** cycle. Original background music is enabled by default after the first user gesture, with mute, volume and reset controls. Menus and hidden tabs stop continuous game rendering; hidden/paused gameplay stops music and engine processing.
 
-**New: Kutaisi is playable** — clear **Tbilisi level 3**, then select **02 / KUTAISI** above the car selector. Explore the Rioni, White/Red/Rustaveli/Chain bridges, Colchis Fountain, Bagrati Cathedral, the royal quarter and more. Two stunt challenges award secret **Platinum boxes**, each containing three parts. Cities have separate endless levels and leaderboards; your cars, paint, upgrades, inventory and credits are shared. [Kutaisi map, unlock and challenge guide](docs/KUTAISI.md).
-
-**New: community statistics** — see all-time unique player profiles, drivers in your selected ranking, and your position out of that total. Guests count after starting a chase; returning with the same saved garage counts once. [Counting and ranking rules](docs/COMMUNITY.md#player-statistics).
-
-**New: clear results & sharing** — a large finish clock, automatic overall/time ranks, Garage / Next Level choices and a Facebook result link. Checkpoints have a musical cue. Levels use varied fair routes and shuffled dawn/night/day starts; occasional brief showers stay lightweight. Roadside props now clear the rendered street outlines. [Results, conditions and sharing](docs/RESULTS.md).
-
-**New: shared level times** — compare successful clears by level, car and stock equipment. Rewind cannot reduce the timer. A prominent gold Leaderboard button opens the rankings. Bridge edges, bank support and building contacts are refined. [Timing rules and fair comparison](docs/LEVEL_TIMES.md).
-
-**New: Tbilisi expeditions** — expanded streets, a rooftop reward crate, a river jump, varied late-level police and coming-soon city/car slots. Your existing garage stays intact. [Challenges, rewards and save compatibility](docs/EXPEDITIONS.md).
-
-**Community leaderboard** — furthest level, best chase and weekly points. Earn eight badges, a daily getaway bonus and a three-win streak box. [Community guide and scoring rules](docs/COMMUNITY.md).
-
-A compact interface keeps the road visible, with quick garage navigation and grouped driver settings. [Interface guide](docs/INTERFACE.md).
-
-Menus, pause screens and finished chases now stop continuous rendering and audio processing. Garage previews update when you interact with them. [Performance improvements and measurements](docs/PERFORMANCE.md).
+**Race your community.** Separate city progress, score, weekly and level-time leaderboards share server-saved results between players. Public result links include a generated graphic card with the city, car, name, time and score. Existing cars, credits, fusion upgrades, profiles and archived times are preserved. [Interface](docs/INTERFACE.md) · [Rankings](docs/COMMUNITY.md) · [Save/deployment guide](docs/DEPLOYMENT.md).
 
 **[▶ WATCH / DOWNLOAD THE 46-SECOND GAMEPLAY TRAILER (1080p MP4)](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases/download/v1.6.0/TECHCRUSH-Nightshift-Action-46s-1080p.mp4)**
 
@@ -38,7 +24,7 @@ Actual game footage: city flyovers, police chases, jumps, crashes, car selection
 
 _Illustrated key art. The browser game uses the 3D environment shown during play._
 
-A single-player browser 3D chase through central Tbilisi. Clear six checkpoints, dodge mixed traffic, ram patrols and break contact for eight seconds. Complete levels to earn credits and three-part reward boxes, then build a faster car in your saved garage.
+A single-player browser 3D chase through Tbilisi, Kutaisi and Batumi. Clear six checkpoints, dodge mixed traffic, ram patrols and break contact for eight seconds. Complete levels to earn credits and three-part reward boxes, then build a faster car in your saved garage.
 
 ## Play and save
 
@@ -79,13 +65,13 @@ Portrait and landscape layouts include gas, brake/reverse, drift, turbo, rewind,
 
 ## City lighting
 
-The top **AUTO / NIGHT / DAY / DUSK** button cycles lighting modes. Auto completes morning, noon, dusk, night and dawn in **240 seconds of active simulation time**. Level 1 starts at dawn; later levels use deterministic shuffled dawn/night/day offsets. The moon, occupied windows, street lamps and stronger player headlights appear after dark. Pause freezes the automatic cycle and rewind rolls it back with the chase. Your lighting choice is a local display preference; it does not alter your garage or difficulty.
+The top **AUTO / NIGHT / DAY / DUSK** button cycles lighting modes. Auto starts at night, passes through dawn, daytime and dusk, and returns to night in **180 seconds of active simulation time**. Every level uses the same night start. The moon, occupied windows, street lamps and stronger player headlights appear after dark. Pause freezes the automatic cycle and rewind rolls it back with the chase. Your lighting choice is a local display preference; it does not alter your garage or difficulty.
 
 The racing loading gauge follows asset preparation and shader warm-up. It adds no artificial wait. Lighting reuses existing assets, caps real street lights at three without additional shadows, and uses two instanced batches for nearby lamp glow. Garage previews keep their own studio lighting in every mode.
 
 ## Driving audio
 
-Press **M** or the top-right **SOUND** button to enable sound. The four cars have separate V8, flat-six, V12 and W16-inspired engine profiles. Throttle changes the engine load; acceleration raises RPM, automatic shifts drop it, and boost adds intake air and a release sound. These are game-designed hybrid voices, not recordings of the named production cars.
+Sound and original loop music default on after the first click, touch or key press. Press **M** or the top-right **SOUND** button to mute/unmute; Setup adjusts or resets music. All eight cars have distinct engine tuning, including V8, flat-six, V12 and W16-inspired profiles. Throttle changes the engine load; acceleration raises RPM, automatic shifts drop it, and boost adds intake air and a release sound. These are game-designed hybrid voices, not recordings of the named production cars.
 
 Nearby traffic and patrols make a stereo pass-by whoosh based on relative speed and which side they pass. Wood cracks, metal impacts, stone debris, glass, heavy crashes and explosions follow actual contacts. Tires, drifting, wind, nearby sirens and the helicopter complete the mix; cockpit view softens exterior sound. Pause, rewind and mute silence the mix without replaying old collision sounds afterward.
 

@@ -15,6 +15,19 @@ export function actionLabel(button, label) {
   if (node && node.textContent !== label) node.textContent = label;
 }
 export function setupInterface() {
+  for (const [id, path] of [
+    ["start", "M8 4l12 8-12 8z"],
+    ["workshop-open", "M3 20V9l9-6 9 6v11M6 20v-9h12v9M8 14h8M8 17h8"],
+    ["leaderboard-menu", null],
+  ]) {
+    const b = document.getElementById(id);
+    if (!b) continue;
+    b.insertAdjacentHTML(
+      "afterbegin",
+      `<svg viewBox="0 0 24 24" aria-hidden="true">${path ? `<path d="${path}"/>` : icons.trophy}</svg>`,
+    );
+  }
+
   for (const [id, icon, label, key] of [
     ["leaderboard-open", "trophy", "LEADERBOARD", ""],
     ["control-settings", "settings", "SETUP", ""],

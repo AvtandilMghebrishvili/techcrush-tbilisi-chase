@@ -1,5 +1,5 @@
 import { roadClear } from "./road-clearance.js";
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 import { inRiver } from "./water.js";
 import { reservedExpansion } from "./world-sites.js";
 import { ROADS, BUILDINGS, nearestRoad, containsPoint } from "./city-map.js";
@@ -7,12 +7,12 @@ import { LANDMARKS, riverDistance } from "./district-data.js";
 // Shared physical stems and renderer locations. A tree never exists only in the picture.
 export const TREES = [];
 for (const r of ROADS) {
-  if (IS_KUTAISI && r.length < 48) continue;
+  if ((IS_KUTAISI || IS_BATUMI) && r.length < 48) continue;
   const fx = Math.sin(r.angle),
     fz = Math.cos(r.angle),
     rx = fz,
     rz = -fx;
-  for (let t = 18; t < r.length - 9; t += IS_KUTAISI ? 70 : 38)
+  for (let t = 18; t < r.length - 9; t += IS_KUTAISI || IS_BATUMI ? 70 : 38)
     for (const side of [-1, 1]) {
       const lx = r.start.x + fx * t + rx * (r.width / 2 + 2.4) * side,
         lz = r.start.z + fz * t + rz * (r.width / 2 + 2.4) * side;
@@ -21,13 +21,16 @@ for (const r of ROADS) {
         z = lz + fz * 12,
         road = nearestRoad({ x, z });
       if (
-        (IS_KUTAISI && inRiver({ x, z })) ||
+        ((IS_KUTAISI || IS_BATUMI) && inRiver({ x, z })) ||
         !roadClear({ x, z }, 1.2) ||
         reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||
         riverDistance({ x, z }) < 47 ||
         road.distance <= road.road.width / 2 + 1.4 ||
         BUILDINGS.some((b) => containsPoint(b, x, z, 0.6)) ||
-        TREES.some((b) => Math.hypot(b.x - x, b.z - z) < (IS_KUTAISI ? 20 : 4))
+        TREES.some(
+          (b) =>
+            Math.hypot(b.x - x, b.z - z) < (IS_KUTAISI || IS_BATUMI ? 20 : 4),
+        )
       )
         continue;
       TREES.push({
@@ -40,7 +43,7 @@ for (const r of ROADS) {
     }
 }
 // A planted park: varied height, offset rows and open paths around the landmarks.
-for (const [p, rx, rz, count] of IS_KUTAISI
+for (const [p, rx, rz, count] of IS_KUTAISI || IS_BATUMI
   ? [
       [LANDMARKS.rike, 96, 145, 100],
       [LANDMARKS.boulevard, 60, 65, 42],
@@ -55,7 +58,7 @@ for (const [p, rx, rz, count] of IS_KUTAISI
     const road = nearestRoad({ x, z });
     if (
       !roadClear({ x, z }, 1.2) ||
-      (IS_KUTAISI &&
+      ((IS_KUTAISI || IS_BATUMI) &&
         (inRiver({ x, z }) ||
           BUILDINGS.some((b) => containsPoint(b, x, z, 1)))) ||
       reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||

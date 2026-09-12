@@ -28,6 +28,32 @@ export const CABIN_STYLES = {
     trim: "#233d51",
   },
 };
+Object.assign(CABIN_STYLES, {
+  falcon: {
+    accent: "#ff873f",
+    name: "FALCON / RALLY RS",
+    analog: true,
+    trim: "#3e302b",
+  },
+  rioni: {
+    accent: "#63e4b3",
+    name: "RIONI / GRAND TOUR",
+    analog: true,
+    trim: "#23463f",
+  },
+  coast: {
+    accent: "#55b5ff",
+    name: "COAST / TRACK X",
+    analog: false,
+    trim: "#172f48",
+  },
+  creator: {
+    accent: "#ff3158",
+    name: "TECHCRUSH / CREATOR",
+    analog: false,
+    trim: "#321e2b",
+  },
+});
 export function addCabinDetails(car, id) {
   const style = CABIN_STYLES[id] || CABIN_STYLES.gt,
     root = new THREE.Group();

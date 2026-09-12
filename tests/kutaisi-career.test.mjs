@@ -52,18 +52,18 @@ const settle = (p, quests = []) =>
     { now: 100000 },
   );
 
-test("Kutaisi unlocks only after clearing Tbilisi 3, with server course and city validation", () => {
+test("all cities start open, with server course and city validation", () => {
   const p = newProfile();
   for (const level of [1, 2, 3]) {
     p.level = level;
-    assert(!mapUnlocked(p, "kutaisi"));
-    assert.throws(() => begin(p), /level 3/);
+    assert(mapUnlocked(p, "kutaisi"));
+    assert.equal(begin(p).activeRun.map, "kutaisi");
   }
   const unlocked = settle(begin(p, "tbilisi"));
   assert.equal(unlocked.level, 4);
   assert(mapUnlocked(unlocked, "kutaisi"));
   assert.equal(begin(unlocked).activeRun.level, 1);
-  assert.throws(() => begin(unlocked, "batumi"));
+  assert.equal(begin(unlocked, "batumi").activeRun.map, "batumi");
   assert.throws(
     () =>
       applyProgressAction(

@@ -41,10 +41,16 @@
     <link rel="stylesheet" href="./expedition.css" />
     <link rel="stylesheet" href="./results.css" />
     <link rel="stylesheet" href="./menu.css" />
+    <link rel="stylesheet" href="./coastal-update.css" />
   </head>
   <body>
     <main id="game">
       <canvas id="world" aria-label="3D car chase city"></canvas>
+      <div
+        class="wallet hud-wallet"
+        data-wallet
+        aria-label="Saved coin balance"
+      ></div>
       <svg
         class="speed-streaks"
         viewBox="0 0 100 100"
@@ -142,7 +148,7 @@
             <section class="menu-city-choice" aria-label="City selection">
               <div class="menu-section-heading">
                 <h2><span>01</span> CHOOSE YOUR CITY</h2>
-                <span id="menu-city-count">1 / 2 AVAILABLE</span>
+                <span id="menu-city-count">3 / 3 OPEN</span>
               </div>
               <div class="map-slots" role="group" aria-label="Choose your city">
                 <button type="button" data-map="tbilisi" class="active-map">
@@ -162,13 +168,24 @@
                   disabled
                   aria-describedby="map-access-note"
                 >
-                  <span class="city-state">LOCKED</span><b>KUTAISI</b>
+                  <span class="city-state">PLAY NOW</span><b>KUTAISI</b>
                   <span class="city-caption"
                     >Rioni bridges · Platinum secrets</span
-                  ><small>CLEAR TBILISI LEVEL 3</small>
+                  ><small>LEVEL 1 · ENDLESS</small>
                   <svg viewBox="0 0 140 60" aria-hidden="true">
                     <path
                       d="M4 36h132M8 53q22-40 44 0m2 0q20-40 40 0m2 0q20-40 40 0M10 58q13-6 26 0t26 0t26 0t26 0t26 0M60 30V17l10-8 10 8v13M70 9V2"
+                    />
+                  </svg>
+                </button>
+                <button type="button" data-map="batumi">
+                  <span class="city-state">PLAY NOW</span><b>BATUMI</b
+                  ><span class="city-caption"
+                    >Black Sea · boulevard · skyline</span
+                  ><small>LEVEL 1 · ENDLESS</small
+                  ><svg viewBox="0 0 140 60" aria-hidden="true">
+                    <path
+                      d="M4 55q12-6 24 0t24 0t24 0t24 0t24 0M24 48V20m-8 10 8-10 8 10M64 48V18m-6 30 6-30 6 30M60 12a4 4 0 1 0 8 0 4 4 0 1 0-8 0M95 48V12h13v36m8 0V8h13v40"
                     />
                   </svg>
                 </button>
@@ -180,23 +197,13 @@
                     Complete three Tbilisi levels to unlock Kutaisi.
                   </p>
                 </div>
-                <div
-                  id="unlock-progress"
-                  role="progressbar"
-                  aria-label="Tbilisi levels completed to unlock Kutaisi"
-                  aria-valuemin="0"
-                  aria-valuemax="3"
-                  aria-valuenow="0"
-                >
-                  <span data-unlock-step="1">1</span
-                  ><span data-unlock-step="2">2</span
-                  ><span data-unlock-step="3">3</span>
-                </div>
               </div>
-              <div class="upcoming-city">
-                <span>03 / BATUMI</span><small>COMING SOON · მალე</small
-                ><span aria-hidden="true">↗</span>
-              </div>
+              <details class="milestone-details">
+                <summary>
+                  YOUR MYSTERY CARS &amp; REWARDS <span>↗</span>
+                </summary>
+                <div id="milestone-rewards"></div>
+              </details>
             </section>
             <section class="menu-car-choice" aria-label="Car selection">
               <div class="menu-section-heading car-section-heading">
@@ -223,6 +230,11 @@
         </div>
         <div class="menu-launch">
           <div class="launch-summary">
+            <div
+              class="wallet"
+              data-wallet
+              aria-label="Saved coin balance"
+            ></div>
             <span id="menu-race-label">TBILISI · LEVEL 1</span
             ><button id="menu-car-jump" type="button" title="Change your car">
               CHOOSE YOUR CAR ↗
@@ -317,6 +329,11 @@
             <span>CHECKPOINTS</span><b id="progress">0 / 6</b>
           </div>
           <div class="checkpoint-dots" id="dots"></div>
+          <div
+            class="wallet mobile-wallet"
+            data-wallet
+            aria-label="Saved coin balance"
+          ></div>
           <p id="objective">Reach Rustaveli Avenue</p>
           <div class="takedown-count">
             PATROLS TAKEN DOWN <b id="takedowns">0</b>
@@ -427,7 +444,7 @@
             <button id="garage-back" class="secondary">CHANGE CAR</button>
             <button id="result-community" class="secondary">LEADERBOARD</button>
             <button id="result-kutaisi" class="secondary" hidden>
-              KUTAISI UNLOCKED · TRAVEL ↗
+              CHOOSE CITY · 3 MAPS ↗
             </button>
           </div>
           <div id="result-sharing" hidden>
@@ -507,6 +524,7 @@
             <select id="board-map">
               <option value="tbilisi">TBILISI</option>
               <option value="kutaisi">KUTAISI</option>
+              <option value="batumi">BATUMI</option>
             </select></label
           >
           <div class="board-heading">
@@ -1062,5 +1080,11 @@
       </div>
     </main>
     <script type="module" src="./main.js"></script>
+    <dialog id="car-reveal">
+      <div class="car-reveal-body"></div>
+      <form method="dialog">
+        <button class="primary">NICE! VIEW IN GARAGE ↗</button>
+      </form>
+    </dialog>
   </body>
 </html>

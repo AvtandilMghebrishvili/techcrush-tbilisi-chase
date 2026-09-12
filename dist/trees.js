@@ -1,12 +1,15 @@
+import { IS_BATUMI } from "./map-selection.js";
 import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 export async function loadTrees(v) {
   const loader = new GLTFLoader();
-  const models = await Promise.all(
-    (v.mobile ? ["tree-far.glb"] : ["tree-near.glb", "tree-far.glb"]).map((n) =>
-      loader.loadAsync("./assets/" + n),
-    ),
-  );
+  const models = IS_BATUMI
+    ? [(await import("./palm-model.js")).palmModel()]
+    : await Promise.all(
+        (v.mobile ? ["tree-far.glb"] : ["tree-near.glb", "tree-far.glb"]).map(
+          (n) => loader.loadAsync("./assets/" + n),
+        ),
+      );
   const near = models[0],
     far = models[1] || models[0];
   const bounds = new THREE.Box3().setFromObject(near.scene),

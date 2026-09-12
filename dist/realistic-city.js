@@ -1,5 +1,6 @@
 import { facadeMaterial, batchStatic } from "./expansion-visuals.js";
-import { IS_KUTAISI, CITY_NAME } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI, CITY_NAME } from "./map-selection.js";
+const batumi = IS_BATUMI ? await import("./batumi-city.js") : null;
 const kutaisi = IS_KUTAISI ? await import("./kutaisi-city.js") : null;
 import { reservedExpansion } from "./world-sites.js";
 import { buildGrass } from "./grass.js";
@@ -51,7 +52,7 @@ function mountains(v) {
   const terrain = new THREE.Mesh(geometry, v.terrainMaterial);
   terrain.receiveShadow = true;
   v.decor.add(terrain);
-  if (IS_KUTAISI) return;
+  if (IS_KUTAISI || IS_BATUMI) return;
   const statue = makeKartlisDeda();
   const sx = LANDMARKS.mother.x,
     sz = LANDMARKS.mother.z;
@@ -160,14 +161,16 @@ export function buildRealisticCity(v) {
   v.roadMaterial = road;
   v.buildingMaterials = [];
   v.oldTownMaterials = [];
-  const facades = IS_KUTAISI
-    ? kutaisi.kutaisiFacades()
-    : ["#f4ecda", "#d8cfbb", "#dad3c6", "#bfc5bf", "#d1bca5"].map((c) => {
-        const m = mat(c);
-        v.buildingMaterials.push(m);
-        return m;
-      });
-  if (IS_KUTAISI) v.buildingMaterials.push(...facades);
+  const facades = IS_BATUMI
+    ? batumi.batumiFacades()
+    : IS_KUTAISI
+      ? kutaisi.kutaisiFacades()
+      : ["#f4ecda", "#d8cfbb", "#dad3c6", "#bfc5bf", "#d1bca5"].map((c) => {
+          const m = mat(c);
+          v.buildingMaterials.push(m);
+          return m;
+        });
+  if (IS_KUTAISI || IS_BATUMI) v.buildingMaterials.push(...facades);
   const newFacades = [0, 1, 2, 3].map(facadeMaterial);
   v.buildingMaterials.push(...newFacades);
   v.expansionFacades = newFacades;
@@ -284,10 +287,11 @@ export function buildRealisticCity(v) {
   }
   batchStatic(staticCity);
   streetDetails(v, line);
-  if (!IS_KUTAISI) clockBuilding(v, facades[1]);
+  if (!IS_KUTAISI && !IS_BATUMI) clockBuilding(v, facades[1]);
   mountains(v);
   buildTechcrushGarage(v);
-  if (IS_KUTAISI) kutaisi.buildKutaisiCity(v);
+  if (IS_BATUMI) batumi.buildBatumiCity(v);
+  else if (IS_KUTAISI) kutaisi.buildKutaisiCity(v);
   else buildTbilisiDistricts(v);
   buildGrass(v);
   for (const i of [15, 48, 93, 134, 177]) {
@@ -303,12 +307,16 @@ function streetDetails(v, line) {
   v.streetLampMaterials = [lamp];
   const trees = [];
   for (const r of ROADS) {
-    if (IS_KUTAISI && r.length < 48) continue;
+    if ((IS_KUTAISI || IS_BATUMI) && r.length < 48) continue;
     const fx = Math.sin(r.angle),
       fz = Math.cos(r.angle),
       rx = fz,
       rz = -fx;
-    for (let t = 18; t < r.length - 9; t += IS_KUTAISI ? 74 : 38) {
+    for (
+      let t = 18;
+      t < r.length - 9;
+      t += IS_BATUMI ? 95 : IS_KUTAISI ? 74 : 38
+    ) {
       for (const side of [-1, 1]) {
         const x = r.start.x + fx * t + rx * (r.width / 2 + 2.4) * side,
           z = r.start.z + fz * t + rz * (r.width / 2 + 2.4) * side;
@@ -368,13 +376,21 @@ function streetDetails(v, line) {
   c.font = "bold 58px Arial";
   c.textAlign = "center";
   c.fillText(
-    IS_KUTAISI ? "ქუთაისი · რიონის სანაპირო" : "ბარათაშვილის გამზირი",
+    IS_BATUMI
+      ? "ბათუმი · შავი ზღვა"
+      : IS_KUTAISI
+        ? "ქუთაისი · რიონის სანაპირო"
+        : "ბარათაშვილის გამზირი",
     512,
     102,
   );
   c.font = "44px Arial";
   c.fillText(
-    IS_KUTAISI ? "KUTAISI / RIONI RIVERSIDE" : "BARATASHVILI AVENUE",
+    IS_BATUMI
+      ? "BATUMI / BLACK SEA"
+      : IS_KUTAISI
+        ? "KUTAISI / RIONI RIVERSIDE"
+        : "BARATASHVILI AVENUE",
     512,
     184,
   );
