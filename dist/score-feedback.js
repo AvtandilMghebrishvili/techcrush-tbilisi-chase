@@ -1,6 +1,8 @@
 export const BONUS_LIMIT = 3;
 export const BONUS_LIFETIME = 2.6;
 const labels = {
+  banner: ["TECHCRUSH CASH BANNER", "#ffd46e"],
+  decor: ["STREET SMASH", "#eadbb4"],
   patrol: ["PATROL TAKEDOWN", "#ff91a7"],
   near: ["NEAR MISS", "#8df0eb"],
   drift: ["DRIFT", "#d4b2ff"],

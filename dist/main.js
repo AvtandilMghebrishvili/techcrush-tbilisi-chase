@@ -244,6 +244,7 @@ function chooseCar(id) {
   wake();
 }
 function setupGarage() {
+  document.querySelector(".launch-summary").append($("driver-open"));
   const garage = $("garage");
   garage.innerHTML = CARS.map(
     (c) =>
@@ -256,6 +257,17 @@ function setupGarage() {
   };
   for (const button of garage.querySelectorAll("button[data-car]"))
     button.onclick = () => chooseCar(button.dataset.car);
+  for (const [id, direction] of [
+    ["car-prev", -1],
+    ["car-next", 1],
+  ])
+    $(id).onclick = () =>
+      garage.scrollBy({
+        left: direction * (garage.clientWidth * 0.82),
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth",
+      });
   chooseCar(selectedCar);
   if (career) refreshRewards(career);
   $("menu-car-jump").onclick = () => {
@@ -321,6 +333,8 @@ async function bankRun() {
           checkpoints: sim.checkpoint,
           takedowns: sim.takedowns,
           trafficWrecks: sim.trafficWrecks,
+          decorWrecks: sim.decorWrecks,
+          cashBanners: sim.cashBanners,
           distance: sim.runDistance,
           driftSeconds: sim.runDriftSeconds,
           jumps: sim.runJumps,
@@ -443,6 +457,7 @@ async function start() {
       equipment: career.profile.cars[selectedCar],
       completedQuests: career.profile.quests?.completed || [],
       bankedTakedowns: totalTakedowns(career.profile),
+      runId: career.profile.activeRun.id,
     });
     sim.navQuest = $("route-selector").value || null;
     runId = career.profile.activeRun.id;
@@ -742,6 +757,14 @@ function drawMap() {
     MAP_EXTENT * 2 * s,
     MAP_EXTENT * 2 * s,
   );
+  for (const target of sim.cashBannerTargets || [])
+    if (!target.broken) {
+      const marker = radarPoint(ox - target.x * s, oz - target.z * s);
+      c.fillStyle = "#ffd166";
+      c.beginPath();
+      c.arc(marker.x, marker.y, 3.4, 0, Math.PI * 2);
+      c.fill();
+    }
   const cp = navigationTarget(sim);
   if (cp) {
     c.strokeStyle = "#73e6ed";

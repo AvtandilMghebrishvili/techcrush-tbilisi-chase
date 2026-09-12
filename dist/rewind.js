@@ -15,6 +15,7 @@ const scalars = [
   "roadblockAhead",
   "stuntScore",
   "runCash",
+  "decorWrecks",
   "runDistance",
   "runDriftSeconds",
   "runJumps",
@@ -46,8 +47,10 @@ export class RewindTimeline {
           broken: !!b.broken,
           fallenAt: b.fallenAt || 0,
           announced: !!b.announced,
+          brokenByPlayer: !!b.brokenByPlayer,
         })),
       runQuests: clone(sim.runQuests),
+      cashBanners: clone(sim.cashBanners),
       player: clone(sim.player),
       police: clone(sim.police),
       traffic: clone(sim.traffic),
@@ -75,6 +78,7 @@ export class RewindTimeline {
     for (const k of scalars) sim[k] = f[k];
     for (const k of [
       "runQuests",
+      "cashBanners",
       "player",
       "police",
       "traffic",
@@ -106,6 +110,7 @@ export class RewindTimeline {
             broken: false,
             fallenAt: 0,
             announced: false,
+            brokenByPlayer: false,
           },
         );
     sim.events.length = 0;

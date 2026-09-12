@@ -1,3 +1,9 @@
+import {
+  cashBannerIds,
+  CASH_BANNER_REWARD,
+  DECOR_REWARD,
+  DECOR_REWARD_LIMIT,
+} from "./banner-rules.js";
 import { TIME_COURSES } from "./race-timing.js";
 export const STUNT_REWARDS = {
   "batumi-skybox-v1": {
@@ -188,6 +194,22 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
   ])
     if (!Number.isInteger(m[key]))
       throw Error("This run contains invalid counters.");
+  const banners = metrics.cashBanners ?? [],
+    decor = metrics.decorWrecks ?? 0;
+  const allowed = cashBannerIds(ticket.id);
+  if (
+    !Array.isArray(banners) ||
+    banners.length > 3 ||
+    new Set(banners).size !== banners.length ||
+    banners.some((id) => !allowed.includes(id)) ||
+    !Number.isInteger(decor) ||
+    decor < 0 ||
+    decor > DECOR_REWARD_LIMIT ||
+    decor > m.time * 12 + 5
+  )
+    throw Error("Invalid roadside rewards.");
+  m.cashBanners = banners;
+  m.decorWrecks = decor;
   const elapsed = Math.max(0, (now - ticket.startedAt) / 1000);
   if (
     m.time > elapsed + 2 ||
@@ -251,6 +273,8 @@ export function settleCommunity(p, m, result, level, now = Date.now()) {
     day = new Date(now).toISOString().slice(0, 10),
     week = weekKey(now);
   const cash =
+    (m.cashBanners?.length || 0) * CASH_BANNER_REWARD +
+    (m.decorWrecks || 0) * DECOR_REWARD +
     creditAward(150, level) * m.checkpoints +
     creditAward(350, level) * m.takedowns +
     creditAward(120, level) * m.trafficWrecks +

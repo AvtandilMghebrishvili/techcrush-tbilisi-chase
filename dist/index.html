@@ -42,6 +42,7 @@
     <link rel="stylesheet" href="./results.css" />
     <link rel="stylesheet" href="./menu.css" />
     <link rel="stylesheet" href="./coastal-update.css" />
+    <link rel="stylesheet" href="./menu-polish.css" />
   </head>
   <body>
     <main id="game">
@@ -192,23 +193,31 @@
               </div>
               <div id="city-unlock" class="city-unlock">
                 <div class="unlock-copy">
-                  <strong id="unlock-title">NEXT DESTINATION · KUTAISI</strong>
+                  <strong id="unlock-title">3 CITIES · 3 MYSTERY CARS</strong>
                   <p id="map-access-note">
-                    Complete three Tbilisi levels to unlock Kutaisi.
+                    Clear level 5 in each city to earn its exclusive car.
                   </p>
                 </div>
               </div>
               <details class="milestone-details">
-                <summary>
-                  YOUR MYSTERY CARS &amp; REWARDS <span>↗</span>
-                </summary>
+                <summary>MYSTERY CARS &amp; REWARDS <span>↗</span></summary>
                 <div id="milestone-rewards"></div>
               </details>
             </section>
             <section class="menu-car-choice" aria-label="Car selection">
               <div class="menu-section-heading car-section-heading">
-                <h2><span>02</span> CHOOSE YOUR CAR</h2>
-                <span>UPGRADE IN GARAGE</span>
+                <h2><span>02</span> YOUR RIDE</h2>
+                <div class="car-scroll-controls">
+                  <button
+                    type="button"
+                    id="car-prev"
+                    aria-label="Previous cars"
+                  >
+                    ←</button
+                  ><button type="button" id="car-next" aria-label="More cars">
+                    →
+                  </button>
+                </div>
               </div>
               <div
                 id="garage"
@@ -241,11 +250,9 @@
             </button>
           </div>
           <div class="intro-actions">
-            <button id="start" class="primary">
-              START CHASE <span>↗</span>
-            </button>
+            <button id="start" class="primary">START CHASE</button>
             <button id="workshop-open" class="secondary workshop-link" disabled>
-              YOUR GARAGE
+              GARAGE
             </button>
             <button
               id="leaderboard-menu"

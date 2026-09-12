@@ -4,15 +4,12 @@ import { carSpec } from "./config.js";
 export const coinIcon =
   '<svg class="coin-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="7"/><path d="M15 8h-5v8h5M8 11h6M8 14h6"/></svg>';
 export function carSilhouette(id) {
-  const c = carSpec(id),
-    long = id === "rioni",
-    low = ["coast", "rally"].includes(id);
-  return `<svg class="car-silhouette" viewBox="0 0 160 64" aria-hidden="true" style="color:${c.color}"><path d="M9 43l8-12 25-4 ${long ? "13-12 36 1 21 14" : "14-" + (low ? 9 : 16) + " 35 0 22 " + (low ? 9 : 16)} 25 7 6 13H9z" fill="currentColor"/><path d="M50 28l12-${low ? 6 : 12}h25l15 ${low ? 6 : 12}z" fill="#142132"/><circle cx="39" cy="46" r="11"/><circle cx="124" cy="46" r="11"/><circle cx="39" cy="46" r="5" fill="#c9d6df"/><circle cx="124" cy="46" r="5" fill="#c9d6df"/></svg>`;
+  return `<img class="car-photo" src="./assets/car-previews/${id}.webp" alt="" width="512" height="288" decoding="async">`;
 }
 export function carRequirement(id) {
   const map = CITY_IDS.find((m) => CITY_CARS[m] === id);
   return map
-    ? `${map.toUpperCase()} · CLEAR LEVEL 5`
+    ? `${map.toUpperCase()} · LVL 5`
     : id === "creator"
       ? "10 PATROL TAKEDOWNS"
       : "READY TO DRIVE";

@@ -84,6 +84,18 @@ export class QuestMap {
       const p = mapPoint(q, 100);
       return `<button data-quest-route="${q.route}" class="quest-pin" style="left:${p.x}%;top:${p.y}%;--quest:${q.color}" aria-label="Route to ${q.title}">${q.symbol}${completed.has(q.quest) ? "✓" : ""}</button>`;
     }).join("");
+    const cash = (sim.cashBannerTargets || []).filter((p) => !p.broken);
+    for (const target of cash) {
+      const p = mapPoint(target, 100);
+      const pin = document.createElement("span");
+      pin.className = "quest-pin cash-pin";
+      pin.style.cssText = `left:${p.x}%;top:${p.y}%;--quest:#ffd166`;
+      pin.textContent = "₾";
+      pin.title = "TECHCRUSH banner · 4,000 coins";
+      pins.append(pin);
+    }
+    document.getElementById("quest-city").textContent +=
+      ` · ${cash.length}/3 CASH BANNERS`;
     for (const b of this.dialog.querySelectorAll("[data-quest-route]"))
       b.onclick = () => this.route(b.dataset.questRoute);
     const c = document.getElementById("quest-canvas").getContext("2d");

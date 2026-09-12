@@ -55,13 +55,13 @@ export function cityMenu(store, leave) {
         ? "✓ SELECTED"
         : "PLAY NOW ↗";
       b.querySelector("small").textContent =
-        `LEVEL ${cityLevel(p, map)} · ${Math.min(5, cityLevel(p, map) - 1)}/5 TO MYSTERY CAR`;
+        `LVL ${cityLevel(p, map)} · ${Math.min(5, cityLevel(p, map) - 1)}/5`;
     }
     $("menu-city-count").textContent = "3 / 3 OPEN";
     $("menu-race-label").textContent = `${CITY_NAME} · LEVEL ${cityLevel(p)}`;
-    $("unlock-title").textContent = "THREE CITIES. THREE MYSTERY CARS.";
+    $("unlock-title").textContent = "3 CITIES · 3 MYSTERY CARS";
     $("map-access-note").textContent =
-      "Every city is open. Clear level 5 in each to earn its exclusive car. Your garage travels with you.";
+      "Clear level 5 in each city to unlock its exclusive car.";
     refreshRewards(store);
     $("result-kutaisi").hidden = false;
     $("result-kutaisi").textContent = "CHOOSE CITY · 3 MAPS ↗";

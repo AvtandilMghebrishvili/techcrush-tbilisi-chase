@@ -1,3 +1,8 @@
+import {
+  cashBannerIds,
+  breakReward,
+  patrolCollisionDamage,
+} from "./banner-rules.js";
 import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
 import { IS_KUTAISI, IS_BATUMI, ACTIVE_MAP } from "./map-selection.js";
 import { buildingContact } from "./building-contact.js";
@@ -127,6 +132,7 @@ export function resolveCircleRect(car, r, rect) {
     if (hit) {
       if (rect.barrier && local.impact >= rect.breakSpeed) {
         rect.broken = true;
+        rect.brokenByPlayer = !!car.carId;
         car.vx *= 0.78;
         car.vz *= 0.78;
         car.impact = Math.max(car.impact || 0, local.impact * 0.65);
@@ -322,7 +328,12 @@ export class ChaseSimulation {
   reset() {
     for (const b of this.obstacles)
       if (b.barrier)
-        Object.assign(b, { broken: false, fallenAt: 0, announced: false });
+        Object.assign(b, {
+          broken: false,
+          fallenAt: 0,
+          announced: false,
+          brokenByPlayer: false,
+        });
     this.player = vehicle(START.x, START.z, START.angle);
     this.player.carId = this.selectedCar || "gt";
     this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
@@ -342,6 +353,9 @@ export class ChaseSimulation {
     this.player.width = this.player.performance.width;
     this.player.length = this.player.performance.length;
     this.runCash = 0;
+    this.decorWrecks = 0;
+    this.cashBanners = [];
+    this.cashBannerIds = cashBannerIds(this.runOptions?.runId || "preview");
     this.runDistance = 0;
     this.runDriftSeconds = 0;
     this.runJumps = 0;
@@ -380,6 +394,9 @@ export class ChaseSimulation {
       fallenAt: 0,
       fallAngle: 0,
     }));
+    this.cashBannerTargets = this.poles.filter(
+      (p) => p.bannerAnchor && this.cashBannerIds.includes(p.bannerId),
+    );
     this.nextCopId = 1;
     this.police = [];
     this.police = Array.from(
@@ -1248,7 +1265,7 @@ export class ChaseSimulation {
           if (playerHit && p.invulnerable <= 0) {
             const other = a === p ? b : a,
               damage = officers.has(other)
-                ? Math.min(8, impact * 0.35)
+                ? patrolCollisionDamage(impact, other.kind)
                 : impact * 0.55;
             p.health = Math.max(
               0,
@@ -1299,6 +1316,7 @@ export class ChaseSimulation {
             `prop:${tree.breakSpeed ? "p" : "t"}:${tree.linked?.[0] ?? tree.id}`,
             tree.broken,
           );
+        if (tree.broken && car === p) breakReward(this, tree);
         if (tree.broken && tree.linked)
           for (const id of tree.linked) {
             const sibling = this.poles[id];
@@ -1361,6 +1379,7 @@ export class ChaseSimulation {
     for (const rail of this.obstacles)
       if (rail.barrier && rail.broken && !rail.announced) {
         rail.announced = true;
+        if (rail.brokenByPlayer) breakReward(this, rail);
         rail.fallenAt = this.time;
         this.emitSound("metal", rail, 40, "barrier:" + rail.id, true);
       }

@@ -1,3 +1,4 @@
+import { updateSponsorBanners } from "./sponsor-banners.js";
 import { supportedVisualY } from "./vehicle-ground.js";
 import { updateExpansion } from "./expansion-visuals.js";
 import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
@@ -423,6 +424,7 @@ export class SceneView {
   }
   render(sim, dt, input) {
     updateBreakables(this, sim);
+    updateSponsorBanners(this, sim);
     const ready = sim.phase === "ready";
     if (!ready) {
       const p = sim.player;

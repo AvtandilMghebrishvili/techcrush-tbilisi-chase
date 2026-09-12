@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0 — 2026-09-13
+
+- Place 48 two-sided TECHCRUSH subscription banners in each city with large Georgian copy and a laughing emoji. Exactly three turn into 4,000-coin smash rewards per new run, selected from its server-issued identifier.
+- Award 25 coins per player-destroyed decoration, capped at 100 paid ordinary decorations per run. Linked supports count once; NPC destruction earns nothing. Rewind restores props and counters together. Server settlement derives the money from bounded, validated counters; old clients can omit the new fields.
+- Increase solid patrol impacts to a 10 HP cap and tank impacts to 15 HP before armor; grazing hits remain proportional and the existing contact cooldown remains.
+- Replace flat car icons with eight compact WebP studio captures of the actual models. Use a horizontal car picker, shorter labels and balanced launch actions on desktop, phone and landscape layouts.
+- Mark available cash banners in gold on the radar and full quest map. Reuse the existing collision grid, event feed, textures and idle lifecycle; no additional animation loop or renderer is added.
+
 ## 2.0.0 — 2026-09-13
 
 - Open every city immediately and add Batumi: connected real-street data, Black Sea, boulevard planting, original palm geometry, thirteen landmark interpretations and a distant airport. Share pursuit, traffic, checkpoints, rewind, weather and garage logic. Add a connected Platinum rooftop stunt.
