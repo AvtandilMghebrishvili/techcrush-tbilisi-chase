@@ -241,7 +241,12 @@ export class ChaseAudio {
       this.engineTone.source.setPeriodicWave(c.createPeriodicWave(real, imag));
       this.currentCar = a.car;
     }
-    this.set(this.engineTone.source.frequency, (a.rpm || 900) / 120, t, 0.025);
+    this.set(
+      this.engineTone.source.frequency,
+      voice.electric ? 200 + (a.rev || 0) * 1450 : (a.rpm || 900) / 120,
+      t,
+      0.025,
+    );
     this.set(
       this.engineSub.source.frequency,
       ((a.rpm || 900) / 120) * 2,
@@ -260,13 +265,19 @@ export class ChaseAudio {
     );
     this.set(
       this.engineTone.gain.gain,
-      (0.036 + 0.065 * load + rev * 0.016) * cut,
+      voice.electric
+        ? load * 0.01 + rev * 0.016
+        : (0.036 + 0.065 * load + rev * 0.016) * cut,
       t,
       0.03,
     );
     this.set(
       this.engineSub.gain.gain,
-      (0.035 + 0.025 * load) * (1 - rev * 0.35) * (a.car === "suv" ? 1.5 : 1),
+      voice.electric
+        ? 0
+        : (0.035 + 0.025 * load) *
+            (1 - rev * 0.35) *
+            (a.car === "suv" ? 1.5 : 1),
       t,
       0.04,
     );
@@ -283,9 +294,19 @@ export class ChaseAudio {
         t,
         0.04,
       );
-      this.set(this.recording.gain.gain, (0.08 + load * 0.12) * cut, t, 0.04);
+      this.set(
+        this.recording.gain.gain,
+        voice.electric ? 0 : (0.08 + load * 0.12) * cut,
+        t,
+        0.04,
+      );
     }
-    this.set(this.intake.gain.gain, load * (0.006 + rev * 0.013), t, 0.04);
+    this.set(
+      this.intake.gain.gain,
+      voice.electric ? 0 : load * (0.006 + rev * 0.013),
+      t,
+      0.04,
+    );
     this.set(this.intake.filter.frequency, voice.body + rev * 1300, t);
     this.set(
       this.wind.gain.gain,
@@ -318,7 +339,13 @@ export class ChaseAudio {
     this.set(this.turbo.gain.gain, boost * 0.045, t, 0.025);
     this.set(this.turboTone.source.frequency, 1700 + boost * 2100, t, 0.08);
     this.set(this.turboTone.gain.gain, boost * 0.003, t, 0.04);
-    if (active && this.lastBoost > 0.35 && !p.boosting && this.wasBoosting)
+    if (
+      active &&
+      !voice.electric &&
+      this.lastBoost > 0.35 &&
+      !p.boosting &&
+      this.wasBoosting
+    )
       this.effect({ kind: "release", impact: 20 }, p);
     if (active && a.shift > 0) this.effect({ kind: "shift", impact: 10 }, p);
     this.lastBoost = boost;

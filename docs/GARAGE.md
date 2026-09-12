@@ -23,7 +23,7 @@ Top speed is the simulation ceiling, not a guaranteed speed on every road. Accel
 - **Rims:** tier-specific five-, seven-, ten- and split-spoke designs, with Bronze, Silver, Gold or Diamond finishes.
 - **Tires:** wider tire sections, different tread density, semi-slicks and Diamond track slicks, plus sidewall quality bands. Rolling radius remains consistent.
 - **Brakes:** colored stationary calipers and increasingly drilled discs. Calipers steer with the hub but do not spin with the wheel.
-- **Spoiler:** body-mounted feet, progressively taller/wider wings, colored trailing edges/end plates, and a double-element Diamond wing. The Vector keeps its stock wing before upgrading.
+- **Spoiler:** one complete wing with body-mounted feet, tier-specific span/height and colored trailing edges/end plates. Factory aero is replaced by the installed grade, never stacked. Vector and Falcon keep their stock wings before upgrading. [Vehicle-specific fits and the Cyber EV bonus](FLEET.md).
 - **Paint:** eight free presets and a custom hex color. Paint is saved to the selected car on the server and appears on that car in the next chase. Paint does not change performance or cost credits.
 
 The original 458 keeps its original wheels while stock; fitting wheel, tire or brake upgrades replaces their visible assemblies at the actual source-model hubs. All cars retain their steering shaft, lamp and exhaust positions. Repair and rewind continue to restore damage independently of installed parts.

@@ -150,6 +150,14 @@ export class GaragePreview {
         ? sportsCar(this.source, color, false, id, equipment)
         : makeOriginalSportsCar(id, color, equipment);
     this.scene.add(this.car);
+    this.car.updateMatrixWorld(true);
+    const bounds = new THREE.Box3().setFromObject(this.car);
+    this.carCenter = bounds.getCenter(new THREE.Vector3());
+    this.fitCorners = [];
+    for (const x of [bounds.min.x, bounds.max.x])
+      for (const y of [bounds.min.y, bounds.max.y])
+        for (const z of [bounds.min.z, bounds.max.z])
+          this.fitCorners.push(new THREE.Vector3(x, y, z).sub(this.carCenter));
     this.carId = id;
     if (this.car.userData.glass) this.car.userData.glass.opacity = 0.55;
     for (const l of this.car.userData.headlights || []) l.intensity = 0;
@@ -207,15 +215,35 @@ export class GaragePreview {
         this.camera.fov = 76;
       } else {
         if (this.car.userData.glass) this.car.userData.glass.opacity = 0.55;
-        // Keep the complete body readable in the narrower compact studio.
-        const distance =
-          this.zoom * Math.max(1, 1 / Math.max(0.65, this.camera.aspect));
-        this.camera.position.set(
-          Math.sin(this.yaw) * distance,
-          1 + distance * this.pitch,
-          Math.cos(this.yaw) * distance,
-        );
-        this.camera.lookAt(0, 0.6, 0);
+        // Fit each model and its installed aero at the current angle/aspect.
+        // Eight cached corners also handle long pickups in narrow desktop panes.
+        const direction = new THREE.Vector3(
+          Math.sin(this.yaw),
+          this.pitch,
+          Math.cos(this.yaw),
+        ).normalize();
+        const right = new THREE.Vector3(
+          direction.z,
+          0,
+          -direction.x,
+        ).normalize();
+        const up = direction.clone().cross(right);
+        const tanV = Math.tan((19 * Math.PI) / 180),
+          tanH = tanV * this.camera.aspect;
+        let fit = 1;
+        for (const corner of this.fitCorners)
+          fit = Math.max(
+            fit,
+            corner.dot(direction) +
+              Math.max(
+                Math.abs(corner.dot(right)) / tanH,
+                Math.abs(corner.dot(up)) / tanV,
+              ),
+          );
+        this.camera.position
+          .copy(this.carCenter)
+          .addScaledVector(direction, (fit * 1.12 * this.zoom) / 6.7);
+        this.camera.lookAt(this.carCenter);
         this.camera.fov = 38;
       }
       this.camera.updateProjectionMatrix();

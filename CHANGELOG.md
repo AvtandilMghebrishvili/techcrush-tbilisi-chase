@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.5.0 — 2026-09-13
+
+- Give seven procedural vehicles distinct canopy, roof, lighting and body designs; preserve the licensed Original 458. Replace the signature YouTuber model with TECHCRUSH Cyber, a faceted electric pickup with a covered cargo bed, larger wheels and an EV cockpit/voice.
+- Replace complete aero and wheel assemblies when fitting upgrades. Remove stacked factory wings and upper duplicate blades, use body-specific mounts and dispose replaced kit resources. Cache eight model-bound corners for correctly framed garage views.
+- Balance Cyber at 84 m/s stock (+5% over Coast X), 38 m/s² acceleration and 1.08 handling; retain upgrade ceilings and other cars' existing driving stats.
+- Grant 2× driving points and credits for new Cyber runs, including run-earned finish/quest bonuses. Stamp reward rules on server tickets, preserve old ticket rates, validate the appropriate score ceiling and bank once. Boxes and item sale values do not multiply.
+- Regenerate real model thumbnails, show the EV reward benefit, adapt drivetrain labels, and retain all saved car IDs, installed parts, fusion, paint and unlocks.
+- Add fleet/kit, electric drivetrain and per-city reward regression checks. Validate all three cities and compact mobile garage behavior in local Chrome.
+
 ## 2.4.0 — 2026-09-13
 
 - Automatically unlock all ordinary reward cars at level 10 in any city and TECHCRUSH at level 15. Keep already owned and previously earned legacy cars.

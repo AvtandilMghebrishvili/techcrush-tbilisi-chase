@@ -3,7 +3,11 @@ import { carRequirement, refreshRewards, coinIcon } from "./reward-ui.js";
 import { ACTIVE_MAP, CITY_NAME, cityLevel } from "./map-selection.js";
 import { GaragePreview } from "./garage-preview.js";
 import { PAINTS, paintColor } from "./customization.js";
-import { PART_DETAILS, comparisonRows } from "./garage-presentation.js";
+import {
+  vehiclePartName,
+  vehiclePartDetails,
+  comparisonRows,
+} from "./garage-presentation.js";
 import {
   PARTS,
   TIERS,
@@ -223,7 +227,7 @@ export class GarageUI {
     const part = changed[0],
       tier = after[part.id];
     $("upgrade-feedback").textContent =
-      `${TIERS[tier].name}${"+".repeat(partStars(after, part.id))} ${part.name} fitted to ${carSpec(this.car).name}. ${upgradeBenefits(carSpec(this.car), before, part, tier, partStars(after, part.id)).join(" · ")}`;
+      `${TIERS[tier].name}${"+".repeat(partStars(after, part.id))} ${vehiclePartName(part, this.car)} fitted to ${carSpec(this.car).name}. ${upgradeBenefits(carSpec(this.car), before, part, tier, partStars(after, part.id)).join(" · ")}`;
     const rows = comparisonRows(
       carSpec(this.car),
       before,
@@ -303,13 +307,13 @@ export class GarageUI {
     const section = $("part-inspector");
     section.dataset.gradeCount = String(maxTier);
     section.style.setProperty("--tier", TIERS[tier].color);
-    section.innerHTML = `<div class="inspector-heading"><div class="inspector-art">${partArtwork(part, "", tier)}</div><div class="inspector-copy"><small>${installed ? "FITTED ✓" : "UPGRADE PREVIEW"}</small><h3>${part.name}</h3><span class="fitted-grade">Installed: ${TIERS[actual].name}${"+".repeat(actualStars)}</span><p>${part.effect}</p></div></div>
+    section.innerHTML = `<div class="inspector-heading"><div class="inspector-art">${partArtwork(part, "", tier)}</div><div class="inspector-copy"><small>${installed ? "FITTED ✓" : "UPGRADE PREVIEW"}</small><h3>${vehiclePartName(part, this.car)}</h3><span class="fitted-grade">Installed: ${TIERS[actual].name}${"+".repeat(actualStars)}</span><p>${part.effect}</p></div></div>
       <div class="quality-picker" role="group" aria-label="Preview quality and spare inventory">${grades}</div>
       <div class="comparison-meters">${rows.map((r) => `<div class="comparison-row"><span>${r.label} ${r.lower ? "↓" : "↑"}</span><div class="comparison-numbers"><b>${r.before.toFixed(r.unit === "s" ? 2 : 1)}</b><span>→</span><strong data-after="${r.key}">${r.after.toFixed(r.unit === "s" ? 2 : 1)}</strong><small>${r.unit}</small></div><div class="meter" style="--from:${Math.min(100, (r.before / r.max) * 100)}%;--to:${Math.min(100, (r.after / r.max) * 100)}%"><i></i><b></b></div></div>`).join("")}</div>
       <small class="preview-disclaimer">${installed ? "Installed and saved." : `Comparing ${TIERS[tier].name} · ${spare} spare${spare === 1 ? "" : "s"}. Preview changes are not installed.`}</small>
       <div class="inspector-actions">${buy}${install}${sell}</div>
       ${!buy && !install ? `<small class="grade-source">${actual >= maxTier ? "Top grade fitted. Collect duplicates to fuse." : this.car === "creator" ? "Higher grades drop from TECHCRUSH boxes." : "Find Platinum in city stunt boxes."}</small>` : ""}
-      ${fusion}<details class="part-explanation"><summary>WHAT CHANGES?</summary><p>${PART_DETAILS[part.id]}</p><p>Fusion bonuses belong to this car. Spare counts appear under each grade.</p></details>`;
+      ${fusion}<details class="part-explanation"><summary>WHAT CHANGES?</summary><p>${vehiclePartDetails(part, this.car)}</p><p>Fusion bonuses belong to this car. Spare counts appear under each grade.</p></details>`;
     const mutate = (type, extra = {}) =>
       void this.run(() =>
         this.store.mutate({ type, car: this.car, part: part.id, ...extra }),
@@ -349,6 +353,10 @@ export class GarageUI {
     if (!p) return;
     const spec = upgradedSpec(carSpec(this.car), p.cars[this.car]);
     $("garage-selected-car").textContent = carSpec(this.car).name;
+    $("garage-car-class").textContent =
+      this.car === "creator"
+        ? "ELECTRIC AWD · 2× DRIVING COINS + SCORE"
+        : carSpec(this.car).type;
     const stock = upgradedSpec(carSpec(this.car));
     $("garage-level").textContent =
       `LEVEL ${String(cityLevel(p)).padStart(2, "0")}`;
@@ -415,7 +423,10 @@ export class GarageUI {
     if (this.inspection) equipment[this.inspection.part] = this.inspection.tier;
     if ($("workshop").open) this.preview?.setCar(this.car, equipment);
     $("preview-label").textContent = this.inspection
-      ? `${TIERS[this.inspection.tier].name.toUpperCase()} ${PARTS.find((x) => x.id === this.inspection.part).name.toUpperCase()} · PREVIEW ONLY`
+      ? `${TIERS[this.inspection.tier].name.toUpperCase()} ${vehiclePartName(
+          PARTS.find((x) => x.id === this.inspection.part),
+          this.car,
+        ).toUpperCase()} · PREVIEW ONLY`
       : "YOUR INSTALLED BUILD";
     const inspected = PARTS.find((x) => x.id === this.selectedPart) || PARTS[0];
     this.renderInspector(
@@ -447,7 +458,7 @@ export class GarageUI {
             best,
             Math.min(this.car === "creator" ? 8 : 5, tier + 1),
           );
-        return `<button class="part-tile" data-part="${part.id}" data-inspect="${part.id}" data-tier="${previewTier}" aria-pressed="${part.id === this.selectedPart}" style="--tier:${TIERS[tier || 1].color}"><span class="tile-photo">${partArtwork(part, "", tier || 1)}</span><span class="tile-copy"><b>${part.name}</b><small>${TIERS[tier].name}${"+".repeat(stars)}</small>${best > tier ? "<em>FREE UPGRADE ↑</em>" : ""}</span></button>`;
+        return `<button class="part-tile" data-part="${part.id}" data-inspect="${part.id}" data-tier="${previewTier}" aria-pressed="${part.id === this.selectedPart}" style="--tier:${TIERS[tier || 1].color}"><span class="tile-photo">${partArtwork(part, "", tier || 1)}</span><span class="tile-copy"><b>${vehiclePartName(part, this.car)}</b><small>${TIERS[tier].name}${"+".repeat(stars)}</small>${best > tier ? "<em>FREE UPGRADE ↑</em>" : ""}</span></button>`;
       })
       .join("");
     for (const button of $("part-grid").querySelectorAll("[data-inspect]"))
@@ -554,7 +565,7 @@ export class GarageUI {
       const show = (slot, reward, done) => {
         const part = PARTS.find((x) => x.id === reward.part);
         slot.style.setProperty("--tier", TIERS[reward.tier].color);
-        slot.innerHTML = `${partArtwork(part, "", reward.tier)}<strong>${part.name}</strong><span>${TIERS[reward.tier].name}</span>`;
+        slot.innerHTML = `${partArtwork(part, "", reward.tier)}<strong>${vehiclePartName(part, this.car)}</strong><span>${TIERS[reward.tier].name}</span>`;
         slot.classList.toggle("spinning", !done);
         if (done) this.preview?.hydrate(slot);
       };

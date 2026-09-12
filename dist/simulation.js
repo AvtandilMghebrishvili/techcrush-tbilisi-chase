@@ -6,7 +6,8 @@ import {
 import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
 import { IS_KUTAISI, IS_BATUMI, ACTIVE_MAP } from "./map-selection.js";
 import { buildingContact } from "./building-contact.js";
-import { levelRewards, creditAward } from "./community-rules.js";
+import { levelRewards, creditAward, STUNT_REWARDS } from "./community-rules.js";
+import { carRewardMultiplier } from "./car-bonuses.js";
 import { TREES } from "./world-props.js";
 import { BRIDGE_BARRIERS } from "./bridge-data.js";
 import { nearbyObstacles } from "./spatial-index.js";
@@ -337,7 +338,7 @@ export class ChaseSimulation {
     this.player = vehicle(START.x, START.z, START.angle);
     this.player.carId = this.selectedCar || "gt";
     this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
-    this.rewardRates = levelRewards(this.level);
+    this.rewardRates = levelRewards(this.level, this.player.carId);
     this.checkpoints = checkpointsForLevel(this.level);
     this.helicopter = createAirSupport(this.player, this.level);
     this.player.equipment = structuredClone(this.runOptions?.equipment || {});
@@ -602,7 +603,7 @@ export class ChaseSimulation {
       if (((this.runOptions.bankedTakedowns || 0) + this.takedowns) % 10 === 0)
         this.events.push("TECHCRUSH BOX EARNED · BANK YOUR RUN TO KEEP IT");
       const points = Math.round(750 * this.rewardRates.score + 1e-8),
-        cash = creditAward(350, this.level);
+        cash = creditAward(350, this.level, this.player.carId);
       this.score += points;
       this.runCash += cash;
       this.scoreFeedback("patrol", points, cash);
@@ -625,9 +626,13 @@ export class ChaseSimulation {
       car.wreckedAt = this.time;
       car.vx = car.vz = 0;
       car.respawnAt = this.time + 12;
-      this.runCash += creditAward(120, this.level);
+      this.runCash += creditAward(120, this.level, this.player.carId);
       this.trafficWrecks++;
-      this.scoreFeedback("traffic", 0, creditAward(120, this.level));
+      this.scoreFeedback(
+        "traffic",
+        0,
+        creditAward(120, this.level, this.player.carId),
+      );
       this.explosions.push({
         id: `traffic-${car.id}`,
         x: car.x,
@@ -1391,7 +1396,11 @@ export class ChaseSimulation {
         ) {
           this.runQuests.push(id);
           this.navQuest = null;
-          this.events.push(text + " · BANK IN GARAGE");
+          const credits = STUNT_REWARDS[id].cash * carRewardMultiplier(p.carId);
+          this.events.push(
+            text.replace(/[\d,]+ CR/, credits.toLocaleString() + " CR") +
+              " · BANK IN GARAGE",
+          );
           this.emitSound("reward", p, 20, "quest:" + id);
         }
       };
@@ -1475,7 +1484,7 @@ export class ChaseSimulation {
     ) {
       this.checkpoint++;
       this.emitSound("checkpoint", p, 20, "checkpoint:" + this.checkpoint);
-      this.runCash += creditAward(150, this.level);
+      this.runCash += creditAward(150, this.level, this.player.carId);
       const bonus = Math.round(
         (1000 +
           Math.max(
@@ -1485,7 +1494,11 @@ export class ChaseSimulation {
           this.rewardRates.score,
       );
       this.score += bonus;
-      this.scoreFeedback("checkpoint", bonus, creditAward(150, this.level));
+      this.scoreFeedback(
+        "checkpoint",
+        bonus,
+        creditAward(150, this.level, this.player.carId),
+      );
       this.lastCheckpointTime = this.time;
       const beforeRepair = p.health;
       p.health = Math.min(100, p.health + 30);
@@ -1514,12 +1527,16 @@ export class ChaseSimulation {
       if (this.escape >= 8) {
         this.phase = "won";
         this.emitSound("level-clear", p, 30, "level-clear");
-        this.runCash += creditAward(800, this.level);
+        this.runCash += creditAward(800, this.level, this.player.carId);
         const points = Math.round(
           (3000 + Math.round(p.health * 20)) * this.rewardRates.score,
         );
         this.score += points;
-        this.scoreFeedback("escape", points, creditAward(800, this.level));
+        this.scoreFeedback(
+          "escape",
+          points,
+          creditAward(800, this.level, this.player.carId),
+        );
       }
     }
     if (p.health <= 0) {

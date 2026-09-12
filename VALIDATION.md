@@ -1,5 +1,12 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## v2.5.0 — Distinct fleet and fitted upgrades
+
+- **217 automated tests pass**, including new all-model kit replacement and all-city 2× Cyber settlement checks. Existing saves, pre-update tickets, repeated settlement, body support, steering hubs and bounded upgrades are covered.
+- Private local Chrome fixtures exercise actual preview, Diamond spoiler/rim installation, saved equipment across city reloads, driving and cockpit in Tbilisi/Kutaisi/Batumi. Garage and chase each contain one fitted wing. All new run tickets carry the server-owned reward version. No page exceptions.
+- Desktop 1440×900 and emulated mobile 390×844 garage views checked. Vehicle-bound framing fixes cropped long pickups; the electric cabin has a dark, readable display. No horizontal mobile overflow. No public player data was used or modified by testing.
+- Original 458 model is retained. Seven regenerated menu images use the actual vehicle factories. Owned kit geometry/materials are released when replaced; no continuous rendering loop was added.
+
 ## v1.18.0 — City selection and entry menu
 
 - All **190 automated tests** pass. No physics, reward, profile-schema or timing-course change.

@@ -71,10 +71,15 @@ Object.assign(ENGINE_VOICES, {
     redline: 9100,
   },
   creator: {
-    ...ENGINE_VOICES.suv,
-    name: "TECHCRUSH V8 twin turbo",
-    pitch: 0.85,
-    redline: 8400,
+    name: "Electric AWD",
+    electric: true,
+    idle: 0,
+    gears: 1,
+    pitch: 1,
+    body: 300,
+    brightness: 4400,
+    redline: 14000,
+    harmonics: [1, 0.08, 0.025],
   },
 });
 export function engineTelemetry(
@@ -90,7 +95,9 @@ export function engineTelemetry(
   const reverse = (player.speed || 0) < -0.7;
   const ceilings = Array.from(
     { length: voice.gears },
-    (_, i) => top * [0.27, 0.42, 0.59, 0.77, 0.96, 1.14, 1.32][i],
+    (_, i) =>
+      top *
+      (voice.electric ? 1.25 : [0.27, 0.42, 0.59, 0.77, 0.96, 1.14, 1.32][i]),
   );
   let gear = previous.car === id ? previous.gear || 1 : 1;
   let shift = 0,
@@ -130,7 +137,7 @@ export function engineTelemetry(
     cooldown,
     reverse,
     speed,
-    gearLabel: reverse ? "R" : String(gear),
+    gearLabel: reverse ? "R" : voice.electric ? "D" : String(gear),
     rev: clamp((rpm - voice.idle) / (voice.redline - voice.idle), 0, 1),
     shiftCut: cooldown > 0.12 ? 0.52 : 1,
   };

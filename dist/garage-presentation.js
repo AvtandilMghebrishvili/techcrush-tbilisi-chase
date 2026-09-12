@@ -1,4 +1,23 @@
 import { PARTS, TIERS, upgradedSpec } from "./progression.js";
+export const vehiclePartName = (part, car) =>
+  car === "creator"
+    ? {
+        engine: "AWD motors",
+        ecu: "Motor controller",
+        turbo: "Power boost",
+        tank: "Boost battery",
+        cooler: "Battery cooling",
+        gearbox: "EV reduction gear",
+        exhaust: "Power inverter",
+      }[part.id] || part.name
+    : part.name;
+export const vehiclePartDetails = (part, car) =>
+  car === "creator" &&
+  ["engine", "ecu", "turbo", "tank", "cooler", "gearbox", "exhaust"].includes(
+    part.id,
+  )
+    ? "Electric drivetrain upgrade. Uses your existing compatible inventory and rarity; the comparison below shows the exact performance change. No combustion engine or exhaust is added."
+    : PART_DETAILS[part.id];
 export function partArtwork(part, extraClass = "", tier = 1) {
   const index = PARTS.findIndex((p) => p.id === part.id);
   return `<div class="part-art ${extraClass}" data-art-part="${part.id}" data-art-tier="${tier}" role="img" aria-label="${TIERS[tier]?.name} ${part.name} assembly" style="--art-x:${((index % 4) / 3) * 100}%;--art-y:${(Math.floor(index / 4) / 3) * 100}%"></div>`;
@@ -18,7 +37,7 @@ export const PART_DETAILS = {
     "Touring tread becomes sport tread, semi-slicks and finally track slicks. Grip and steering response increase; the tire radius stays consistent.",
   rims: "Lighter forged wheels improve acceleration and top speed. Each tier has a different spoke pattern and metallic finish.",
   spoiler:
-    "A larger rear wing improves steering response and the speed ceiling. Higher tiers add end plates and a double-element Diamond wing.",
+    "Replaces the entire rear wing, including factory aero. Higher tiers change its span, supports, end plates and finish. No stacked spoilers.",
   brakes:
     "Upgraded calipers and drilled discs increase braking force, helping you slow down sooner before tight corners.",
   armor:

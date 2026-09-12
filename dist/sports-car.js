@@ -200,7 +200,7 @@ export function sportsCar(
 }
 export function animateWheels(group, speed, dt, steer = 0) {
   for (const wheel of group.userData.wheels || [])
-    wheel.rotation.x -= (speed * dt) / 0.34;
+    wheel.rotation.x -= (speed * dt) / (group.userData.wheelRadius || 0.34);
   for (const pivot of group.userData.wheelSteering || [])
     pivot.rotation.y = -steer * 0.4;
   turnSteering(group, steer);

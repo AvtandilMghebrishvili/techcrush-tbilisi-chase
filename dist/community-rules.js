@@ -5,6 +5,7 @@ import {
   DECOR_REWARD_LIMIT,
 } from "./banner-rules.js";
 import { TIME_COURSES } from "./race-timing.js";
+import { carRewardMultiplier, ticketRewardMultiplier } from "./car-bonuses.js";
 export const STUNT_REWARDS = {
   "batumi-skybox-v1": {
     cash: 3500,
@@ -31,12 +32,16 @@ export const STUNT_REWARDS = {
   },
 };
 // Shared community rules. Public standings use banked runs, never private keys.
-export function levelRewards(level = 1) {
+export function levelRewards(level = 1, car) {
   const n = Math.max(1, Math.floor(level));
-  return { score: 1 + (n - 1) * 0.15, cash: 1 + (n - 1) * 0.1 };
+  const bonus = carRewardMultiplier(car);
+  return {
+    score: (1 + (n - 1) * 0.15) * bonus,
+    cash: (1 + (n - 1) * 0.1) * bonus,
+  };
 }
-export const creditAward = (base, level) =>
-  Math.round(base * levelRewards(level).cash);
+export const creditAward = (base, level, car) =>
+  Math.round(base * levelRewards(level).cash) * carRewardMultiplier(car);
 export const clearReward = (level) => creditAward(1800 + level * 250, level);
 export function weekKey(now = Date.now()) {
   const d = new Date(now);
@@ -222,7 +227,8 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
     (result === "won" && (m.checkpoints !== 6 || m.time < 8)) ||
     m.score >
       (m.distance * 3.5 + m.time * 450 + m.checkpoints * 1800 + 6000) *
-        levelRewards(ticket.level).score
+        levelRewards(ticket.level).score *
+        ticketRewardMultiplier(ticket)
   )
     throw Error("This run could not be verified. Please start a new chase.");
   const quests = metrics.quests ?? [];
@@ -267,19 +273,27 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
   }
   return m;
 }
-export function settleCommunity(p, m, result, level, now = Date.now()) {
+export function settleCommunity(
+  p,
+  m,
+  result,
+  level,
+  now = Date.now(),
+  multiplier = 1,
+) {
   const c = p.community,
     won = result === "won",
     day = new Date(now).toISOString().slice(0, 10),
     week = weekKey(now);
   const cash =
-    (m.cashBanners?.length || 0) * CASH_BANNER_REWARD +
-    (m.decorWrecks || 0) * DECOR_REWARD +
-    creditAward(150, level) * m.checkpoints +
-    creditAward(350, level) * m.takedowns +
-    creditAward(120, level) * m.trafficWrecks +
-    (won ? creditAward(800, level) : 0);
-  const bonus = won ? clearReward(level) : 0;
+    multiplier *
+    ((m.cashBanners?.length || 0) * CASH_BANNER_REWARD +
+      (m.decorWrecks || 0) * DECOR_REWARD +
+      creditAward(150, level) * m.checkpoints +
+      creditAward(350, level) * m.takedowns +
+      creditAward(120, level) * m.trafficWrecks +
+      (won ? creditAward(800, level) : 0));
+  const bonus = won ? clearReward(level) * multiplier : 0;
   p.credits += cash + bonus;
   c.runs++;
   c.wins += Number(won);
@@ -310,7 +324,7 @@ export function settleCommunity(p, m, result, level, now = Date.now()) {
     c.checkpoints = won ? 0 : m.checkpoints;
   } else if (reached === c.furthestLevel)
     c.checkpoints = Math.max(c.checkpoints, won ? 0 : m.checkpoints);
-  const daily = won && c.lastDaily !== day ? 500 : 0;
+  const daily = won && c.lastDaily !== day ? 500 * multiplier : 0;
   if (daily) c.lastDaily = day;
   const streakBox = won && c.streak % 3 === 0 ? 1 : 0;
   p.boxes += streakBox;
@@ -318,15 +332,13 @@ export function settleCommunity(p, m, result, level, now = Date.now()) {
     (a) => !c.badges.includes(a.id) && c[a.metric] >= a.target,
   );
   c.badges.push(...unlocked.map((a) => a.id));
-  const badgeCash = unlocked.reduce((n, a) => n + a.reward, 0);
+  const badgeCash = unlocked.reduce((n, a) => n + a.reward, 0) * multiplier;
   p.credits += daily + badgeCash;
   const stuntIds = (m.quests || []).filter(
     (id) => !p.quests.completed.includes(id),
   );
-  const stuntCash = stuntIds.reduce(
-    (sum, id) => sum + STUNT_REWARDS[id].cash,
-    0,
-  );
+  const stuntCash =
+    multiplier * stuntIds.reduce((sum, id) => sum + STUNT_REWARDS[id].cash, 0);
   const stuntBoxes = stuntIds.reduce((n, id) => n + STUNT_REWARDS[id].boxes, 0);
   const platinumBoxes = stuntIds.reduce(
     (n, id) => n + (STUNT_REWARDS[id].platinum || 0),
@@ -337,6 +349,7 @@ export function settleCommunity(p, m, result, level, now = Date.now()) {
   p.credits += stuntCash;
   p.boxes += stuntBoxes;
   c.lastReward = {
+    multiplier,
     cash: cash + bonus + daily + badgeCash + stuntCash,
     stunts: stuntIds,
     runCash: cash,

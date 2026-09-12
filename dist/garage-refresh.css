@@ -69,6 +69,13 @@
 .garage-build {
   padding: 24px;
 }
+#garage-car-class {
+  display: block;
+  color: #a9cadb;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
 .garage-build h3 {
   font:
     italic 800 34px "Barlow Condensed",

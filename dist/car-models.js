@@ -7,133 +7,9 @@ import {
   addHeadlights,
 } from "./vehicle-details.js";
 
-// Every exterior fitting is positioned from these shared body sections (z, half width, height).
-export const MODEL_SHAPES = {
-  gt: {
-    name: "Apex R",
-    length: 4.5,
-    width: 1.96,
-    roof: 1.35,
-    wheelbase: 2.64,
-    stations: [
-      [-2.25, 0.86, 0.76],
-      [-1.9, 0.94, 0.87],
-      [-1.32, 0.98, 0.91],
-      [-0.5, 0.88, 0.83],
-      [0.5, 0.87, 0.79],
-      [1.32, 0.97, 0.85],
-      [1.9, 0.88, 0.66],
-      [2.25, 0.76, 0.53],
-    ],
-  },
-  rally: {
-    name: "Vector V12",
-    length: 4.8,
-    width: 2.08,
-    roof: 1.22,
-    wheelbase: 2.8,
-    stations: [
-      [-2.4, 0.96, 0.78],
-      [-1.85, 1.04, 0.91],
-      [-1.4, 1.04, 0.87],
-      [-0.3, 0.95, 0.76],
-      [0.55, 0.96, 0.78],
-      [1.4, 1.04, 0.84],
-      [2.1, 0.98, 0.59],
-      [2.4, 0.9, 0.51],
-    ],
-  },
-  suv: {
-    name: "Veyra W16",
-    length: 5,
-    width: 2.15,
-    roof: 1.37,
-    wheelbase: 2.9,
-    stations: [
-      [-2.5, 0.93, 0.79],
-      [-2.0, 1.04, 0.9],
-      [-1.45, 1.075, 0.96],
-      [-0.55, 1, 0.89],
-      [0.4, 0.98, 0.81],
-      [1.45, 1.07, 0.84],
-      [2.15, 0.98, 0.65],
-      [2.5, 0.9, 0.55],
-    ],
-  },
-};
-// Distinct silhouettes; all lamps, mirrors, tires and kits sample their own shell.
-Object.assign(MODEL_SHAPES, {
-  falcon: {
-    name: "Falcon RS",
-    length: 4.7,
-    width: 2.02,
-    roof: 1.43,
-    wheelbase: 2.74,
-    stations: [
-      [-2.35, 0.8, 0.75],
-      [-1.75, 1.01, 0.94],
-      [-1.37, 1.01, 0.99],
-      [-0.5, 0.88, 0.9],
-      [0.5, 0.9, 0.85],
-      [1.37, 1.01, 0.94],
-      [1.9, 0.86, 0.65],
-      [2.35, 0.77, 0.48],
-    ],
-  },
-  rioni: {
-    name: "Rioni GT",
-    length: 5.15,
-    width: 2.04,
-    roof: 1.32,
-    wheelbase: 2.96,
-    stations: [
-      [-2.575, 0.82, 0.73],
-      [-2, 0.97, 0.87],
-      [-1.48, 1.02, 0.92],
-      [-0.5, 0.92, 0.87],
-      [0.5, 0.94, 0.89],
-      [1.48, 1.02, 0.84],
-      [2.12, 0.94, 0.72],
-      [2.575, 0.71, 0.56],
-    ],
-  },
-  coast: {
-    name: "Coast X",
-    length: 4.85,
-    width: 2.14,
-    roof: 1.22,
-    wheelbase: 2.86,
-    angular: true,
-    stations: [
-      [-2.425, 0.91, 0.82],
-      [-1.85, 1.07, 0.98],
-      [-1.43, 1.07, 0.92],
-      [-0.5, 0.92, 0.78],
-      [0.5, 0.91, 0.75],
-      [1.43, 1.07, 0.88],
-      [2.1, 0.96, 0.54],
-      [2.425, 0.83, 0.43],
-    ],
-  },
-  creator: {
-    name: "TECHCRUSH YouTuber",
-    length: 4.95,
-    width: 2.18,
-    roof: 1.34,
-    wheelbase: 2.9,
-    angular: true,
-    stations: [
-      [-2.475, 1, 0.88],
-      [-1.9, 1.09, 1.02],
-      [-1.45, 1.09, 1.0],
-      [-0.5, 0.9, 0.81],
-      [0.5, 0.94, 0.81],
-      [1.45, 1.09, 0.97],
-      [2.1, 1.03, 0.62],
-      [2.475, 0.93, 0.51],
-    ],
-  },
-});
+import { MODEL_SHAPES } from "./vehicle-designs.js";
+import { makeCyberPickup } from "./cyber-pickup.js";
+export { MODEL_SHAPES };
 export function bodySurface(shape, rounded = true) {
   const curve = new THREE.CatmullRomCurve3(
     shape.stations.map((p) => new THREE.Vector3(...p)),
@@ -174,6 +50,7 @@ export function bodySurface(shape, rounded = true) {
   return { sections, section, top, side };
 }
 export function makeOriginalSportsCar(id, color, equipment = {}) {
+  if (id === "creator") return makeCyberPickup(color, equipment);
   const shape = MODEL_SHAPES[id] || MODEL_SHAPES.gt,
     group = new THREE.Group(),
     skin = bodySurface(shape, id !== "rally" && !shape.angular);
@@ -191,10 +68,6 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     roughness: 0.46,
     metalness: 0.3,
     side: THREE.DoubleSide,
-  });
-  const rubber = new THREE.MeshStandardMaterial({
-    color: "#121417",
-    roughness: 0.98,
   });
   const chrome = new THREE.MeshStandardMaterial({
     color: "#b9c7cb",
@@ -262,7 +135,14 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     return m;
   };
   const quad = (p, mat, name) => mesh(p, [0, 1, 2, 0, 2, 3], mat, name);
-  const cols = 40,
+  const cabin = shape.cabin,
+    cabinShift = cabin.shift || 0,
+    cabinLift = cabin.lift || 0;
+  const cabinRoot = new THREE.Group();
+  cabinRoot.name = "cabin-shell";
+  cabinRoot.position.set(0, cabinLift, cabinShift);
+  group.add(cabinRoot);
+  const cols = shape.angular ? 16 : 32,
     positions = [],
     indices = [];
   for (const [z, w, h] of skin.sections)
@@ -291,7 +171,11 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
           [0, 0, 0],
         );
         if (
-          !(Math.abs(center[0]) < 0.64 && center[2] > -1.04 && center[2] < 0.64)
+          !(
+            Math.abs(center[0]) < 0.64 &&
+            center[2] > -1.04 + cabinShift &&
+            center[2] < 0.64 + cabinShift
+          )
         )
           indices.push(...tri);
       }
@@ -305,20 +189,38 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
   mesh(positions, indices, paint, "body-shell");
   box(shape.width * 0.78, 0.12, shape.length * 0.91, dark, 0, 0.26, 0);
   // Fitted glass panes and pillars meet the body at their lower corners.
-  const roofRear = -0.7,
-    roofFront = 0.06,
-    roofHalf = id === "suv" ? 0.62 : 0.58;
+  const roofRear = cabin.roofRear,
+    roofFront = cabin.roofFront,
+    roofHalf = cabin.half;
   const corner = (s, z, y, w) => [s * w, y, z];
-  const rear = (s) => corner(s, -1.27, skin.top(s * 0.65, -1.27) + 0.003, 0.65);
-  const front = (s) => corner(s, 0.84, skin.top(s * 0.69, 0.84) + 0.003, 0.69);
+  const rear = (s) =>
+    corner(s, cabin.rear, skin.top(s * 0.72, cabin.rear) + 0.003, 0.72);
+  const front = (s) =>
+    corner(s, cabin.front, skin.top(s * 0.72, cabin.front) + 0.003, 0.72);
   const rr = (s) => corner(s, roofRear, shape.roof, roofHalf);
   const rf = (s) => corner(s, roofFront, shape.roof, roofHalf);
   quad([front(-1), front(1), rf(1), rf(-1)], glass, "windscreen");
-  quad([rear(1), rear(-1), rr(-1), rr(1)], glass, "rear-window");
-  quad([rr(-1), rf(-1), rf(1), rr(1)], paint, "roof");
+  if (!shape.openTop) {
+    quad([rear(1), rear(-1), rr(-1), rr(1)], glass, "rear-window");
+    quad([rr(-1), rf(-1), rf(1), rr(1)], paint, "roof");
+  } else {
+    for (const s of [-1, 1])
+      tube(
+        [
+          [s * 0.54, 0.91, -0.83],
+          [s * 0.54, 1.23, -0.83],
+          [s * 0.21, 1.23, -0.83],
+          [s * 0.21, 0.91, -0.83],
+        ],
+        0.043,
+        dark,
+      );
+  }
   for (const s of [-1, 1]) {
-    quad([rear(s), front(s), rf(s), rr(s)], glass, "side-window");
-    tube([rear(s), rr(s), rf(s), front(s)], 0.023, paint);
+    if (!shape.openTop) {
+      quad([rear(s), front(s), rf(s), rr(s)], glass, "side-window");
+      tube([rear(s), rr(s), rf(s), front(s)], 0.023, paint);
+    } else tube([rf(s), front(s)], 0.023, paint);
     tube([rear(s), front(s)], 0.012, dark);
     const anchor = skin.side(0.82, 0.35, s),
       tip = anchor.clone().add(new THREE.Vector3(s * 0.17, 0.13, 0));
@@ -329,8 +231,8 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     box(0.025, 0.035, 0.16, chrome, handle.x, handle.y, handle.z);
     const sill = skin.side(0.18, 0, s);
     box(0.08, 0.06, 1.65, dark, sill.x, sill.y, -0.05);
-    box(0.47, 0.12, 0.48, dark, s * 0.37, 0.6, -0.39);
-    const seat = box(0.48, 0.47, 0.14, dark, s * 0.37, 0.84, -0.67);
+    box(0.47, 0.12, 0.48, dark, s * 0.37, 0.6, -0.39, cabinRoot);
+    const seat = box(0.48, 0.47, 0.14, dark, s * 0.37, 0.84, -0.67, cabinRoot);
     seat.rotation.x = -0.1;
     box(
       0.25,
@@ -338,20 +240,22 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
       0.12,
       dark,
       s * 0.37,
-      Math.min(1.14, shape.roof - 0.13),
+      Math.min(1.14, shape.roof - cabinLift - 0.13),
       -0.67,
+      cabinRoot,
     );
   }
-  box(1.31, 0.16, 0.38, dark, 0, 0.83, 0.46);
+  box(1.31, 0.16, 0.38, dark, 0, 0.83, 0.46, cabinRoot);
   const dash = add(
     new THREE.CapsuleGeometry(0.075, 1.1, 6, 24),
     dark,
     [0, 0.91, 0.4],
+    cabinRoot,
   );
   dash.rotation.z = Math.PI / 2;
-  box(0.17, 0.1, 0.012, glass, -0.08, 0.94, 0.25);
-  box(0.14, 0.035, 0.58, dark, 0, 0.66, -0.1);
-  const rotor = makeSteering(group, dark, chrome, 0.36, 0.98, 0.2);
+  box(0.17, 0.1, 0.012, glass, -0.08, 0.94, 0.25, cabinRoot);
+  box(0.14, 0.035, 0.58, dark, 0, 0.66, -0.1, cabinRoot);
+  const rotor = makeSteering(cabinRoot, dark, chrome, 0.36, 0.98, 0.2);
   bindSteering(group, rotor);
   // Surface patches are sampled from the exact same shell as the body, eliminating floating lamps.
   function patch(cx, cz, w, d, mat, oval = false) {
@@ -396,33 +300,6 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     m.userData.mountOffset = offset;
     return m;
   }
-  if (id === "creator") {
-    for (const x of [-0.18, 0.18]) patch(x, 1.4, 0.15, 1.3, chrome);
-    const c = document.createElement("canvas");
-    c.width = 512;
-    c.height = 128;
-    const ctx = c.getContext("2d");
-    ctx.fillStyle = "#ed1941";
-    ctx.fillRect(0, 0, 512, 128);
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.font = "bold 65px Arial";
-    ctx.fillText("TECHCRUSH", 256, 85, 480);
-    const t = new THREE.CanvasTexture(c);
-    t.colorSpace = THREE.SRGBColorSpace;
-    const brand = new THREE.MeshStandardMaterial({
-      map: t,
-      color: "#fff",
-      roughness: 0.4,
-    });
-    patch(0, 1.52, 0.82, 0.27, brand);
-    for (const side of [-1, 1]) {
-      const z = -shape.length * 0.37,
-        y = skin.top(side * 0.65, z);
-      box(0.07, 0.35, 0.1, dark, side * 0.65, y + 0.17, z);
-      box(0.7, 0.04, 0.35, paint, side * 0.65, y + 0.36, z);
-    }
-  }
   const frontZ = shape.length / 2,
     rearZ = -frontZ;
   const lamps = [];
@@ -438,6 +315,10 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
       id === "gt",
     );
     if (id === "gt") patch(x, z, 0.25, 0.31, lens, true);
+    else if (id === "falcon" || id === "rioni") {
+      for (const dx of [-0.125, 0.125])
+        patch(x + dx, z, 0.19, 0.22, lens, true);
+    } else if (id === "coast") patch(x, z, 0.48, 0.055, lens);
     else if (id === "rally") {
       const pts = [
         [x - s * 0.2, z + 0.05],
@@ -449,7 +330,27 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
       for (let i = 0; i < 4; i++)
         patch(x + (i - 1.5) * 0.113, z, 0.071, 0.15, lens);
     lamps.push({ x, y: skin.top(x, z), z });
-    box(0.57, 0.065, 0.012, tail, s * 0.49, 0.65, rearZ - 0.006);
+    if (id === "falcon")
+      box(0.15, 0.25, 0.014, tail, s * 0.69, 0.76, rearZ - 0.007);
+    else if (id === "rioni") {
+      for (const dx of [-0.14, 0.14]) {
+        const light = add(new THREE.CircleGeometry(0.072, 24), tail, [
+          s * 0.51 + dx,
+          0.66,
+          rearZ - 0.008,
+        ]);
+        light.rotation.y = Math.PI;
+      }
+    } else
+      box(
+        id === "coast" ? 0.83 : 0.57,
+        0.065,
+        0.012,
+        tail,
+        s * 0.49,
+        0.65,
+        rearZ - 0.006,
+      );
     const pipe = add(
       new THREE.CylinderGeometry(0.071, 0.071, 0.22, 24),
       chrome,
@@ -469,76 +370,55 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     for (const s of [-1, 1])
       box(0.024, 0.15, 0.022, chrome, s * 0.235, 0.39, frontZ + 0.015);
     box(0.48, 0.018, 0.022, chrome, 0, 0.47, frontZ + 0.015);
+    for (const s of [-1, 1]) {
+      const pts = [
+        [-1.2, 0.43],
+        [-1.2, 0.88],
+        [-0.85, 0.98],
+        [-0.43, 0.8],
+        [-0.45, 0.48],
+      ].map(([z, y]) => [s * (skin.section(z).w + 0.004), y, z]);
+      tube(pts, 0.028, chrome);
+    }
+  }
+  if (id === "falcon") {
+    patch(0, 1.4, 0.7, 0.44, dark);
+    for (const s of [-1, 1]) {
+      tube(
+        [
+          [s * 0.73, 1.25, -1.25],
+          [s * 0.7, 1.58, -0.83],
+          [s * 0.7, 1.58, 0.24],
+        ],
+        0.025,
+        dark,
+      );
+      for (const z of [-1.0, 0.55])
+        box(0.03, 0.03, 0.18, dark, s * 0.975, 0.87, z);
+    }
+  }
+  if (id === "rioni") {
+    for (const s of [-1, 1]) patch(s * 0.48, 1.1, 0.17, 0.66, dark);
+    box(1.4, 0.22, 0.022, dark, 0, 0.51, frontZ + 0.014);
+    for (let i = 0; i < 9; i++)
+      box(0.02, 0.19, 0.012, chrome, (i - 4) * 0.143, 0.51, frontZ + 0.029);
+  }
+  if (id === "coast" || id === "rally") {
+    for (const s of [-1, 1]) {
+      patch(s * 0.78, -1.57, 0.25, 0.4, dark);
+      box(0.13, 0.065, 1.93, dark, s * (shape.width / 2 - 0.05), 0.31, 0);
+    }
   }
   for (let i = 0; i < 5; i++)
     patch(0, -1.38 - i * 0.095, id === "rally" ? 1.0 : 0.68, 0.038, dark);
   const wheels = [],
-    pivots = [],
-    rimTier = equipment.rims || 0;
-  const rimMat = new THREE.MeshStandardMaterial({
-    color: ["#b9c7cc", "#bd8b59", "#d5e2e8", "#dfc15e", "#8cdeec", "#d9b9ff"][
-      rimTier
-    ],
-    metalness: 1,
-    roughness: 0.23,
-  });
+    pivots = [];
   for (const z of [-shape.wheelbase / 2, shape.wheelbase / 2])
     for (const s of [-1, 1]) {
-      const pivot = new THREE.Group(),
-        w = skin.section(z).w;
-      pivot.position.set(s * (w - 0.1), 0.36, z);
-      group.add(pivot);
-      if (z > 0) pivots.push(pivot);
-      const wheel = new THREE.Group();
-      pivot.add(wheel);
-      wheels.push(wheel);
-      const tire = add(
-        new THREE.CylinderGeometry(
-          0.35,
-          0.35,
-          0.23 + (equipment.tires || 0) * 0.004,
-          48,
-        ),
-        rubber,
-        [0, 0, 0],
-        wheel,
-      );
-      tire.rotation.z = Math.PI / 2;
-      const disc = add(
-        new THREE.CylinderGeometry(0.253, 0.253, 0.247, 40),
-        dark,
-        [0, 0, 0],
-        wheel,
-      );
-      disc.rotation.z = Math.PI / 2;
-      const ring = add(
-        new THREE.TorusGeometry(0.25, 0.014, 8, 48),
-        rimMat,
-        [s * 0.13, 0, 0],
-        wheel,
-      );
-      ring.rotation.y = Math.PI / 2;
-      for (let i = 0; i < 5 + rimTier * 2; i++) {
-        const a = (i / (5 + rimTier * 2)) * Math.PI * 2,
-          spoke = box(
-            0.025,
-            0.23,
-            0.029,
-            rimMat,
-            s * 0.13,
-            Math.cos(a) * 0.11,
-            Math.sin(a) * 0.11,
-            wheel,
-          );
-        spoke.rotation.x = a;
-      }
-      const hub = add(
-        new THREE.CylinderGeometry(0.058, 0.058, 0.032, 20),
-        rimMat,
-        [s * 0.144, 0, 0],
-        wheel,
-      );
-      hub.rotation.z = Math.PI / 2;
+      const hub = new THREE.Group();
+      hub.position.set(s * (skin.section(z).w - 0.1), 0.36, z);
+      group.add(hub);
+      wheels.push(hub);
       tube(
         Array.from({ length: 25 }, (_, i) => {
           const a = (i / 24) * Math.PI,
@@ -559,8 +439,18 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
     paint,
     glass,
     shape: id,
+    design: shape,
+    aeroMount: { z: -shape.length / 2 + 0.42, width: shape.width * 0.81 },
+    cabinLayout: {
+      lift: cabinLift,
+      shift: cabinShift,
+      roof: shape.roof,
+      roofRear,
+      roofFront,
+      openTop: !!shape.openTop,
+    },
     equipment: { ...equipment },
-    cockpitSeat: { x: 0.36, y: shape.roof - 0.13, z: -0.15 },
+    cockpitSeat: { x: 0.36, y: shape.roof - 0.16, z: -0.15 + cabinShift },
     exhaustPositions: [-0.57, 0.57].map((x) => ({
       x,
       y: 0.4,

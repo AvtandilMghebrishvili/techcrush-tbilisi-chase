@@ -49,7 +49,7 @@ Object.assign(CABIN_STYLES, {
   },
   creator: {
     accent: "#ff3158",
-    name: "TECHCRUSH / CREATOR",
+    name: "TECHCRUSH / ELECTRIC AWD",
     analog: false,
     trim: "#321e2b",
   },
@@ -62,6 +62,8 @@ export function addCabinDetails(car, id) {
     chrome = metal("#abb4bd", 0.25),
     accent = metal(style.accent, 0.48);
   car.add(root);
+  const layout = car.userData.cabinLayout || {};
+  root.position.set(0, layout.lift || 0, layout.shift || 0);
   // The original licensed cabin is preserved. Each additional cluster is flush with its dash.
   const classic = id === "classic",
     x = 0.36,
@@ -113,7 +115,6 @@ export function addCabinDetails(car, id) {
   if (!classic) {
     const wide = id === "suv";
     car.userData.steering.rotor.parent.position.y -= 0.115;
-    const roof = id === "rally" ? 1.22 : id === "gt" ? 1.35 : 1.37;
     const lining = new THREE.MeshStandardMaterial({
       color: "#1b2028",
       roughness: 0.96,
@@ -122,7 +123,8 @@ export function addCabinDetails(car, id) {
       color: style.trim,
       roughness: 0.84,
     });
-    box(root, 1.13, 0.012, 0.74, lining, 0, roof - 0.012, -0.32);
+    // Roofs belong to each model's real canopy; no generic flat liner floating
+    // above a low sports car or through a pickup's sloped roof.
     box(root, 1.25, 0.032, 1.42, lining, 0, 0.445, -0.17);
     for (const side of [-1, 1]) {
       box(root, 0.038, 0.27, 0.97, upholstery, side * 0.65, 0.68, -0.2);
@@ -274,7 +276,7 @@ export function updateInterior(car, p, dt = 1 / 60, input = {}) {
   if (!d) return;
   d.engine = engineTelemetry(p, input, d.engine || {}, dt);
   const speed = Math.round(Math.abs(p.speed || 0) * 3.6),
-    gear = p.speed < -0.7 ? "R" : String(d.engine.gear),
+    gear = d.engine.gearLabel,
     rpm = Math.round((d.engine.rpm / d.engine.voice.redline) * 20) / 20;
   const key = `${speed}:${gear}:${rpm}`;
   if (d.last === key) return;

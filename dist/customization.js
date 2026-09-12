@@ -163,7 +163,7 @@ export function makeSpoiler(
   root.name = "rear-wing";
   root.userData.tier = tier;
   if (!tier && !stockWing) return root;
-  const height = baseY + 0.14 + tier * 0.075,
+  const height = baseY + 0.14 + tier * 0.042,
     carbon = metal("#202730", 0.4),
     finish = metal(TIERS[tier].color);
   const span = width + tier * 0.035,
@@ -182,6 +182,7 @@ export function makeSpoiler(
     box(root, 0.14, 0.028, 0.2, carbon, s * width * 0.32, baseY + 0.006, z);
   }
   const wing = box(root, span, 0.048, depth, carbon, 0, height, z);
+  wing.name = "aero-blade";
   wing.rotation.x = -0.045 * tier;
   box(root, span, 0.018, 0.024, finish, 0, height + 0.025, z - depth / 2);
   if (tier >= 2)
@@ -196,29 +197,45 @@ export function makeSpoiler(
         height + 0.024,
         z,
       );
-  if (tier >= 4)
-    box(
-      root,
-      span * 0.91,
-      0.023,
-      depth * 0.48,
-      carbon,
-      0,
-      height + 0.105,
-      z - 0.065,
-    );
   return root;
+}
+
+function removeKit(root) {
+  if (!root) return;
+  const materials = new Set();
+  root.traverse((m) => {
+    m.geometry?.dispose();
+    if (m.material)
+      for (const mat of Array.isArray(m.material) ? m.material : [m.material])
+        materials.add(mat);
+  });
+  for (const mat of materials) mat.dispose();
+  root.removeFromParent();
 }
 
 // Install replacement assemblies on existing hubs, never on an approximate wheelbase.
 export function installWheelKits(car, equipment, { classic = false } = {}) {
-  if (classic && !equipment.rims && !equipment.tires && !equipment.brakes)
-    return;
   car.updateMatrixWorld(true);
-  const old = car.userData.wheels || [],
+  car.userData.stockWheels ||= car.userData.wheels || [];
+  car.userData.stockSteering ||= car.userData.wheelSteering || [];
+  const old = car.userData.stockWheels,
     centers = old.map((w) =>
       car.worldToLocal(w.getWorldPosition(new THREE.Vector3())),
     );
+  removeKit(car.userData.wheelKit);
+  car.userData.wheelKit = null;
+  if (classic && !equipment.rims && !equipment.tires && !equipment.brakes) {
+    old.forEach((w) => {
+      w.visible = true;
+    });
+    car.userData.wheels = old;
+    car.userData.wheelSteering = car.userData.stockSteering;
+    return;
+  }
+  const assembly = new THREE.Group();
+  assembly.name = "installed-wheel-kit";
+  car.add(assembly);
+  car.userData.wheelKit = assembly;
   const wheels = [],
     pivots = [];
   old.forEach((w) => {
@@ -227,11 +244,13 @@ export function installWheelKits(car, equipment, { classic = false } = {}) {
   for (const center of centers) {
     const pivot = new THREE.Group();
     pivot.position.copy(center);
-    car.add(pivot);
+    assembly.add(pivot);
     const kit = makeWheel(
       equipment,
       Math.sign(center.x),
-      classic ? Math.min(0.37, Math.max(0.32, center.y)) : 0.35,
+      classic
+        ? Math.min(0.37, Math.max(0.32, center.y))
+        : car.userData.wheelRadius || 0.35,
     );
     pivot.add(kit);
     wheels.push(kit);
@@ -244,20 +263,24 @@ export function installWheelKits(car, equipment, { classic = false } = {}) {
 }
 
 export function addExteriorKit(car, equipment, id) {
-  const classic = id === "classic",
-    shape = car.userData.bodySurface;
-  const z = classic
-    ? -1.82
-    : -(id === "gt" ? 4.5 : id === "rally" ? 4.8 : 5) / 2 + 0.4;
-  const baseY = classic ? 0.82 : shape.top(0.53, z);
-  car.add(
-    makeSpoiler(
-      equipment.spoiler,
-      classic ? 1.75 : 1.6,
-      baseY,
-      z,
-      id === "rally",
-    ),
+  const shape = car.userData.bodySurface;
+  const mount = car.userData.aeroMount || {
+    z: -1.82,
+    width: 1.75,
+    baseY: 0.82,
+  };
+  const baseY = mount.baseY ?? shape.top(mount.width * 0.32, mount.z);
+  // The fitted kit owns the entire wing, including factory aero. Re-fitting
+  // replaces the assembly instead of stacking meshes or retaining old materials.
+  removeKit(car.userData.exteriorKit);
+  const wing = makeSpoiler(
+    equipment.spoiler,
+    mount.width,
+    baseY,
+    mount.z,
+    !!car.userData.design?.stockWing,
   );
+  car.add(wing);
+  car.userData.exteriorKit = wing;
   car.userData.equipment = { ...equipment };
 }

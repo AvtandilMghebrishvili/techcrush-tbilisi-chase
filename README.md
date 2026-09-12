@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**Version 2.5 — a distinct fleet.** Keep the Original 458 and choose between a rounded coupe, wedge V12, luxury hypercar, rally hatch, long-hood GT, open speedster and the **TECHCRUSH Cyber electric pickup**. Cyber earns **2× driving coins and score**, with a balanced 5% stock speed advantage over Coast X. Aero upgrades replace the factory wing instead of stacking; wheel kits, cabin fittings and garage cameras match each model. Existing car ownership, paint, parts and progress are retained. [Fleet, rewards and upgrade guide](docs/FLEET.md).
+
 **Version 2.4 — career milestone rewards.** Reach **level 10 in any city** to automatically unlock Falcon RS, Rioni GT and Coast X; reach **level 15** to unlock TECHCRUSH. Every fifth city level adds a **Mystery + Special** pair with bonus coins and six high-grade parts. Existing players receive retroactive rewards and retain every previously earned car. [Milestones, odds and save compatibility](docs/MILESTONES.md).
 
 **Version 2.3 — tune your map.** Open **Setup → Map & Radar** to adjust minimap size (80–160%) and street zoom (0.5–2.5×), with a live preview and saved browser preferences. The full city map adds +/−, drag/pinch navigation, Fit City and Find Me. The radar starts 10% larger and respects small-screen control space. [Map controls](docs/INTERFACE.md#map-size-and-zoom-23).

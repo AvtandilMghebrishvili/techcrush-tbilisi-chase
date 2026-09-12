@@ -1,4 +1,5 @@
 // Shared reward limits: optional counters keep pre-2.1 clients compatible.
+import { carRewardMultiplier } from "./car-bonuses.js";
 export const BANNER_COUNT = 48;
 export const CASH_BANNER_COUNT = 3;
 export const CASH_BANNER_REWARD = 4000;
@@ -22,17 +23,21 @@ export const patrolCollisionDamage = (impact, kind) =>
     Math.max(0, impact) * (kind === "tank" ? 0.7 : 0.5),
   );
 export function breakReward(sim, prop) {
+  const bonus = carRewardMultiplier(sim.player?.carId);
   if (prop.bannerId != null && sim.cashBannerIds.includes(prop.bannerId)) {
     if (sim.cashBanners.includes(prop.bannerId)) return 0;
     sim.cashBanners.push(prop.bannerId);
-    sim.runCash += CASH_BANNER_REWARD;
-    sim.scoreFeedback("banner", 0, CASH_BANNER_REWARD);
-    sim.events.push(`TECHCRUSH +4,000 COINS · ${sim.cashBanners.length}/3`);
-    return CASH_BANNER_REWARD;
+    const cash = CASH_BANNER_REWARD * bonus;
+    sim.runCash += cash;
+    sim.scoreFeedback("banner", 0, cash);
+    sim.events.push(
+      `TECHCRUSH +${cash.toLocaleString()} COINS · ${sim.cashBanners.length}/3`,
+    );
+    return cash;
   }
   if (sim.decorWrecks >= DECOR_REWARD_LIMIT) return 0;
   sim.decorWrecks++;
-  sim.runCash += DECOR_REWARD;
-  sim.scoreFeedback("decor", 0, DECOR_REWARD);
-  return DECOR_REWARD;
+  sim.runCash += DECOR_REWARD * bonus;
+  sim.scoreFeedback("decor", 0, DECOR_REWARD * bonus);
+  return DECOR_REWARD * bonus;
 }

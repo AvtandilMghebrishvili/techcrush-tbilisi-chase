@@ -1,4 +1,5 @@
 import { TIME_COURSES } from "./race-timing.js";
+import { ticketRewardMultiplier } from "./car-bonuses.js";
 import {
   mapUnlocked,
   cityLevel,
@@ -396,6 +397,7 @@ export function applyProgressAction(
       level: cityLevel(p, map),
       map,
       car: action.car,
+      rewardVersion: 1,
       ...(TIME_COURSES.includes(action.course)
         ? {
             course: action.course,
@@ -621,7 +623,14 @@ export function applyProgressAction(
               community: p.maps[map].community,
             }
           : p;
-      settleCommunity(runProfile, metrics, action.result, level, context.now);
+      settleCommunity(
+        runProfile,
+        metrics,
+        action.result,
+        level,
+        context.now,
+        ticketRewardMultiplier(p.activeRun),
+      );
       runProfile.community.lastTime =
         action.result === "won" && metrics.timing
           ? {
