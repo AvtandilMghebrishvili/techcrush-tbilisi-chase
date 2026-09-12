@@ -88,3 +88,17 @@ export const levelRecords = sqliteTable(
     ),
   ],
 );
+export const raceResults = sqliteTable("race_results", {
+  id: text("id").primaryKey(),
+  keyHash: text("key_hash")
+    .notNull()
+    .references(() => garages.keyHash),
+  course: text("course").notNull(),
+  level: integer("level").notNull(),
+  car: text("car").notNull(),
+  buildPoints: integer("build_points").notNull(),
+  durationMs: integer("duration_ms").notNull(),
+  score: integer("score").notNull(),
+  rewinds: integer("rewinds").notNull(),
+  recordedAt: integer("recorded_at").notNull(),
+});

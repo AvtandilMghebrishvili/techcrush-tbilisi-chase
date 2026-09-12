@@ -1,3 +1,4 @@
+import { onAsphalt } from "./road-clearance.js";
 import { ROAD_DATA } from "./road-data.js";
 import { LANDMARKS, RIVER_BANKS } from "./district-data.js";
 
@@ -91,6 +92,7 @@ const railSpans = rails.flatMap((rail) => {
       p = point(t);
     const crossing =
       i === count ||
+      onAsphalt(p) ||
       crossingRoads.some((r) => {
         if (Math.abs(Math.cos(r.angle - rail.angle)) > 0.94) return false;
         const u = Math.max(

@@ -1,5 +1,5 @@
 import { weekKey, driverTitle, ACHIEVEMENTS } from "../dist/community-rules.js";
-import { TIME_COURSE, TIME_COURSE_LABEL } from "../dist/race-timing.js";
+import { TIME_COURSE, TIME_COURSES } from "../dist/race-timing.js";
 const SORTS = {
   progress:
     "rank_level DESC,rank_checkpoints DESC,best_score DESC,rank_at ASC,public_id ASC",
@@ -83,11 +83,13 @@ export async function readLeaderboard(DB, url, hash, now = Date.now()) {
   };
 }
 async function readLevelTimes(DB, url, hash, now) {
+  const course = url.searchParams.get("course") || TIME_COURSE;
   const level = Number(url.searchParams.get("level") || 1),
     page = Number(url.searchParams.get("page") || 0),
     car = url.searchParams.get("car") || "all",
     build = url.searchParams.get("build") || "all";
   if (
+    !TIME_COURSES.includes(course) ||
     !Number.isSafeInteger(level) ||
     level < 1 ||
     level > 1000000 ||
@@ -102,7 +104,7 @@ async function readLevelTimes(DB, url, hash, now) {
     "g.listed=1 AND r.course=? AND r.level=?" +
     (car !== "all" ? " AND r.car=?" : "") +
     (build === "stock" ? " AND r.build_class='stock'" : "");
-  const values = [TIME_COURSE, level, ...(car === "all" ? [] : [car])];
+  const values = [course, level, ...(car === "all" ? [] : [car])];
   // One fastest result per driver even in the all-car/all-build view. Numeric
   // ties share a sporting rank; recorded_at/public_id only stabilize display.
   const cte = `WITH attempts AS (SELECT r.*,g.public_id,g.display_name,g.avatar,
@@ -153,8 +155,8 @@ async function readLevelTimes(DB, url, hash, now) {
     level,
     car,
     build,
-    course: TIME_COURSE,
-    courseLabel: TIME_COURSE_LABEL,
+    course,
+    courseLabel: "TBILISI · COURSE " + course.slice(8),
     entries: rows.results.map(publicTime),
     me: publicTime(mine),
     updatedAt: new Date(now).toISOString(),

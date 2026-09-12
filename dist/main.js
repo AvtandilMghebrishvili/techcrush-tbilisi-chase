@@ -1,3 +1,5 @@
+import { ResultScreen } from "./result-screen.js";
+import { levelCondition } from "./level-conditions.js";
 import { CommunityUI } from "./community-ui.js";
 import { RaceClock, TIME_COURSE, formatRaceTime } from "./race-timing.js";
 import { ACHIEVEMENTS } from "./community-rules.js";
@@ -40,6 +42,7 @@ import {
 const $ = (id) => document.getElementById(id),
   keys = new Set();
 setupInterface();
+const results = new ResultScreen(career);
 let sim,
   view,
   mobile,
@@ -191,6 +194,7 @@ async function leaveRun(showGarage = true) {
   keys.clear();
   mobile?.clear();
   agentInput = null;
+  results.reset();
   sim.reset();
   $("modal").hidden = true;
   $("hud").hidden = true;
@@ -285,7 +289,9 @@ function updateLightingLabel() {
   const lighting = view.lighting;
   if (!lighting) return;
   const label =
-    (lighting.mode === "auto" ? "AUTO · " : "") + lighting.level.label;
+    (lighting.mode === "auto" ? "AUTO · " : "") +
+    lighting.level.label +
+    (lighting.weather.mesh.visible ? " · RAIN" : "");
   actionLabel($("lighting-toggle"), label);
   $("lighting-toggle").setAttribute(
     "aria-label",
@@ -340,6 +346,7 @@ async function start() {
       car: selectedCar,
       course: TIME_COURSE,
     });
+    results.reset();
     sim.start(selectedCar, {
       level: career.profile.level,
       equipment: career.profile.cars[selectedCar],
@@ -390,6 +397,7 @@ function pause() {
   refreshActivity();
 }
 function showModal(title, copy, kicker, end) {
+  results.reset();
   mobile?.clear();
   document.body.dataset.phase = sim.phase;
   $("result-reward").textContent = "";
@@ -419,8 +427,8 @@ function finish() {
     won ? "CLEAN GETAWAY" : sim.phase === "busted" ? "BUSTED" : "CAR WRECKED",
     true,
   );
-  $("result-time").textContent =
-    `LEVEL ${sim.level} · ${formatRaceTime(raceClock.result().elapsedMs)}${won ? " · CLEAR TIME" : " · NOT A FINISHED TIME"}`;
+  results.show(sim.level, raceClock.result(), won);
+  const resultGeneration = results.generation;
   keys.clear();
   $("pause").disabled = true;
   if (won) {
@@ -429,16 +437,27 @@ function finish() {
       "Saving your credits and three-part reward box…";
     void bankRun()
       .then(() => {
+        if (results.generation !== resultGeneration) return;
         const reward = career.profile.community.lastReward;
         const badges = reward.badges
           .map((id) => ACHIEVEMENTS.find((a) => a.id === id)?.name)
           .join(", ");
         $("result-reward").textContent =
           `+${reward.cash.toLocaleString()} CR · +${reward.boxes} BOX${reward.boxes === 1 ? "" : "ES"} · LEVEL ${career.profile.level} UNLOCKED${reward.daily ? " · DAILY +500 CR" : ""}${badges ? " · NEW: " + badges : ""}`;
-        $("restart").textContent = `START LEVEL ${career.profile.level} ↗`;
+        const next =
+          view.lighting.mode === "auto"
+            ? levelCondition(career.profile.level).label
+            : view.lighting.mode.toUpperCase();
+        $("restart").textContent =
+          `NEXT · LEVEL ${career.profile.level} · ${next} ↗`;
+        results.saved(career.profile.community.lastTime);
         $("garage-back").textContent = "GARAGE · OPEN BOX & UPGRADE";
       })
       .catch((error) => {
+        if (results.generation !== resultGeneration) return;
+        $("restart").disabled = $("garage-back").disabled = false;
+        $("result-rank-note").textContent =
+          "Ranking appears after your result is saved.";
         $("result-reward").textContent =
           error.message + " Use Garage to retry.";
       });
@@ -465,7 +484,9 @@ function updateHUD() {
   if ($("route-selector").value !== (sim.navQuest || ""))
     $("route-selector").value = sim.navQuest || "";
   $("run-level").textContent = `LEVEL ${sim.level}`;
-  $("run-time").textContent = formatRaceTime(raceClock.elapsedMs);
+  $("run-time").textContent = formatRaceTime(
+    Math.ceil(raceClock.elapsedMs / 10) * 10,
+  );
   $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
   $("score").textContent = Math.floor(sim.score).toString().padStart(6, "0");
   $("progress").textContent = sim.checkpoint + " / 6";
@@ -889,6 +910,10 @@ try {
     },
   });
   $("leaderboard-open").disabled = false;
+  $("community-dialog").addEventListener("close", () => {
+    if (sim.phase === "won" && results.record && !$("modal").hidden)
+      results.saved(results.record);
+  });
   $("result-community").onclick = async () => {
     if (await leaveRun(false)) community.open("board");
   };

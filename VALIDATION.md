@@ -1,5 +1,14 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## v1.14.0 — Finish results and fair courses
+
+- 157 unit/integration tests pass, including 300 distinct deterministic checkpoint layouts, full road gate footprints, shuffled lighting bags, asphalt clearance for all planted trees and rail midpoints, linked prop relocation, finite cached checkpoint/finish audio, result metadata/privacy, replay/concurrency, old-course settlement and archived time access.
+- A local Chromium fixture passes a checkpoint through normal physics, hears both cue types, completes the escape through the normal frame loop and saves through the real local API. The finish shows both ranks, a durable result page and the correct next-level lighting. Rank failure/retry leaves continuation available; the Facebook destination is intercepted locally to verify its result URL and noopener behavior without publishing anything.
+- Result screens are checked at desktop, 390×844, 360×640, 667×375 and 844×390. Compact landscape has no overlapping recovery controls. Garage, active timer, terminal sound suspension and six lifecycle/memory cycles pass. No test players enter the public database.
+- A normal-input Apex R controller with Bronze parts clears all six gates and escapes in 233.7 simulated seconds, with 43 HP and 29,874 points. A separate stock Veyra controller was caught after five gates at 164.1 seconds; the controller is not a guarantee of winning every chase. These are local driving smoke tests, not public timed records.
+- The brief shower has one additional draw call, no extra triangles and no media downloads. Local synchronized render medians were 14.70 ms dry / 15.10 ms wet. The existing idle frame/audio suspension is retained. See [Performance](docs/PERFORMANCE.md) for scope.
+
+
 ## v1.13.0 — Shared level times and surface precision
 
 - 151 tests pass. New coverage includes non-rewindable wall time, frozen loadout metadata, invalid timing, old-client/save compatibility, per-level/car/stock rankings, equal-time ranks, privacy, atomic competing settlements and replay protection.

@@ -1,4 +1,4 @@
-import { TIME_COURSE } from "./race-timing.js";
+import { TIME_COURSES } from "./race-timing.js";
 import {
   newCommunity,
   normalizeName,
@@ -227,9 +227,9 @@ export function applyProgressAction(
       startedAt: context.now,
       level: p.level,
       car: action.car,
-      ...(action.course === TIME_COURSE
+      ...(TIME_COURSES.includes(action.course)
         ? {
-            course: TIME_COURSE,
+            course: action.course,
             buildPoints: PARTS.reduce(
               (sum, part) => sum + (p.cars[action.car][part.id] || 0),
               0,
@@ -327,6 +327,7 @@ export function applyProgressAction(
               level,
               car: p.activeRun.car,
               buildPoints: p.activeRun.buildPoints,
+              score: metrics.score,
               runId: p.activeRun.id,
               recordedAt: context.now,
             }

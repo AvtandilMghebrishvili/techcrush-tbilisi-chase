@@ -300,6 +300,12 @@ test("timing insert and garage settlement are atomic, including competing report
       record.duration_ms,
       success.profile.community.lastTime.elapsedMs,
     );
+    const shared = await f.DB.prepare(
+      "SELECT duration_ms FROM race_results WHERE id=?",
+    )
+      .bind(base.runId)
+      .first();
+    assert.equal(shared.duration_ms, record.duration_ms);
     assert.equal(success.profile.level, 2);
     assert.equal(success.profile.boxes, 2);
     await f.action(t, { ...base, metrics: metrics(80000) });

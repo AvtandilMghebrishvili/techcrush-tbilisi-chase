@@ -1,3 +1,5 @@
+import { levelCondition } from "./level-conditions.js";
+import { CityWeather } from "./city-weather.js";
 import * as THREE from "./vendor/three.module.js";
 
 export const LIGHTING_MODES = ["auto", "night", "day", "dusk"];
@@ -152,6 +154,7 @@ export class CityLighting {
     this.view = view;
     this.mode = "auto";
     this.level = lightingAt(0);
+    this.weather = new CityWeather(view.scene);
     this.near = [];
     this.refreshAt = -1;
     this.dayMap = view.daylightHDR || view.scene.background;
@@ -217,8 +220,16 @@ export class CityLighting {
     return this.mode;
   }
   update(sim) {
+    this.weather.update(sim, this.mode);
+    if (!this.condition || this.conditionLevel !== sim.level) {
+      this.conditionLevel = sim.level;
+      this.condition = levelCondition(sim.level);
+    }
     const v = this.view,
-      state = (this.level = lightingAt(sim.time, this.mode)),
+      state = (this.level = lightingAt(
+        sim.time + this.condition.offset,
+        this.mode,
+      )),
       n = state.night;
     this.sky.position.copy(v.camera.position);
     this.sky.material.uniforms.night.value = n;

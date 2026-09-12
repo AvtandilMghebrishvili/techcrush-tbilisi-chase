@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.14.0 — 2026-09-12
+
+- Show a prominent finish clock, automatic overall and per-level time ranks, saved rewards, Garage / Next Level actions, and Facebook/copy result links. Render immutable server-stored result pages with Open Graph metadata; private drivers stay private.
+- Add distinct checkpoint and level-clear musical cues using two cached, finite PCM buffers. Preserve mute, pause, hidden-tab suspension and terminal audio drain.
+- Shuffle roomy checkpoint positions/order by level, consistently for all players; vary Auto daylight starts in shuffled dusk/night/day bags. Preserve manual lighting. Add rare 24-second GPU showers with one small buffer and one draw call.
+- Calibrate linked street props against the asphalt union, river support and building footprints; move poles/benches/signs together and keep trees/bridge rail openings clear of the roadway.
+- Keep existing garages and records, add an archive course selector, accept already-open 1.13 clients, and separate 1.14 time comparisons. Add the immutable-result table through a new additive migration.
+- Keep idle views on demand, abort result rank requests on hide/leave, and stop finite sound tails. No runtime texture/model/audio assets or quality settings were reduced.
+
 ## 1.13.0 — 2026-09-12
 
 - Add shared per-level completion times, car/stock filters, equal-time ranks, rewind counts and a prominent menu Leaderboard button. Active wall time excludes pause/loading but includes rewind and slow frames; successful clears are timed to hundredths.

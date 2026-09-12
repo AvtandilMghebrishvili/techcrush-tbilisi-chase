@@ -1,9 +1,10 @@
+import { resultPage } from "./server/result-page.mjs";
 import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import {handleApi} from './server/api.mjs';
-import {openLocalDatabase} from './server/local-db.mjs';
-const DB=openLocalDatabase();
+import { handleApi } from "./server/api.mjs";
+import { openLocalDatabase } from "./server/local-db.mjs";
+const DB = openLocalDatabase();
 const root = path.resolve("dist");
 const types = {
   ".html": "text/html",
@@ -22,16 +23,47 @@ http
       const pathname = decodeURIComponent(
         new URL(req.url, "http://localhost").pathname,
       );
-      if(pathname.startsWith('/api/')) {
-        const chunks=[];let bytes=0;
-        for await(const chunk of req){bytes+=chunk.length;if(bytes>8192){res.writeHead(413);res.end('Request too large');return;}chunks.push(chunk);}
-        const body=Buffer.concat(chunks);
-        const response=await handleApi(new Request('http://localhost'+req.url,{method:req.method,
-          headers:req.headers,...(body.length?{body}:{} )}),DB);
-        res.writeHead(response.status,Object.fromEntries(response.headers));
-        res.end(Buffer.from(await response.arrayBuffer()));return;
+      if (pathname.startsWith("/result/")) {
+        const response = await resultPage(
+          new Request("http://" + req.headers.host + req.url, {
+            method: req.method,
+          }),
+          DB,
+        );
+        res.writeHead(response.status, Object.fromEntries(response.headers));
+        res.end(Buffer.from(await response.arrayBuffer()));
+        return;
       }
-      if(/^\/(server|client|\.openai)(\/|$)/.test(pathname)){res.writeHead(404);res.end('Not found');return;}
+      if (pathname.startsWith("/api/")) {
+        const chunks = [];
+        let bytes = 0;
+        for await (const chunk of req) {
+          bytes += chunk.length;
+          if (bytes > 8192) {
+            res.writeHead(413);
+            res.end("Request too large");
+            return;
+          }
+          chunks.push(chunk);
+        }
+        const body = Buffer.concat(chunks);
+        const response = await handleApi(
+          new Request("http://localhost" + req.url, {
+            method: req.method,
+            headers: req.headers,
+            ...(body.length ? { body } : {}),
+          }),
+          DB,
+        );
+        res.writeHead(response.status, Object.fromEntries(response.headers));
+        res.end(Buffer.from(await response.arrayBuffer()));
+        return;
+      }
+      if (/^\/(server|client|\.openai)(\/|$)/.test(pathname)) {
+        res.writeHead(404);
+        res.end("Not found");
+        return;
+      }
       const file = path.resolve(
         root,
         "." + (pathname === "/" ? "/index.html" : pathname),

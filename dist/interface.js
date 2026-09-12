@@ -42,8 +42,8 @@ export function setupInterface() {
   document.getElementById("modal").addEventListener("keydown", (event) => {
     if (event.key !== "Tab") return;
     const buttons = [
-      ...event.currentTarget.querySelectorAll("button:not(:disabled)"),
-    ].filter((b) => !b.hidden);
+      ...event.currentTarget.querySelectorAll("button:not(:disabled), a[href]"),
+    ].filter((b) => b.getClientRects().length > 0);
     const first = buttons[0],
       last = buttons.at(-1);
     if (event.shiftKey && document.activeElement === first) {

@@ -1,6 +1,6 @@
 // Change this ID when the timed route/physics rules change; old records stay saved.
-export const TIME_COURSE = "tbilisi-1.13";
-export const TIME_COURSE_LABEL = "TBILISI · COURSE 1.13";
+export const TIME_COURSE = "tbilisi-1.14";
+export const TIME_COURSE_LABEL = "TBILISI · COURSE 1.14";
 export function formatRaceTime(ms) {
   if (!Number.isFinite(ms)) return "—";
   const centiseconds = Math.max(0, Math.floor(ms / 10));
@@ -41,3 +41,5 @@ export class RaceClock {
     };
   }
 }
+
+export const TIME_COURSES = ["tbilisi-1.13", TIME_COURSE];

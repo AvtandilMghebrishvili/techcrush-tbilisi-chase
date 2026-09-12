@@ -1,5 +1,15 @@
 # Rendering and audio lifecycle
 
+## Result screen and weather 1.14.0
+
+The result overlay makes two finite rank reads after saving, with an eight-second deadline and cancellation on hide/leave. It does not poll. The world remains on the existing single on-demand frame loop. The two musical cues use cached PCM buffers and disconnect after a maximum 1.25-second tail; the audio context then suspends. Lighting conditions are cached per level rather than allocating a shuffled bag each frame.
+
+One-time placement calibration checked 1,860 prop groups and relocated 457 groups outside asphalt/building/water boundaries. All 993 planted tree stems and every sampled remaining bridge rail midpoint cleared the actual asphalt. Candidate checkpoint pools are also computed once.
+
+Six start/drive/pause/garage cycles retained 5,472 world geometries / 85 textures and 67 garage geometries / 5 textures throughout; effects and audio voices returned to zero. Sampled retained JS heap ranged 71.18–72.10 MiB. Hidden and terminal scenes stopped producing frames. This is a bounded local test, not proof that every browser/device is leak-free.
+
+Rain adds one draw call and 144 line segments, zero triangles and 4,608 bytes of fixed attribute storage. A 1280×720 local Chromium test alternated 30 warmed dry/wet renders with GPU completion: medians were 14.70 ms dry / 15.10 ms with the final shower effect. This isolated scene measurement is not a whole-game FPS benchmark. Showers last 24 seconds on a minority of levels; no separate animation loop or timer runs when inactive. All 21 shipped runtime media assets remain byte-identical.
+
 ## Timings and surface queries 1.13.0
 
 For 100 distinct route queries on the same graph, the previous quadratic Dijkstra took 318.22 ms and the heap implementation took 15.86 ms locally. All 100 returned point sequences matched exactly, including deterministic tie ordering. This measures route computation, not total game FPS. The source cache now holds at most 96 trees in typed arrays. Single-cell obstacle queries reuse immutable ordered lists; water support checks use Z-banded polygon edges instead of full street scans.

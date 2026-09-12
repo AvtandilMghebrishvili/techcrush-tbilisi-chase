@@ -1405,6 +1405,7 @@ export class ChaseSimulation {
       !p.flipped
     ) {
       this.checkpoint++;
+      this.emitSound("checkpoint", p, 20, "checkpoint:" + this.checkpoint);
       this.runCash += creditAward(150, this.level);
       const bonus = Math.round(
         (1000 +
@@ -1442,6 +1443,7 @@ export class ChaseSimulation {
       this.escape = clamp(this.escape + (unseen ? dt : -dt * 1.5), 0, 8);
       if (this.escape >= 8) {
         this.phase = "won";
+        this.emitSound("level-clear", p, 30, "level-clear");
         this.runCash += creditAward(800, this.level);
         this.score += Math.round(
           (3000 + Math.round(p.health * 20)) * this.rewardRates.score,

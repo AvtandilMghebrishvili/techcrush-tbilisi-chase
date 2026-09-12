@@ -192,7 +192,27 @@ export async function handleApi(request, DB) {
             record.runId,
             body.id,
           );
-          [result] = await DB.batch([update, insert]);
+          // Save an immutable result, atomically with the reward and fastest time.
+          // Public reads still require the owner to have a listed driver profile.
+          const share = DB.prepare(
+            "INSERT INTO race_results (id,key_hash,course,level,car,build_points,duration_ms,score,rewinds,recorded_at) SELECT ?,?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.community.lastTime.runId')=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(id) DO NOTHING",
+          ).bind(
+            record.runId,
+            hash,
+            record.course,
+            record.level,
+            record.car,
+            record.buildPoints,
+            record.elapsedMs,
+            record.score,
+            record.rewinds,
+            record.recordedAt,
+            hash,
+            version + 1,
+            record.runId,
+            body.id,
+          );
+          [result] = await DB.batch([update, insert, share]);
         } else result = await update.run();
         if (result.meta.changes !== 1)
           return json(

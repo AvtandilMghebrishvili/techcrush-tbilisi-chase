@@ -55,3 +55,5 @@ GitHub Pages and a static file ZIP alone are unsuitable for the current server-s
 ## Release checks
 
 Run tests/build for the release source, include all runtime assets and migrations, and preserve credits/license files. Validate saving, reloading, separate player profiles and a short drive. Public access and repository visibility must be configured separately. See [Testing](TESTING.md), [Career API](CAREER.md) and [Assets](../ASSETS.md).
+
+Release 1.14 adds `race_results` through migration `0003_massive_mephistopheles.sql`. Preserve migrations 0000–0002 and the existing DB binding. Route `/result/*` through the Worker (before the static fallback) so shared result pages have server-rendered metadata. A static-only host cannot serve shared scores or these result pages.

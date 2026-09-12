@@ -23,6 +23,7 @@ import { updateInterior } from "./interior-detail.js";
 import { paintColor } from "./customization.js";
 import { updateScenery } from "./scenery.js";
 import { buildRealisticCity } from "./realistic-city.js";
+import { calibrateRoadsideProps } from "./breakable-props.js";
 import { loadTrees, updateTrees } from "./trees.js";
 import { makeSedan } from "./patrol-car.js";
 import {
@@ -103,6 +104,7 @@ export class SceneView {
     this.scene.add(sun);
     this.sun = sun;
     buildRealisticCity(this);
+    calibrateRoadsideProps(this);
     this.cameraMode = 0;
     this.cockpit = makeCockpit();
     this.camera.add(this.cockpit.root);

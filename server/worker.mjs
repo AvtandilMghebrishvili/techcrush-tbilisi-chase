@@ -1,6 +1,9 @@
 import { handleApi } from "./api.mjs";
+import { resultPage } from "./result-page.mjs";
 export default {
   async fetch(request, env) {
+    if (new URL(request.url).pathname.startsWith("/result/"))
+      return resultPage(request, env.DB);
     if (new URL(request.url).pathname.startsWith("/api/"))
       return handleApi(request, env.DB);
     if (env.ASSETS) {

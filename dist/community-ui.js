@@ -39,7 +39,7 @@ export class CommunityUI {
       this.page = 0;
       this.load();
     };
-    for (const id of ["time-car", "time-build"])
+    for (const id of ["time-car", "time-build", "time-course"])
       $(id).onchange = () => {
         this.page = 0;
         this.load();
@@ -259,7 +259,8 @@ export class CommunityUI {
       this.data &&
       (this.data.mode !== this.mode ||
         (timed &&
-          (this.data.level !== Number($("time-level").value) ||
+          (this.data.course !== $("time-course").value ||
+            this.data.level !== Number($("time-level").value) ||
             this.data.car !== $("time-car").value ||
             this.data.build !== $("time-build").value)))
     ) {
@@ -280,7 +281,7 @@ export class CommunityUI {
       );
     try {
       const response = await fetch(
-        `/api/leaderboard?${new URLSearchParams({ mode: this.mode, page: this.page, ...(timed ? { level: $("time-level").value, car: $("time-car").value, build: $("time-build").value } : {}) })}`,
+        `/api/leaderboard?${new URLSearchParams({ mode: this.mode, page: this.page, ...(timed ? { course: $("time-course").value, level: $("time-level").value, car: $("time-car").value, build: $("time-build").value } : {}) })}`,
         {
           headers: { Authorization: "Bearer " + this.store.token },
           cache: "no-store",

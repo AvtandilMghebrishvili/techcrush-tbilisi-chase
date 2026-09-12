@@ -1,4 +1,4 @@
-import { TIME_COURSE } from "./race-timing.js";
+import { TIME_COURSES } from "./race-timing.js";
 export const STUNT_REWARDS = {
   "tbilisi-skybox-v1": { cash: 2500, boxes: 1, name: "Skybox" },
   "mtkvari-gap-v1": { cash: 1500, boxes: 1, name: "Mtkvari gap" },
@@ -200,8 +200,8 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
     const t = metrics.timing;
     if (
       !t ||
-      t.course !== TIME_COURSE ||
-      ticket.course !== TIME_COURSE ||
+      !TIME_COURSES.includes(t.course) ||
+      ticket.course !== t.course ||
       !Number.isSafeInteger(t.elapsedMs) ||
       t.elapsedMs < 0 ||
       t.elapsedMs > 21600000 ||

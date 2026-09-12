@@ -136,3 +136,7 @@ Destroyed NPCs retain their charred meshes and act as fixed-mass obstacles until
 Water entry disables ground contacts, propulsion and capture participation. `waterAt`, `waterAge`, `y`, `pitch` and `roll` drive descent. At the actual water surface the simulation emits a single splash and sound; the renderer shows bounded droplets/foam and disposes them. After three seconds the actor returns to an unoccupied road, with a new NPC identity. Rewind clones the water state, matches actor identities before interpolating, and restores sparse broken barrier records. `bridge-visuals.js` reflects each contact immediately in two instanced batches.
 
 `spatial-index.js` caches immutable footprint bounds by obstacle-array identity/length in a weak map. Use a new array if replacing or moving a footprint; changing `broken` does not alter its bounds. Nearby queries preserve source ordering. `city-map.js` uses a static bounding hierarchy for exact nearest-road projection; regression tests compare results against linear scans. `grass.js` creates capped, static instanced geometry and does not add a frame loop.
+
+## Finish results (1.14)
+
+`result-screen.js` owns finite rank fetches and share links; `result-page.mjs` serves public saved result HTML without the game runtime. `race_results` is appended atomically during valid timed settlements. `level-conditions.js` supplies stable variation, `city-weather.js` animates a bounded GPU shower, and `road-clearance.js` shares the rendered asphalt index for placement. Source and Worker result routes use the same handler.

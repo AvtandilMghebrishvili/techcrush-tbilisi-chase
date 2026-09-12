@@ -1,3 +1,4 @@
+import { roadClear } from "./road-clearance.js";
 import { reservedExpansion } from "./world-sites.js";
 import { ROADS, BUILDINGS, nearestRoad, containsPoint } from "./city-map.js";
 import { LANDMARKS, riverDistance } from "./district-data.js";
@@ -17,6 +18,7 @@ for (const r of ROADS) {
         z = lz + fz * 12,
         road = nearestRoad({ x, z });
       if (
+        !roadClear({ x, z }, 1.2) ||
         reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||
         riverDistance({ x, z }) < 47 ||
         road.distance <= road.road.width / 2 + 1.4 ||
@@ -42,6 +44,7 @@ for (let i = 0; i < 110; i++) {
     z = p.z + Math.sin(a) * 220 * r;
   const road = nearestRoad({ x, z });
   if (
+    !roadClear({ x, z }, 1.2) ||
     reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||
     riverDistance({ x, z }) < 50 ||
     road.distance < road.road.width / 2 + 3 ||

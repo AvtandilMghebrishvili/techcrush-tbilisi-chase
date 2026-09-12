@@ -14,3 +14,7 @@ Performance bounds:
 - Five 512 × 512 masks and one 64 × 64 falloff texture are prepared once. Existing environment assets and garage render-loop suspension are reused.
 
 `motorsport.css` styles the established controls rather than replacing their actions. Short entry transitions animate opacity/translation and honor reduced motion. The loading gauge advances at actual setup milestones (city, facade/road assets, hills, cars/trees, saved garage, shader warm-up); it is not a network-byte percentage. `compileAsync` completes before the loading overlay is hidden, with no minimum-duration timer.
+
+## Level starts and showers (1.14)
+
+Auto starts use shuffled dusk/night/day conditions per level, with the same condition for every player on that course. Manual modes remain fixed. Some Auto levels include a short 24-second light shower. It adds no media downloads or continuous background timer. [Behavior and performance](RESULTS.md).

@@ -37,6 +37,7 @@
       }
     </script>
     <link rel="stylesheet" href="./expedition.css" />
+    <link rel="stylesheet" href="./results.css" />
   </head>
   <body>
     <main id="game">
@@ -308,13 +309,42 @@
           <h2 id="modal-title">PAUSED.</h2>
           <p id="modal-copy">Your getaway can wait.</p>
           <div id="result-score"></div>
-          <div id="result-time"></div>
+          <div class="result-clock">
+            <small id="result-time-label"></small>
+            <div id="result-time"></div>
+            <small id="result-time-detail"></small>
+          </div>
+          <div id="result-ranks" hidden aria-live="polite">
+            <div class="rank-grid">
+              <div>
+                <small>OVERALL POSITION</small
+                ><strong id="result-rank">…</strong>
+              </div>
+              <div>
+                <small>LEVEL TIME RANK</small
+                ><strong id="result-time-rank">…</strong>
+              </div>
+            </div>
+            <p id="result-rank-note"></p>
+            <button id="result-rank-retry" hidden>RETRY RANKING</button>
+          </div>
           <p id="result-reward"></p>
           <button id="resume" class="primary">
-            BACK TO THE CHASE <span>↗</span></button
-          ><button id="restart" class="secondary">RESTART RUN</button>
-          <button id="garage-back" class="secondary">CHANGE CAR</button>
-          <button id="result-community" class="secondary">LEADERBOARD</button>
+            BACK TO THE CHASE <span>↗</span>
+          </button>
+          <div class="result-actions">
+            <button id="restart" class="secondary">RESTART RUN</button>
+            <button id="garage-back" class="secondary">CHANGE CAR</button>
+            <button id="result-community" class="secondary">LEADERBOARD</button>
+          </div>
+          <div id="result-sharing" hidden>
+            <div class="share-actions">
+              <a id="result-facebook" target="_blank" rel="noopener noreferrer"
+                >SHARE TO FACEBOOK ↗</a
+              ><button id="result-copy">COPY RESULT LINK</button>
+            </div>
+            <p id="result-share-status"></p>
+          </div>
         </div>
       </section>
       <dialog id="community-dialog" aria-labelledby="community-title">
@@ -393,12 +423,18 @@
                 <option value="stock">Stock only</option>
               </select></label
             >
+            <label
+              >COURSE<select id="time-course">
+                <option value="tbilisi-1.14">Current · 1.14</option>
+                <option value="tbilisi-1.13">Archive · 1.13</option>
+              </select></label
+            >
             <button class="secondary" type="submit">SHOW ↗</button>
           </form>
           <p id="time-rules" class="time-rules" hidden>
             Six checkpoints + escape. Pause/loading excluded; rewind time still
             counts. Compare the same car with Stock only for equal equipment.
-            Records start with this course update; old progress stays saved.
+            Switch Course to view archived times. Your old progress stays saved.
           </p>
           <div class="board-meta">
             <span id="board-count"></span

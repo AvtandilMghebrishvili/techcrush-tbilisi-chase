@@ -6,7 +6,7 @@ Each level has its own table. Only successful clears count: all six checkpoints 
 
 Times are rounded up to hundredths of a second. Equal displayed times share the same sporting rank; the earlier record/public ID only stabilizes row order. Select the same **Car** and **Stock only** to compare equal equipment. **All upgrades** is an open category: each row identifies the car and the summed installed part grades, out of 56. That sum is descriptive, not an assertion that different parts provide equal performance. Car and installed grades are captured by the server at the start of the run, so later garage changes cannot relabel a tuned run as stock.
 
-Records begin with course `tbilisi-1.13`. Earlier versions did not measure this clock, so historical times are not invented. Existing levels, credits, parts, boxes, names, public IDs and the original progress/score/week standings remain saved. Changing car/route/physics rules in a future release should use a new course ID; old database records stay intact. A normal career clear advances the level as before; this update does not add a lower-level replay mode.
+Records began with course `tbilisi-1.13`. The current course is `tbilisi-1.14`; choose **Course → Archive · 1.13** to view earlier times. Earlier versions did not measure this clock, so historical times are not invented. Existing levels, credits, parts, boxes, names, public IDs and the original progress/score/week standings remain saved. Changing car/route/physics rules in a future release should use a new course ID; old database records stay intact. A normal career clear advances the level as before; this update does not add a lower-level replay mode.
 
 ## Storage and validation
 
@@ -23,3 +23,5 @@ Water support is derived from the same road/sidewalk polygons, bridge decks and 
 Vehicle/building contacts now use the oriented chassis width and length rather than a large enclosing circle. Clock-building wings, cornices, bath bases/domes, the cable station and elevated tube-shell clearances use more detailed dimensions and height checks. Rounded dome contacts follow their circular cross-section; curved tube shells use the same 30 longitudinal sections as the mesh. Tiny decorative details and curved surfaces remain practical game collision approximations, not a triangle-perfect rigid-body simulation.
 
 Pathfinding uses a heap and a bounded 96-source typed-array cache. Nearby single-cell collision queries reuse cached lists; water ray crossings use height bands. No texture, model, shadow or render-quality setting was reduced. See [Performance](PERFORMANCE.md) and [Validation](../VALIDATION.md) for measured scope and limitations.
+
+The finish overlay now shows both overall and level-time ranks automatically, with a large clock and a saved result-sharing page. See [Results and conditions](RESULTS.md).

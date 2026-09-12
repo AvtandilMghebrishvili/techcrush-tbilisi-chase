@@ -428,6 +428,10 @@ export class ChaseAudio {
     const v = pos.gain * (0.14 + 0.28 * strength),
       rate = 0.82 + Math.random() * 0.2;
     const opt = { volume: v, pan, rate };
+    if (event.kind === "checkpoint" || event.kind === "level-clear") {
+      this.cue(event.kind === "level-clear");
+      return;
+    }
     if (event.kind === "reward") {
       this.thump(660, 0.1, pan, 0.18);
       this.play(this.buffers.glass, {
@@ -581,6 +585,39 @@ export class ChaseAudio {
       });
     if (event.impact > 22)
       this.play(this.buffers.glass, { ...opt, volume: v * 0.18, rate: 0.8 });
+  }
+  cue(clear = false) {
+    // Short, tuned marimba-like notes. Cached PCM; no new media downloads,
+    // oscillators, timers or frame loop after the finite victory tail ends.
+    const key = clear ? "clearCue" : "gateCue";
+    if (!this.buffers[key]) {
+      const c = this.context,
+        duration = clear ? 1.25 : 0.48;
+      const buffer = c.createBuffer(
+        1,
+        Math.ceil(c.sampleRate * duration),
+        c.sampleRate,
+      );
+      const out = buffer.getChannelData(0);
+      const notes = clear ? [523.25, 659.25, 783.99, 1046.5] : [783.99, 1046.5];
+      notes.forEach((hz, j) => {
+        const start = (clear ? 0.16 : 0.095) * j;
+        for (let i = Math.ceil(start * c.sampleRate); i < out.length; i++) {
+          const t = i / c.sampleRate - start;
+          const env = Math.min(1, t / 0.006) * Math.exp(-t * (clear ? 7 : 13));
+          out[i] +=
+            env *
+            (Math.sin(t * hz * Math.PI * 2) * 0.58 +
+              Math.sin(t * hz * Math.PI * 4) * 0.15 * Math.exp(-t * 12));
+        }
+      });
+      this.buffers[key] = buffer;
+    }
+    this.play(this.buffers[key], {
+      volume: clear ? 0.35 : 0.3,
+      filter: 6000,
+      fade: 0.025,
+    });
   }
   thump(frequency, volume, pan, duration) {
     if (this.voices.size >= 28) return;
