@@ -102,30 +102,62 @@ export function nearestRoad(p, street) {
 // Cached node-to-node trees keep the minimap and police routes inexpensive.
 const trees = new Map();
 function tree(source) {
-  if (trees.has(source)) return trees.get(source);
-  const costs = NODES.map(() => Infinity),
-    prev = NODES.map(() => -1),
-    done = new Set();
-  costs[source] = 0;
-  for (let k = 0; k < NODES.length; k++) {
-    let u = -1,
-      c = Infinity;
-    for (let i = 0; i < NODES.length; i++)
-      if (!done.has(i) && costs[i] < c) {
-        c = costs[i];
-        u = i;
+  if (trees.has(source)) {
+    const found = trees.get(source);
+    trees.delete(source);
+    trees.set(source, found);
+    return found;
+  }
+  const costs = new Float64Array(NODES.length).fill(Infinity),
+    prev = new Int32Array(NODES.length).fill(-1),
+    heap = [];
+  const before = (a, b) =>
+    a.cost < b.cost || (a.cost === b.cost && a.node < b.node);
+  const push = (node, cost) => {
+    const item = { node, cost };
+    let i = heap.length;
+    heap.push(item);
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (!before(item, heap[parent])) break;
+      heap[i] = heap[parent];
+      i = parent;
+    }
+    heap[i] = item;
+  };
+  const pop = () => {
+    const first = heap[0],
+      tail = heap.pop();
+    if (heap.length) {
+      let i = 0;
+      while (i * 2 + 1 < heap.length) {
+        let child = i * 2 + 1;
+        if (child + 1 < heap.length && before(heap[child + 1], heap[child]))
+          child++;
+        if (!before(heap[child], tail)) break;
+        heap[i] = heap[child];
+        i = child;
       }
-    if (u < 0) break;
-    done.add(u);
-    for (const e of NODES[u].links)
-      if (c + e.length < costs[e.node]) {
-        costs[e.node] = c + e.length;
-        prev[e.node] = u;
+      heap[i] = tail;
+    }
+    return first;
+  };
+  costs[source] = 0;
+  push(source, 0);
+  while (heap.length) {
+    const { node: u, cost: c } = pop();
+    if (c !== costs[u]) continue;
+    for (const edge of NODES[u].links)
+      if (c + edge.length < costs[edge.node]) {
+        costs[edge.node] = c + edge.length;
+        prev[edge.node] = u;
+        push(edge.node, costs[edge.node]);
       }
   }
-  const t = { costs, prev };
-  trees.set(source, t);
-  return t;
+  const result = { costs, prev };
+  if (trees.size >= 96) trees.delete(trees.keys().next().value);
+  trees.set(source, result);
+  return result;
 }
 export function routeBetween(from, to) {
   const a = nearestRoad(from),
@@ -179,8 +211,37 @@ export const START = {
   angle: 1.66,
 };
 export const CLOCK_PARTS = [
-  { x: 7.5, z: 0, w: 38, d: 28, h: 46, angle: 0 },
-  { x: 14, z: -30, w: 26, d: 48, h: 29, angle: 0 },
+  // World transform of the renderer's -PI/2 group, including its separate wing.
+  { x: 9, z: 0, w: 34, d: 27, h: 31, angle: 0 },
+  { x: 14, z: -30, w: 25, d: 46, h: 27, angle: 0 },
+  { x: -9, z: 0, w: 2, d: 14, h: 30, angle: 0 },
+  ...[-5.2, -3.6, 3.6, 5.2].map((z) => ({
+    x: -10.5,
+    z,
+    w: 1.1,
+    d: 0.7,
+    base: 1,
+    h: 27,
+    angle: 0,
+  })),
+  ...[3.5, 8.7, 14, 19.3, 24.6, 29.8].map((y) => ({
+    x: 9,
+    z: 0,
+    w: 35,
+    d: 28,
+    base: y - 0.175,
+    h: y + 0.175,
+    angle: 0,
+  })),
+  ...[3, 8, 13, 18, 23, 27.5].map((y) => ({
+    x: 14,
+    z: -30,
+    w: 26,
+    d: 47,
+    base: y - 0.2,
+    h: y + 0.2,
+    angle: 0,
+  })),
 ];
 export const CLOCK_BUILDING = placeOffRoad({ x: -410, z: -234 }, CLOCK_PARTS);
 export const CHECKPOINTS = [
@@ -240,6 +301,7 @@ for (const road of ROADS) {
         angle: road.angle - Math.PI / 2,
         tint: Math.floor(rand() * 5),
         name: road.name,
+        cornices: [1, h * 0.25, h * 0.5, h * 0.75, h + 0.3],
       });
     }
   }

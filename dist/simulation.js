@@ -1,4 +1,5 @@
 import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
+import { buildingContact } from "./building-contact.js";
 import { levelRewards, creditAward } from "./community-rules.js";
 import { TREES } from "./world-props.js";
 import { BRIDGE_BARRIERS } from "./bridge-data.js";
@@ -92,6 +93,7 @@ export function vehicle(x = 0, z = 0, angle = 0) {
   };
 }
 export function resolveCircleRect(car, r, rect) {
+  if (car.width && car.length) return buildingContact(car, rect);
   if (
     rect.broken ||
     (rect.h != null && (car.y || 0) >= rect.h - 0.1) ||
@@ -434,6 +436,7 @@ export class ChaseSimulation {
             mass: 4.2,
             width: 3.15,
             length: 6.3,
+            height: 2.55,
             speedScale: 0.5,
             accelerationScale: 0.55,
             yawScale: 0.65,
@@ -444,6 +447,7 @@ export class ChaseSimulation {
               mass: 1.85,
               width: 2.22,
               length: 5.3,
+              height: 2.15,
               speedScale: 0.94,
               accelerationScale: 1.05,
               yawScale: 0.9,
@@ -453,6 +457,7 @@ export class ChaseSimulation {
               mass: 1.2,
               width: 1.98,
               length: 4.98,
+              height: 1.6,
               speedScale: 1,
               accelerationScale: 1,
               yawScale: 1,
@@ -462,6 +467,7 @@ export class ChaseSimulation {
         maxHealth: kind === "supercar" ? 120 : 110,
         width: kind === "supercar" ? 2.08 : 1.96,
         length: kind === "supercar" ? 4.8 : 4.5,
+        height: 1.45,
         speedScale: kind === "supercar" ? 1.14 : 1.07,
         accelerationScale: kind === "supercar" ? 1.3 : 1.16,
         yawScale: 1.12,

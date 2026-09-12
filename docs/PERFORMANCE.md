@@ -1,5 +1,11 @@
 # Rendering and audio lifecycle
 
+## Timings and surface queries 1.13.0
+
+For 100 distinct route queries on the same graph, the previous quadratic Dijkstra took 318.22 ms and the heap implementation took 15.86 ms locally. All 100 returned point sequences matched exactly, including deterministic tie ordering. This measures route computation, not total game FPS. The source cache now holds at most 96 trees in typed arrays. Single-cell obstacle queries reuse immutable ordered lists; water support checks use Z-banded polygon edges instead of full street scans.
+
+The 1,200-step simulation workload's warm median was 327.20 ms in this run, within the range of the previous release's 336.62 ms. No overall FPS gain is claimed. Six browser lifecycle cycles retained 5,611 world geometries / 86 textures, 67 garage geometries / 5 textures, zero remaining effects/voices and 72.05–72.84 MiB sampled JS heap. This bounded local observation does not prove the absence of every leak on every device. The race clock owns no timer or animation loop; leaderboard polling still stops on close/hide. Existing media bytes and render-quality budgets remain unchanged.
+
 ## World queries 1.9.0
 
 A static 48-metre cell index prunes contact and sightline footprints; query results retain source order for deterministic iterative resolution. The nearest-road bounding hierarchy returns the exact original projection, including road-ID tie breaks. Regression tests compare both indices against complete scans. Broken barriers are skipped by physics, sightlines and camera clipping without rebuilding immutable footprint bounds.

@@ -83,11 +83,19 @@ test("interior overlap and car collision are separated without NaNs", () => {
   const c = vehicle(5, 5),
     rect = { minX: 0, maxX: 10, minZ: 0, maxZ: 10 };
   resolveCircleRect(c, 2, rect);
-  assert(c.x <= -2 || c.x >= 12 || c.z <= -2 || c.z >= 12);
+  assert(
+    c.x <= -c.width / 2 ||
+      c.x >= 10 + c.width / 2 ||
+      c.z <= -c.length / 2 ||
+      c.z >= 10 + c.length / 2,
+  );
   const a = vehicle(),
     b = vehicle();
   collideVehicles(a, b);
-  assert(distance(a, b) >= 1.98, 'door-to-door overlap is resolved using the actual body width');
+  assert(
+    distance(a, b) >= 1.98,
+    "door-to-door overlap is resolved using the actual body width",
+  );
   assert(Number.isFinite(a.x));
 });
 test("police route around blocks instead of driving through them", () => {

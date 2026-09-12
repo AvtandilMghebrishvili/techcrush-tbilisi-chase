@@ -1,3 +1,6 @@
+import { formatRaceTime } from "./race-timing.js";
+import { carSpec } from "./config.js";
+import { PARTS } from "./progression.js";
 import {
   ACHIEVEMENTS,
   AVATARS,
@@ -30,6 +33,17 @@ export class CommunityUI {
     this.guest = false;
     const dialog = $("community-dialog");
     $("leaderboard-open").onclick = () => this.open("board");
+    $("leaderboard-menu").onclick = () => this.open("board");
+    $("time-filters").onsubmit = (e) => {
+      e.preventDefault();
+      this.page = 0;
+      this.load();
+    };
+    for (const id of ["time-car", "time-build"])
+      $(id).onchange = () => {
+        this.page = 0;
+        this.load();
+      };
     $("driver-open").onclick = () => this.open("profile");
     $("community-close").onclick = () => dialog.close();
     dialog.addEventListener("close", () => {
@@ -234,6 +248,25 @@ export class CommunityUI {
     if (!$("community-dialog").open || this.tab !== "board" || document.hidden)
       return;
     const generation = this.generation;
+    const timed = this.mode === "times";
+    $("time-filters").hidden = !timed;
+    $("time-rules").hidden = !timed;
+    if (timed && !$("time-level").checkValidity()) {
+      $("time-level").reportValidity();
+      return;
+    }
+    if (
+      this.data &&
+      (this.data.mode !== this.mode ||
+        (timed &&
+          (this.data.level !== Number($("time-level").value) ||
+            this.data.car !== $("time-car").value ||
+            this.data.build !== $("time-build").value)))
+    ) {
+      $("board-rows").replaceChildren();
+      $("board-self").replaceChildren();
+      $("board-empty").hidden = true;
+    }
     this.controller = new AbortController();
     $("board-status").textContent = "Loading shared standings…";
     $("board-refresh").disabled = true;
@@ -247,7 +280,7 @@ export class CommunityUI {
       );
     try {
       const response = await fetch(
-        `/api/leaderboard?mode=${this.mode}&page=${this.page}`,
+        `/api/leaderboard?${new URLSearchParams({ mode: this.mode, page: this.page, ...(timed ? { level: $("time-level").value, car: $("time-car").value, build: $("time-build").value } : {}) })}`,
         {
           headers: { Authorization: "Bearer " + this.store.token },
           cache: "no-store",
@@ -276,6 +309,9 @@ export class CommunityUI {
     }
   }
   renderBoard(data) {
+    $("board-last-heading").textContent =
+      this.mode === "times" ? "REWINDS" : "CLEARS";
+    if (this.mode === "times") return this.renderTimes(data);
     const weekly = this.mode === "weekly";
     $("board-rule").textContent = weekly
       ? `Banked points this week. Resets ${new Date(data.resetsAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} at 00:00 UTC.`
@@ -303,5 +339,29 @@ export class CommunityUI {
     $("board-self").innerHTML = me
       ? `<span>YOUR POSITION</span><strong>#${num(me.rank)}</strong><div><b>${esc(me.name)}</b><small>LEVEL ${me.level} · ${num(weekly ? me.weekScore : me.bestScore)} ${weekly ? "WEEK POINTS" : "BEST SCORE"}</small></div>`
       : `<span>${this.store.profile.driver.listed ? "READY TO PLACE" : "YOUR DRIVER"}</span><div><b>${esc(this.store.profile.driver.name || "Choose a name to join")}</b><small>${this.store.profile.driver.listed ? "Bank a chase to appear here." : this.store.profile.driver.name ? "Public visibility is off. Change it in My Driver." : "Open My Driver. No account needed."}</small></div>`;
+  }
+  renderTimes(data) {
+    $("board-rule").textContent =
+      `${data.courseLabel} · Level ${data.level} · fastest completed escapes. Equal times share a rank.`;
+    $("board-score-heading").textContent = "CLEAR TIME";
+    $("board-count").textContent =
+      `${num(data.total)} DRIVERS · LEVEL ${data.level}`;
+    const build = (r) =>
+      `${carSpec(r.car).name} · ${r.buildPoints ? "TUNED " + r.buildPoints + "/" + PARTS.length * 4 : "STOCK"}`;
+    $("board-rows").innerHTML = data.entries
+      .map(
+        (row) =>
+          `<tr class="${row.id === this.store.publicId ? "is-me" : ""} ${row.rank <= 3 ? "podium-" + row.rank : ""}"><td class="board-position">${row.rank <= 3 ? '<span class="rank-medal">' + row.rank + "</span>" : num(row.rank)}</td><td><div class="board-driver"><span class="driver-avatar avatar-${avatar(row.avatar)}">${esc(Array.from(row.name)[0]?.toUpperCase() || "?")}</span><div><b>${esc(row.name)}${row.id === this.store.publicId ? " <em>YOU</em>" : ""}</b><small>${esc(build(row))}</small><small>${row.rewinds} REWINDS · ${new Date(row.recordedAt).toLocaleDateString()}</small></div></div></td><td class="board-level"><strong>${row.level}</strong><small>6/6 + ESCAPE</small></td><td class="board-points time-value">${formatRaceTime(row.durationMs)}</td><td class="board-wins">${row.rewinds}</td></tr>`,
+      )
+      .join("");
+    $("board-empty").hidden = data.total > 0;
+    $("board-prev").disabled = data.page === 0;
+    $("board-next").disabled = (data.page + 1) * 25 >= data.total;
+    $("board-page").textContent = data.total
+      ? `${data.page + 1} / ${Math.ceil(data.total / 25)}`
+      : "NO CLEAR TIMES YET";
+    $("board-self").innerHTML = data.me
+      ? `<span>YOUR TIME</span><strong>#${num(data.me.rank)}</strong><div><b>${formatRaceTime(data.me.durationMs)} · LEVEL ${data.me.level}</b><small>${esc(build(data.me))}</small></div>`
+      : `<span>LEVEL ${data.level}</span><div><b>No matching time yet</b><small>Clear this level with a public driver profile to record a time.</small></div>`;
   }
 }

@@ -1,4 +1,5 @@
 import { CommunityUI } from "./community-ui.js";
+import { RaceClock, TIME_COURSE, formatRaceTime } from "./race-timing.js";
 import { ACHIEVEMENTS } from "./community-rules.js";
 import { setupInterface, actionLabel } from "./interface.js";
 import { ChaseAudio } from "./chase-audio.js";
@@ -12,6 +13,7 @@ import { ProfileClient } from "./profile-client.js";
 import { GarageUI } from "./garage-ui.js";
 import { upgradedSpec } from "./progression.js";
 const career = new ProfileClient();
+const raceClock = new RaceClock();
 let workshop,
   community,
   runId = null,
@@ -60,6 +62,11 @@ function dialogOpen() {
   ].some((id) => $(id).open);
 }
 function refreshActivity() {
+  raceClock.setActive(
+    !document.hidden &&
+      !dialogOpen() &&
+      ["running", "rewinding"].includes(sim?.phase),
+  );
   loop.setEnabled(!document.hidden);
   soundscape.setForeground(!document.hidden && !dialogOpen());
   mobile?.syncActivity();
@@ -230,6 +237,7 @@ async function bankRun() {
           jumps: sim.runJumps,
           topSpeed: sim.runTopSpeed,
           quests: sim.runQuests,
+          timing: raceClock.result(),
         },
         result: ["won", "wrecked", "busted"].includes(sim.phase)
           ? sim.phase
@@ -327,7 +335,11 @@ async function start() {
     if (career.pending) await career.retry();
     if (career.profile.selectedCar !== selectedCar)
       await career.mutate({ type: "select", car: selectedCar });
-    await career.mutate({ type: "begin-run", car: selectedCar });
+    await career.mutate({
+      type: "begin-run",
+      car: selectedCar,
+      course: TIME_COURSE,
+    });
     sim.start(selectedCar, {
       level: career.profile.level,
       equipment: career.profile.cars[selectedCar],
@@ -336,6 +348,7 @@ async function start() {
     sim.navQuest = $("route-selector").value || null;
     runId = career.profile.activeRun.id;
     view.startGame(sim);
+    raceClock.reset();
     $("intro").hidden = true;
     $("mission-card").hidden = true;
     $("hud").hidden = false;
@@ -356,6 +369,7 @@ async function start() {
   }
 }
 function pause() {
+  raceClock.setActive(false);
   if (sim.phase === "rewinding") sim.timeline.release(sim);
   if (!["running", "paused"].includes(sim.phase)) return;
   if (sim.phase === "running") {
@@ -379,6 +393,7 @@ function showModal(title, copy, kicker, end) {
   mobile?.clear();
   document.body.dataset.phase = sim.phase;
   $("result-reward").textContent = "";
+  $("result-time").textContent = "";
   $("modal-title").textContent = title;
   $("modal-copy").textContent = copy;
   $("modal-kicker").textContent = kicker;
@@ -392,6 +407,7 @@ function showModal(title, copy, kicker, end) {
   (end ? $("restart") : $("resume")).focus();
 }
 function finish() {
+  raceClock.setActive(false);
   const won = sim.phase === "won";
   showModal(
     won ? "GONE." : "CHASE OVER.",
@@ -403,6 +419,8 @@ function finish() {
     won ? "CLEAN GETAWAY" : sim.phase === "busted" ? "BUSTED" : "CAR WRECKED",
     true,
   );
+  $("result-time").textContent =
+    `LEVEL ${sim.level} · ${formatRaceTime(raceClock.result().elapsedMs)}${won ? " · CLEAR TIME" : " · NOT A FINISHED TIME"}`;
   keys.clear();
   $("pause").disabled = true;
   if (won) {
@@ -447,6 +465,7 @@ function updateHUD() {
   if ($("route-selector").value !== (sim.navQuest || ""))
     $("route-selector").value = sim.navQuest || "";
   $("run-level").textContent = `LEVEL ${sim.level}`;
+  $("run-time").textContent = formatRaceTime(raceClock.elapsedMs);
   $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
   $("score").textContent = Math.floor(sim.score).toString().padStart(6, "0");
   $("progress").textContent = sim.checkpoint + " / 6";
@@ -675,6 +694,8 @@ function frame(dt) {
       sim.phase === "rewinding" ||
       (input().rewind && ["wrecked", "busted"].includes(sim.phase)))
   ) {
+    raceClock.setActive(true);
+    raceClock.rewind(!!input().rewind && sim.timeline.available > 0);
     accumulator += dt;
     while (accumulator >= 1 / 120) {
       const previousPhase = sim.phase;

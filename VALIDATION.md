@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## v1.13.0 — Shared level times and surface precision
+
+- 151 tests pass. New coverage includes non-rewindable wall time, frozen loadout metadata, invalid timing, old-client/save compatibility, per-level/car/stock rankings, equal-time ranks, privacy, atomic competing settlements and replay protection.
+- Every sampled visible bridge deck and bank cap remains supported up to its edge. Road/sidewalk junction interiors are dry; bumper overhang is safe while tires remain supported, and a fully unsupported car falls. Existing bridge crossings, river recovery, ramp jumps and lane-clearance tests pass.
+- Chassis contacts are tested at multiple rotations, with near-wall clearance, solid cornices, refined clock wings, curved bath domes and clearance beneath elevated tubes. Existing high-speed wall, barrier, tree and vehicle-contact tests pass.
+- Two independent local Chromium contexts finish controlled final-gate fixtures through the real game loop/API and see each other's times. Pause freezes the timer, rewind increases it, and records/profile identity survive reload. Level filtering and desktop/390×844/360×640/667×375/844×390 menu, HUD and leaderboard layouts were checked. These fixtures test integration, not a normal-input route win. No QA players are written to the public database.
+- Six browser lifecycle cycles suspend idle rendering/audio and keep geometry/texture counts stable. The heap route benchmark returns exactly the same 100 paths as the previous implementation. See [Performance](docs/PERFORMANCE.md) for scoped measurements.
+- A normal-input Veyra level-1 route controller clears all six checkpoints and escapes in 227.4 simulated seconds with 72 HP, 32,563 points and 8 patrol takedowns. This is a route smoke test, not a public timed record.
+- The final minified client passes seeded local shared-time sorting/car filters, mobile simultaneous drift/nitro, frozen pause clock, a save-backed box, garage preview, preferences across reload and desktop driving. Build checks verify all 21 runtime media assets remain byte-identical, links resolve and no QA globals ship. The new additive SQL migration is included in the Worker build.
+
 ## v1.12.0 — Tbilisi expeditions
 
 - 143 automated tests pass, including new real-physics rooftop/river landings, slow failed launches, high-speed solid ramp faces, roof camera clearance, old profile migration, idempotent server stunt awards and varied late-level patrols.

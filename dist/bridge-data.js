@@ -1,5 +1,5 @@
 import { ROAD_DATA } from "./road-data.js";
-import { LANDMARKS } from "./district-data.js";
+import { LANDMARKS, RIVER_BANKS } from "./district-data.js";
 
 // Deck and barrier dimensions are shared with the renderer.
 export const BRIDGE_DECKS = [
@@ -28,7 +28,7 @@ export const BRIDGE_DECKS = [
       };
     }),
 ];
-const peace = {
+export const PEACE_DECK = {
   name: "PEACE BRIDGE",
   x: LANDMARKS.peace.x,
   z: LANDMARKS.peace.z,
@@ -36,7 +36,19 @@ const peace = {
   length: 150,
   width: 8,
 };
-const rails = [...BRIDGE_DECKS, peace].flatMap((b) =>
+export const BANK_CAPS = RIVER_BANKS.flatMap((bank) =>
+  bank.slice(1).map((b, i) => {
+    const a = bank[i];
+    return {
+      x: (a[0] + b[0]) / 2,
+      z: (a[1] + b[1]) / 2,
+      width: 2.6,
+      length: Math.hypot(b[0] - a[0], b[1] - a[1]),
+      angle: Math.atan2(b[0] - a[0], b[1] - a[1]),
+    };
+  }),
+);
+const rails = [...BRIDGE_DECKS, PEACE_DECK].flatMap((b) =>
   [-1, 1].map((side) => ({
     x: b.x + Math.cos(b.angle) * side * (b.width / 2 - 0.2),
     z: b.z - Math.sin(b.angle) * side * (b.width / 2 - 0.2),

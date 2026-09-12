@@ -25,11 +25,26 @@ export function openLocalDatabase(filename = ".sites-runtime/garages.sqlite") {
   }
   return {
     close: () => db.close(),
+    async batch(statements) {
+      db.exec("BEGIN");
+      try {
+        const results = statements.map((s) => s._execute());
+        db.exec("COMMIT");
+        return results;
+      } catch (error) {
+        db.exec("ROLLBACK");
+        throw error;
+      }
+    },
     prepare(sql) {
       const statement = db.prepare(sql);
       return {
         bind(...values) {
           return {
+            _execute() {
+              const r = statement.run(...values);
+              return { success: true, meta: { changes: Number(r.changes) } };
+            },
             async all() {
               return { results: statement.all(...values) };
             },

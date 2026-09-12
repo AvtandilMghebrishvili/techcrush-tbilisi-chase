@@ -148,31 +148,52 @@ export async function handleApi(request, DB) {
         profile.operations = [...(profile.operations || []), body.id].slice(
           -128,
         );
-        const result = await DB.prepare(
+        const update = DB.prepare(
           "UPDATE garages SET profile=?,version=version+1,updated_at=?,public_id=?,display_name=?,avatar=?,listed=?,ranked_runs=?,rank_level=?,rank_checkpoints=?,best_score=?,total_score=?,wins=?,badges=?,week_key=?,week_score=?,week_wins=?,rank_at=? WHERE key_hash=? AND version=?",
-        )
-          .bind(
-            JSON.stringify(profile),
-            Date.now(),
-            publicId,
-            profile.driver.name,
-            profile.driver.avatar,
-            Number(profile.driver.listed && !!profile.driver.name),
-            profile.community.runs,
-            profile.community.furthestLevel,
-            profile.community.checkpoints,
-            profile.community.bestScore,
-            profile.community.totalScore,
-            profile.community.wins,
-            JSON.stringify(profile.community.badges),
-            profile.community.week,
-            profile.community.weekScore,
-            profile.community.weekWins,
-            profile.community.rankAt || Date.now(),
+        ).bind(
+          JSON.stringify(profile),
+          Date.now(),
+          publicId,
+          profile.driver.name,
+          profile.driver.avatar,
+          Number(profile.driver.listed && !!profile.driver.name),
+          profile.community.runs,
+          profile.community.furthestLevel,
+          profile.community.checkpoints,
+          profile.community.bestScore,
+          profile.community.totalScore,
+          profile.community.wins,
+          JSON.stringify(profile.community.badges),
+          profile.community.week,
+          profile.community.weekScore,
+          profile.community.weekWins,
+          profile.community.rankAt || Date.now(),
+          hash,
+          version,
+        );
+        const record =
+          body.action.type === "settle" ? profile.community.lastTime : null;
+        let result;
+        if (record && record.runId === body.action.runId) {
+          const insert = DB.prepare(
+            "INSERT INTO level_records (key_hash,course,level,car,build_class,build_points,duration_ms,rewinds,recorded_at) SELECT ?,?,?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.community.lastTime.runId')=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(key_hash,course,level,car,build_class) DO UPDATE SET build_points=excluded.build_points,duration_ms=excluded.duration_ms,rewinds=excluded.rewinds,recorded_at=excluded.recorded_at WHERE excluded.duration_ms<level_records.duration_ms",
+          ).bind(
             hash,
-            version,
-          )
-          .run();
+            record.course,
+            record.level,
+            record.car,
+            record.buildPoints === 0 ? "stock" : "tuned",
+            record.buildPoints,
+            record.elapsedMs,
+            record.rewinds,
+            record.recordedAt,
+            hash,
+            version + 1,
+            record.runId,
+            body.id,
+          );
+          [result] = await DB.batch([update, insert]);
+        } else result = await update.run();
         if (result.meta.changes !== 1)
           return json(
             {

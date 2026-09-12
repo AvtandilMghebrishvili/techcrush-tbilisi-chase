@@ -16,7 +16,7 @@ export function actionLabel(button, label) {
 }
 export function setupInterface() {
   for (const [id, icon, label, key] of [
-    ["leaderboard-open", "trophy", "RANKS", ""],
+    ["leaderboard-open", "trophy", "LEADERBOARD", ""],
     ["control-settings", "settings", "SETUP", ""],
     ["camera-toggle", "camera", "CHASE", "C"],
     ["lighting-toggle", "sun", "AUTO · DUSK", ""],

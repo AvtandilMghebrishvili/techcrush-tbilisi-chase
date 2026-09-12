@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.0 — 2026-09-12
+
+- Add shared per-level completion times, car/stock filters, equal-time ranks, rewind counts and a prominent menu Leaderboard button. Active wall time excludes pause/loading but includes rewind and slow frames; successful clears are timed to hundredths.
+- Add server-captured course/loadout metadata and an indexed level-record table. Garage settlement and the record insert are atomic. Keep existing saves, identities, standings and old migrations intact; older clients still bank normal progress.
+- Derive water support from rendered roads, sidewalks, bridge decks and bank caps. Keep overhanging cars supported until tire contacts leave the edge.
+- Replace oversized vehicle-circle/building contacts with oriented chassis contacts. Refine clock wings/cornices, baths, elevated tubes and cable-station collision dimensions.
+- Replace quadratic shortest-path scans with a deterministic heap and bounded typed-array cache; index water edges and reuse single-cell contact lists. Preserve runtime artwork and quality settings.
+
 ## 1.12.0 — 2026-09-12
 
 - Expand the connected Tbilisi road graph to 598 nodes / 766 segments; join stunt aprons into continuous asphalt, keep widened roads clear of buildings and add a scenic landmark access road.

@@ -1,4 +1,10 @@
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 export const garages = sqliteTable(
   "garages",
   {
@@ -45,6 +51,40 @@ export const garages = sqliteTable(
       t.weekWins,
       t.rankAt,
       t.publicId,
+    ),
+  ],
+);
+export const levelRecords = sqliteTable(
+  "level_records",
+  {
+    keyHash: text("key_hash")
+      .notNull()
+      .references(() => garages.keyHash),
+    course: text("course").notNull(),
+    level: integer("level").notNull(),
+    car: text("car").notNull(),
+    buildClass: text("build_class").notNull(),
+    buildPoints: integer("build_points").notNull(),
+    durationMs: integer("duration_ms").notNull(),
+    rewinds: integer("rewinds").notNull(),
+    recordedAt: integer("recorded_at").notNull(),
+  },
+  (t) => [
+    primaryKey({
+      columns: [t.keyHash, t.course, t.level, t.car, t.buildClass],
+    }),
+    index("leaderboard_level_time").on(
+      t.course,
+      t.level,
+      t.durationMs,
+      t.recordedAt,
+    ),
+    index("leaderboard_stock_time").on(
+      t.course,
+      t.level,
+      t.buildClass,
+      t.car,
+      t.durationMs,
     ),
   ],
 );

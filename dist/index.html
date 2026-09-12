@@ -159,6 +159,13 @@
           </div>
         </div>
         <div class="intro-actions">
+          <button
+            id="leaderboard-menu"
+            class="secondary leaderboard-link"
+            type="button"
+          >
+            🏆 LEADERBOARD <small>LEVELS · TIMES · SCORES</small>
+          </button>
           <button id="workshop-open" class="secondary workshop-link" disabled>
             YOUR GARAGE
           </button>
@@ -219,6 +226,9 @@
         <div class="score-panel">
           <div class="career-hud">
             <b id="run-level">LEVEL 1</b><span id="run-cash">0 CR</span>
+          </div>
+          <div class="race-clock">
+            <span>LEVEL TIME</span><b id="run-time">0:00.00</b>
           </div>
           <span class="label">RUN SCORE</span><strong id="score">000000</strong>
           <div class="checkpoint-heading">
@@ -298,6 +308,7 @@
           <h2 id="modal-title">PAUSED.</h2>
           <p id="modal-copy">Your getaway can wait.</p>
           <div id="result-score"></div>
+          <div id="result-time"></div>
           <p id="result-reward"></p>
           <button id="resume" class="primary">
             BACK TO THE CHASE <span>↗</span></button
@@ -350,9 +361,45 @@
             ><button data-board-mode="score" aria-pressed="false">
               HIGH SCORE</button
             ><button data-board-mode="weekly" aria-pressed="false">
-              THIS WEEK
+              THIS WEEK</button
+            ><button data-board-mode="times" aria-pressed="false">
+              LEVEL TIMES
             </button>
           </div>
+          <form id="time-filters" class="time-filters" hidden>
+            <label
+              >LEVEL<input
+                id="time-level"
+                type="number"
+                min="1"
+                max="1000000"
+                step="1"
+                value="1"
+                inputmode="numeric"
+                required
+            /></label>
+            <label
+              >CAR<select id="time-car">
+                <option value="all">All cars</option>
+                <option value="classic">Original 458</option>
+                <option value="gt">Apex R</option>
+                <option value="rally">Vector V12</option>
+                <option value="suv">Veyra W16</option>
+              </select></label
+            >
+            <label
+              >BUILD<select id="time-build">
+                <option value="all">All upgrades</option>
+                <option value="stock">Stock only</option>
+              </select></label
+            >
+            <button class="secondary" type="submit">SHOW ↗</button>
+          </form>
+          <p id="time-rules" class="time-rules" hidden>
+            Six checkpoints + escape. Pause/loading excluded; rewind time still
+            counts. Compare the same car with Stock only for equal equipment.
+            Records start with this course update; old progress stays saved.
+          </p>
           <div class="board-meta">
             <span id="board-count"></span
             ><button id="board-refresh" type="button">↻ REFRESH</button>
@@ -369,7 +416,9 @@
                   <th scope="col">DRIVER</th>
                   <th scope="col">LEVEL</th>
                   <th scope="col" id="board-score-heading">BEST SCORE</th>
-                  <th scope="col" class="board-wins">CLEARS</th>
+                  <th scope="col" class="board-wins" id="board-last-heading">
+                    CLEARS
+                  </th>
                 </tr>
               </thead>
               <tbody id="board-rows"></tbody>

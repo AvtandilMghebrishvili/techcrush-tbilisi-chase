@@ -1,3 +1,4 @@
+import { TIME_COURSE } from "./race-timing.js";
 import {
   newCommunity,
   normalizeName,
@@ -226,6 +227,15 @@ export function applyProgressAction(
       startedAt: context.now,
       level: p.level,
       car: action.car,
+      ...(action.course === TIME_COURSE
+        ? {
+            course: TIME_COURSE,
+            buildPoints: PARTS.reduce(
+              (sum, part) => sum + (p.cars[action.car][part.id] || 0),
+              0,
+            ),
+          }
+        : {}),
     };
   } else if (action.type === "select") {
     if (!CAR_IDS.includes(action.car)) throw Error("Unknown car");
@@ -310,6 +320,17 @@ export function applyProgressAction(
         context.now,
       );
       settleCommunity(p, metrics, action.result, level, context.now);
+      p.community.lastTime =
+        action.result === "won" && metrics.timing
+          ? {
+              ...metrics.timing,
+              level,
+              car: p.activeRun.car,
+              buildPoints: p.activeRun.buildPoints,
+              runId: p.activeRun.id,
+              recordedAt: context.now,
+            }
+          : null;
       p.activeRun = null;
     } else {
       // Already-open pre-community clients may finish their old chase. They do

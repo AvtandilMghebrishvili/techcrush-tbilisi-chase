@@ -1,7 +1,8 @@
 import { RIVER_POLYGON } from "./district-data.js";
-import { ROADS } from "./city-map.js";
+import { BRIDGE_DECKS, PEACE_DECK } from "./bridge-data.js";
+import { overOpenWater, wheelsUnsupported } from "./surface-support.js";
 import { terrainBlocked } from "./terrain.js";
-const bridges = ROADS.filter((r) => /Bridge/.test(r.name));
+const bridges = [...BRIDGE_DECKS, PEACE_DECK];
 export function inRiver(p) {
   let inside = false;
   for (
@@ -21,14 +22,14 @@ export function inRiver(p) {
 }
 export function bridgeAt(p) {
   return bridges.find((r) => {
-    const dx = p.x - r.start.x,
-      dz = p.z - r.start.z;
+    const dx = p.x - r.x,
+      dz = p.z - r.z;
     const along = dx * Math.sin(r.angle) + dz * Math.cos(r.angle);
     const side = Math.abs(dx * Math.cos(r.angle) - dz * Math.sin(r.angle));
-    return along >= -3 && along <= r.length + 3 && side <= r.width / 2 + 0.5;
+    return Math.abs(along) <= r.length / 2 && side <= r.width / 2;
   });
 }
-export const unsupportedWater = (p) => inRiver(p) && !bridgeAt(p);
+export const unsupportedWater = overOpenWater;
 export function driveableLine(a, b) {
   const steps = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.z - a.z) / 3));
   for (let i = 0; i <= steps; i++) {
@@ -44,7 +45,7 @@ export function beginWater(car, time) {
   if (
     car.waterAt != null ||
     (car.airborne && car.y > 0.8) ||
-    !unsupportedWater(car)
+    !wheelsUnsupported(car)
   )
     return false;
   car.waterAt = time;

@@ -1,3 +1,4 @@
+import { TIME_COURSE } from "./race-timing.js";
 export const STUNT_REWARDS = {
   "tbilisi-skybox-v1": { cash: 2500, boxes: 1, name: "Skybox" },
   "mtkvari-gap-v1": { cash: 1500, boxes: 1, name: "Mtkvari gap" },
@@ -50,6 +51,7 @@ export function newCommunity(level = 1) {
     weekWins: 0,
     lastDaily: "",
     lastReward: null,
+    lastTime: null,
   };
 }
 export const ACHIEVEMENTS = [
@@ -194,6 +196,28 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
   )
     throw Error("The stunt landing could not be verified.");
   m.quests = quests;
+  if (metrics.timing != null) {
+    const t = metrics.timing;
+    if (
+      !t ||
+      t.course !== TIME_COURSE ||
+      ticket.course !== TIME_COURSE ||
+      !Number.isSafeInteger(t.elapsedMs) ||
+      t.elapsedMs < 0 ||
+      t.elapsedMs > 21600000 ||
+      t.elapsedMs + 250 < m.time * 1000 ||
+      t.elapsedMs > elapsed * 1000 + 2000 ||
+      !Number.isSafeInteger(t.rewinds) ||
+      t.rewinds < 0 ||
+      t.rewinds > t.elapsedMs / 100 + 1
+    )
+      throw Error("Invalid level timing. Please start a new chase.");
+    m.timing = {
+      course: t.course,
+      elapsedMs: Math.ceil(t.elapsedMs / 10) * 10,
+      rewinds: t.rewinds,
+    };
+  }
   return m;
 }
 export function settleCommunity(p, m, result, level, now = Date.now()) {

@@ -1,4 +1,5 @@
 import { STUNT_APRONS } from "../dist/world-sites.js";
+import { BRIDGE_DECKS, PEACE_DECK, BANK_CAPS } from "../dist/bridge-data.js";
 import ClipperLib from "clipper-lib";
 import { writeFile } from "node:fs/promises";
 import { ROADS, NODES } from "../dist/city-map.js";
@@ -87,8 +88,31 @@ const ground = clip(
   [[RIVER_POLYGON]],
   "ctDifference",
 );
+const supportRects = [...BRIDGE_DECKS, PEACE_DECK, ...BANK_CAPS].map((b) => [
+  [
+    ...[
+      [-1, -1],
+      [1, -1],
+      [1, 1],
+      [-1, 1],
+    ].map(([sx, sz]) => [
+      b.x +
+        (Math.cos(b.angle) * sx * b.width) / 2 +
+        (Math.sin(b.angle) * sz * b.length) / 2,
+      b.z -
+        (Math.sin(b.angle) * sx * b.width) / 2 +
+        (Math.cos(b.angle) * sz * b.length) / 2,
+    ]),
+  ],
+]);
+// Physics uses exactly the rendered bank caps, road/sidewalk surfaces and decks.
+const openWater = clip(
+  [[RIVER_POLYGON]],
+  [...network(4.5), ...supportRects],
+  "ctDifference",
+);
 const rounded = JSON.parse(
-  JSON.stringify({ asphalt, sidewalk, ground }, (_, v) =>
+  JSON.stringify({ asphalt, sidewalk, ground, openWater }, (_, v) =>
     typeof v === "number" ? +v.toFixed(4) : v,
   ),
 );

@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**New: shared level times** — compare successful clears by level, car and stock equipment. Rewind cannot reduce the timer. A prominent gold Leaderboard button opens the rankings. Bridge edges, bank support and building contacts are refined. [Timing rules and fair comparison](docs/LEVEL_TIMES.md).
+
 **New: Tbilisi expeditions** — expanded streets, a rooftop reward crate, a river jump, varied late-level police and coming-soon city/car slots. Your existing garage stays intact. [Challenges, rewards and save compatibility](docs/EXPEDITIONS.md).
 
 **Community leaderboard** — furthest level, best chase and weekly points. Earn eight badges, a daily getaway bonus and a three-win streak box. [Community guide and scoring rules](docs/COMMUNITY.md).

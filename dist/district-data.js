@@ -122,8 +122,51 @@ for (let z = LANDMARKS.rike.z - 125; z < LANDMARKS.rike.z + 170; z += 18) {
   };
   if (!overlapsRoad(wall, 3)) RETAINING_WALLS.push(wall);
 }
+const physicalParts = {
+  ...landmarkParts,
+  // The tube shells are elevated and taper: full-height enclosing boxes used
+  // to block empty air beside/below them. These match the 30 rendered sections.
+  tubes: [-1, 1].flatMap((sign) =>
+    Array.from({ length: 30 }, (_, i) => {
+      const u = (i + 0.5) / 30,
+        radius = 12 + 7 * Math.cos(u * Math.PI) ** 2,
+        cy = 18 + u * 4,
+        angle = sign * 0.32,
+        dx = 48 - u * 99;
+      return {
+        x: -13 + Math.cos(angle) * dx,
+        z: sign * 26 - Math.sin(angle) * dx,
+        w: 99 / 30,
+        d: 2 * radius,
+        base: cy - radius * 0.81,
+        h: cy + radius * 0.81,
+        angle,
+        tubeSection: { radius, cy },
+      };
+    }),
+  ),
+  baths: [
+    ...landmarkParts.baths.slice(0, 7).map((p) => ({ ...p, h: 2.2 })),
+    ...landmarkParts.baths
+      .slice(0, 7)
+      .map((p) => ({
+        ...p,
+        base: 2.2,
+        h: 2.2 + p.w * 0.3,
+        dome: { radius: p.w / 2, height: p.w * 0.3 },
+      })),
+    { x: -5, z: 35, w: 27, d: 5, h: 13, angle: 0 },
+    { x: -5, z: 35, w: 11, d: 5.15, h: 18, angle: 0 },
+    { x: -5, z: 35, w: 28, d: 6, base: 12.775, h: 13.425, angle: 0 },
+  ],
+  metekhi: [
+    { x: 0, z: 0, w: 20, d: 29, base: 18, h: 40, angle: 0 },
+    { x: 0, z: 0, w: 25, d: 32, base: 40, h: 42, angle: 0 },
+  ],
+  cable: [{ x: 0, z: 0, w: 23, d: 13, h: 7, angle: 0 }],
+};
 export const DISTRICT_SOLIDS = [
-  ...Object.entries(landmarkParts).flatMap(([key, parts]) =>
+  ...Object.entries(physicalParts).flatMap(([key, parts]) =>
     parts.map((b) => ({
       ...b,
       x: b.x + LANDMARKS[key].x,
@@ -131,5 +174,5 @@ export const DISTRICT_SOLIDS = [
       landmark: true,
     })),
   ),
-  ...RETAINING_WALLS,
+  ...RETAINING_WALLS.map((w) => ({ ...w, w: 3, h: 8 })),
 ];
