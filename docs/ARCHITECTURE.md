@@ -21,6 +21,10 @@ flowchart LR
 
 ## Module guide
 
+`mobile-input.js` owns pointer/gyro composition, proportional thumb steering and a one-tap nitro latch. The latch is presentation input, not saved state: pause, rewind and leaving a run clear it. `stepVehicle` receives `boostLatched` only for mobile bursts, burns fuel continuously and allows boosted handbrake turns; reverse/braking still governs acceleration. Desktop held Shift retains its previous rules.
+
+`navigation-cache.js` shares the exact current player/checkpoint route across arrows, distance and minimap. Production bundles the authored ES modules using the checked-in Three sources; the build does not change geometry or texture data.
+
 All paths below are relative to `dist/`.
 
 | Module                                                    | Responsibility                                                                                                |

@@ -10,7 +10,13 @@ import {
   addHeadlights,
 } from "./vehicle-details.js";
 export async function loadSportsAssets(view, { legacy = true } = {}) {
-  const hdr = await new HDRLoader().loadAsync("./assets/daylight.hdr");
+  const [hdr, gltf, ao] = await Promise.all([
+    new HDRLoader().loadAsync("./assets/daylight.hdr"),
+    legacy ? new GLTFLoader().loadAsync("./assets/sports-car.glb") : null,
+    legacy
+      ? new THREE.TextureLoader().loadAsync("./assets/ferrari_ao.png")
+      : null,
+  ]);
   hdr.mapping = THREE.EquirectangularReflectionMapping;
   const pmrem = new THREE.PMREMGenerator(view.renderer);
   view.scene.environment = pmrem.fromEquirectangular(hdr).texture;
@@ -22,10 +28,6 @@ export async function loadSportsAssets(view, { legacy = true } = {}) {
   view.scene.backgroundBlurriness = 0.045;
   // The original licensed 458 is available alongside the three procedural models.
   if (!legacy) return;
-  const [gltf, ao] = await Promise.all([
-    new GLTFLoader().loadAsync("./assets/sports-car.glb"),
-    new THREE.TextureLoader().loadAsync("./assets/ferrari_ao.png"),
-  ]);
   view.carTemplate = gltf.scene.children[0];
   view.carAO = ao;
   const box = new THREE.Box3().setFromObject(view.carTemplate);

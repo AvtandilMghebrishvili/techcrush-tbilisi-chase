@@ -53,9 +53,9 @@ Ceilings are on-road values; acceleration time, charge, turns and collisions aff
 | M                     | Sound on/off                                   |
 | Enter                 | Start from the garage                          |
 
-Physical key codes support Georgian keyboard layouts. Phones and tablets have multi-touch driving buttons and optional **gyro / tilt steering**. Open **CONTROLS → ENABLE GYRO**, allow motion access, hold the phone comfortably and tap **CENTER STEERING**. Buttons remain available. [Mobile setup, sensitivity and performance guide](docs/MOBILE.md).
+Physical key codes support Georgian keyboard layouts. Mobile now defaults to **auto gas + thumb steering**: slide to turn, pull down to drift, and **tap NITRO once to burn the tank**. All three work together. Manual GAS, arrow buttons and **gyro / tilt steering** are available in **CONTROLS**. [Mobile setup and performance guide](docs/MOBILE.md).
 
-Portrait and landscape layouts include gas, brake/reverse, drift, turbo, rewind, recovery and camera switching. Auto accelerator is optional; braking overrides it. Auto graphics reduces rendering cost on touch devices, and Battery saver / High detail are selectable. A WebGL2 browser and internet connection are required.
+Portrait and landscape layouts include gas, brake/reverse, drift, turbo, rewind, recovery and camera switching. Auto accelerator can be switched off; braking overrides it. Auto graphics reduces rendering cost on touch devices, and Battery saver / High detail are selectable. A WebGL2 browser and internet connection are required.
 
 ## City lighting
 

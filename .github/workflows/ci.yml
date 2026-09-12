@@ -32,3 +32,5 @@ jobs:
         run: npm test
       - name: Build Worker, assets and migrations
         run: npm run build
+      - name: Verify production links and lossless assets
+        run: npm run check:build

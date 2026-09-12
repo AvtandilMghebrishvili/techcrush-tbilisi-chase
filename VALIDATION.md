@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Mobile arcade controls and loading 1.8.0 — 12 September 2026
+
+`npm test`: **113 passed, 0 failed**. Six new cases cover one-tap depletion/recharge, simultaneous steering/drift/boost in actual physics, brake priority, thumb ownership/hysteresis, lifecycle cancellation, exact route-cache invalidation and hashed-asset caching. Build and `npm run check:build` pass; all 21 shipped assets match source bytes exactly.
+
+Chrome touch emulation verified simultaneous thumb-pad drift + NITRO, continued boost after finger release, independent steering release, empty-tank lockout, and manual gas/right/drift. Hit targets were unobstructed with no horizontal overflow at 360×740, 390×844, 667×375 and 844×390. Separate synthetic gyro checks passed re-enable, pause detachment, neutral reset and resumed steering.
+
+The minified production build passed touch driving/nitro/pause, a real isolated save-API box opening, garage preview, persistence of opened boxes and manual preferences across reload, and desktop W/Shift at 1280×800. A pre-existing Start/footer overlap at that desktop size was fixed with a scrollable menu. No page errors or missing assets appeared in the completed production check. Credits' road downloads remain available and no QA globals ship.
+
+[Cold-load measurements](docs/PERFORMANCE.md#mobile-loading-180): requests 83→18, JS 2.79→1.05 MB and observed load 10.23→8.66 s at 40 ms / 4 MiB/s. No new graphics reduction or save-schema change. Physical-phone feel, FPS and thermal performance remain unverified.
+
 ## Idle CPU lifecycle 1.7.1 — 12 September 2026
 
 `npm test`: **107 passed, 0 failed** including four new lifecycle/audio cleanup cases. Production Worker/assets build passes. [Detailed before/after measurements and reproduction steps](docs/PERFORMANCE.md).

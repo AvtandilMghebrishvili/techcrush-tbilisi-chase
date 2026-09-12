@@ -61,6 +61,8 @@ Record browser/version, device/GPU, commit, steps and observed results with any 
 
 ## Before a release
 
+`mobile-arcade.test.mjs` covers the committed nitro burst, real drift/boost physics, brake priority, pad ownership, input cancellation, exact route reuse and immutable-cache scope. After `npm run build`, run `npm run check:build` to verify local production links and unchanged asset bytes. Exercise touch controls on the bundled build as well as the development source.
+
 `lifecycle.test.mjs` checks that idle rendering owns no callback, invalidations coalesce, hidden frames cancel, resumed clocks do not catch up hidden time, terminal work drains and can wake for rewind, and audio DSP/node connections are suspended/released correctly. [Performance validation](PERFORMANCE.md) documents the browser measurements and repeat-run memory checks.
 
 Run the suite for the release commit, run full routes if mechanics/maps changed, and inspect the final hosted artifact in a browser. Verify the public source includes all local runtime assets and the lockfile. Update `VALIDATION.md` with new evidence rather than silently replacing historical results.

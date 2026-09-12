@@ -159,14 +159,28 @@ export class SceneView {
   async loadTextures(progress = () => {}) {
     progress(12, "LOADING STREETS & FACADES");
     const loader = new THREE.TextureLoader();
-    const [road, facade, logo, wordmark] = await Promise.all(
-      [
+    let completed = 0;
+    const track = (promise) =>
+      promise.then((value) => {
+        progress(
+          12 + Math.round((++completed / 8) * 76),
+          "LOADING CITY, CARS & TREES",
+        );
+        return value;
+      });
+    const [road, facade, logo, wordmark, hill, hillNormal] = await Promise.all([
+      ...[
         "road-day.png",
         "limestone.png",
         "techcrush-logo.jpg",
         "techcrush-wordmark.png",
-      ].map((n) => loader.loadAsync("./assets/" + n)),
-    );
+        "hills-diff.jpg",
+        "hills-nor_gl.jpg",
+      ].map((n) => track(loader.loadAsync("./assets/" + n))),
+      track(loadTrees(this)),
+      track(loadSportsAssets(this)),
+    ]);
+    progress(90, "FINISHING CITY MATERIALS");
     applyTechcrushBrand(this, logo.image, wordmark.image);
     logo.dispose();
     wordmark.dispose();
@@ -188,12 +202,6 @@ export class SceneView {
       m.emissiveIntensity = 0;
       m.needsUpdate = true;
     }
-    progress(38, "SHAPING THE TBILISI SKYLINE");
-    const [hill, hillNormal] = await Promise.all(
-      ["hills-diff.jpg", "hills-nor_gl.jpg"].map((n) =>
-        loader.loadAsync("./assets/" + n),
-      ),
-    );
     hill.colorSpace = THREE.SRGBColorSpace;
     for (const t of [hill, hillNormal]) {
       t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -223,14 +231,6 @@ export class SceneView {
         "#include <map_fragment>\ndiffuseColor.rgb=mix(diffuseColor.rgb,vec3(.29,.31,.23),.72);",
       );
     };
-    progress(57, "PREPARING CARS & TREES");
-    let complete = 0;
-    await Promise.all(
-      [loadTrees(this), loadSportsAssets(this)].map((p) =>
-        p.then(() => progress(57 + ++complete * 17, "PREPARING CARS & TREES")),
-      ),
-    );
-    this.selectCar("gt");
     this.lighting = new CityLighting(this);
     progress(94, "CONNECTING YOUR GARAGE");
   }

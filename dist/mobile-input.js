@@ -75,13 +75,78 @@ export class PointerLedger {
     this.pointers.clear();
   }
   has(key) {
-    return [...this.pointers.values()].includes(key);
+    for (const held of this.pointers.values()) if (held === key) return true;
+    return false;
   }
   get size() {
     return this.pointers.size;
   }
 }
-export function mergeMobileInput(keyboard, keys, touch, tilt, autoGas, active) {
+export class NitroBurst {
+  active = false;
+  start(player, phase) {
+    if (
+      phase !== "running" ||
+      player.health <= 0 ||
+      player.nitro <= 0 ||
+      player.nitroLocked
+    )
+      return false;
+    this.active = true;
+    return true;
+  }
+  read(player, phase) {
+    if (
+      phase !== "running" ||
+      player.health <= 0 ||
+      player.nitro <= 0 ||
+      player.nitroLocked
+    )
+      this.clear();
+    return this.active;
+  }
+  clear() {
+    this.active = false;
+  }
+}
+export class ThumbSteering {
+  pointer = null;
+  steer = 0;
+  drift = false;
+  down(id, x, y, bounds) {
+    if (this.pointer !== null) return false;
+    this.pointer = id;
+    this.bounds = bounds;
+    this.move(id, x, y);
+    return true;
+  }
+  move(id, x, y) {
+    if (this.pointer !== id) return;
+    const { left, top, width, height } = this.bounds;
+    const axis = clamp((x - left - width / 2) / (width * 0.42), -1, 1);
+    this.steer = Math.sign(axis) * Math.max(0, (Math.abs(axis) - 0.07) / 0.93);
+    // A lower strip lets the steering thumb also hold the handbrake.
+    // Hysteresis avoids flickering at the edge of the drift strip.
+    this.drift = (y - top) / height > (this.drift ? 0.59 : 0.7);
+  }
+  up(id) {
+    if (this.pointer === id) this.clear();
+  }
+  clear() {
+    this.pointer = null;
+    this.steer = 0;
+    this.drift = false;
+  }
+}
+export function mergeMobileInput(
+  keyboard,
+  keys,
+  touch,
+  tilt,
+  autoGas,
+  active,
+  assist = {},
+) {
   const throttleHeld =
     keys.has("w") ||
     keys.has("s") ||
@@ -108,10 +173,11 @@ export function mergeMobileInput(keyboard, keys, touch, tilt, autoGas, active) {
         ? keyboard.steer
         : touch.has("a") || touch.has("d")
           ? Number(touch.has("d")) - Number(touch.has("a"))
-          : tilt
+          : (assist.steer ?? tilt)
       : 0,
-    brake: active && (keyboard.brake || touch.has(" ")),
-    boost: active && (keyboard.boost || touch.has("Shift")),
+    brake: active && (keyboard.brake || touch.has(" ") || !!assist.drift),
+    boost: active && (keyboard.boost || touch.has("Shift") || !!assist.burst),
+    ...(active && assist.burst ? { boostLatched: true } : {}),
     rewind: keyboard.rewind || touch.has("q"),
   };
 }

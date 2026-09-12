@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.0 — 2026-09-12
+
+- Default mobile Auto accelerator and proportional thumb steering with a pull-down drift strip; manual pedals, arrow buttons and gyro remain selectable.
+- One-tap mobile nitro burns to empty, works during drift, respects brake/reverse motion, and never restarts without another tap. Pause, rewind, recovery and leaving the run cancel it. Desktop Shift is unchanged.
+- Larger action targets, a fuel/status button and improved phone HUD spacing. Keep desktop Start reachable above the footer on shorter windows.
+- Bundle/minify production code, parallelize asset requests, defer the hidden cover and omit seven unused reference assets from deployment. Retain every shipped visual/audio asset byte, existing quality budgets and attribution downloads.
+- Share exact-state navigation paths, remove pointer-query allocations and retain idle suspension. Add arcade regressions and production link/asset verification to CI.
+
 ## 1.7.1 — 2026-09-12
 
 - Stop continuous city rendering and HUD work on the menu, pause and result screens. Finish the last crash burst, dispose its debris, then retain the last image. Input, resize, camera/lighting changes and dialog transitions request a fresh frame.

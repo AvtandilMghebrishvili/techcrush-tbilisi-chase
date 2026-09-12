@@ -161,13 +161,15 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
   const steer = car.steering;
   car.boostCooldown = Math.max(0, (car.boostCooldown || 0) - dt);
   if (car.nitroLocked && car.nitro >= 22) car.nitroLocked = false;
-  const boosting =
+  const burst = !!input.boostLatched;
+  const burning =
     !!input.boost &&
-    throttle > 0 &&
-    forward > 5 &&
-    !input.brake &&
+    (burst || (throttle > 0 && forward > 5 && !input.brake)) &&
     !car.nitroLocked &&
     car.nitro > 0;
+  // A tapped mobile burst burns its tank continuously. Braking/reverse retains
+  // control of acceleration; a handbrake turn can use nitro simultaneously.
+  const boosting = burning && throttle > 0 && (burst ? forward >= 0 : true);
   car.boostStrength =
     (car.boostStrength || 0) +
     ((boosting ? 1 : 0) - (car.boostStrength || 0)) *
@@ -176,8 +178,8 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
     car.performance || upgradedSpec(carSpec(car.carId), car.equipment);
   let accel =
     throttle * (throttle * forward < -0.5 ? spec.braking : spec.acceleration);
-  if (boosting) {
-    accel += spec.boostPower * car.boostStrength;
+  if (boosting) accel += spec.boostPower * car.boostStrength;
+  if (burning) {
     car.nitro = Math.max(0, car.nitro - dt * spec.nitroDrain);
     car.boostCooldown = spec.boostDelay;
     if (car.nitro <= 0) car.nitroLocked = true;

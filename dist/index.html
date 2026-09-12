@@ -135,8 +135,8 @@
           PHONE SETUP · BUTTONS / GYRO
         </button>
         <p class="mobile-hint">
-          Best in landscape. Hold GAS + steering together, or enable gyro in
-          Controls.
+          Best in landscape. Auto gas, slide-to-steer, pull-to-drift and one-tap
+          NITRO. Choose gyro or manual pedals in Controls.
         </p>
         <div class="intro-meta">
           <span>03 / TECHCRUSH RUN</span><span>3D ARCADE CHASE</span>
@@ -145,6 +145,8 @@
       <section class="mission-card" id="mission-card">
         <img
           class="mission-cover"
+          loading="lazy"
+          decoding="async"
           src="./assets/tbilisi-cover.png"
           alt="TECHCRUSH Tbilisi Chase cover: sports car, patrols and Tbilisi skyline"
         />
@@ -395,10 +397,19 @@
       <div id="touch-controls" hidden>
         <div class="touch-steering">
           <div class="touch-mode-row">
-            <span id="touch-mode">BUTTONS</span
+            <span id="touch-mode">THUMB STEERING</span
             ><button id="touch-center" aria-label="Center gyro steering">
               CENTER
             </button>
+          </div>
+          <div
+            id="steering-pad"
+            role="group"
+            aria-label="Thumb steering: slide left or right; pull down to drift. Button steering is available in Controls."
+          >
+            <span class="pad-label">◀ <b>STEER</b> ▶</span>
+            <i class="pad-rail"></i><i class="pad-thumb"></i>
+            <span class="pad-drift">↓ PULL TO DRIFT</span>
           </div>
           <div class="steering-buttons">
             <button data-key="a" aria-label="Steer left">◀</button
@@ -406,13 +417,27 @@
           </div>
         </div>
         <div class="touch-pedals">
-          <button data-key=" " aria-label="Hold handbrake to drift">
-            DRIFT
+          <button
+            data-key=" "
+            class="touch-drift"
+            aria-label="Hold handbrake to drift while steering"
+          >
+            DRIFT<small>HOLD</small>
           </button>
-          <button data-key="Shift" class="touch-turbo" aria-label="Hold turbo">
-            TURBO
+          <button
+            id="touch-nitro"
+            class="touch-turbo"
+            aria-label="Tap nitro once to burn the remaining tank"
+            aria-pressed="false"
+          >
+            <span id="touch-nitro-charge">100%</span><b>NITRO</b
+            ><small id="touch-nitro-state">TAP TO BURN</small>
           </button>
-          <button data-key="s" aria-label="Hold brake, then reverse">
+          <button
+            data-key="s"
+            class="touch-brake"
+            aria-label="Hold brake, then reverse"
+          >
             BRAKE<small>REVERSE</small>
           </button>
           <button data-key="w" class="touch-gas" aria-label="Hold accelerator">
@@ -445,11 +470,13 @@
           </button>
         </div>
         <p>
-          Hold GAS to accelerate. BRAKE slows down, then reverses. Hold DRIFT in
-          a turn, TURBO to boost, or REWIND to undo up to five seconds.
+          Auto accelerator drives for you. Slide the thumb pad to steer; pull
+          into the lower strip to drift through a turn. Tap NITRO once — it
+          burns the remaining tank, even while drifting. BRAKE slows down, then
+          reverses. Hold REWIND to undo up to five seconds.
         </p>
         <div class="steering-choice" role="group" aria-label="Steering mode">
-          <button id="buttons-enable" aria-pressed="true">TOUCH BUTTONS</button
+          <button id="buttons-enable" aria-pressed="true">TOUCH STEERING</button
           ><button id="tilt-enable" aria-pressed="false">ENABLE GYRO</button>
         </div>
         <p id="tilt-status" role="status" aria-live="polite"></p>
@@ -476,9 +503,23 @@
           direction</label
         >
         <label class="setting-check"
-          ><input id="auto-gas" type="checkbox" /> Auto accelerator
-          <small>Brake always overrides it.</small></label
+          ><input id="auto-gas" type="checkbox" /> Arcade · auto accelerator
+          <small
+            >On by default on mobile. Turn off for manual GAS. Brake always
+            overrides it.</small
+          ></label
         >
+        <label class="setting-select"
+          >Touch steering<select id="touch-steering-mode">
+            <option value="pad">Thumb pad · slide + drift</option>
+            <option value="buttons">Left / right buttons</option>
+          </select></label
+        >
+        <p class="setting-note">
+          NITRO needs one tap. Repeated taps do not refill it. After it runs
+          out, recharge and tap again. Pause, rewind or leaving the run cancels
+          the burst.
+        </p>
         <label class="setting-select"
           >Touch controls<select id="touch-visibility">
             <option value="auto">Auto · detect touch screen</option>

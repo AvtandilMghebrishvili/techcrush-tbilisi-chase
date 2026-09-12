@@ -1,5 +1,27 @@
 # Rendering and audio lifecycle
 
+## Mobile loading 1.8.0
+
+Production JS/CSS is bundled and minified with content-hashed filenames and safe long-lived code caching. Independent city/car/tree assets load concurrently; the hidden phone cover loads only when needed. Seven unused early reference assets remain in Git but remove **12,719,902 bytes** from deployment. This exclusion is a packaging improvement, not a claim that unrequested files previously slowed browsing. The playable original remains `sports-car.glb`.
+
+All **21 shipped assets (41,110,441 bytes)** are byte-identical to source. No geometry decimation, lower texture resolution, reduced visibility or changed quality budget is introduced. Derived road database downloads and attribution remain included. `npm run check:build` verifies production links and asset equality; CI runs it after building.
+
+Local cold-load comparison in headless Chrome 153 on Windows, mobile emulation 844×390 / DPR 3, simulated 40 ms latency and 4 MiB/s download:
+
+| Measurement | 1.7.1 | 1.8 |
+| --- | ---: | ---: |
+| Resource requests before ready + 300 ms | 83 | 18 |
+| JS requests | 59 | 1 |
+| JS encoded bytes | 2,789,414 | 1,049,339 |
+| Total encoded resource bytes | 29,738,274 | 25,224,593 |
+| Observed load, including warm-up + 300 ms | 10,229 ms | 8,657 ms |
+
+This sample is approximately 15% faster to the observed ready state and 62% smaller in JS. It is a single before/after trace, not a statistical or physical-phone FPS/thermal benchmark. Later small layout/copy edits can slightly change bundle bytes. The visual assets are unchanged.
+
+During play, arrows, HUD distance and minimap share a route cached for the exact player/checkpoint state. Any position change, even 0.001 units or rewind, invalidates it. Pointer lookup no longer allocates arrays on every input query. The idle suspension below remains intact.
+
+## Idle lifecycle 1.7.1
+
 Version 1.7.1 fixes unnecessary CPU use after playing. The principal reproduced issue was **continuing work while idle**, rather than demonstrated unbounded heap growth.
 
 ## Changes

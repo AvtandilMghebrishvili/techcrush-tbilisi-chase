@@ -1,5 +1,6 @@
 import { ChaseAudio } from "./chase-audio.js";
 import { FrameLoop } from "./frame-loop.js";
+import { playerRoute } from "./navigation-cache.js";
 import { MobileControls } from "./mobile-ui.js";
 import { LIGHTING_MODES } from "./city-lighting.js";
 import { ROADS } from "./city-map.js";
@@ -29,7 +30,6 @@ import {
   CHECKPOINTS,
   distance,
   angleDelta,
-  routeBetween,
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   keys = new Set();
@@ -375,6 +375,8 @@ function finish() {
   }
 }
 function toast(text) {
+  if (text === "BACK ON YOUR WHEELS" || text.startsWith("CAR RESET"))
+    mobile?.clear();
   if (text === "COLLISION") {
     view.shake = 0.4;
     return;
@@ -474,7 +476,7 @@ function updateHUD() {
     : "Lose the police for 8 seconds";
   $("district").textContent = cp ? cp.name.toUpperCase() : "ESCAPE ROUTE";
   if (cp) {
-    const route = routeBetween(p, cp),
+    const route = playerRoute(sim),
       next = route.find((q) => distance(p, q) > 20) || cp;
     const delta = angleDelta(Math.atan2(next.x - p.x, next.z - p.z), p.angle);
     $("direction").textContent =
@@ -530,8 +532,7 @@ function drawMap() {
     c.setLineDash([4, 3]);
     c.beginPath();
     c.moveTo(ox - sim.player.x * s, oz - sim.player.z * s);
-    for (const q of routeBetween(sim.player, cp))
-      c.lineTo(ox - q.x * s, oz - q.z * s);
+    for (const q of playerRoute(sim)) c.lineTo(ox - q.x * s, oz - q.z * s);
     c.stroke();
     c.setLineDash([]);
     c.fillStyle = "#73e6ed";
@@ -790,6 +791,7 @@ try {
     pause,
     clearKeys: () => keys.clear(),
     phase: () => sim.phase,
+    player: () => sim.player,
     recover: () => {
       if (sim.phase === "running") sim.recover();
     },
@@ -854,7 +856,10 @@ try {
     wake();
     if (!e.repeat) {
       if (k === "p" || k === "Escape") pause();
-      if (k === "r") sim.recover();
+      if (k === "r") {
+        mobile?.clear();
+        sim.recover();
+      }
       if (k === "m") toggleSound();
       if (k === "c") switchCamera();
       if (k === "Enter" && sim.phase === "ready") start();

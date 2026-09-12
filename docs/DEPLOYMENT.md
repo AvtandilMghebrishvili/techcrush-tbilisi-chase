@@ -12,10 +12,10 @@ Sites audience settings control who can open the game. Public permits anyone wit
 
 `.openai/hosting.json` identifies the creator's Sites project and logical `DB` binding. It is metadata, not a credential. Fork owners must use their own project.
 
-Run `npm ci`, `npm test`, and `npm run build`. The build emits:
+Run `npm ci`, `npm test`, `npm run build`, and `npm run check:build`. The build emits:
 
 - `dist/server/index.js`: bundled Workers-compatible default fetch handler.
-- `dist/client/`: game modules, assets, vendor files and credits.
+- `dist/client/`: hashed/minified browser JS and CSS, unchanged runtime assets, credits, licenses and road database downloads. This generated directory is safely cleared before rebuilding; authored `dist/` is never deleted. Original ES modules and early source/reference assets remain in the repository.
 - `dist/.openai/hosting.json`: logical hosting configuration.
 - `dist/.openai/drizzle/`: generated migration files and metadata.
 

@@ -1,5 +1,6 @@
 import * as THREE from "./vendor/three.module.js";
-import { routeBetween, distance } from "./simulation.js";
+import { distance } from "./simulation.js";
+import { playerRoute } from "./navigation-cache.js";
 
 const GUIDE_VIEWS = {
   chase: { scale: 0.68, height: 0.23, tilt: 0, screenWidth: 0.085 },
@@ -86,7 +87,7 @@ export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
   ) {
     // Sample the current position each moving frame, rather than jumping every
     // 200 ms. The street graph already caches its shortest-path trees.
-    guide.points = sampleRoute(sim.player, routeBetween(sim.player, cp));
+    guide.points = sampleRoute(sim.player, playerRoute(sim));
     guide.checkpoint = sim.checkpoint;
     guide.level = sim.level;
     guide.originX = sim.player.x;
