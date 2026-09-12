@@ -1,3 +1,4 @@
+import { setupInterface, actionLabel } from "./interface.js";
 import { ChaseAudio } from "./chase-audio.js";
 import { FrameLoop } from "./frame-loop.js";
 import { playerRoute } from "./navigation-cache.js";
@@ -33,6 +34,7 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   keys = new Set();
+setupInterface();
 let sim,
   view,
   mobile,
@@ -211,7 +213,7 @@ async function bankRun() {
 }
 function switchCamera(id) {
   const mode = id ? view.setCamera(id) : view.cycleCamera();
-  $("camera-toggle").textContent = "C · " + mode.label;
+  actionLabel($("camera-toggle"), mode.label);
   $("camera-toggle").setAttribute(
     "aria-label",
     "Camera: " + mode.label + "; click to switch",
@@ -234,7 +236,7 @@ function updateLightingLabel() {
   if (!lighting) return;
   const label =
     (lighting.mode === "auto" ? "AUTO · " : "") + lighting.level.label;
-  $("lighting-toggle").textContent = label;
+  actionLabel($("lighting-toggle"), label);
   $("lighting-toggle").setAttribute(
     "aria-label",
     `Lighting: ${lighting.mode === "auto" ? "automatic cycle" : lighting.mode}; ${lighting.level.label.toLowerCase()}; click to switch`,
@@ -252,13 +254,14 @@ async function toggleSound() {
     muted = !muted;
     soundscape.setMuted(muted);
     wake();
-    $("sound").textContent = muted ? "SOUND OFF" : "SOUND ON";
+    actionLabel($("sound"), muted ? "MUTED" : "SOUND");
+    $("sound").setAttribute("aria-pressed", String(!muted));
     $("sound").setAttribute(
       "aria-label",
       muted ? "Enable sound" : "Mute sound",
     );
   } catch {
-    $("sound").textContent = "AUDIO UNAVAILABLE";
+    actionLabel($("sound"), "NO AUDIO");
   }
 }
 function audioTick(dt = 0) {
@@ -318,6 +321,7 @@ function pause() {
     mobile?.reset();
     sim.phase = "running";
     $("modal").hidden = true;
+    $("pause").focus({ preventScroll: true });
     accumulator = 0;
   }
   document.body.dataset.phase = sim.phase;
@@ -442,14 +446,14 @@ function updateHUD() {
   $("takedowns").textContent = String(sim.takedowns);
   $("heat").textContent =
     sim.police.filter((c) => !c.destroyed).length +
-    " UNITS · HEAT " +
+    " UNITS · H" +
     sim.heatLevel +
     (sim.helicopter ? " · AIR" : "");
   const escape = sim.checkpoint === 6;
   $("bust-bar").style.width =
     (escape ? sim.escape / 8 : sim.bust / 4) * 100 + "%";
   $("bust-bar").style.background = escape ? "#73e6ed" : "#ff796e";
-  $("heat-label").textContent = escape ? "BREAK CONTACT" : "POLICE PURSUIT";
+  $("heat-label").textContent = escape ? "ESCAPING" : "PURSUIT";
   $("pursuit-text").textContent =
     sim.bust > 1
       ? "BOXED IN — ACCELERATE!"

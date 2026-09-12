@@ -1,6 +1,8 @@
 # Garage customization
 
-Open **GARAGE · UPGRADES & BOXES** before a run or return to it after banking a completed run. Select the car you want to modify at the top. Each car has independent equipment and paint; the inventory and credits belong to the driver.
+Open **YOUR GARAGE** before a run or return to it after banking a completed run. Select the car you want to modify at the top. Each car has independent equipment and paint; the inventory and credits belong to the driver.
+
+Use the sticky **Your Build / Boxes / Upgrades** shortcuts to move around the garage. The close button stays available while scrolling.
 
 ## See the actual car
 

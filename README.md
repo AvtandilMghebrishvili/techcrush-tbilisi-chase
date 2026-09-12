@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Share the link with friends; each browser gets its own saved garage.
 
+A compact interface keeps the road visible, with quick garage navigation and grouped driver settings. [Interface guide](docs/INTERFACE.md).
+
 Menus, pause screens and finished chases now stop continuous rendering and audio processing. Garage previews update when you interact with them. [Performance improvements and measurements](docs/PERFORMANCE.md).
 
 **[▶ WATCH / DOWNLOAD THE 46-SECOND GAMEPLAY TRAILER (1080p MP4)](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases/download/v1.6.0/TECHCRUSH-Nightshift-Action-46s-1080p.mp4)**
@@ -53,7 +55,7 @@ Ceilings are on-road values; acceleration time, charge, turns and collisions aff
 | M                     | Sound on/off                                   |
 | Enter                 | Start from the garage                          |
 
-Physical key codes support Georgian keyboard layouts. Mobile now defaults to **auto gas + thumb steering**: slide to turn, pull down to drift, and **tap NITRO once to burn the tank**. All three work together. Manual GAS, arrow buttons and **gyro / tilt steering** are available in **CONTROLS**. [Mobile setup and performance guide](docs/MOBILE.md).
+Physical key codes support Georgian keyboard layouts. Mobile now defaults to **auto gas + thumb steering**: slide to turn, pull down to drift, and **tap NITRO once to burn the tank**. All three work together. Manual GAS, arrow buttons and **gyro / tilt steering** are available in **SETUP** (the sliders icon). [Mobile setup and performance guide](docs/MOBILE.md).
 
 Portrait and landscape layouts include gas, brake/reverse, drift, turbo, rewind, recovery and camera switching. Auto accelerator can be switched off; braking overrides it. Auto graphics reduces rendering cost on touch devices, and Battery saver / High detail are selectable. A WebGL2 browser and internet connection are required.
 

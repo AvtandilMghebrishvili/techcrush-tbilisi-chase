@@ -4,7 +4,7 @@ Open the [public game](https://nightshift-chase-september.avtandilmghebrishvili.
 
 ## Start with two-thumb arcade controls
 
-Choose a car, then tap **START YOUR ENGINE**. Landscape leaves more space for the road; portrait is supported too. The display respects screen cutouts and home-indicator areas.
+Choose a car, then tap **START CHASE**. Landscape leaves more space for the road; portrait is supported too. The display respects screen cutouts and home-indicator areas.
 
 | Control                  | Action                                                    |
 | ------------------------ | --------------------------------------------------------- |
@@ -19,7 +19,7 @@ Choose a car, then tap **START YOUR ENGINE**. Landscape leaves more space for th
 | RESET CAR                | Recover on a clear road with the existing score penalty   |
 | Camera button at the top | Cycle chase, cockpit, hood and high chase                 |
 | Pause button             | Pause / resume                                            |
-| CONTROLS                 | Pause the chase and open driver setup                     |
+| SETUP                 | Pause the chase and open driver setup                     |
 
 Use the **left thumb to steer + pull down to drift**, and the **right thumb to tap NITRO**. Auto accelerator keeps driving; the separate DRIFT button also works with steering. Nitro can launch from rest and boost through a handbrake turn. Its button shows charge, BURNING and RECHARGING. Repeated taps do not refill the tank. At empty it stops and never restarts automatically: recharge, then tap again. BRAKE still controls braking/reverse; the committed fuel burns without forward boost fighting the brake.
 
@@ -29,7 +29,7 @@ Version 1.8 enables Auto accelerator once for existing mobile users. Choose manu
 
 ## Gyro / tilt steering
 
-1. Open **CONTROLS** or **PHONE SETUP** and tap **ENABLE GYRO**.
+1. Open **SETUP** (the sliders icon) or **DRIVER SETUP** and tap **ENABLE GYRO**.
 2. Allow Motion & Orientation access if your browser asks. Permission is requested only by tapping the button.
 3. Hold the phone in your normal driving position. The first valid reading sets the center. **CENTER STEERING**, or **CENTER** beside the touch arrows, makes the current position straight ahead.
 4. Close setup, resume and tilt left/right. **Auto accelerator** is on by default; disable it for manual GAS. BRAKE always takes priority.
@@ -43,6 +43,8 @@ If permission is declined, the sensor is missing, or no data arrives within five
 The implementation uses the browser's [Device Orientation API](https://www.w3.org/TR/orientation-event/). See [permission and user-activation requirements](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/requestPermission_static) for browser details. The game does not request a compass or location.
 
 ## Display and performance
+
+Open **SETUP → DISPLAY** for graphics, touch visibility and fullscreen. **GYRO TUNING** contains centering, sensitivity and direction; enabling gyro opens it automatically. Driving options stay at the top.
 
 Version 1.8 keeps these quality settings unchanged. Production code is bundled/minified, assets load concurrently and the hidden phone cover waits until needed. All shipped art/model/audio bytes match the original source. [Loading measurements](PERFORMANCE.md#mobile-loading-180).
 

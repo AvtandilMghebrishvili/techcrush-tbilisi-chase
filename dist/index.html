@@ -14,11 +14,11 @@
     <link rel="icon" type="image/jpeg" href="./assets/techcrush-logo.jpg" />
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./garage.css" />
-    <link rel="stylesheet" href="./ui-refresh.css" />
     <link rel="stylesheet" href="./garage-refresh.css" />
     <link rel="stylesheet" href="./workshop-studio.css" />
     <link rel="stylesheet" href="./motorsport.css" />
     <link rel="stylesheet" href="./mobile.css" />
+    <link rel="stylesheet" href="./ui-refresh.css" />
     <meta name="theme-color" content="#10151f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
@@ -110,36 +110,43 @@
           </button>
         </div>
       </header>
-      <section id="intro" class="intro">
-        <div class="eyebrow"><span></span> TECHCRUSH / TBILISI STREETS</div>
-        <h1>TBILISI<br /><em>CHASE.</em></h1>
-        <p class="intro-copy">
-          Rustaveli. Rike. Abanotubani.<br />Six checkpoints. A city in pursuit.
-          One way out.
-        </p>
-        <div
-          id="garage"
-          class="garage"
-          role="group"
-          aria-label="Choose your car"
-        ></div>
-        <p id="car-details" class="car-details"></p>
-        <p id="intro-career" class="career-line"></p>
-        <button id="workshop-open" class="secondary workshop-link" disabled>
-          GARAGE · UPGRADES & BOXES
-        </button>
-        <button id="start" class="primary">
-          START YOUR ENGINE <span>↗</span>
-        </button>
+      <section
+        id="intro"
+        class="intro"
+        aria-label="Choose a car and start your chase"
+      >
+        <div class="intro-content">
+          <div class="eyebrow"><span></span> TECHCRUSH / TBILISI STREETS</div>
+          <h1>TBILISI<br /><em>CHASE.</em></h1>
+          <p class="intro-copy">
+            Six checkpoints. One getaway.<br />Race through the streets of
+            Tbilisi.
+          </p>
+          <div
+            id="garage"
+            class="garage"
+            role="group"
+            aria-label="Choose your car"
+          ></div>
+          <p id="car-details" class="car-details"></p>
+          <p id="intro-career" class="career-line"></p>
+        </div>
+        <div class="intro-actions">
+          <button id="workshop-open" class="secondary workshop-link" disabled>
+            YOUR GARAGE
+          </button>
+          <button id="start" class="primary">
+            START CHASE <span>↗</span>
+          </button>
+        </div>
         <button id="mobile-setup" class="secondary" hidden disabled>
-          PHONE SETUP · BUTTONS / GYRO
+          DRIVER SETUP · TOUCH / GYRO
         </button>
         <p class="mobile-hint">
-          Best in landscape. Auto gas, slide-to-steer, pull-to-drift and one-tap
-          NITRO. Choose gyro or manual pedals in Controls.
+          Slide to steer · pull to drift · tap NITRO. Best in landscape.
         </p>
         <div class="intro-meta">
-          <span>03 / TECHCRUSH RUN</span><span>3D ARCADE CHASE</span>
+          <span>CHOOSE YOUR RIDE</span><span>MAKE YOUR ESCAPE ↗</span>
         </div>
       </section>
       <section class="mission-card" id="mission-card">
@@ -238,7 +245,15 @@
           <div><small>NEXT CHECKPOINT</small><b id="distance">120 M</b></div>
         </div>
       </section>
-      <section id="modal" class="modal" hidden>
+      <section
+        id="modal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-copy"
+        hidden
+      >
         <div class="modal-card">
           <span class="eyebrow" id="modal-kicker">TAKE A BREATHER</span>
           <h2 id="modal-title">PAUSED.</h2>
@@ -265,6 +280,11 @@
             ×
           </button>
         </header>
+        <nav class="workshop-nav" aria-label="Garage shortcuts">
+          <button data-section="garage-showcase">01 · YOUR BUILD</button>
+          <button data-section="box-bench">02 · BOXES</button>
+          <button data-section="parts-heading">03 · UPGRADES</button>
+        </nav>
         <div class="garage-wallet">
           <b id="garage-level">LEVEL 01</b
           ><strong id="garage-credits">0 CR</strong
@@ -276,7 +296,7 @@
           class="workshop-cars"
           aria-label="Car to upgrade"
         ></div>
-        <section class="garage-showcase">
+        <section id="garage-showcase" class="garage-showcase">
           <div class="garage-build">
             <span class="eyebrow">YOUR CURRENT BUILD</span>
             <h3 id="garage-selected-car">Original 458</h3>
@@ -323,9 +343,9 @@
           role="status"
           aria-live="polite"
         ></p>
-        <section class="box-bench">
+        <section id="box-bench" class="box-bench">
           <div>
-            <h3>YOUR NEXT UPGRADE STARTS HERE.</h3>
+            <h3>YOUR NEXT UPGRADE.</h3>
             <p>14 parts · four tiers · repeated drops are possible.</p>
             <small
               >Bronze 55% · Silver 28% · Gold 13% · Diamond 4% per slot</small
@@ -336,7 +356,7 @@
         <p id="last-drop" class="last-drop"></p>
         <p id="save-error" role="status"></p>
         <button id="save-retry" class="secondary" hidden>RETRY SAVE</button>
-        <div class="parts-heading">
+        <div id="parts-heading" class="parts-heading">
           <h3>PERFORMANCE PARTS</h3>
           <span id="parts-count">14 PARTS</span>
         </div>
@@ -469,85 +489,94 @@
             ×
           </button>
         </div>
-        <p>
-          Auto accelerator drives for you. Slide the thumb pad to steer; pull
-          into the lower strip to drift through a turn. Tap NITRO once — it
-          burns the remaining tank, even while drifting. BRAKE slows down, then
-          reverses. Hold REWIND to undo up to five seconds.
-        </p>
-        <div class="steering-choice" role="group" aria-label="Steering mode">
-          <button id="buttons-enable" aria-pressed="true">TOUCH STEERING</button
-          ><button id="tilt-enable" aria-pressed="false">ENABLE GYRO</button>
+        <p class="setup-lead">Your chase. Your controls.</p>
+        <div class="keyboard-guide" aria-label="Keyboard controls">
+          <span><kbd>WASD</kbd> Drive</span><span><kbd>SPACE</kbd> Drift</span>
+          <span><kbd>SHIFT</kbd> Nitro</span><span><kbd>Q</kbd> Rewind</span>
         </div>
-        <p id="tilt-status" role="status" aria-live="polite"></p>
-        <div id="tilt-meter" aria-hidden="true">
-          <span>LEFT</span><i></i><span>RIGHT</span>
-        </div>
-        <button id="tilt-center" class="secondary">CENTER STEERING</button>
-        <label class="setting-range" for="tilt-range"
-          >Steering sensitivity
-          <b id="tilt-range-value">24° to full lock</b></label
-        ><input
-          id="tilt-range"
-          type="range"
-          min="12"
-          max="40"
-          step="1"
-          value="24"
-        /><small class="setting-note"
-          >Lower angle = quicker steering. Hold the phone comfortably before
-          centering.</small
-        >
-        <label class="setting-check"
-          ><input id="tilt-invert" type="checkbox" /> Reverse gyro
-          direction</label
-        >
-        <label class="setting-check"
-          ><input id="auto-gas" type="checkbox" /> Arcade · auto accelerator
-          <small
-            >On by default on mobile. Turn off for manual GAS. Brake always
-            overrides it.</small
-          ></label
-        >
-        <label class="setting-select"
-          >Touch steering<select id="touch-steering-mode">
-            <option value="pad">Thumb pad · slide + drift</option>
-            <option value="buttons">Left / right buttons</option>
-          </select></label
-        >
-        <p class="setting-note">
-          NITRO needs one tap. Repeated taps do not refill it. After it runs
-          out, recharge and tap again. Pause, rewind or leaving the run cancels
-          the burst.
-        </p>
-        <label class="setting-select"
-          >Touch controls<select id="touch-visibility">
-            <option value="auto">Auto · detect touch screen</option>
-            <option value="on">Always show</option>
-          </select></label
-        >
-        <label class="setting-select"
-          >Graphics<select id="graphics-quality">
-            <option value="auto">Auto · lighter on phones</option>
-            <option value="battery">Battery saver</option>
-            <option value="high">High detail</option>
-          </select></label
-        >
-        <button id="mobile-fullscreen" class="secondary">
-          FULLSCREEN / LANDSCAPE
-        </button>
-        <p id="screen-status" class="setting-note">
-          Portrait and landscape both work. Fullscreen support depends on your
-          browser.
-        </p>
-        <p class="setting-note">
-          Gyro needs motion permission and HTTPS. If it is unavailable, use
-          touch buttons. In Facebook / Instagram, open this page in Safari or
-          Chrome. Motion readings stay on your device.
-        </p>
-        <p class="setting-note">
-          Keyboard: WASD / arrows · Space drift · Shift turbo · Q rewind · C
-          camera · R recover · P pause · M sound.
+        <section class="setup-section">
+          <h3>DRIVING <small>TOUCH + GYRO</small></h3>
+          <div class="steering-choice" role="group" aria-label="Steering mode">
+            <button id="buttons-enable" aria-pressed="true">
+              TOUCH STEERING</button
+            ><button id="tilt-enable" aria-pressed="false">ENABLE GYRO</button>
+          </div>
+          <label class="setting-check"
+            ><input id="auto-gas" type="checkbox" /> Arcade · auto accelerator
+            <small
+              >On by default on mobile. Turn off for manual GAS. Brake always
+              overrides it.</small
+            ></label
+          >
+          <label class="setting-select"
+            >Touch steering<select id="touch-steering-mode">
+              <option value="pad">Thumb pad · slide + drift</option>
+              <option value="buttons">Left / right buttons</option>
+            </select></label
+          >
+          <p class="setting-note">
+            Slide to steer, pull down to drift. Tap NITRO to burn the tank;
+            BRAKE overrides acceleration.
+          </p>
+        </section>
+        <details class="setup-section" id="gyro-options">
+          <summary>
+            GYRO TUNING <small>CALIBRATION + SENSITIVITY</small>
+          </summary>
+          <p id="tilt-status" role="status" aria-live="polite"></p>
+          <div id="tilt-meter" aria-hidden="true">
+            <span>LEFT</span><i></i><span>RIGHT</span>
+          </div>
+          <button id="tilt-center" class="secondary">CENTER STEERING</button>
+          <label class="setting-range" for="tilt-range"
+            >Steering sensitivity
+            <b id="tilt-range-value">24° to full lock</b></label
+          ><input
+            id="tilt-range"
+            type="range"
+            min="12"
+            max="40"
+            step="1"
+            value="24"
+          /><small class="setting-note"
+            >Lower angle = quicker steering. Hold the phone comfortably before
+            centering.</small
+          >
+          <label class="setting-check"
+            ><input id="tilt-invert" type="checkbox" /> Reverse gyro
+            direction</label
+          >
+          <p class="setting-note">
+            Motion permission is required. If gyro is unavailable, touch
+            steering still works. In social apps, open the game in Safari or
+            Chrome.
+          </p>
+        </details>
+        <details class="setup-section" id="display-options">
+          <summary>DISPLAY <small>QUALITY + FULLSCREEN</small></summary>
+          <label class="setting-select"
+            >Touch controls<select id="touch-visibility">
+              <option value="auto">Auto · detect touch screen</option>
+              <option value="on">Always show</option>
+            </select></label
+          >
+          <label class="setting-select"
+            >Graphics<select id="graphics-quality">
+              <option value="auto">Auto · lighter on phones</option>
+              <option value="battery">Battery saver</option>
+              <option value="high">High detail</option>
+            </select></label
+          >
+          <button id="mobile-fullscreen" class="secondary">
+            FULLSCREEN / LANDSCAPE
+          </button>
+          <p id="screen-status" class="setting-note">
+            Portrait and landscape both work. Fullscreen support depends on your
+            browser.
+          </p>
+        </details>
+        <p class="settings-bottom-note">
+          Changes save automatically. Hold REWIND to undo up to 5 seconds.
         </p>
       </dialog>
       <div id="loading" role="status" aria-live="polite">

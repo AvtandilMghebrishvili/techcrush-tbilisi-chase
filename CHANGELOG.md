@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.10.0 — 2026-09-12
+
+- Refresh the interface with compact graphite panels, readable contrast, red primary actions and consistent rounded buttons. Keep entry controls opaque and the center route cue free of a background.
+- Use a single row of inline SVG toolbar icons, accessible names and desktop shortcut hints. Keep Start and Garage reachable while car details scroll on short screens.
+- Reposition score, pursuit, speed, circular radar, rewind and recovery controls for desktop, tablet, portrait phones and short landscape screens. Preserve independent touch steering, drift and one-tap nitro.
+- Add sticky garage shortcuts for Your Build, Boxes and Upgrades; compact the preview, grade controls and part comparisons while retaining the actual car/part artwork and saved customization.
+- Organize Driver Setup into Driving, Gyro Tuning and Display. Enabling gyro opens its tuning section; graphics, fullscreen and touch visibility remain available under Display.
+- Keep keyboard focus inside the pause/result overlay and return it to Pause after resuming. Respect reduced motion, retain on-demand rendering and introduce no additional media or icon-font downloads.
+
 ## 1.9.0 — 2026-09-12
 
 - Expand the archived OSM street network from 519 nodes / 671 segments to 551 / 704, including Dumas, Kikodze, Lermontovi, Iashvili and Sulkhan-Saba streets. Move two approximate embankment connections onto dry land and regenerate joined asphalt/sidewalks.

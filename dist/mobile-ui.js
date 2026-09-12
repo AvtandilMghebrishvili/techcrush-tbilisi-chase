@@ -72,7 +72,10 @@ export class MobileControls {
     $("mobile-setup").onclick = () => this.open();
     $("controls-close").onclick = () => $("controls-dialog").close();
     $("controls-dialog").addEventListener("close", () => this.clear());
-    $("tilt-enable").onclick = () => this.enableTilt();
+    $("tilt-enable").onclick = () => {
+      $("gyro-options").open = true;
+      this.enableTilt();
+    };
     $("buttons-enable").onclick = () => this.disableTilt();
     $("tilt-center").onclick = $("touch-center").onclick = () =>
       this.calibrate();

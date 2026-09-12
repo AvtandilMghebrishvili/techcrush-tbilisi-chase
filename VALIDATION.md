@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Compact interface 1.10.0 — 12 September 2026
+
+`npm test`: **123 passed, 0 failed**. The production build and link/asset verification pass. Existing 21 runtime assets (41,110,441 bytes) remain byte-identical; toolbar icons are inline SVG and no additional media is downloaded.
+
+Chrome UI review passed at **1440×900, 1280×720, 1024×768, 390×844, 360×640, 844×390 and 667×375**. Checks covered reachable Start/Garage/toolbars, phone control hit targets, no document overflow, pause Tab/Shift+Tab wrapping, focus after Resume, grouped graphics/gyro settings, sticky garage shortcuts, grade previews and three-reward dialogs. The small-screen Start clipping and tablet recovery/rewind overlap found during review were corrected. A separate 360×640 inspector capture measured 314 px content width and 314 px scroll width.
+
+Touch emulation retained simultaneous steering/drift/nitro, committed burst after release, depletion, manual gas/steer/drift, pointer cancellation and gyro switching. The final minified build passed touch driving, pause, isolated save-backed box opening, garage preview, persisted preferences/box state after reload, and desktop W/Shift driving. No page errors, missing assets or QA globals were found.
+
+Lifecycle checks passed audio/visual suspension on pause, hidden pages and finished chases, resumed audio, terminal rewind and garage invalidation. Six run/garage cycles retained **4,734 world geometries / 81 textures**, **67 garage geometries / 5 textures**, no active effects/voices at rest and a **63.95–64.29 MiB** sampled JS heap after collection. These are local Chrome/emulated-touch checks, not physical-phone, Safari or FPS certification. QA scripts, captures and isolated profiles remain under ignored `artifacts/`.
+
 ## Roads, terrain and river safety 1.9.0 — 12 September 2026
 
 `npm test`: **123 passed, 0 failed**. New coverage checks all road centers and both lanes against water/hills, connected added streets, sedan/SUV/tank water recovery, live riverbank pursuit, player HP/recovery/rewind, immediate panel fracture and restoration, mountain collision, exact nearest-road parity and broad-phase contact parity. The old unbreakable-rail regression was replaced by the new high-impact fracture requirement.

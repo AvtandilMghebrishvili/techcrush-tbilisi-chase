@@ -1,105 +1,1679 @@
-/* TECHCRUSH HUD: open navigation typography and a round, bearing-correct radar. */
-.route-cue {
+/* Compact driving interface. Loaded after legacy component styles deliberately. */
+:root {
+  --ui-surface: #101925f2;
+  --ui-border: #63748b66;
+  --ui-text: #f5f7fc;
+  --ui-soft: #bccbda;
+  --ui-accent: #ff355b;
+  --ui-cyan: #85eef1;
+  --ui-edge: max(20px, env(safe-area-inset-left));
+  --ui-top: max(14px, env(safe-area-inset-top));
+}
+button,
+select,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  border-radius: 10px;
+  transition:
+    background-color 0.14s,
+    border-color 0.14s,
+    transform 0.14s;
+}
+button:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--ui-cyan);
+  outline-offset: 3px;
+}
+button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+.primary {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid #ff718c;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #ff355b, #e91c46);
+  box-shadow: 0 3px 0 #80132b;
+  padding: 12px 16px;
+  font-size: 19px;
+  letter-spacing: 0.7px;
+}
+.primary:hover:not(:disabled) {
+  background: #ff4e70;
+  box-shadow: 0 3px 0 #80132b;
+}
+.secondary {
+  min-height: 44px;
+  border-radius: 10px;
+  background: #1b293b;
+  border-color: #587088;
+  color: #f3f7fc;
+}
+#game > header {
+  padding: var(--ui-top) var(--ui-edge);
+  gap: 18px;
+  flex-wrap: nowrap;
+  align-items: center;
+  pointer-events: none;
+}
+#game > header > * {
+  pointer-events: auto;
+}
+#game > header .brand {
+  gap: 9px;
+}
+#game > header .brand-logo {
+  width: 32px;
+  height: 32px;
+}
+#game > header .brand-wordmark {
+  width: 148px;
+}
+#game > header .brand-sub {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+#game > header .top-actions {
+  display: flex;
+  gap: 6px;
+  width: auto;
+}
+#game > header .icon-button {
+  height: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
+  padding: 0 12px;
+  border: 1px solid var(--ui-border);
+  background: var(--ui-surface);
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+  font:
+    700 11px Barlow,
+    Arial,
+    sans-serif;
+}
+#game > header .icon-button:hover {
+  background: #26364a;
+  border-color: #9aadbf;
+}
+#game > header .icon-button svg {
+  height: 19px;
+  width: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+#game > header .icon-button kbd {
+  font:
+    600 9px Barlow,
+    Arial;
+  color: #b7c7d9;
+  border: 1px solid #ffffff29;
+  border-radius: 4px;
+  padding: 3px;
+  min-width: 16px;
+}
+#game > header #pause {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  color: #ffbcc9;
+}
+#game > header #pause .action-label,
+#game > header #pause kbd {
+  display: none;
+}
+#sound[aria-pressed="true"] {
+  color: var(--ui-cyan);
+}
+#sound[aria-pressed="true"] .mute-slash {
+  display: none;
+}
+/* Stable, fully opaque text on entry; movement never fades out the controls. */
+body.loaded #intro,
+body.loaded #mission-card,
+.modal:not([hidden]) .modal-card,
+dialog[open] {
+  animation: none;
+  opacity: 1;
+}
+#intro {
+  top: 92px;
+  bottom: auto;
+  left: var(--ui-edge);
+  width: 410px;
+  max-width: calc(100% - 40px);
+  max-height: calc(100dvh - 176px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  background: linear-gradient(140deg, #101925f5, #101925e6);
+  border: 1px solid var(--ui-border);
+  border-top: 3px solid var(--ui-accent);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px #0003;
+}
+.intro-content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #64768a transparent;
+  padding-right: 2px;
+}
+#intro .eyebrow {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #ff9baf;
+}
+#intro h1 {
+  font-size: 76px;
+  line-height: 0.89;
+  margin: 16px 0;
+  color: #fff;
+  letter-spacing: -1px;
+}
+#intro h1 em {
+  color: var(--ui-accent);
+}
+#intro .intro-copy {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c9d7e4;
+  margin: 0 0 16px;
+}
+#garage {
+  width: 100%;
+  gap: 8px;
+  margin: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#garage button {
+  min-height: 64px;
+  padding: 10px 12px;
+  background: #182536;
+  border: 1px solid #69809766;
+  border-radius: 10px;
+  position: relative;
+}
+#garage button:hover {
+  background: #23374c;
+  border-color: #a5bdcf;
+}
+#garage button[aria-pressed="true"] {
+  border-color: #ff6483;
+  background: #3c1d30;
+  box-shadow: inset 3px 0 var(--ui-accent);
+}
+#garage button[aria-pressed="true"]::after {
+  content: "✓";
+  position: absolute;
+  top: 8px;
+  right: 9px;
+  color: #ffafc0;
+  font-size: 12px;
+}
+#garage i {
+  height: 2px;
+  width: 18px;
+  margin-bottom: 6px;
+}
+#garage b {
+  font:
+    700 20px/1.1 "Barlow Condensed",
+    Arial;
+}
+#garage small {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  margin-top: 5px;
+}
+#car-details {
+  font-size: 11px !important;
+  line-height: 1.45;
+  margin: 10px 0;
+  min-height: 0;
+  color: #c4d1df;
+}
+#intro-career {
+  font-size: 12px;
+  color: var(--ui-cyan);
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid #ffffff20;
+}
+.intro-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.75fr);
+  gap: 8px;
+  flex: none;
+}
+#intro .intro-actions button {
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 12px;
+  position: static;
+  letter-spacing: 0.4px;
+}
+#intro .workshop-link {
+  font-size: 11px;
+  white-space: nowrap;
+}
+#intro .intro-actions #start {
+  min-width: 0;
+  min-height: 48px;
+}
+#intro #mobile-setup {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px;
+  font-size: 10px;
+  background: #162233;
+  border-color: #ffffff20;
+  flex: none;
+}
+#intro .mobile-hint {
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 0;
+  color: #b7c7d8;
+}
+#intro .intro-meta {
+  margin: 0;
+  font-size: 9px;
+  letter-spacing: 0.9px;
+  gap: 10px;
+}
+#mission-card {
+  right: var(--ui-edge);
+  bottom: 84px;
+  top: auto;
+  width: 270px;
+  padding: 18px;
+  border-radius: 16px;
+  border-top: 3px solid var(--ui-accent);
+  background: #101925ef;
+  box-shadow: none;
+}
+#mission-card .mission-cover {
+  width: calc(100% + 36px);
+  margin: -18px -18px 14px;
+  height: 145px;
+  opacity: 1;
+}
+#mission-card .mission-row {
+  margin-top: 16px;
+  gap: 12px;
+}
+#mission-card .mission-row strong {
+  font-size: 13px;
+}
+#mission-card .mission-row p {
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 4px 0 0;
+  color: #c3d1df;
+}
+#game > footer {
+  padding: 16px var(--ui-edge);
+  font-size: 10px;
+  gap: 10px;
+}
+#game > footer .controls {
+  gap: 14px;
+}
+#game > footer kbd {
+  font-size: 9px;
+}
+/* Keep the middle of the road clear, with contrast only behind edge telemetry. */
+#hud .score-panel,
+#hud .pursuit-panel,
+#hud .speed-panel {
+  background: linear-gradient(140deg, #101925ef, #101925d6);
+  border: 1px solid #7d91a655;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 3px 12px #0002;
+  text-shadow: none;
+}
+#hud .score-panel {
+  top: 80px;
+  left: var(--ui-edge);
+  width: 196px;
+}
+#hud .score-panel .label {
+  font-size: 9px;
+  letter-spacing: 1.4px;
+}
+#hud .career-hud {
+  margin: 0 0 6px;
+  font-size: 10px;
+  gap: 8px;
+}
+#hud .career-hud b {
+  color: #ffb9c7;
+}
+#hud .score-panel > strong {
+  font-size: 40px;
+  line-height: 1.05;
+  margin: 0;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+#hud .checkpoint-heading {
+  font-size: 9px;
+  margin-top: 10px;
+  letter-spacing: 0.8px;
+}
+#hud .checkpoint-dots {
+  gap: 4px;
+  margin: 6px 0 0;
+}
+#hud .checkpoint-dots i {
+  height: 4px;
+  border-radius: 3px;
+  transform: none;
+}
+#hud #objective {
+  font-size: 11px;
+  margin: 9px 0 0;
+  line-height: 1.3;
+  color: #d4e1ec;
+}
+#hud .takedown-count {
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  margin-top: 9px;
+}
+#hud .pursuit-panel {
+  top: 80px;
+  right: var(--ui-edge);
+  width: 220px;
+  border-top: 2px solid #ff617c;
+}
+#hud .pursuit-panel .label {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+#hud .pursuit-panel strong {
+  font:
+    700 11px Barlow,
+    Arial;
+  letter-spacing: 0.2px;
+  color: #ffb0c0;
+}
+#hud .pursuit-panel p {
+  font-size: 10px;
+  line-height: 1.45;
+  margin: 7px 0 0;
+  color: #d4dfeb;
+}
+#hud .heat-bar {
+  margin-top: 8px;
+  background: #57627666;
+}
+#hud .speed-panel {
+  right: var(--ui-edge);
+  bottom: 76px;
+  width: 184px;
+}
+#hud .speed-value {
+  gap: 7px;
+}
+#hud .speed-value > strong {
+  font-size: 66px;
+  line-height: 0.95;
+  color: #fff;
+}
+#hud .speed-value > span {
+  font-size: 10px;
+}
+#hud .condition {
+  margin: 10px 0 5px;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+#hud .condition b {
+  color: #e8ff76;
+}
+#hud .nitro {
+  margin-top: 10px;
+  gap: 9px;
+}
+#hud .nitro > span,
+#hud .turbo-readout {
+  font-size: 9px;
+  letter-spacing: 0.2px;
+}
+#hud .turbo-readout {
+  margin-top: 6px;
+}
+#hud .drift-status {
+  min-height: 0;
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--ui-cyan);
+}
+#hud .navigator {
+  left: var(--ui-edge);
+  bottom: 76px;
+  width: 150px;
+  padding: 0;
   background: none;
   border: 0;
   box-shadow: none;
-  backdrop-filter: none;
-  padding: 0;
-  gap: 10px;
-  top: 100px;
-  color: #fff;
-  text-shadow:
-    0 2px 4px #000,
-    0 0 14px #09101cd9;
 }
-.route-cue > span {
-  font-size: clamp(32px, 5.5vh, 44px);
-  color: #fff;
-  line-height: 1;
-  width: 1em;
-  text-align: center;
-  flex-shrink: 0;
-}
-.route-cue b {
-  font-size: clamp(25px, 4.3vh, 34px);
-  font-variant-numeric: tabular-nums;
-  font-style: italic;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: 1px;
-}
-.route-cue small {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #fff;
-  font-weight: 700;
+#map {
   display: block;
-  margin-bottom: 5px;
-}
-.navigator {
-  background: transparent;
-  border: 0;
-  padding: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  width: 206px;
-}
-.navigator #map {
   width: 100%;
-  display: block;
   aspect-ratio: 1;
   border-radius: 50%;
-  filter: drop-shadow(0 4px 12px #0009);
+  box-shadow:
+    0 0 0 2px #dce8ff40,
+    0 3px 14px #0006;
 }
-.map-caption {
+#hud .map-caption {
+  display: flex;
   justify-content: center;
   text-align: center;
-  gap: 8px;
-  margin-top: 9px;
-  font-size: 12px;
+  margin-top: 7px;
+  font-size: 9px;
   text-shadow: 0 2px 4px #000;
 }
-.map-caption span:last-child {
+body.mobile-controls #hud .map-caption {
+  display: none;
+}
+#hud .map-caption span:last-child {
   position: absolute;
-  top: 12px;
+  top: 10px;
   left: 0;
   right: 0;
+  font-size: 9px;
   color: white;
   font-weight: 800;
 }
-@media (max-width: 650px) {
-  .route-cue {
-    top: 203px;
-    gap: 9px;
+#hud #route-cue {
+  left: 50%;
+  right: auto;
+  top: 85px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 9px;
+  width: max-content;
+  max-width: 240px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+  backdrop-filter: none;
+  text-shadow:
+    0 2px 4px #000,
+    0 0 10px #0009;
+}
+#route-cue > span {
+  font-size: 36px;
+  line-height: 1;
+  width: 1em;
+  flex: none;
+  text-align: center;
+  color: #fff;
+}
+#route-cue b {
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: 0.4px;
+  font-style: italic;
+}
+#route-cue small {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  margin-bottom: 5px;
+  color: #fff;
+}
+#hud #toast {
+  top: 155px;
+  left: 50%;
+  width: max-content;
+  max-width: min(480px, 55%);
+  transform: translate(-50%, 4px);
+  font:
+    700 15px/1.35 Barlow,
+    Arial;
+  letter-spacing: 0.3px;
+  padding: 9px 14px;
+  border: 1px solid #8294aa55;
+  border-left: 3px solid var(--ui-accent);
+  border-radius: 9px;
+  background: #111b2bea;
+  color: #fff;
+  text-shadow: none;
+  white-space: normal;
+  text-align: center;
+  pointer-events: none;
+}
+#hud #toast.visible {
+  transform: translate(-50%, 0);
+}
+#rewind {
+  bottom: 76px;
+  left: calc(var(--ui-edge) + 166px);
+  transform: none;
+  width: 154px;
+  min-height: 48px;
+  padding: 8px 10px;
+  background: #101925ed;
+  border: 1px solid #7d9bac;
+  border-left: 3px solid var(--ui-cyan);
+  border-radius: 10px;
+}
+#rewind span {
+  font-size: 10px;
+  letter-spacing: 0.7px;
+}
+#rewind b {
+  font-size: 17px;
+  margin-right: 5px;
+}
+#rewind small {
+  font-size: 9px;
+  letter-spacing: 0.2px;
+  margin: 4px 0;
+}
+/* Dialogs share a compact header, clear navigation and comfortable targets. */
+.modal-card {
+  width: min(440px, calc(100% - 24px));
+  padding: 24px;
+  border-radius: 16px;
+  background: #121c2b;
+  border-color: #71839766;
+}
+.modal-card h2 {
+  font-size: 48px;
+  margin: 13px 0 10px;
+}
+.modal-card p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #c4d2df;
+}
+.modal-card .primary,
+.modal-card .secondary {
+  min-height: 48px;
+  font-size: 17px;
+}
+#modal-copy {
+  margin-bottom: 18px;
+}
+#workshop,
+#controls-dialog,
+#loot-dialog {
+  color: var(--ui-text);
+  background: #101925;
+  border: 1px solid #71879f88;
+  border-top: 3px solid var(--ui-accent);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px #0008;
+  scrollbar-width: thin;
+  scrollbar-color: #60768c #101925;
+}
+#workshop {
+  width: min(1160px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  height: auto;
+  padding: 18px;
+  scroll-padding-top: 112px;
+}
+#workshop .workshop-header {
+  position: sticky;
+  top: -18px;
+  z-index: 8;
+  padding: 12px 0 10px;
+  margin: 0;
+  background: #101925;
+  align-items: center;
+  border-bottom: 1px solid #69809944;
+}
+#workshop .workshop-header .eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+#workshop h2,
+#workshop h3,
+#workshop .workshop-cars button {
+  text-shadow: none;
+}
+#workshop h2 {
+  font-size: 32px;
+  line-height: 1;
+  margin: 6px 0 0;
+}
+.icon-close {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 25px;
+  background: #1d2b3c;
+  flex: none;
+}
+.workshop-nav {
+  display: flex;
+  gap: 6px;
+  position: sticky;
+  top: 49px;
+  padding: 8px 0;
+  background: #101925;
+  z-index: 7;
+}
+.workshop-nav button {
+  min-height: 38px;
+  flex: 1;
+  background: #1b2a3d;
+  color: #d5e4f0;
+  border: 1px solid #61799266;
+  font:
+    700 10px Barlow,
+    Arial;
+  letter-spacing: 0.7px;
+}
+.workshop-nav button:hover {
+  background: #28405a;
+  border-color: #8ab7ce;
+}
+#workshop .garage-wallet {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  margin: 4px 0 10px;
+  border: 1px solid #3e5269;
+  border-radius: 10px;
+  background: #0b1320;
+}
+#workshop .garage-wallet strong {
+  font-size: 23px;
+  color: #fff0aa;
+}
+#workshop .garage-wallet b,
+#workshop .garage-wallet span {
+  font-size: 11px;
+}
+#workshop .garage-wallet small {
+  font-size: 10px;
+  color: #b4c7d8;
+}
+#workshop .workshop-cars {
+  margin: 0 0 12px;
+  gap: 7px;
+}
+#workshop .workshop-cars button {
+  font-size: 18px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 9px;
+}
+#workshop .workshop-cars button[aria-pressed="true"] {
+  background: #3c1d30;
+  box-shadow: inset 3px 0 var(--ui-accent);
+  border-color: #ff6e8a;
+}
+#workshop .garage-showcase {
+  grid-template-columns: minmax(225px, 0.75fr) minmax(0, 1.5fr);
+  border-radius: 12px;
+}
+#workshop .garage-build {
+  padding: 16px;
+}
+#workshop .garage-build h3 {
+  font-size: 27px;
+  margin: 8px 0 16px;
+}
+#workshop .garage-stats {
+  gap: 15px 12px;
+}
+#workshop .garage-stats strong {
+  font-size: 24px;
+}
+#workshop .garage-preview {
+  height: 260px;
+  min-height: 0;
+}
+#workshop .preview-angles {
+  gap: 5px;
+  padding: 0 12px 10px;
+}
+#workshop .preview-angles button {
+  font-family: Barlow, Arial, sans-serif;
+  min-height: 38px;
+  font-size: 10px;
+  padding: 7px 10px;
+}
+#workshop .paint-bench {
+  padding: 10px 12px;
+  gap: 8px;
+}
+#workshop #paint-swatches {
+  gap: 4px;
+}
+#workshop #paint-swatches button {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  flex: 0 0 32px;
+  border: 7px solid #101721;
+  border-radius: 50%;
+}
+#workshop #paint-swatches button[aria-pressed="true"] {
+  outline: 2px solid #fff;
+  outline-offset: 0;
+}
+#workshop .part-inspector {
+  padding: 16px;
+  gap: 18px;
+  margin: 14px 0;
+  border-radius: 12px;
+  grid-template-columns: 140px minmax(0, 1.1fr) minmax(220px, 1fr);
+}
+#workshop .part-filters button,
+#workshop .quality-picker button,
+#workshop .part-actions button,
+#workshop .inspector-actions button {
+  font-family: Barlow, Arial, sans-serif;
+  min-height: 40px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+#workshop .part-filters {
+  gap: 7px;
+  flex-wrap: wrap;
+}
+#workshop .quality-picker {
+  gap: 5px;
+}
+#workshop .part-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+#workshop .part-title h3 {
+  font-size: 23px;
+}
+#workshop .box-bench {
+  padding: 16px;
+  border-radius: 12px;
+  gap: 16px;
+}
+#workshop .box-bench h3 {
+  font-size: 23px;
+  margin: 0 0 6px;
+}
+#workshop .box-bench p {
+  font-size: 12px;
+  margin: 0 0 5px;
+}
+#workshop .box-bench small {
+  font-size: 10px;
+  color: #c1d0df;
+}
+#workshop .parts-heading h3 {
+  font-size: 25px;
+}
+#workshop .save-footer {
+  padding: 16px 0 4px;
+  gap: 10px;
+}
+#workshop .save-footer button {
+  min-height: 40px;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+#loot-dialog {
+  padding: 22px;
+  width: min(820px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+}
+#loot-dialog h2 {
+  font-size: 38px;
+  margin: 10px 0 18px;
+}
+#loot-dialog .loot-slot {
+  border-radius: 10px;
+}
+#loot-dialog .primary,
+#loot-dialog .secondary {
+  min-height: 44px;
+  font-size: 17px;
+}
+#controls-dialog {
+  width: min(520px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 18px;
+}
+#controls-dialog .controls-heading {
+  top: -18px;
+  margin: 0;
+  padding: 10px 0;
+  background: #101925;
+  align-items: center;
+  border-bottom: 1px solid #60758c55;
+}
+#controls-dialog .controls-heading .eyebrow {
+  font-size: 9px;
+  letter-spacing: 1.4px;
+}
+#controls-dialog h2 {
+  font:
+    800 italic 30px/1.1 "Barlow Condensed",
+    Arial;
+  margin: 6px 0 2px;
+}
+#controls-dialog .setup-lead {
+  margin: 12px 0;
+  font-size: 13px;
+  color: #d3dfeb;
+}
+.keyboard-guide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 11px;
+  margin: 12px 0;
+}
+.keyboard-guide kbd {
+  display: inline-block;
+  min-width: 49px;
+  padding: 6px 4px;
+  border-radius: 5px;
+  background: #24364b;
+  border: 1px solid #6b819744;
+  font: 700 10px Barlow;
+  text-align: center;
+  margin-right: 6px;
+}
+#controls-dialog .setup-section {
+  padding: 14px;
+  border: 1px solid #647b9555;
+  border-radius: 11px;
+  background: #162334;
+  margin-top: 10px;
+}
+.setup-section h3,
+.setup-section summary {
+  font:
+    800 11px Barlow,
+    Arial;
+  letter-spacing: 1px;
+  color: #f3f6fc;
+  margin: 0 0 12px;
+}
+.setup-section h3 small,
+.setup-section summary small {
+  display: block;
+  color: #aabed1;
+  font: 500 9px Barlow;
+  letter-spacing: 0.7px;
+  margin-top: 5px;
+}
+.setup-section summary {
+  position: relative;
+  list-style: none;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0;
+  padding-right: 30px;
+}
+.setup-section summary::-webkit-details-marker {
+  display: none;
+}
+.setup-section summary::after {
+  content: "+";
+  position: absolute;
+  right: 4px;
+  font-size: 23px;
+  font-weight: 400;
+  color: var(--ui-cyan);
+}
+.setup-section[open] summary::after {
+  content: "−";
+}
+.setup-section[open] summary {
+  margin-bottom: 12px;
+}
+#controls-dialog .steering-choice {
+  gap: 8px;
+}
+#controls-dialog .steering-choice button {
+  font-family: Barlow, Arial, sans-serif;
+  min-height: 44px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+#controls-dialog .setting-check {
+  font-size: 12px;
+  min-height: 44px;
+  margin: 10px 0;
+  gap: 8px;
+}
+#controls-dialog .setting-check small {
+  flex-basis: 100%;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #b7c8d9;
+}
+#controls-dialog .setting-select {
+  font-size: 12px;
+  gap: 10px;
+  margin-top: 10px;
+}
+#controls-dialog .setting-select select {
+  min-height: 44px;
+  font-size: 11px;
+  max-width: 64%;
+  padding: 6px;
+  border-radius: 8px;
+}
+#controls-dialog .setting-note {
+  font-size: 11px !important;
+  line-height: 1.55;
+  color: #bacbdc;
+  margin: 10px 0 0;
+}
+#controls-dialog #tilt-status {
+  min-height: 0;
+  font-size: 12px;
+}
+#controls-dialog .settings-bottom-note {
+  font-size: 10px;
+  color: #adc1d4;
+  line-height: 1.5;
+  margin: 14px 2px 0;
+}
+#controls-dialog .secondary {
+  font-size: 11px;
+  letter-spacing: 0.6px;
+}
+#controls-dialog #tilt-meter i {
+  transform: translateX(calc(var(--steer) * 105px));
+}
+.boot-card {
+  border-radius: 16px;
+}
+.boot-card h2 {
+  font-size: 58px;
+}
+@media (max-width: 1100px) {
+  #game > header .brand-sub,
+  #game > header .brand-divider {
+    display: none;
   }
-  .route-cue b {
-    font-size: 28px;
+  #game > header .icon-button kbd {
+    display: none;
   }
-  .route-cue > span {
-    font-size: 36px;
+  #mission-card {
+    width: 240px;
   }
-  .route-cue small {
-    font-size: 10px;
-    letter-spacing: 1px;
+  #intro {
+    width: 380px;
   }
-  .navigator {
-    width: 128px;
+  #workshop .part-inspector {
+    grid-template-columns: 110px minmax(0, 1fr);
   }
-  .map-caption {
-    font-size: 10px;
+  #workshop .part-inspector .comparison-meters {
+    grid-column: 1/-1;
   }
 }
-@media (max-height: 500px) {
-  .navigator {
-    width: 102px;
+@media (max-width: 900px) {
+  #game > header .icon-button .action-label,
+  #game > header .icon-button kbd {
+    display: none;
   }
-  .route-cue {
+  #game > header .icon-button {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+  }
+  #mission-card {
+    display: none;
+  }
+  #game > footer .controls {
+    gap: 9px;
+  }
+}
+@media (max-height: 740px) and (min-width: 601px) {
+  #intro {
     top: 76px;
+    bottom: auto;
+    max-height: calc(100dvh - 141px);
+    padding: 18px;
+    gap: 10px;
   }
-  .route-cue b {
-    font-size: 24px;
+  #intro h1 {
+    font-size: 56px;
+    margin: 10px 0;
   }
-  .route-cue > span {
+  #intro .intro-copy {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+  #intro .intro-meta {
+    display: none;
+  }
+  #hud .score-panel {
+    width: 176px;
+  }
+  #hud .score-panel > strong {
+    font-size: 32px;
+  }
+  #hud #objective,
+  #hud .takedown-count {
+    display: none;
+  }
+  #hud .navigator {
+    width: 122px;
+  }
+  #rewind {
+    left: calc(var(--ui-edge) + 138px);
+  }
+}
+/* Tablets keep touch controls below telemetry, separate from desktop placement. */
+@media (min-width: 601px) and (min-height: 501px) {
+  body.mobile-controls #hud .navigator {
+    left: auto;
+    right: calc(var(--safe-right) + 178px);
+    bottom: var(--safe-bottom);
+    width: 100px;
+  }
+  body.mobile-controls #hud .speed-panel {
+    bottom: calc(var(--safe-bottom) + 144px);
+    width: 144px;
+  }
+  body.mobile-controls #hud .speed-value > strong {
+    font-size: 42px;
+  }
+  body.mobile-controls:not(.auto-accelerator) #hud .speed-panel {
+    bottom: calc(var(--safe-bottom) + 214px);
+  }
+  body.mobile-controls #rewind {
+    left: calc(var(--safe-left) + 186px);
+    bottom: var(--safe-bottom);
+    width: 120px;
+  }
+  body.mobile-controls #touch-recover {
+    left: calc(var(--safe-left) + 186px);
+    bottom: calc(var(--safe-bottom) + 70px);
+    min-height: 44px;
+    width: 120px;
+  }
+  body.mobile-controls #workshop #paint-swatches button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex-basis: 44px;
+  }
+}
+@media (max-width: 600px) {
+  :root {
+    --ui-edge: max(12px, env(safe-area-inset-left));
+    --ui-top: max(8px, env(safe-area-inset-top));
+  }
+  #game > header {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: var(--ui-top) var(--ui-edge);
+  }
+  #game > header .brand-wordmark,
+  #game > header .brand-sub,
+  #game > header .brand-divider {
+    display: none;
+  }
+  #game > header .brand-logo {
+    width: 32px;
+    height: 32px;
+  }
+  #game > header .top-actions {
+    width: auto;
+    gap: 5px;
+  }
+  #game > header .icon-button {
+    flex: none;
+  }
+  #intro {
+    top: 72px;
+    bottom: auto;
+    max-height: calc(100dvh - 72px - var(--safe-bottom, 16px));
+    left: var(--ui-edge);
+    width: calc(100% - 24px);
+    max-width: none;
+    padding: 18px;
+    gap: 10px;
+  }
+  #intro h1 {
+    font-size: 58px;
+    line-height: 0.9;
+    margin: 12px 0;
+  }
+  #intro .intro-copy {
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  #intro #garage button {
+    min-height: 60px;
+    padding: 9px 12px;
+  }
+  #intro #garage b {
+    font-size: 21px;
+  }
+  #intro .intro-actions .primary {
+    font-size: 20px;
+  }
+  #intro .intro-actions .secondary {
+    font-size: 11px;
+  }
+  #intro .intro-meta {
+    display: none;
+  }
+  #game > footer {
+    display: none;
+  }
+  #hud .score-panel {
+    left: var(--ui-edge);
+    top: 66px;
+    width: 146px;
+    padding: 9px 10px;
+  }
+  #hud .score-panel > strong {
     font-size: 30px;
+  }
+  #hud .career-hud {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+  #hud .score-panel .label,
+  #hud #objective,
+  #hud .takedown-count {
+    display: none;
+  }
+  #hud .checkpoint-heading {
+    font-size: 9px;
+    margin-top: 7px;
+  }
+  #hud .checkpoint-dots {
+    margin-top: 5px;
+  }
+  #hud .pursuit-panel {
+    top: 66px;
+    right: var(--ui-edge);
+    width: 160px;
+    padding: 10px;
+  }
+  #hud .pursuit-panel > div:first-child {
+    display: block;
+  }
+  #hud .pursuit-panel .label {
+    font-size: 8px;
+    display: block;
+    margin-bottom: 5px;
+  }
+  #hud .pursuit-panel strong {
+    font-size: 11px;
+  }
+  #hud .pursuit-panel p {
+    font-size: 9px;
+    line-height: 1.3;
+    margin-top: 6px;
+  }
+  #hud .heat-bar {
+    margin-top: 6px;
+  }
+  #hud #route-cue {
+    top: 175px;
+    gap: 7px;
+    max-width: 190px;
+  }
+  #route-cue > span {
+    font-size: 32px;
+  }
+  #route-cue b {
+    font-size: 28px;
+  }
+  #route-cue small {
+    font-size: 8px;
+    letter-spacing: 0.9px;
+  }
+  #hud #toast {
+    top: 230px;
+    max-width: 82%;
+    font-size: 12px;
+    padding: 8px 11px;
+  }
+  #hud .speed-panel {
+    right: var(--ui-edge);
+    bottom: calc(var(--safe-bottom, 12px) + 144px);
+    width: 125px;
+    padding: 10px;
+  }
+  #hud .speed-value > strong {
+    font-size: 40px;
+  }
+  #hud .speed-value > span {
+    font-size: 9px;
+  }
+  #hud .condition {
+    font-size: 9px;
+    margin: 7px 0 5px;
+    letter-spacing: 0.5px;
+  }
+  #hud .nitro,
+  #hud .turbo-readout {
+    display: none;
+  }
+  #hud .navigator {
+    width: 86px;
+    left: var(--ui-edge);
+    right: auto;
+    bottom: calc(var(--safe-bottom, 12px) + 194px);
+  }
+  #hud .map-caption {
+    display: none;
+  }
+  #rewind {
+    left: var(--ui-edge);
+    bottom: calc(var(--safe-bottom, 12px) + 144px);
+    width: 150px;
+    min-height: 44px;
+    padding: 6px 9px;
+  }
+  #rewind span {
+    font-size: 10px;
+  }
+  #rewind small {
+    font-size: 9px;
+    margin: 3px 0;
+  }
+  #touch-recover {
+    left: calc(var(--ui-edge) + 96px) !important;
+    right: auto !important;
+    bottom: calc(var(--safe-bottom, 12px) + 208px) !important;
+    width: 80px !important;
+    min-height: 44px !important;
+    border-radius: 9px !important;
+    font-size: 9px !important;
+  }
+  body.mobile-controls:not(.auto-accelerator) #hud .speed-panel {
+    bottom: calc(var(--safe-bottom, 12px) + 214px);
+  }
+  #workshop {
+    padding: 12px;
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+    scroll-padding-top: 110px;
+  }
+  #workshop .workshop-header {
+    top: -12px;
+    padding: 10px 0;
+    background: #101925;
+  }
+  #workshop .workshop-header h2 {
+    font-size: 28px;
+  }
+  #workshop .workshop-header .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  #workshop .workshop-nav {
+    top: 47px;
+    gap: 4px;
+  }
+  #workshop .workshop-nav button {
+    min-height: 44px;
+    font-size: 9px;
+    padding: 6px 4px;
+    letter-spacing: 0.2px;
+  }
+  #workshop .garage-wallet {
+    gap: 8px 13px;
+    flex-wrap: wrap;
+    margin: 4px 0 10px;
+  }
+  #workshop .garage-wallet small {
+    flex-basis: 100%;
+    font-size: 9px;
+  }
+  #workshop .workshop-cars {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  #workshop .workshop-cars button {
+    font-size: 17px;
+  }
+  #workshop .garage-showcase {
+    grid-template-columns: 1fr;
+  }
+  #workshop .studio-column {
+    order: -1;
+  }
+  #workshop .garage-preview {
+    height: 225px;
+  }
+  #workshop .garage-build h3 {
+    font-size: 24px;
+    margin: 6px 0 12px;
+  }
+  #workshop .garage-build {
+    padding: 14px;
+  }
+  #workshop .garage-stats {
+    gap: 12px;
+  }
+  #workshop .garage-stats strong {
+    font-size: 21px;
+  }
+  #workshop .preview-angles button {
+    min-height: 44px;
+    padding: 7px 9px;
+    font-size: 9px;
+  }
+  #workshop .paint-bench {
+    gap: 8px;
+  }
+  #workshop #paint-swatches {
+    gap: 2px;
+    flex-wrap: wrap;
+  }
+  #workshop #paint-swatches {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    width: 100%;
+    gap: 0;
+  }
+  #workshop #paint-swatches button {
+    width: 100%;
+    max-width: 44px;
+    height: 44px;
+    min-width: 0;
+    min-height: 44px;
+    flex-basis: 44px;
+    border-width: 10px;
+  }
+  #workshop .part-inspector {
+    grid-template-columns: 85px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  #workshop .part-filters {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  #workshop .part-filters button,
+  #workshop .quality-picker button,
+  #workshop .part-actions button,
+  #workshop .inspector-actions button {
+    min-height: 44px;
+    font-size: 10px;
+  }
+  #workshop .box-bench {
+    padding: 14px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #workshop #open-box {
+    width: 100%;
+  }
+  #workshop .box-bench h3 {
+    font-size: 21px;
+  }
+  #workshop .part-grid {
+    grid-template-columns: 1fr;
+  }
+  #loot-dialog {
+    padding: 16px;
+  }
+  #loot-dialog h2 {
+    font-size: 31px;
+  }
+  #loot-dialog .loot-slots {
+    gap: 6px;
+  }
+  #loot-dialog .loot-slot strong {
+    font-size: 15px;
+  }
+  #loot-dialog .loot-slot span {
+    font-size: 10px;
+  }
+  #controls-dialog {
+    padding: 14px;
+  }
+  #controls-dialog .controls-heading {
+    top: -14px;
+  }
+  #controls-dialog .setup-section {
+    padding: 12px;
+  }
+  .modal-card {
+    padding: 22px;
+    max-height: calc(100dvh - 28px);
+    overflow: auto;
+  }
+  .modal-card h2 {
+    font-size: 42px;
+  }
+}
+@media (max-height: 500px) and (min-width: 601px) {
+  :root {
+    --ui-edge: max(12px, env(safe-area-inset-left));
+    --ui-top: max(6px, env(safe-area-inset-top));
+  }
+  #intro {
+    top: 62px;
+    bottom: auto;
+    max-height: calc(100dvh - 74px);
+    width: 480px;
+    padding: 14px;
+    gap: 8px;
+  }
+  #intro .intro-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 8px 14px;
+    align-items: start;
+  }
+  #intro .eyebrow {
+    grid-column: 1/-1;
+    font-size: 8px;
+  }
+  #intro h1 {
+    font-size: 44px;
+    margin: 0;
+    grid-row: 2/4;
+  }
+  #intro .intro-copy,
+  #intro .mobile-hint,
+  #intro #car-details {
+    display: none;
+  }
+  #intro #garage {
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    grid-column: 2;
+  }
+  #intro #garage button {
+    min-height: 48px;
+    padding: 6px 8px;
+  }
+  #intro #garage b {
+    font-size: 17px;
+  }
+  #intro #garage small {
+    font-size: 8px;
+  }
+  #intro #garage i {
+    display: none;
+  }
+  #intro #intro-career {
+    grid-column: 1/-1;
+    margin: 0;
+    padding: 6px 0 0;
+  }
+  #intro #mobile-setup {
+    min-height: 36px;
+  }
+  #intro .intro-actions button {
+    min-height: 44px;
+  }
+  #game > footer {
+    display: none;
+  }
+  #hud .score-panel {
+    top: 61px;
+    left: var(--ui-edge);
+    width: 148px;
+    padding: 8px 10px;
+  }
+  #hud .score-panel > strong {
+    font-size: 27px;
+  }
+  #hud .career-hud {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+  #hud .checkpoint-heading {
+    font-size: 8px;
+    margin-top: 4px;
+  }
+  #hud .score-panel .label,
+  #hud #objective,
+  #hud .takedown-count {
+    display: none;
+  }
+  #hud .pursuit-panel {
+    top: 61px;
+    right: var(--ui-edge);
+    width: 178px;
+    padding: 9px;
+  }
+  #hud .pursuit-panel p {
+    font-size: 9px;
+    line-height: 1.3;
+  }
+  #hud #route-cue {
+    top: 68px;
+    max-width: 180px;
+  }
+  #route-cue b {
+    font-size: 26px;
+  }
+  #route-cue small {
+    font-size: 8px;
+  }
+  #hud #toast {
+    top: 125px;
+    font-size: 12px;
+    max-width: 50%;
+    padding: 7px 10px;
+  }
+  #hud .navigator {
+    left: auto;
+    right: calc(var(--safe-right, 12px) + 178px);
+    bottom: var(--safe-bottom, 12px);
+    width: 76px;
+  }
+  #hud .map-caption {
+    display: none;
+  }
+  #hud .speed-panel {
+    right: var(--ui-edge);
+    bottom: calc(var(--safe-bottom, 12px) + 145px);
+    width: 128px;
+    padding: 8px 10px;
+  }
+  #hud .speed-value > strong {
+    font-size: 32px;
+  }
+  #hud .condition {
+    font-size: 8px;
+    margin: 6px 0 4px;
+  }
+  #hud .drift-status {
+    display: none;
+  }
+  #rewind {
+    left: calc(var(--safe-left, 12px) + 186px);
+    bottom: var(--safe-bottom, 12px);
+    width: 106px;
+    min-height: 48px;
+    padding: 6px 8px;
+  }
+  #touch-recover {
+    left: calc(var(--safe-left, 12px) + 186px) !important;
+    bottom: calc(var(--safe-bottom, 12px) + 58px) !important;
+    min-height: 44px !important;
+    width: 106px !important;
+  }
+  #workshop .garage-preview {
+    height: 220px;
+  }
+  #workshop .garage-showcase {
+    grid-template-columns: 1fr 1.35fr;
+  }
+  #workshop .studio-column {
+    order: 0;
+  }
+  #workshop button,
+  #controls-dialog button {
+    min-height: 44px;
+  }
+  .modal-card {
+    padding: 16px 22px;
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+  }
+  .modal-card h2 {
+    font-size: 36px;
+    margin: 8px 0;
+  }
+  .modal-card p {
+    margin: 6px 0 12px;
+    font-size: 12px;
+  }
+  .modal-card button {
+    min-height: 44px;
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  button,
+  select,
+  .toast {
+    transition: none !important;
+  }
+  .workshop-nav {
+    scroll-behavior: auto;
   }
 }
