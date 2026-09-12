@@ -30,9 +30,19 @@ export const PART_DETAILS = {
   weight:
     "Lightweight body panels reduce mass in the performance model, improving acceleration and the speed ceiling.",
 };
-export function comparisonRows(base, equipment, part, tier) {
+export function comparisonRows(
+  base,
+  equipment,
+  part,
+  tier,
+  stars = equipment.stars?.[part.id] || 0,
+) {
   const before = upgradedSpec(base, equipment),
-    after = upgradedSpec(base, { ...equipment, [part.id]: tier });
+    after = upgradedSpec(base, {
+      ...equipment,
+      [part.id]: tier,
+      stars: { ...equipment.stars, [part.id]: stars },
+    });
   const descriptors = {
     topSpeed: ["Top speed", "km/h", (s) => s.topSpeed * 3.6, 430],
     acceleration: ["Acceleration", "m/s²", (s) => s.acceleration, 65],
@@ -83,9 +93,19 @@ export const partCategory = (id) =>
     : ["rims", "spoiler", "armor", "weight"].includes(id)
       ? "body"
       : "power";
-export function upgradeBenefits(base, equipment, part, tier) {
+export function upgradeBenefits(
+  base,
+  equipment,
+  part,
+  tier,
+  stars = equipment.stars?.[part.id] || 0,
+) {
   const before = upgradedSpec(base, equipment),
-    after = upgradedSpec(base, { ...equipment, [part.id]: tier });
+    after = upgradedSpec(base, {
+      ...equipment,
+      [part.id]: tier,
+      stars: { ...equipment.stars, [part.id]: stars },
+    });
   const n = (value, digits = 1) => Number(value.toFixed(digits));
   const labels = {
     topSpeed: () =>

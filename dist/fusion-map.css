@@ -1,0 +1,282 @@
+.fusion-panel {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--tier) 45%, transparent);
+  border-radius: 10px;
+  background: #ffffff06;
+  display: grid;
+  gap: 7px;
+}
+.fusion-panel strong {
+  display: flex;
+  justify-content: space-between;
+  color: var(--tier);
+  font-size: 12px;
+}
+.fusion-panel small,
+.fusion-panel p {
+  font-size: 10px;
+  line-height: 1.5;
+  margin: 0;
+  color: #c8d5df;
+}
+.fusion-panel progress {
+  width: 100%;
+  height: 5px;
+  accent-color: var(--tier);
+}
+.fusion-panel button,
+.loot-choices button {
+  min-height: 40px;
+  padding: 9px;
+  border-radius: 7px;
+  border: 1px solid #ffffff33;
+  background: #1c2937;
+  color: #eef9ff;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.fusion-panel button:disabled,
+.loot-choices button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.loot-choices {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  width: 100%;
+}
+.loot-choices small {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #c5d3df;
+}
+.loot-choices b {
+  font-size: 12px;
+  color: #a8f2c8;
+}
+.loot-choices [data-loot-choice="equip"] {
+  background: #17624a;
+  border-color: #70dfad;
+}
+.loot-slot {
+  height: auto;
+  min-height: 270px;
+}
+.loot-dialog {
+  max-height: 90dvh;
+  overflow: auto;
+}
+#quest-map-open {
+  pointer-events: auto;
+  position: absolute;
+  bottom: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 7px 12px;
+  border: 1px solid #a9dbe766;
+  border-radius: 20px;
+  background: #102734ed;
+  color: #f0fbff;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+#quest-map {
+  width: min(1080px, 94vw);
+  max-height: 92dvh;
+  padding: 22px;
+  border: 1px solid #a9dbe744;
+  border-radius: 16px;
+  background: #0e1824;
+  color: #eef5fa;
+  overflow: auto;
+}
+#quest-map::backdrop {
+  background: #030a12bd;
+}
+#quest-map header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+#quest-map h2 {
+  margin: 4px 0;
+  font-size: 25px;
+}
+#quest-map header small {
+  color: #e3adff;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+#quest-map-close,
+#quest-return {
+  padding: 12px 16px;
+  min-height: 44px;
+  border: 1px solid #d9eaff44;
+  border-radius: 8px;
+  background: #223043;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+.quest-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.quest-cartography {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid #c0e7ef33;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #112531;
+}
+#quest-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.quest-north {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  color: #e8ff76;
+  font: bold 12px Arial;
+}
+.quest-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #101724;
+  background: var(--quest);
+  color: #182034;
+  font-weight: 900;
+  box-shadow: 0 0 0 4px #0e182488;
+  cursor: pointer;
+}
+#quest-list {
+  display: grid;
+  gap: 12px;
+}
+.quest-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--quest) 45%, transparent);
+  background: #ffffff06;
+  border-radius: 12px;
+  color: #edf8ff;
+  cursor: pointer;
+}
+.quest-card > b {
+  background: var(--quest);
+  color: #10202a;
+  border-radius: 8px;
+  padding: 9px;
+  font-size: 18px;
+}
+.quest-card span {
+  display: grid;
+  gap: 7px;
+}
+.quest-card strong {
+  font-size: 13px;
+}
+.quest-card small {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #c1d4df;
+}
+.quest-card em {
+  font-size: 10px;
+  color: var(--quest);
+  margin-left: auto;
+  font-style: normal;
+}
+.quest-help {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #bdccd7;
+}
+.quest-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 10px;
+  margin-top: 12px;
+  color: #cbdbe5;
+}
+#quest-map button:focus-visible,
+#quest-map-open:focus-visible {
+  outline: 3px solid #f7df8c;
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .quest-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  #quest-map {
+    padding: 14px;
+  }
+  .quest-cartography {
+    max-height: 48dvh;
+    width: auto;
+    aspect-ratio: 1;
+    margin: auto;
+  }
+  #quest-map h2 {
+    font-size: 20px;
+  }
+  .quest-card {
+    padding: 10px;
+  }
+  .loot-choices button {
+    font-size: 10px;
+    min-height: 42px;
+  }
+  #quest-map-open {
+    bottom: -15px;
+    padding: 5px 9px;
+    font-size: 9px;
+  }
+}
+
+body.mobile-controls #quest-map-open {
+  bottom: auto;
+  top: -40px;
+  min-height: 36px;
+  width: 88px;
+  white-space: normal;
+  font-size: 9px;
+  padding: 7px 3px;
+}
+#quest-map > header {
+  position: static;
+  inset: auto;
+  transform: none;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0 0 18px;
+  background: none;
+  border: 0;
+  z-index: auto;
+}
+.loot-choices {
+  padding: 0 8px;
+  box-sizing: border-box;
+}

@@ -44,9 +44,13 @@ export class CommunityUI {
     const courses = () => {
       $("time-course").innerHTML = (
         this.map === "kutaisi"
-          ? [["kutaisi-1.0", "KUTAISI · 1.0"]]
+          ? [
+              ["kutaisi-1.1", "CURRENT · 1.1"],
+              ["kutaisi-1.0", "ARCHIVE · 1.0"],
+            ]
           : [
-              ["tbilisi-1.14", "CURRENT · 1.14"],
+              ["tbilisi-1.16", "CURRENT · 1.16"],
+              ["tbilisi-1.14", "ARCHIVE · 1.14"],
               ["tbilisi-1.13", "ARCHIVE · 1.13"],
             ]
       )

@@ -8,7 +8,7 @@ export function levelHash(value) {
 }
 export function levelCondition(level = 1) {
   level = Math.max(1, Math.floor(level));
-  const bag = ["dusk", "night", "day"];
+  const bag = ["dawn", "night", "day"];
   const block = Math.floor((level - 1) / 3);
   if (block) {
     for (let i = 2; i > 0; i--) {
@@ -20,6 +20,6 @@ export function levelCondition(level = 1) {
   return {
     mode,
     label: mode.toUpperCase(),
-    offset: { dusk: 0, night: 150, day: 450 }[mode],
+    offset: { dawn: 0, night: 175, day: 45 }[mode],
   };
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.16.0 — 2026-09-13
+
+- Fix handbrake input after toolbar focus and rear-traction behavior with upgraded/fused tires. Support smooth drift entry, recovery and re-entry on both maps; keyboard and mobile turbo can accompany a turn.
+- Match the base patrol speed to the selected car build, add 20% of that base per level up to a 145 m/s physics ceiling, raise acceleration and increase Kutaisi starting units to six with shorter reinforcement intervals. Existing role, collision, road/bridge routing and 22-unit bounds remain.
+- Run the full Auto lighting cycle in four minutes, with morning/noon/dusk/night/dawn and repeatable level start offsets. Manual modes remain fixed.
+- Add a full city/side-quest map, separate rooftop/river pins, collected state, route selection and on-radar markers. Cache static streets/water in one shared raster; pause chase, clock, rendering and audio while the map is open.
+- Open one earned box atomically with a successful level settlement. Reveal all three drops immediately; equip stronger parts or sell/keep spares, with per-drop replay protection.
+- Add five permanent fusion stars to each car part slot. Consume 5/10/15/20/25 same-part, same-rarity duplicates for +30/+50/+70/+90/+110% of its base part effect. Tuning survives rarity upgrades; maximum landing protection is capped at 90%.
+- Preserve old profiles, parts, paint and records. Separate new timing rules as Tbilisi 1.16 / Kutaisi 1.1 and retain earlier course archives. Add shared-rule, API concurrency, both-map drift, browser, map/pause and full-driving validation.
+
 ## 1.15.0 — 2026-09-13
 
 - Unlock a separate Kutaisi city after clearing Tbilisi level 3. Use one shared saved garage with independent city levels, progress/score/weekly boards and per-level times. Existing Tbilisi careers and records remain intact.

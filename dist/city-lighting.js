@@ -6,20 +6,23 @@ export const LIGHTING_MODES = ["auto", "night", "day", "dusk"];
 export const LOCAL_LIGHT_LIMIT = 3;
 export const LAMP_EFFECT_LIMIT = 64;
 const smooth = (a, b, n) => THREE.MathUtils.smoothstep(n, a, b);
+export const DAY_CYCLE_SECONDS = 240;
 const cycle = [
   [0, 0.45],
-  [120, 1],
-  [300, 1],
-  [420, 0],
-  [540, 0],
-  [600, 0.45],
+  [30, 0],
+  [90, 0],
+  [130, 0.64],
+  [155, 1],
+  [205, 1],
+  [240, 0.45],
 ];
 
 // Simulation time makes pause, recovery and the five-second rewind coherent.
 export function lightingAt(time, mode = "auto") {
   let night = mode === "night" ? 1 : mode === "dusk" ? 0.64 : 0;
+  const t =
+    ((time % DAY_CYCLE_SECONDS) + DAY_CYCLE_SECONDS) % DAY_CYCLE_SECONDS;
   if (mode === "auto") {
-    const t = ((time % 600) + 600) % 600;
     for (let i = 1; i < cycle.length; i++) {
       const [end, b] = cycle[i],
         [start, a] = cycle[i - 1];
@@ -32,7 +35,16 @@ export function lightingAt(time, mode = "auto") {
   return {
     night,
     lamps: smooth(0.24, 0.72, night),
-    label: night > 0.83 ? "NIGHT" : night > 0.22 ? "DUSK" : "DAY",
+    label:
+      night > 0.83
+        ? "NIGHT"
+        : mode === "auto" && (t < 30 || t >= 205)
+          ? "DAWN"
+          : night > 0.22
+            ? "DUSK"
+            : mode === "auto" && t >= 55 && t <= 90
+              ? "NOON"
+              : "DAY",
   };
 }
 

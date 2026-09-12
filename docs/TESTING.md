@@ -8,7 +8,7 @@ Tests use Node's built-in test runner. They import simulation and geometry modul
 npm test
 ```
 
-The current suite contains **162 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/mobile.test.mjs`.
+The current suite contains **183 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/mobile.test.mjs`.
 
 `career.test.mjs` covers full-footprint road clearance, all three bridges in both directions, thin-wall tunneling, distinct car geometry, 14 parts/four tiers, integrated upgrade physics, duplicate rewards, currency settlement, level difficulty, wreck-credit rewind and breakable poles. `save-api.test.mjs` checks isolated profiles, request retries/conflicts, box idempotency and actual SQLite close/reopen persistence.
 
@@ -70,3 +70,7 @@ Run the suite for the release commit, run full routes if mechanics/maps changed,
 [Back to README](../README.md)
 
 `world-safety.test.mjs` checks expanded road/lane clearance, the rendered riverbed, explicit bridges, patrol and player sinking/respawn, mountain blocking, panel fracture/rewind/visual synchronization and exact spatial-query parity. `node scripts/benchmark-simulation.mjs` runs the reproducible CPU workload documented in PERFORMANCE.md.
+
+## Drift and Fusion (1.16)
+
+`drift-tbilisi.test.mjs` and `drift-kutaisi.test.mjs` run every car with stock, Diamond and maximum-fused Platinum equipment through left/right handbrake turns, simultaneous nitro, recovery and opposite re-entry. `fusion.test.mjs` checks all 14 parts at every rarity through five stars, insufficient inventories, old-save migration, finite maximum performance, immediate boxes, independent drop claims and bounded patrol scaling. `fusion-api.test.mjs` exercises actual SQLite/API retry and concurrent-spend protection. See [Fusion](FUSION.md) and the latest validation entry.

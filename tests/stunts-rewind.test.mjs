@@ -151,7 +151,7 @@ test("time-based reinforcements grow without checkpoints and stop at twelve cars
   s.start();
   s.time = 35;
   s.update(1 / 120, {});
-  assert.equal(s.police.length, 4);
+  assert.equal(s.police.length, 5);
   assert.equal(s.heatLevel, 2);
   for (let i = 0; i < 20; i++) {
     s.time = s.nextWaveAt + 0.01;

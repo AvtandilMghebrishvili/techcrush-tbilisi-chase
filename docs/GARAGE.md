@@ -41,3 +41,7 @@ The 56 part-grade assemblies are original procedural 3D models rendered into cac
 ## Platinum (v1.15)
 
 Kutaisi's two secret stunt challenges each award one Platinum box once per profile. Open the separate PLATINUM button to roll three fifth-grade parts; duplicates count separately. All fourteen assemblies have fifth-grade previews. Install an owned part free or sell a spare for 1,400 CR. Regular purchases stop at Diamond and ordinary box odds are unchanged. Platinum contributes 4.5 tier units versus Diamond's 4. Shared upgrades and paint travel between both cities. [Unlock and challenge locations](KUTAISI.md).
+
+## Immediate rewards and fusion stars (1.16)
+
+Level clears reveal the earned three-part box before Garage/Next Level. Equip a stronger part directly, sell a spare, or keep it for fusion. Each installed part has a five-star tuning track, with exact duplicate requirements and total bonuses shown in its card. Stars stay with this car slot when rarity is improved. [Rules, examples and safety limits](FUSION.md).

@@ -9,15 +9,18 @@ import {
   LAMP_EFFECT_LIMIT,
 } from "../dist/city-lighting.js";
 
-test("lighting progresses from dusk to night and day with continuous deterministic rewind", () => {
-  assert.equal(lightingAt(0).label, "DUSK");
+test("lighting completes morning, noon, dusk, night and dawn in exactly four minutes", () => {
+  assert.equal(lightingAt(0).label, "DAWN");
   assert.equal(lightingAt(150).label, "NIGHT");
-  assert.equal(lightingAt(480).label, "DAY");
+  assert.equal(lightingAt(45).label, "DAY");
+  assert.equal(lightingAt(75).label, "NOON");
+  assert.equal(lightingAt(130).label, "DUSK");
+  assert.equal(lightingAt(239).label, "DAWN");
   for (let t = 0; t < 1200; t += 0.5) {
     const s = lightingAt(t);
     assert(s.night >= 0 && s.night <= 1 && s.lamps >= 0 && s.lamps <= 1);
     assert(Math.abs(s.night - lightingAt(t - 0.001).night) < 0.001);
-    assert.deepEqual(s, lightingAt(t + 600));
+    assert.deepEqual(s, lightingAt(t + 240));
   }
   assert.equal(lightingAt(999, "night").night, 1);
   assert.equal(lightingAt(999, "day").lamps, 0);

@@ -1,6 +1,6 @@
 # Career, persistence and API
 
-Rules in `dist/progression.js` are shared by browser and server. Profiles begin at level 1 with 1,000 credits and one box. Fourteen parts have four tiers, giving 56 combinations; the README lists effects, prices and odds.
+Rules in `dist/progression.js` are shared by browser and server. Profiles begin at level 1 with 1,000 credits and one box. Fourteen parts have five rarities, giving 70 base combinations, plus five optional fusion stars per car slot; the README lists effects, prices and odds.
 
 ## Rewards and equipment
 
@@ -8,7 +8,7 @@ A winning run clears six gates and escapes. Settlement grants run earnings, 1,80
 
 Boxes use cryptographic random values on the server for three independent draws. All three rewards are stored atomically before slot animation begins. Skip/reload/retry cannot reroll the same operation. Duplicates count separately. Higher owned parts install free; credit purchases buy the next tier. The old fitted part returns to inventory. Spoilers, tire width and rims also change geometry.
 
-`upgradedSpec()` produces the actual driving parameters. `pursuitTuning(level)` smoothly increases speed, acceleration, observation range, route updates, wave frequency and unit cap. Level 3 enables flank targeting. Growth approaches a bound rather than increasing without limit.
+`upgradedSpec()` produces the actual driving parameters. `pursuitTuning(level, playerSpeed, map)` starts near the chosen car build’s top speed, adds 20% of that base per level up to 145 m/s, and separately increases acceleration, observation, route updates and reinforcement pressure. Kutaisi starts with six patrols; Tbilisi starts with four. At most 22 units are retained. Level 3 enables flank targeting. [Fusion and progression details](FUSION.md).
 
 ## Storage and recovery
 
@@ -36,13 +36,13 @@ Successful responses are `{ profile, version, driver }`. Example action body:
 {"id":"unique-operation-id","version":3,"action":{"type":"upgrade","car":"gt","part":"engine"}}
 ```
 
-Actions: `select`, `open-box`, `upgrade`, `equip`, `sell`, `settle`. Equipment uses validated part/car IDs; equip/sell also supply tier 1–4. Settlement supplies `runId`, `level`, earned `cash`, and `result` (`won`, `busted`, `wrecked`, `abandoned`).
+Actions include `driver`, `begin-run`, `select`, `paint`, `open-box`, `open-platinum-box`, `upgrade`, `equip`, `sell`, `fuse`, `claim-loot` and `settle`. Equipment uses validated part/car IDs; equip/sell supply tier 1–5. `fuse` consumes server-checked duplicates of the currently fitted rarity. `claim-loot` supplies `boxId`, `index` and `choice` (`equip`/`sell`). Modern settlement sends the server-issued `runId`, `level`, bounded gameplay/timing `metrics`, `result` and optional `autoOpenBox: true`; the server derives currency. Legacy cash-only clients retain limited compatibility.
 
 Prepared statements and a version compare-and-swap protect concurrent writes. The last 128 operation IDs and settled run IDs suppress retries. A stale version returns 409 and refreshes the client; invalid actions/insufficient funds return 400, invalid keys 401, absent profiles 404 and storage failures 503. Transient errors retain the original pending operation ID for a safe retry.
 
 ## Limits
 
-This is a casual single-player game. The API validates funds, inventory, current level, bounded cash and concurrency; the browser calculates driving and run outcomes. It is **not an anti-cheat authority**, competitive leaderboard, payment system or multiplayer server. A modified client can fabricate a run result. Credits have no monetary value.
+This is a casual single-player game. The API validates funds, inventory, current level, bounded cash and concurrency; the browser calculates driving and run outcomes. The shared community leaderboard is **not an anti-cheat authority**, payment system or multiplayer server. A modified client can fabricate a run result. Credits have no monetary value.
 
 Different people using one browser profile share its garage. Two tabs can access one save; conflicting purchases refresh instead of merging. Backups, data retention and production key-management policies remain the hosting operator's responsibility.
 

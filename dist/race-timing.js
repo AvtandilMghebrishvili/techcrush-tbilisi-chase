@@ -46,6 +46,8 @@ export class RaceClock {
 
 export const TIME_COURSES = [
   "tbilisi-1.13",
+  "tbilisi-1.14",
+  "kutaisi-1.0",
   MAP_COURSES.tbilisi,
   MAP_COURSES.kutaisi,
 ];

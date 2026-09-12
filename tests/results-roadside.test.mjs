@@ -23,7 +23,7 @@ import { TIME_COURSE } from "../dist/race-timing.js";
 test("ranked levels use reproducible shuffled conditions and roomy road gates", () => {
   assert.deepEqual(
     [1, 2, 3].map((l) => levelCondition(l).mode),
-    ["dusk", "night", "day"],
+    ["dawn", "night", "day"],
   );
   const fingerprints = new Set();
   for (let level = 1; level <= 300; level++) {

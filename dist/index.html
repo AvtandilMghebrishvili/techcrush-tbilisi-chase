@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="./mobile.css" />
     <link rel="stylesheet" href="./ui-refresh.css" />
     <link rel="stylesheet" href="./community.css" />
+    <link rel="stylesheet" href="./fusion-map.css" />
     <meta name="theme-color" content="#10151f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
@@ -273,6 +274,13 @@
             height="230"
             aria-label="City minimap showing player, police, and next checkpoint"
           ></canvas>
+          <button
+            id="quest-map-open"
+            aria-haspopup="dialog"
+            title="Open full city map and side quests"
+          >
+            MAP + SIDE QUESTS ↗
+          </button>
           <div class="map-caption">
             <span id="district">DOWNTOWN</span><span>N ↑</span>
           </div>
@@ -358,6 +366,46 @@
           </div>
         </div>
       </section>
+      <dialog id="quest-map" aria-labelledby="quest-map-title">
+        <header>
+          <div>
+            <small id="quest-city">EXPLORE &amp; COLLECT</small>
+            <h2 id="quest-map-title">CHOOSE YOUR NEXT CHALLENGE.</h2>
+          </div>
+          <button id="quest-map-close" aria-label="Close quest map">
+            CLOSE ×
+          </button>
+        </header>
+        <div class="quest-layout">
+          <div>
+            <div class="quest-cartography">
+              <canvas
+                id="quest-canvas"
+                width="900"
+                height="900"
+                aria-label="City streets, river, six checkpoints and stunt locations"
+              ></canvas>
+              <div id="quest-pins"></div>
+              <span class="quest-north">N ↑</span>
+            </div>
+            <div class="quest-legend">
+              <span>● YOU</span><span>1–6 CHECKPOINTS</span
+              ><span>S ROOFTOP</span><span>R RIVER JUMP</span
+              ><span>▪ STREET RAMPS</span>
+            </div>
+          </div>
+          <div>
+            <div id="quest-list"></div>
+            <p class="quest-help">
+              Select a challenge to guide you to the correct ramp entrance.
+              Build speed before the jump and land upright. Uncollected boxes
+              stay available after updates. The chase and timer pause while this
+              map is open.
+            </p>
+            <button id="quest-return">RESUME CHECKPOINT ROUTE ↗</button>
+          </div>
+        </div>
+      </dialog>
       <dialog id="community-dialog" aria-labelledby="community-title">
         <header class="community-header">
           <div>

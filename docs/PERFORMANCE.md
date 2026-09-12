@@ -1,5 +1,11 @@
 # Rendering and audio lifecycle
 
+## Drift, Fusion and map UI (1.16)
+
+The radar reuses one lazy 1536 × 1536 canvas atlas of the selected city’s roads and water instead of stroking every street on each HUD update. The full quest map uses the same atlas and repaints its 900 × 900 overlay only when opened. Together these buffers use about 12.1 MiB of raw RGBA storage; there is no new frame loop, WebGL context for the map, media download or change to 3D quality. Map changes still reload and release the previous world.
+
+Opening the quest dialog suspends simulation, race clock, audio/gyro and continuous scene rendering. A local browser check observed identical simulation time and renderer frame count with no pending frame over 600 ms. Fusion stores at most fourteen small star counters per car; stats are computed for the installed build at run start. Reward animation is finite and stops on hide. The existing garage renderer supplies reward artwork. Patrol counts remain capped at 22 despite faster and more frequent pursuit.
+
 ## Result screen and weather 1.14.0
 
 The result overlay makes two finite rank reads after saving, with an eight-second deadline and cancellation on hide/leave. It does not poll. The world remains on the existing single on-demand frame loop. The two musical cues use cached PCM buffers and disconnect after a maximum 1.25-second tail; the audio context then suspends. Lighting conditions are cached per level rather than allocating a shuffled bag each frame.

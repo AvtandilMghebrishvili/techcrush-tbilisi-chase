@@ -258,7 +258,7 @@ test("endless levels preserve growth, bounded active units and distinct late pur
   let previous = pursuitTuning(1);
   for (const level of [2, 4, 7, 20, 100, 1000]) {
     const t = pursuitTuning(level);
-    assert(t.maxSpeed > previous.maxSpeed);
+    assert(t.maxSpeed >= previous.maxSpeed && t.maxSpeed <= 145);
     assert(t.repath < previous.repath);
     assert(t.waveInterval < previous.waveInterval);
     assert(t.maxUnits <= 22);

@@ -4,7 +4,7 @@ A successful level requires six checkpoints and eight seconds of escaping the po
 
 After the server saves the finish and reward, the screen fetches **Overall position** and **Level time rank** once. Overall ranks use career progress; time ranks compare the current level/course across all cars and builds. They are separate measures. Equal displayed times share a time rank. The full leaderboard has car/stock filters for closer comparisons. Positions may change as other people finish. A network error leaves the saved result and continuation buttons usable, with a manual ranking retry. Guest/private drivers see a prompt to choose a public name instead of a fictitious rank.
 
-Choose **Next · Level N** to race immediately, or **Garage · Open Box & Upgrade** to spend the reward and install parts. The next button names the upcoming lighting condition. Rewards settle once; restarting, sharing or refreshing the rankings does not award extra currency or boxes.
+One earned box reveals immediately after settlement. Equip a stronger reward, sell it or keep it for fusion, then choose **Next · Level N** or **Garage · Fuse & Upgrade**. The next button names the upcoming lighting condition. Rewards settle once; restarting, sharing or refreshing the rankings does not award extra currency or boxes.
 
 ## Sharing
 
@@ -16,9 +16,9 @@ The additive `0003_massive_mephistopheles.sql` migration creates `race_results`.
 
 ## Routes and conditions
 
-Course `tbilisi-1.14` uses wider roads, full arch-footprint clearance and a stable hash to shuffle six district destinations and their visiting order. Candidate pools are prepared once and layouts use a bounded 32-level cache. Level 1 keeps its familiar route. Every player sees the same layout for a given level/course, so reloading cannot reroll a faster route.
+Current courses `tbilisi-1.16` and `kutaisi-1.1` retain wider roads, full arch-footprint clearance and a stable hash to shuffle six district destinations and their visiting order. Candidate pools are prepared once and layouts use a bounded 32-level cache. Level 1 keeps its familiar route. Every player sees the same layout for a given level/course, so reloading cannot reroll a faster route.
 
-Auto lighting starts at dusk, night or day using a shuffled three-level bag. The first three levels are dusk/night/day. The continuous lighting cycle still proceeds during play and rewinds with the world. Manual Day/Night/Dusk choices remain available; these are casual community rankings, not locked competition settings.
+Auto lighting starts at dawn, night or day using a shuffled three-level bag. The first three levels are dawn/night/day. The full morning/noon/dusk/night/dawn cycle lasts **240 active simulation seconds**, and rewinds with the world. Manual Day/Night/Dusk choices remain available; these are casual community rankings, not locked competition settings.
 
 Some levels receive one 24-second light shower, with a fade in/out. It uses 144 GPU-animated line segments, one 4,608-byte static buffer set, one draw call, no added media, shadow pass, reflections, splash simulation, interval or independent animation loop. Manual lighting disables automatic showers. The exact local rendering measurement is in [Performance](PERFORMANCE.md); it is not a universal phone performance guarantee.
 

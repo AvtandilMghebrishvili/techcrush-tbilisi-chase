@@ -1,6 +1,6 @@
 # City lighting and interface
 
-`city-lighting.js` owns a single `CityLighting` instance per world. `lightingAt(sim.time, mode)` produces a continuous darkness/lamps state; its 600-second loop starts at dusk, reaches full night at 120 seconds, stays dark until 300, reaches daylight at 420, and starts dusk again at 540. Manual modes fix the state. Only the display preference is stored in `techcrush-lighting` in local storage. Garage saves, physics, pursuit sight and difficulty are unchanged.
+`city-lighting.js` owns a single `CityLighting` instance per world. `lightingAt(sim.time, mode)` produces a continuous darkness/lamps state; its **240-second loop** starts at dawn, reaches daylight by 30 seconds, holds noon/daylight until 90, blends through dusk to full night at 155, and returns toward dawn after 205. Manual modes fix the state. Only the display preference is stored in `techcrush-lighting` in local storage. Garage saves, physics, pursuit sight and difficulty are unchanged.
 
 The sky is a single inward-facing sphere with the existing HDR, a night gradient, procedural moon and stars. Lighting blends directional/ambient intensity, fog and environment reflections. The existing player headlights increase from 16 to 145 intensity at night. The garage uses the retained raw HDR in its separate renderer, independent of outdoor darkness.
 
@@ -17,4 +17,4 @@ Performance bounds:
 
 ## Level starts and showers (1.14)
 
-Auto starts use shuffled dusk/night/day conditions per level, with the same condition for every player on that course. Manual modes remain fixed. Some Auto levels include a short 24-second light shower. It adds no media downloads or continuous background timer. [Behavior and performance](RESULTS.md).
+Auto starts use shuffled dawn/night/day conditions per level, with the same condition for every player on that course. Manual modes remain fixed. Some Auto levels include a short 24-second light shower. It adds no media downloads or continuous background timer. [Behavior and performance](RESULTS.md).

@@ -85,10 +85,10 @@ test("drift carries sideways momentum and countersteering restores grip", () => 
   assert(!c.isDrifting);
   assert(Math.abs(c.slip) < 0.05);
 });
-test("pursuit starts with three roles, builds to six units, and retains varied civilian traffic", () => {
+test("pursuit starts with four units, adds checkpoint reinforcements, and retains varied civilian traffic", () => {
   const s = new ChaseSimulation();
   s.start();
-  assert.equal(s.police.length, 3);
+  assert.equal(s.police.length, 4);
   assert(s.police.some((c) => c.role === "intercept"));
   assert(new Set(s.traffic.map((t) => t.kind)).size >= 5);
   assert(
@@ -101,7 +101,7 @@ test("pursuit starts with three roles, builds to six units, and retains varied c
     Object.assign(s.player, { ...cp, vx: 0, vz: 0 });
     s.update(1 / 120);
   }
-  assert.equal(s.police.length, 6);
+  assert.equal(s.police.length, 7);
   assert.equal(s.police.filter((c) => c.role === "blockade").length, 2);
 });
 test("a blockade unit plans a road position ahead of the observed moving player", () => {

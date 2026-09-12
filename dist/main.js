@@ -1,3 +1,4 @@
+import { QuestMap, QUEST_PINS, mapAtlas, MAP_EXTENT } from "./quest-map.js";
 import { ResultScreen } from "./result-screen.js";
 import {
   ACTIVE_MAP,
@@ -17,7 +18,6 @@ import { FrameLoop } from "./frame-loop.js";
 import { playerRoute, navigationTarget } from "./navigation-cache.js";
 import { MobileControls } from "./mobile-ui.js";
 import { LIGHTING_MODES } from "./city-lighting.js";
-import { ROADS } from "./city-map.js";
 import { radarPoint, routeDistance } from "./hud-math.js";
 import { ProfileClient } from "./profile-client.js";
 import { GarageUI } from "./garage-ui.js";
@@ -29,7 +29,7 @@ let workshop,
   runId = null,
   settlement = null,
   transitioning = false;
-import { RIVER_POLYGON, LANDMARKS } from "./district-data.js";
+import { LANDMARKS } from "./district-data.js";
 import { RAMPS } from "./stunts.js";
 import { SceneView } from "./view.js";
 import {
@@ -70,6 +70,7 @@ function dialogOpen() {
     "loot-dialog",
     "controls-dialog",
     "community-dialog",
+    "quest-map",
   ].some((id) => $(id).open);
 }
 function refreshActivity() {
@@ -238,6 +239,7 @@ async function bankRun() {
         type: "settle",
         runId: id,
         level: sim.level,
+        autoOpenBox: true,
         metrics: {
           time: sim.time,
           score: Math.floor(sim.score),
@@ -460,7 +462,11 @@ function finish() {
         $("restart").textContent =
           `NEXT · LEVEL ${cityLevel(career.profile)} · ${next} ↗`;
         results.saved(cityCommunity(career.profile).lastTime);
-        $("garage-back").textContent = "GARAGE · OPEN BOX & UPGRADE";
+        $("garage-back").textContent = "GARAGE · FUSE & UPGRADE";
+        if (career.profile.lastBox?.kind === "level") {
+          workshop.car = selectedCar;
+          void workshop.openBox(false, career.profile.lastBox);
+        }
       })
       .catch((error) => {
         if (results.generation !== resultGeneration) return;
@@ -618,23 +624,14 @@ function drawMap() {
   c.clip();
   c.fillStyle = "#112531";
   c.fillRect(0, 0, 230, 230);
-  c.fillStyle = "#204853";
-  c.beginPath();
-  RIVER_POLYGON.forEach(([x, z], i) =>
-    i ? c.lineTo(ox - x * s, oz - z * s) : c.moveTo(ox - x * s, oz - z * s),
+  c.drawImage(
+    mapAtlas(),
+    ox - MAP_EXTENT * s,
+    oz - MAP_EXTENT * s,
+    MAP_EXTENT * 2 * s,
+    MAP_EXTENT * 2 * s,
   );
-  c.closePath();
-  c.fill();
-  c.strokeStyle = "#344954";
-  c.lineWidth = 6;
-  for (const road of ROADS) {
-    c.lineWidth = Math.max(1.3, road.width * s);
-    c.beginPath();
-    c.moveTo(ox - road.start.x * s, oz - road.start.z * s);
-    c.lineTo(ox - road.end.x * s, oz - road.end.z * s);
-    c.stroke();
-  }
-  const cp = sim.checkpoints[sim.checkpoint];
+  const cp = navigationTarget(sim);
   if (cp) {
     c.strokeStyle = "#73e6ed";
     c.lineWidth = 1.6;
@@ -667,6 +664,18 @@ function drawMap() {
     c.lineTo(x - 4, y + 3);
     c.closePath();
     c.fill();
+  }
+  for (const q of QUEST_PINS) {
+    const marker = radarPoint(ox - q.x * s, oz - q.z * s, 95);
+    c.fillStyle = q.color;
+    c.beginPath();
+    c.arc(marker.x, marker.y, 8, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = "#10202a";
+    c.font = "bold 10px Arial";
+    c.textAlign = "center";
+    c.fillText(q.symbol, marker.x, marker.y + 3);
+    c.textAlign = "start";
   }
   for (const cop of sim.police) {
     if (cop.destroyed) continue;
@@ -904,6 +913,20 @@ try {
   selectedCar = career.profile.selectedCar;
   setupGarage();
   workshop = new GarageUI(career, chooseCar, view);
+  const questMap = new QuestMap(
+    sim,
+    () => career.profile,
+    (value) => {
+      $("route-selector").value = value;
+      $("route-selector").dispatchEvent(new Event("change"));
+    },
+  );
+  $("quest-map-open").onclick = () => {
+    keys.clear();
+    mobile?.clear();
+    questMap.open();
+    refreshActivity();
+  };
   mobile = new MobileControls({
     invalidate: wake,
     pause,
@@ -978,7 +1001,8 @@ try {
       return;
     if (
       e.target.closest?.("button,input,select,textarea") &&
-      ["Enter", " "].includes(e.key)
+      ["Enter", " "].includes(e.key) &&
+      !(e.key === " " && sim.phase === "running")
     )
       return;
     const k = normalizeKey(e);
@@ -1029,6 +1053,7 @@ try {
     "loot-dialog",
     "controls-dialog",
     "community-dialog",
+    "quest-map",
   ])
     dialogs.observe($(id), { attributes: true, attributeFilter: ["open"] });
   registerTools();

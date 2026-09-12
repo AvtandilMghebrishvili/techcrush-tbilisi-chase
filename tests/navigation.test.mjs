@@ -181,14 +181,22 @@ test("aggressive patrol gains on a moving car while respecting its speed limit",
   });
   sim.police = [sim.makePolice(START.x, START.z)];
   sim.police[0].angle = Math.PI / 2;
+  let approachSpeed = 0;
   for (let i = 0; i < 900; i++) {
     sim.player.vx = 30;
     sim.player.vz = 0;
     sim.update(1 / 120, {});
+    if (distance(sim.police[0], sim.player) > 12)
+      approachSpeed = Math.max(
+        approachSpeed,
+        Math.hypot(sim.police[0].vx, sim.police[0].vz),
+      );
   }
   const cop = sim.police[0];
   assert(distance(cop, sim.player) < 80);
-  assert(Math.hypot(cop.vx, cop.vz) > 37);
+  assert(approachSpeed > 37);
+  // Faster police now catch and ram this target before the seven-second end.
+  assert(sim.player.health < 100 || distance(cop, sim.player) < 12);
   assert(Math.hypot(cop.vx, cop.vz) <= sim.difficulty.maxSpeed + 3.51);
 });
 

@@ -1,5 +1,5 @@
 import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
-import { IS_KUTAISI } from "./map-selection.js";
+import { IS_KUTAISI, ACTIVE_MAP } from "./map-selection.js";
 import { buildingContact } from "./building-contact.js";
 import { levelRewards, creditAward } from "./community-rules.js";
 import { TREES } from "./world-props.js";
@@ -192,7 +192,10 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
   const burst = !!input.boostLatched;
   const burning =
     !!input.boost &&
-    (burst || (throttle > 0 && forward > 5 && !input.brake)) &&
+    (burst ||
+      (throttle > 0 &&
+        forward > 5 &&
+        (!input.brake || Math.abs(steer) > 0.1))) &&
     !car.nitroLocked &&
     car.nitro > 0;
   // A tapped mobile burst burns its tank continuously. Braking/reverse retains
@@ -226,24 +229,27 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
     -steer *
     spec.handling *
     Math.min(Math.abs(forward) / 10, 1) *
-    (1.25 - 0.006 * Math.abs(forward)) *
+    Math.max(0.35, 1.25 - 0.006 * Math.abs(forward)) *
     (input.brake ? 1.5 : 1) *
     Math.sign(forward);
   car.angle += turn * dt;
-  if (input.brake && Math.abs(steer) > 0.15 && Math.abs(forward) > 11)
+  if (input.brake && Math.abs(steer) > 0.1 && forward > 8)
     car.driftSign = Math.sign(steer);
   const sliding =
-    Math.abs(forward) > 10 &&
-    Math.abs(steer) > 0.15 &&
+    forward > (car.drift > 0.3 ? 6 : 8) &&
+    Math.abs(steer) > 0.1 &&
     (input.brake ||
       (car.drift > 0.3 && throttle > 0 && Math.sign(steer) === car.driftSign));
   car.drift +=
-    (Number(sliding) - car.drift) * (1 - Math.exp(-dt * (sliding ? 6 : 8)));
+    (Number(sliding) - car.drift) * (1 - Math.exp(-dt * (sliding ? 10 : 8)));
   lateral -= forward * turn * dt * car.drift;
-  lateral *= Math.exp(-dt * (spec.grip - car.drift * 6.7));
+  // Handbrake releases rear traction even with high-tier/fused tires. Normal
+  // traction returns smoothly when steering centres or the car slows down.
+  const rearGrip = spec.grip * (1 - car.drift) + 1.25 * car.drift;
+  lateral *= Math.exp(-dt * rearGrip);
   lateral = clamp(lateral, -Math.abs(forward) * 0.65, Math.abs(forward) * 0.65);
   car.slip = Math.atan2(lateral, Math.max(1, Math.abs(forward)));
-  car.isDrifting = Math.abs(car.slip) > 0.1 && Math.abs(forward) > 10;
+  car.isDrifting = Math.abs(car.slip) > 0.1 && forward > 6;
   car.vx = Math.sin(car.angle) * forward + Math.cos(car.angle) * lateral;
   car.vz = Math.cos(car.angle) * forward - Math.sin(car.angle) * lateral;
   car.impact = 0;
@@ -311,7 +317,6 @@ export class ChaseSimulation {
     this.player = vehicle(START.x, START.z, START.angle);
     this.player.carId = this.selectedCar || "gt";
     this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
-    this.difficulty = pursuitTuning(this.level);
     this.rewardRates = levelRewards(this.level);
     this.checkpoints = checkpointsForLevel(this.level);
     this.helicopter = createAirSupport(this.player, this.level);
@@ -319,6 +324,11 @@ export class ChaseSimulation {
     this.player.performance = upgradedSpec(
       carSpec(this.player.carId),
       this.player.equipment,
+    );
+    this.difficulty = pursuitTuning(
+      this.level,
+      this.player.performance.topSpeed,
+      ACTIVE_MAP,
     );
     this.player.width = this.player.performance.width;
     this.player.length = this.player.performance.length;
@@ -1102,10 +1112,12 @@ export class ChaseSimulation {
           ? cop.blockPoint.angle
           : Math.atan2(target.x - cop.x, target.z - cop.z),
         turn = angleDelta(desired, cop.angle);
-      const max =
+      const max = Math.min(
+        145,
         (this.difficulty.maxSpeed + Math.min(this.checkpoint, 5) * 0.7) *
-        (cop.ramRecovery > 0 ? 0.55 : 1) *
-        (cop.speedScale || 1);
+          (cop.ramRecovery > 0 ? 0.55 : 1) *
+          (cop.speedScale || 1),
+      );
       let want =
         holding || distance(cop, target) < 3
           ? 0

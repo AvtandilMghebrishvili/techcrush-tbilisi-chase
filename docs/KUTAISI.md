@@ -39,7 +39,7 @@ Platinum's stat contribution is 4.5 tier units versus Diamond's 4, giving a mode
 
 ## Shared driving and conditions
 
-Keyboard, touch, auto gas, latched nitro, gyro, drift, damage, police collisions, water recovery and five-second rewind work as in Tbilisi. Police receive the same bounded difficulty curve: SUVs and a helicopter from level 2, tanks from level 3, then later sport interceptors. There is no separate easy-mode physics. Auto lighting uses the same fair dusk/night/day sequence and subsequent deterministic shuffled bags. Manual lighting still works.
+Keyboard, touch, auto gas, latched nitro, gyro, drift, damage, police collisions, water recovery and five-second rewind work as in Tbilisi. Kutaisi starts with six patrols, player-matched base speed and 20% of that base added per extra level (capped at 145 m/s), plus faster reinforcement waves. It shares the same role progression: SUVs and a helicopter from level 2, tanks from level 3, then later sport interceptors. There is no separate easy-mode physics. Auto lighting uses the same four-minute cycle and fair dawn/night/day starting sequence and subsequent deterministic shuffled bags. Manual lighting still works.
 
 ## Rebuild and extend
 
@@ -51,3 +51,5 @@ Keyboard, touch, auto gas, latched nitro, gyro, drift, damage, police collisions
 - Run `npm test`, `npm run build` and `npm run check:build`. See [validation](../VALIDATION.md) for browser and actual-physics checks. Do not delete the authored `dist/` directory.
 
 References: [Google Maps, Kutaisi centre](https://www.google.com/maps/@42.269,42.703,15z), [Georgia Travel: Kutaisi](https://georgia.travel/cities-towns/kutaisi), [White Bridge](https://georgia.travel/the-white-bridge), [Kutaisi tourism: Picasso Boy](https://kutaisi.travel/en/7495/picaso-boy-ka-2-2/), [Royal District](https://georgia.travel/kutaisi-royal-district).
+
+Use **MAP + SIDE QUESTS** beside the radar to see both stunt sites, their box/collection status and route buttons. [Fusion stars, patrol tuning and full-map instructions](FUSION.md).

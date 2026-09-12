@@ -4,11 +4,13 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**New: Drift & Fusion update** — reliable handbrake turns on both maps (including after clicking the camera), stronger player-matched police, a **four-minute Auto day/night cycle**, and **MAP + SIDE QUESTS** with rooftop/river route selection. Level-clear boxes now reveal immediately: equip stronger drops, sell spares or keep duplicates for **five fusion stars**. Existing saves are preserved. [Fusion rules and update guide](docs/FUSION.md).
+
 **New: Kutaisi is playable** — clear **Tbilisi level 3**, then select **02 / KUTAISI** above the car selector. Explore the Rioni, White/Red/Rustaveli/Chain bridges, Colchis Fountain, Bagrati Cathedral, the royal quarter and more. Two stunt challenges award secret **Platinum boxes**, each containing three parts. Cities have separate endless levels and leaderboards; your cars, paint, upgrades, inventory and credits are shared. [Kutaisi map, unlock and challenge guide](docs/KUTAISI.md).
 
 **New: community statistics** — see all-time unique player profiles, drivers in your selected ranking, and your position out of that total. Guests count after starting a chase; returning with the same saved garage counts once. [Counting and ranking rules](docs/COMMUNITY.md#player-statistics).
 
-**New: clear results & sharing** — a large finish clock, automatic overall/time ranks, Garage / Next Level choices and a Facebook result link. Checkpoints have a musical cue. Levels use varied fair routes and shuffled day/night/dusk starts; occasional brief showers stay lightweight. Roadside props now clear the rendered street outlines. [Results, conditions and sharing](docs/RESULTS.md).
+**New: clear results & sharing** — a large finish clock, automatic overall/time ranks, Garage / Next Level choices and a Facebook result link. Checkpoints have a musical cue. Levels use varied fair routes and shuffled dawn/night/day starts; occasional brief showers stay lightweight. Roadside props now clear the rendered street outlines. [Results, conditions and sharing](docs/RESULTS.md).
 
 **New: shared level times** — compare successful clears by level, car and stock equipment. Rewind cannot reduce the timer. A prominent gold Leaderboard button opens the rankings. Bridge edges, bank support and building contacts are refined. [Timing rules and fair comparison](docs/LEVEL_TIMES.md).
 
@@ -73,7 +75,7 @@ Portrait and landscape layouts include gas, brake/reverse, drift, turbo, rewind,
 
 ## City lighting
 
-The top **AUTO / NIGHT / DAY / DUSK** button cycles lighting modes. Auto starts at dusk, reaches night after about two minutes, then returns through dawn and daylight over a ten-minute cycle. The moon, occupied windows, street lamps and stronger player headlights appear after dark. Pause freezes the automatic cycle and rewind rolls it back with the chase. Your lighting choice is a local display preference; it does not alter your garage or difficulty.
+The top **AUTO / NIGHT / DAY / DUSK** button cycles lighting modes. Auto completes morning, noon, dusk, night and dawn in **240 seconds of active simulation time**. Level 1 starts at dawn; later levels use deterministic shuffled dawn/night/day offsets. The moon, occupied windows, street lamps and stronger player headlights appear after dark. Pause freezes the automatic cycle and rewind rolls it back with the chase. Your lighting choice is a local display preference; it does not alter your garage or difficulty.
 
 The racing loading gauge follows asset preparation and shader warm-up. It adds no artificial wait. Lighting reuses existing assets, caps real street lights at three without additional shadows, and uses two instanced batches for nearby lamp glow. Garage previews keep their own studio lighting in every mode.
 

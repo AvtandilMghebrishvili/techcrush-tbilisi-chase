@@ -120,6 +120,17 @@ export const CAR_IDS = ["classic", "gt", "rally", "suv"];
 export const upgradeCost = (tier) => [0, 600, 1500, 3600, 7800][tier] || 0;
 export const salvageValue = (tier) => [0, 75, 180, 420, 960, 1400][tier] || 0;
 export const partKey = (id, tier) => `${id}:${tier}`;
+// Fusion is permanent tuning of a car's part slot; changing rarity keeps it.
+export const FUSION_COSTS = [5, 10, 15, 20, 25];
+export const FUSION_BONUSES = [0, 0.3, 0.5, 0.7, 0.9, 1.1];
+export const partStars = (equipment, id) =>
+  Math.max(0, Math.min(5, Math.floor(Number(equipment?.stars?.[id]) || 0)));
+export const partPower = (equipment, id) => {
+  const tier = Math.max(0, Math.min(5, Math.floor(equipment[id] || 0)));
+  return (
+    (tier === 5 ? 4.5 : tier) * (1 + FUSION_BONUSES[partStars(equipment, id)])
+  );
+};
 export function newProfile() {
   return {
     schema: 4,
@@ -165,8 +176,7 @@ export function upgradedSpec(base, equipment = {}) {
     landingScale: 1,
   };
   for (const part of PARTS) {
-    const grade = Math.max(0, Math.min(5, Math.floor(equipment[part.id] || 0)));
-    const tier = grade === 5 ? 4.5 : grade;
+    const tier = partPower(equipment, part.id);
     for (const [stat, value] of Object.entries(part.stats)) {
       if (stat === "protection") spec.damageScale *= 1 - value * tier;
       else if (stat === "landingProtection")
@@ -174,23 +184,30 @@ export function upgradedSpec(base, equipment = {}) {
       else spec[stat] = (spec[stat] || 0) + value * tier;
     }
   }
+  spec.landingScale = Math.max(0.1, spec.landingScale);
   return spec;
 }
-export function pursuitTuning(level = 1) {
+export function pursuitTuning(level = 1, playerSpeed = 58, map = "tbilisi") {
   level = Math.max(1, Math.floor(level));
   const growth = (level - 1) / (level + 7);
   const endurance = (level - 1) / (level + 45);
   return {
     level,
-    maxSpeed: 43 + growth * 37 + endurance * 12,
-    acceleration: 15.5 + growth * 15 + endurance * 6,
+    // +20% of the player's normal speed per level. A physical ceiling avoids
+    // runaway velocities on unlimited levels; tactics/counts keep escalating.
+    maxSpeed: Math.min(
+      145,
+      Math.max(45, playerSpeed) * (1 + 0.2 * (level - 1)),
+    ),
+    acceleration: 24 + growth * 24 + endurance * 6,
     repath: 0.55 - growth * 0.34,
     lead: 1.8 + growth * 1.3,
     ramRecovery: 2.6 - growth * 1.5,
-    waveInterval: 35 - growth * 19 - endurance * 5,
+    waveInterval: (map === "kutaisi" ? 23 : 29) - growth * 12 - endurance * 3,
     maxUnits: 12 + Math.min(10, Math.floor((level - 1) / 2)),
-    initialUnits: 3 + Math.min(4, Math.floor((level - 1) / 3)),
-    sight: 260 + growth * 100,
+    initialUnits:
+      (map === "kutaisi" ? 6 : 4) + Math.min(4, Math.floor((level - 1) / 3)),
+    sight: (map === "kutaisi" ? 350 : 290) + growth * 100,
     flank: level >= 3,
     roadblockRange: 100 + growth * 80,
   };
@@ -247,7 +264,10 @@ export function applyProgressAction(
         ? {
             course: action.course,
             buildPoints: PARTS.reduce(
-              (sum, part) => sum + (p.cars[action.car][part.id] || 0),
+              (sum, part) =>
+                sum +
+                (p.cars[action.car][part.id] || 0) +
+                partStars(p.cars[action.car], part.id),
               0,
             ),
           }
@@ -287,6 +307,46 @@ export function applyProgressAction(
       p.inventory[key] = (p.inventory[key] || 0) + 1;
     }
     p.lastBox = { id: action.id, items, kind: "platinum" };
+  } else if (action.type === "claim-loot") {
+    const drop = p.lastBox;
+    if (
+      !drop ||
+      drop.id !== action.boxId ||
+      !Number.isInteger(action.index) ||
+      !drop.items[action.index] ||
+      !["equip", "sell"].includes(action.choice)
+    )
+      throw Error("Choose a reward from your current box.");
+    const reward = drop.items[action.index];
+    if (reward.claimed) throw Error("This reward has already been used.");
+    const next = applyProgressAction(
+      p,
+      {
+        type: action.choice,
+        car,
+        part: reward.part,
+        tier: reward.tier,
+      },
+      rng,
+      context,
+    );
+    next.lastBox.items[action.index].claimed = action.choice;
+    return next;
+  } else if (action.type === "fuse") {
+    if (!item) throw Error("Unknown upgrade.");
+    const equipment = p.cars[car],
+      tier = equipment[item.id] || 0;
+    const stars = partStars(equipment, item.id),
+      cost = FUSION_COSTS[stars];
+    if (!tier) throw Error("Install this part before fusing duplicates.");
+    if (!cost) throw Error("This part already has five fusion stars.");
+    const key = partKey(item.id, tier);
+    if ((p.inventory[key] || 0) < cost)
+      throw Error(
+        `Collect ${cost} spare ${TIERS[tier].name} ${item.name} parts.`,
+      );
+    p.inventory[key] -= cost;
+    equipment.stars = { ...equipment.stars, [item.id]: stars + 1 };
   } else if (
     action.type === "upgrade" ||
     action.type === "equip" ||
@@ -404,6 +464,15 @@ export function applyProgressAction(
         p.level++;
         p.boxes++;
       }
+    }
+    if (action.result === "won" && action.autoOpenBox === true && p.boxes > 0) {
+      p.boxes--;
+      const items = rollBox(rng);
+      for (const reward of items) {
+        const key = partKey(reward.part, reward.tier);
+        p.inventory[key] = (p.inventory[key] || 0) + 1;
+      }
+      p.lastBox = { id: action.runId, kind: "level", items };
     }
     p.settled.push(action.runId);
     p.settled = p.settled.slice(-128);
