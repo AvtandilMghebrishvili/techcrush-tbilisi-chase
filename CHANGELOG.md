@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.7.0 — 2026-09-12
+
+- Add multi-touch gas, brake/reverse, steering, drift and turbo with independent pointer ownership; preserve keyboard input and hold-to-rewind after crashes.
+- Add opt-in gyro steering with motion permission, screen-relative axes, calibration, a dead zone, smoothing, sensitivity, inversion and explicit button fallback on denied/missing/stale sensor data.
+- Add driver setup, optional auto accelerator with brake priority, touch visibility preference, fullscreen/landscape request and supported screen wake lock. Rotation and app switching clear input and pause the chase.
+- Reflow the HUD, menus, reward boxes and buttons for portrait, landscape, safe areas and smaller viewports. Widen portrait cameras to keep more road visible.
+- Add Auto/Battery saver/High graphics, pixel budgets, lighter phone trees without the 12 MB near-tree download, and no dynamic shadow maps in the lighter mode. Physics and saves are unchanged.
+- Add two-finger garage zoom, larger paint targets and online home-screen metadata.
+- Add mobile regressions and an English setup/compatibility guide. Physical-phone sensor and performance validation remains separate from emulation.
+
 ## 1.6.0 — 2026-09-12
 
 - Add a ten-minute automatic dusk/night/day cycle driven by simulation time, with a moon, subtle stars/clouds, warm occupied windows, streetlight halos and soft pools of light. Pause and rewind preserve the cycle.

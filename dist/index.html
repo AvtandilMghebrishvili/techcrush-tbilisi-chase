@@ -18,6 +18,15 @@
     <link rel="stylesheet" href="./garage-refresh.css" />
     <link rel="stylesheet" href="./workshop-studio.css" />
     <link rel="stylesheet" href="./motorsport.css" />
+    <link rel="stylesheet" href="./mobile.css" />
+    <meta name="theme-color" content="#10151f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <link rel="apple-touch-icon" href="./assets/techcrush-logo.jpg" />
+    <link rel="manifest" href="./manifest.webmanifest" />
     <script type="importmap">
       {
         "imports": {
@@ -59,6 +68,14 @@
           ><span class="brand-sub">NIGHTSHIFT</span>
         </a>
         <div class="top-actions">
+          <button
+            id="control-settings"
+            class="icon-button"
+            aria-label="Driving controls and mobile settings"
+            disabled
+          >
+            CONTROLS
+          </button>
           <button
             id="camera-toggle"
             class="icon-button"
@@ -114,6 +131,13 @@
         <button id="start" class="primary">
           START YOUR ENGINE <span>↗</span>
         </button>
+        <button id="mobile-setup" class="secondary" hidden disabled>
+          PHONE SETUP · BUTTONS / GYRO
+        </button>
+        <p class="mobile-hint">
+          Best in landscape. Hold GAS + steering together, or enable gyro in
+          Controls.
+        </p>
         <div class="intro-meta">
           <span>03 / TECHCRUSH RUN</span><span>3D ARCADE CHASE</span>
         </div>
@@ -198,7 +222,7 @@
           </div>
           <div class="bar"><i id="health-bar"></i></div>
           <div class="nitro">
-            <span>SHIFT / TURBO</span>
+            <span id="turbo-key-label">SHIFT / TURBO</span>
             <div class="bar"><i id="nitro-bar"></i></div>
           </div>
           <div class="turbo-readout">
@@ -260,7 +284,7 @@
           <div class="studio-column">
             <div id="garage-preview" class="garage-preview">
               <span id="preview-label">YOUR INSTALLED BUILD</span
-              ><small>DRAG TO ROTATE · SCROLL TO ZOOM</small>
+              ><small>DRAG TO ROTATE · PINCH / SCROLL TO ZOOM</small>
             </div>
             <div
               id="preview-angles"
@@ -369,17 +393,122 @@
         >
       </footer>
       <div id="touch-controls" hidden>
-        <div>
-          <button data-key="a" aria-label="Steer left">◀</button
-          ><button data-key="d" aria-label="Steer right">▶</button>
+        <div class="touch-steering">
+          <div class="touch-mode-row">
+            <span id="touch-mode">BUTTONS</span
+            ><button id="touch-center" aria-label="Center gyro steering">
+              CENTER
+            </button>
+          </div>
+          <div class="steering-buttons">
+            <button data-key="a" aria-label="Steer left">◀</button
+            ><button data-key="d" aria-label="Steer right">▶</button>
+          </div>
         </div>
-        <div>
-          <button data-key=" " aria-label="Handbrake">DRIFT</button
-          ><button data-key="s" aria-label="Brake and reverse">↓</button
-          ><button data-key="w" aria-label="Accelerate">↑</button
-          ><button data-key="Shift" aria-label="Nitro">N₂O</button>
+        <div class="touch-pedals">
+          <button data-key=" " aria-label="Hold handbrake to drift">
+            DRIFT
+          </button>
+          <button data-key="Shift" class="touch-turbo" aria-label="Hold turbo">
+            TURBO
+          </button>
+          <button data-key="s" aria-label="Hold brake, then reverse">
+            BRAKE<small>REVERSE</small>
+          </button>
+          <button data-key="w" class="touch-gas" aria-label="Hold accelerator">
+            GAS<small>HOLD</small>
+          </button>
         </div>
       </div>
+      <button
+        id="touch-recover"
+        aria-label="Recover car on a clear road with a score penalty"
+      >
+        RESET CAR
+      </button>
+      <dialog
+        id="controls-dialog"
+        class="controls-dialog"
+        aria-labelledby="controls-title"
+      >
+        <div class="controls-heading">
+          <div>
+            <span class="eyebrow">TECHCRUSH / DRIVER SETUP</span>
+            <h2 id="controls-title">YOUR CONTROLS.</h2>
+          </div>
+          <button
+            id="controls-close"
+            class="icon-close"
+            aria-label="Close controls"
+          >
+            ×
+          </button>
+        </div>
+        <p>
+          Hold GAS to accelerate. BRAKE slows down, then reverses. Hold DRIFT in
+          a turn, TURBO to boost, or REWIND to undo up to five seconds.
+        </p>
+        <div class="steering-choice" role="group" aria-label="Steering mode">
+          <button id="buttons-enable" aria-pressed="true">TOUCH BUTTONS</button
+          ><button id="tilt-enable" aria-pressed="false">ENABLE GYRO</button>
+        </div>
+        <p id="tilt-status" role="status" aria-live="polite"></p>
+        <div id="tilt-meter" aria-hidden="true">
+          <span>LEFT</span><i></i><span>RIGHT</span>
+        </div>
+        <button id="tilt-center" class="secondary">CENTER STEERING</button>
+        <label class="setting-range" for="tilt-range"
+          >Steering sensitivity
+          <b id="tilt-range-value">24° to full lock</b></label
+        ><input
+          id="tilt-range"
+          type="range"
+          min="12"
+          max="40"
+          step="1"
+          value="24"
+        /><small class="setting-note"
+          >Lower angle = quicker steering. Hold the phone comfortably before
+          centering.</small
+        >
+        <label class="setting-check"
+          ><input id="tilt-invert" type="checkbox" /> Reverse gyro
+          direction</label
+        >
+        <label class="setting-check"
+          ><input id="auto-gas" type="checkbox" /> Auto accelerator
+          <small>Brake always overrides it.</small></label
+        >
+        <label class="setting-select"
+          >Touch controls<select id="touch-visibility">
+            <option value="auto">Auto · detect touch screen</option>
+            <option value="on">Always show</option>
+          </select></label
+        >
+        <label class="setting-select"
+          >Graphics<select id="graphics-quality">
+            <option value="auto">Auto · lighter on phones</option>
+            <option value="battery">Battery saver</option>
+            <option value="high">High detail</option>
+          </select></label
+        >
+        <button id="mobile-fullscreen" class="secondary">
+          FULLSCREEN / LANDSCAPE
+        </button>
+        <p id="screen-status" class="setting-note">
+          Portrait and landscape both work. Fullscreen support depends on your
+          browser.
+        </p>
+        <p class="setting-note">
+          Gyro needs motion permission and HTTPS. If it is unavailable, use
+          touch buttons. In Facebook / Instagram, open this page in Safari or
+          Chrome. Motion readings stay on your device.
+        </p>
+        <p class="setting-note">
+          Keyboard: WASD / arrows · Space drift · Shift turbo · Q rewind · C
+          camera · R recover · P pause · M sound.
+        </p>
+      </dialog>
       <div id="loading" role="status" aria-live="polite">
         <div class="boot-card">
           <img
@@ -415,13 +544,13 @@
         aria-label="Hold to rewind up to five seconds"
         disabled
       >
-        <span><b>↶</b> HOLD Q · REWIND</span>
+        <span><b>↶</b> <span class="rewind-key">HOLD Q · </span>REWIND</span>
         <small id="rewind-status">0.0s AVAILABLE</small>
         <i><em id="rewind-fill"></em></i>
       </button>
       <div class="timeline-overlay" aria-hidden="true">
         <span>REWINDING</span><strong id="timeline-time"></strong
-        ><small>RELEASE Q TO CONTINUE</small>
+        ><small>RELEASE TO CONTINUE</small>
       </div>
     </main>
     <script type="module" src="./main.js"></script>

@@ -8,7 +8,7 @@ Tests use Node's built-in test runner. They import simulation and geometry modul
 npm test
 ```
 
-The current suite contains **63 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/stunts-rewind.test.mjs`.
+The current suite contains **103 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/mobile.test.mjs`.
 
 `career.test.mjs` covers full-footprint road clearance, all three bridges in both directions, thin-wall tunneling, distinct car geometry, 14 parts/four tiers, integrated upgrade physics, duplicate rewards, currency settlement, level difficulty, wreck-credit rewind and breakable poles. `save-api.test.mjs` checks isolated profiles, request retries/conflicts, box idempotency and actual SQLite close/reopen persistence.
 
@@ -24,6 +24,8 @@ The current suite contains **63 tests**. The [CI workflow](../.github/workflows/
 | `refinements.test.mjs`   | Actual licensed GLB loading, steering shaft/center invariants, fitted lights/exhaust, profile migration, same-frame prop response and unbreakable bridge rails |
 
 Test names in the files provide the precise assertions. Tests do not prove realistic appearance, stable FPS on every GPU, or enjoyable first-time difficulty.
+
+`mobile.test.mjs` checks screen-relative steering in four orientations, calibration/dead zone/smoothing, Euler-wrap continuity, stale-data neutrality, independent finger ownership, keyboard priority, brake-over-auto-gas, actual simulation equivalence and rewind, pixel budgets and portrait camera framing. Browser QA also checks real multi-touch event delivery, permission denial/no-sensor fallbacks, pinch zoom, local preferences and phone layouts. Synthetic orientation events validate the code path; they do not replace physical iOS/Android testing.
 
 ## Full-route driving controller
 

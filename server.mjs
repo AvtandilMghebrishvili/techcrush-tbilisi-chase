@@ -14,6 +14,7 @@ const types = {
   ".svg": "image/svg+xml",
   ".zip": "application/zip",
   ".wav": "audio/wav",
+  ".webmanifest": "application/manifest+json",
 };
 http
   .createServer(async (req, res) => {

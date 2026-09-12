@@ -17,7 +17,9 @@ export class GaragePreview {
     this.zoom = 6.7;
     this.mode = "exterior";
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    this.renderer.setPixelRatio(
+      Math.min(devicePixelRatio, source.budget?.low ? 1 : 1.5),
+    );
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.95;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -47,12 +49,28 @@ export class GaragePreview {
     this.observer = new ResizeObserver(() => this.resize());
     this.observer.observe(host);
     const c = this.renderer.domElement;
+    this.pointers = new Map();
     c.onpointerdown = (e) => {
+      e.preventDefault();
+      this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      this.pinch = this.pinchDistance();
       this.drag = { x: e.clientX, y: e.clientY };
       c.setPointerCapture(e.pointerId);
     };
     c.onpointermove = (e) => {
-      if (!this.drag) return;
+      if (!this.drag || !this.pointers.has(e.pointerId)) return;
+      this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const pinch = this.pinchDistance();
+      if (pinch && this.pinch) {
+        this.zoom = THREE.MathUtils.clamp(
+          (this.zoom * this.pinch) / pinch,
+          5.6,
+          10,
+        );
+        this.pinch = pinch;
+        this.drag = { x: e.clientX, y: e.clientY };
+        return;
+      }
       this.mode = "exterior";
       this.yaw -= (e.clientX - this.drag.x) * 0.009;
       this.pitch = THREE.MathUtils.clamp(
@@ -62,12 +80,26 @@ export class GaragePreview {
       );
       this.drag = { x: e.clientX, y: e.clientY };
     };
-    c.onpointerup = c.onpointercancel = () => (this.drag = null);
+    c.onpointerup =
+      c.onpointercancel =
+      c.onlostpointercapture =
+        (e) => {
+          this.pointers.delete(e.pointerId);
+          this.pinch = this.pinchDistance();
+          this.drag = this.pointers.size
+            ? [...this.pointers.values()][0]
+            : null;
+        };
     c.onwheel = (e) => {
       e.preventDefault();
       this.zoom = THREE.MathUtils.clamp(this.zoom + e.deltaY * 0.004, 5.6, 10);
     };
     this.resize();
+  }
+  pinchDistance() {
+    if (this.pointers.size < 2) return 0;
+    const [a, b] = [...this.pointers.values()];
+    return Math.hypot(a.x - b.x, a.y - b.y);
   }
   studio() {
     const scene = new THREE.Scene();
@@ -133,6 +165,8 @@ export class GaragePreview {
     this.active = false;
     cancelAnimationFrame(this.frame);
     this.drag = null;
+    this.pointers.clear();
+    this.pinch = 0;
   }
   resize() {
     const r = this.host.getBoundingClientRect();
@@ -184,7 +218,9 @@ export class GaragePreview {
     const url = this.renderer.domElement.toDataURL("image/png");
     this.cache.set(key, url);
     disposeGroup(this.photoScene, part);
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    this.renderer.setPixelRatio(
+      Math.min(devicePixelRatio, this.source.budget?.low ? 1 : 1.5),
+    );
     this.resize();
     return url;
   }

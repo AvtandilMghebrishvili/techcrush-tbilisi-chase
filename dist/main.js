@@ -1,4 +1,5 @@
 import { ChaseAudio } from "./chase-audio.js";
+import { MobileControls } from "./mobile-ui.js";
 import { LIGHTING_MODES } from "./city-lighting.js";
 import { ROADS } from "./city-map.js";
 import { radarPoint, routeDistance } from "./hud-math.js";
@@ -33,12 +34,12 @@ const $ = (id) => document.getElementById(id),
   keys = new Set();
 let sim,
   view,
+  mobile,
   muted = true,
   last = 0,
   accumulator = 0,
   toastUntil = 0,
   uiTime = 0;
-const touch = matchMedia("(pointer: coarse)").matches || innerWidth < 650;
 let agentInput = null;
 let selectedCar = "gt";
 const soundscape = new ChaseAudio();
@@ -100,8 +101,9 @@ if (document.modelContext?.registerTool) {
   } catch {}
 }
 function input() {
-  if (agentInput && keys.size === 0) return agentInput;
-  return drivingInput(keys);
+  if (agentInput && keys.size === 0 && !mobile?.touch.size) return agentInput;
+  const keyboard = drivingInput(keys);
+  return mobile ? mobile.read(keyboard, keys, sim?.phase) : keyboard;
 }
 function chooseCar(id) {
   selectedCar = carSpec(id).id;
@@ -140,6 +142,7 @@ function setupGarage() {
       return;
     }
     keys.clear();
+    mobile?.clear();
     agentInput = null;
     sim.reset();
     $("modal").hidden = true;
@@ -238,7 +241,15 @@ function audioTick(dt = 0) {
   soundscape.update(sim, input(), dt, CAMERAS[view.cameraMode].id);
 }
 async function start() {
-  if (transitioning || $("workshop").open || $("loot-dialog").open) return;
+  if (
+    transitioning ||
+    $("workshop").open ||
+    $("loot-dialog").open ||
+    $("controls-dialog").open
+  )
+    return;
+  // Unlock the existing audio context while a tap still has user activation.
+  void soundscape.unlock().catch(() => {});
   transitioning = true;
   try {
     await bankRun();
@@ -246,6 +257,7 @@ async function start() {
     if (career.profile.selectedCar !== selectedCar)
       await career.mutate({ type: "select", car: selectedCar });
     keys.clear();
+    mobile?.reset();
     agentInput = null;
     sim.start(selectedCar, {
       level: career.profile.level,
@@ -257,7 +269,7 @@ async function start() {
     $("mission-card").hidden = true;
     $("hud").hidden = false;
     $("modal").hidden = true;
-    $("touch-controls").hidden = !touch;
+    $("touch-controls").hidden = !mobile.visible;
     $("pause").disabled = false;
     document.body.classList.add("playing");
     accumulator = 0;
@@ -269,19 +281,25 @@ async function start() {
   }
 }
 function pause() {
+  if (sim.phase === "rewinding") sim.timeline.release(sim);
   if (!["running", "paused"].includes(sim.phase)) return;
   if (sim.phase === "running") {
     sim.phase = "paused";
     keys.clear();
+    mobile?.clear();
     showModal("PAUSED.", "Your getaway can wait.", "TAKE A BREATHER", false);
   } else {
+    mobile?.reset();
     sim.phase = "running";
     $("modal").hidden = true;
     accumulator = 0;
   }
+  document.body.dataset.phase = sim.phase;
   audioTick();
 }
 function showModal(title, copy, kicker, end) {
+  mobile?.clear();
+  document.body.dataset.phase = sim.phase;
   $("result-reward").textContent = "";
   $("modal-title").textContent = title;
   $("modal-copy").textContent = copy;
@@ -339,6 +357,7 @@ function toast(text) {
   toastUntil = sim.time + 2.8;
 }
 function updateHUD() {
+  document.body.dataset.phase = sim.phase;
   const p = sim.player;
   $("run-level").textContent = `LEVEL ${sim.level}`;
   $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
@@ -562,6 +581,7 @@ function drawMap() {
 function frame(now) {
   const dt = Math.min((now - last) / 1000 || 0, 0.05);
   last = now;
+  mobile?.tick(dt);
   if (
     sim.phase === "running" ||
     sim.phase === "rewinding" ||
@@ -581,7 +601,12 @@ function frame(now) {
     if (sim.time > toastUntil) $("toast").classList.remove("visible");
   }
   audioTick(dt);
-  if (!$("workshop").open && !$("loot-dialog").open)
+  if (
+    !document.hidden &&
+    !$("workshop").open &&
+    !$("loot-dialog").open &&
+    !$("controls-dialog").open
+  )
     view.render(sim, dt, input());
   uiTime += dt;
   if (uiTime > 0.08) {
@@ -729,6 +754,17 @@ try {
   selectedCar = career.profile.selectedCar;
   setupGarage();
   workshop = new GarageUI(career, chooseCar, view);
+  mobile = new MobileControls({
+    pause,
+    clearKeys: () => keys.clear(),
+    phase: () => sim.phase,
+    recover: () => {
+      if (sim.phase === "running") sim.recover();
+    },
+    quality: (mode) => view.setQuality(mode),
+  });
+  $("control-settings").disabled = false;
+  $("mobile-setup").disabled = false;
   $("workshop-open").disabled = false;
   $("workshop-open").onclick = () => {
     workshop.car = selectedCar;
@@ -764,7 +800,17 @@ try {
     "q",
   ];
   addEventListener("keydown", (e) => {
-    if ($("workshop").open || $("loot-dialog").open) return;
+    if (
+      $("workshop").open ||
+      $("loot-dialog").open ||
+      $("controls-dialog").open
+    )
+      return;
+    if (
+      e.target.closest?.("button,input,select,textarea") &&
+      ["Enter", " "].includes(e.key)
+    )
+      return;
     const k = normalizeKey(e);
     if (!relevant.includes(k)) return;
     if ([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(k))
@@ -791,19 +837,6 @@ try {
     }
     if (document.hidden && sim.phase === "running") pause();
   });
-  for (const btn of document.querySelectorAll("[data-key]")) {
-    btn.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      btn.setPointerCapture(e.pointerId);
-      keys.add(btn.dataset.key);
-      btn.classList.add("pressed");
-    });
-    for (const name of ["pointerup", "pointercancel", "lostpointercapture"])
-      btn.addEventListener(name, () => {
-        keys.delete(btn.dataset.key);
-        btn.classList.remove("pressed");
-      });
-  }
   registerTools();
   await view.renderer.compileAsync(view.scene, view.camera);
   loadingProgress(100, "READY TO RACE");

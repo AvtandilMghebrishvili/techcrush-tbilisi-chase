@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { renderBudget, portraitFov } from "./mobile-input.js";
 import { CityLighting, windowGlow } from "./city-lighting.js";
 import { updateVehicleDamage, prepareVehicleDamage } from "./vehicle-damage.js";
 import { EXPLOSION_LIFETIME, IMPACT_LIFETIME } from "./damage-state.js";
@@ -48,16 +49,32 @@ const material = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.7, ...extra });
 export class SceneView {
   constructor(canvas) {
+    this.mobile =
+      matchMedia("(any-pointer: coarse)").matches ||
+      navigator.maxTouchPoints > 0;
+    this.quality = "auto";
+    try {
+      this.quality =
+        JSON.parse(localStorage.getItem("techcrush-mobile") || "{}").quality ||
+        "auto";
+    } catch {}
+    this.budget = renderBudget(
+      this.quality,
+      this.mobile,
+      innerWidth,
+      innerHeight,
+      devicePixelRatio,
+    );
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color("#b4c1c8");
     this.scene.fog = new THREE.FogExp2("#b8c1c5", 0.00052);
     this.renderer = new THREE.WebGLRenderer({
       canvas,
-      antialias: true,
+      antialias: !this.budget.low,
       powerPreference: "high-performance",
     });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.7));
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.setPixelRatio(this.budget.pixelRatio);
+    this.renderer.shadowMap.enabled = this.budget.shadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -95,12 +112,32 @@ export class SceneView {
     this.camera.position.set(START.x - 12, 5.2, START.z + 6);
     this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
     this.resize = () => {
+      this.budget = renderBudget(
+        this.quality,
+        this.mobile,
+        innerWidth,
+        innerHeight,
+        devicePixelRatio,
+      );
+      this.renderer.setPixelRatio(this.budget.pixelRatio);
       this.camera.aspect = innerWidth / innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(innerWidth, innerHeight);
     };
     addEventListener("resize", this.resize);
     this.resize();
+  }
+  setQuality(mode) {
+    this.quality = ["auto", "battery", "high"].includes(mode) ? mode : "auto";
+    this.resize();
+    this.renderer.shadowMap.enabled = this.budget.shadows;
+    this.renderer.shadowMap.needsUpdate = true;
+    this.scene.traverse((o) => {
+      if (o.isMesh)
+        for (const m of Array.isArray(o.material) ? o.material : [o.material])
+          m.needsUpdate = true;
+    });
+    if (this.trees) this.trees.nextUpdate = -1;
   }
   box(w, h, d, mat, x, y, z, parent = this.scene) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
@@ -492,7 +529,7 @@ export class SceneView {
           this.camera.position.y - 0.1,
           p.z + forward.z * 60,
         );
-        this.camera.fov = interior ? 76 : 70;
+        this.camera.fov = portraitFov(interior ? 76 : 70, this.camera.aspect);
       } else {
         const zoom = mode === "aerial" ? 27 : 9 + p.boostStrength * 1.6;
         const target = new THREE.Vector3(
@@ -517,7 +554,8 @@ export class SceneView {
         );
         this.camera.lookAt(this.cameraLook);
         this.camera.fov +=
-          (56 + p.boostStrength * 8 - this.camera.fov) *
+          (portraitFov(56 + p.boostStrength * 8, this.camera.aspect) -
+            this.camera.fov) *
           (1 - Math.exp(-dt * 5));
       }
       this.camera.updateProjectionMatrix();

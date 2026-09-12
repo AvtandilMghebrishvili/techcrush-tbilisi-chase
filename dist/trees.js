@@ -2,17 +2,20 @@ import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 export async function loadTrees(v) {
   const loader = new GLTFLoader();
-  const [near, far] = await Promise.all(
-    ["tree-near.glb", "tree-far.glb"].map((n) =>
+  const models = await Promise.all(
+    (v.mobile ? ["tree-far.glb"] : ["tree-near.glb", "tree-far.glb"]).map((n) =>
       loader.loadAsync("./assets/" + n),
     ),
   );
+  const near = models[0],
+    far = models[1] || models[0];
   const bounds = new THREE.Box3().setFromObject(near.scene),
     height = bounds.max.y - bounds.min.y;
   const materials = new Map(),
     groups = [];
   const wind = { value: 0 };
   for (const [level, gltf] of [near, far].entries()) {
+    if (v.mobile && level === 0) continue;
     gltf.scene.updateMatrixWorld(true);
     const meshes = [];
     gltf.scene.traverse((m) => {
@@ -63,7 +66,14 @@ export async function loadTrees(v) {
   stumps.count = 0;
   stumps.frustumCulled = false;
   v.decor.add(stumps);
-  v.trees = { groups, height, wind, stumps, nextUpdate: -1 };
+  v.trees = {
+    groups,
+    height,
+    wind,
+    stumps,
+    lowAsset: !!v.mobile,
+    nextUpdate: -1,
+  };
   updateTrees(v, { x: 0, z: 0 }, 0, v.treePositions, true);
 }
 export function updateTrees(
@@ -90,7 +100,9 @@ export function updateTrees(
     let count = 0;
     states.forEach((t, i) => {
       const d = Math.hypot(t.x - p.x, t.z - p.z);
-      if (level === 0 ? d > 105 : d <= 105 || d > 420) return;
+      const near = v.trees.lowAsset ? 0 : (v.budget?.treeNear ?? 105),
+        far = v.budget?.treeFar ?? 420;
+      if (level === 0 ? d > near || near === 0 : d <= near || d > far) return;
       if (t.broken && time - t.fallenAt > 12) return;
       dummy.position.set(t.x, 0.18, t.z);
       const s = t.h / height;
@@ -131,7 +143,10 @@ export function updateTrees(
   }
   let count = 0;
   for (const t of states)
-    if (t.broken && Math.hypot(t.x - p.x, t.z - p.z) < 420) {
+    if (
+      t.broken &&
+      Math.hypot(t.x - p.x, t.z - p.z) < (v.budget?.treeFar ?? 420)
+    ) {
       dummy.position.set(t.x, 0.42, t.z);
       dummy.rotation.set(0, 0, 0);
       dummy.scale.set(1, 1, 1);

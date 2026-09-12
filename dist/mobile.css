@@ -1,0 +1,624 @@
+/* Driver setup is also available with a keyboard; only driving surfaces block gestures. */
+.controls-dialog {
+  color: #edf1f8;
+  background: #141c28;
+  border: 1px solid #425064;
+  border-top: 3px solid #fa214d;
+  border-radius: 14px;
+  width: min(540px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 20px 80px #0009;
+}
+.controls-dialog::backdrop {
+  background: #030811b8;
+}
+.controls-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  position: sticky;
+  top: -24px;
+  background: #141c28;
+  padding: 8px 0;
+  z-index: 2;
+}
+.controls-heading h2 {
+  font-size: 32px;
+  margin: 10px 0;
+}
+.controls-dialog p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #bfccdd;
+}
+.controls-dialog button,
+.controls-dialog select {
+  min-height: 44px;
+}
+.controls-dialog .secondary {
+  width: 100%;
+  margin: 10px 0;
+}
+.steering-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.steering-choice button {
+  border: 1px solid #556177;
+  color: white;
+  background: #263244;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.steering-choice button[aria-pressed="true"] {
+  background: #b81039;
+  border-color: #ff5d7e;
+}
+#tilt-status {
+  min-height: 3em;
+}
+#tilt-meter {
+  --steer: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  height: 38px;
+  background: linear-gradient(90deg, #243144, #56617780, #243144);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 10px;
+}
+#tilt-meter i {
+  position: absolute;
+  width: 8px;
+  height: 24px;
+  left: calc(50% - 4px);
+  background: #f5d367;
+  border-radius: 4px;
+  transform: translateX(calc(var(--steer) * 150px));
+}
+.setting-range,
+.setting-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  margin: 16px 0 8px;
+}
+.setting-range b {
+  color: #ffd46a;
+  font-size: 12px;
+}
+#tilt-range {
+  width: 100%;
+  height: 40px;
+  accent-color: #fa214d;
+}
+.setting-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.setting-check input {
+  width: 22px;
+  height: 22px;
+  accent-color: #fa214d;
+}
+.setting-check small {
+  color: #a8b5c7;
+}
+.setting-select select {
+  color: #fff;
+  background: #243144;
+  border: 1px solid #556177;
+  border-radius: 5px;
+  max-width: 65%;
+  padding: 8px;
+}
+.setting-note {
+  display: block;
+  font-size: 11px !important;
+  line-height: 1.6;
+  color: #a8b5c7;
+}
+#touch-recover,
+.mobile-hint {
+  display: none;
+}
+#touch-center {
+  display: none;
+}
+#touch-controls {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+#touch-controls .touch-steering,
+#touch-controls .touch-pedals {
+  pointer-events: auto;
+}
+#touch-controls .touch-steering {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#touch-controls .steering-buttons {
+  display: flex;
+  gap: 8px;
+}
+#touch-controls .touch-mode-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  height: 26px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #e6edf8;
+  text-shadow: 0 1px 4px black;
+}
+#touch-controls .touch-mode-row button {
+  height: 28px;
+  min-width: 62px;
+  font-size: 10px;
+  border-radius: 5px;
+}
+#touch-controls .touch-pedals {
+  display: grid;
+  grid-template-columns: repeat(2, 68px);
+  gap: 7px;
+  align-items: end;
+}
+#touch-controls button {
+  min-width: 64px;
+  height: 62px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid #d7e5ff80;
+  background: #182334c9;
+  box-shadow: 0 3px 0 #080e19ad;
+  color: #fff;
+  font-size: 13px;
+  touch-action: none;
+  backdrop-filter: none;
+}
+#touch-controls button small {
+  display: block;
+  font-size: 8px;
+  margin-top: 4px;
+  letter-spacing: 0.6px;
+  opacity: 0.75;
+}
+#touch-controls .touch-pedals > :nth-child(-n + 2) {
+  height: 42px;
+  font-size: 11px;
+}
+#touch-controls .touch-gas {
+  background: #bfd259e0;
+  color: #101913;
+  border-color: #ebffaa;
+}
+#touch-controls .touch-turbo {
+  background: #bd1644d9;
+  border-color: #ff637e;
+}
+#touch-controls button.pressed {
+  transform: translateY(2px);
+  background: #f5f5e6;
+  color: #121924;
+  box-shadow: 0 0 20px #ffffff44;
+}
+body.gyro-active #touch-center {
+  display: block;
+}
+body.gyro-active .steering-buttons {
+  opacity: 0.65;
+}
+body.mobile-controls {
+  --safe-left: max(12px, env(safe-area-inset-left));
+  --safe-right: max(12px, env(safe-area-inset-right));
+  --safe-bottom: max(12px, env(safe-area-inset-bottom));
+}
+body.mobile-controls #game {
+  height: 100dvh;
+  min-height: 0;
+}
+body.mobile-controls #world {
+  touch-action: none;
+}
+body.mobile-controls button {
+  -webkit-tap-highlight-color: transparent;
+}
+body.mobile-controls .mobile-hint {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #bac7d9;
+}
+body.mobile-controls #game > header {
+  padding: max(8px, env(safe-area-inset-top)) var(--safe-right) 8px
+    var(--safe-left);
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+body.mobile-controls .brand-sub,
+body.mobile-controls .brand-divider {
+  display: none;
+}
+body.mobile-controls .brand-logo {
+  width: 30px;
+  height: 30px;
+}
+body.mobile-controls .brand-wordmark {
+  width: 98px;
+}
+body.mobile-controls .top-actions {
+  width: auto;
+  gap: 5px;
+}
+body.mobile-controls .top-actions .icon-button {
+  min-height: 44px;
+  padding: 5px 8px;
+  font-size: 10px;
+  flex: none;
+}
+body.mobile-controls .top-actions #pause {
+  flex: none;
+  min-width: 44px;
+}
+body.mobile-controls .mission-card,
+body.mobile-controls footer {
+  display: none;
+}
+body.mobile-controls .intro {
+  top: 80px;
+  bottom: var(--safe-bottom);
+  left: var(--safe-left);
+  width: min(480px, calc(100% - var(--safe-left) - var(--safe-right)));
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0 5px 12px 0;
+}
+body.mobile-controls .intro h1 {
+  font-size: clamp(45px, 12vw, 76px);
+  margin: 10px 0;
+}
+body.mobile-controls .intro .primary,
+body.mobile-controls .intro .secondary {
+  min-height: 48px;
+  width: 100%;
+}
+body.mobile-controls .intro #start {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  box-shadow: 0 -8px 20px #10151f80;
+}
+body.mobile-controls .intro .garage button {
+  min-height: 64px;
+}
+body.mobile-controls .intro-meta {
+  display: none;
+}
+body.mobile-controls .modal-card {
+  max-height: calc(100dvh - 36px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+body.mobile-controls .modal-card button {
+  min-height: 44px;
+}
+body.mobile-controls #touch-controls {
+  position: fixed;
+  inset: auto var(--safe-right) var(--safe-bottom) var(--safe-left);
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  pointer-events: none;
+  z-index: 15;
+}
+body.mobile-controls .hud {
+  pointer-events: none;
+}
+body.mobile-controls .score-panel {
+  top: 70px;
+  left: var(--safe-left);
+  width: 145px;
+}
+body.mobile-controls .score-panel > strong {
+  font-size: 29px;
+  margin: 2px 0;
+}
+body.mobile-controls .career-hud {
+  margin-bottom: 2px;
+  font-size: 10px;
+}
+body.mobile-controls .score-panel .label,
+body.mobile-controls .score-panel #objective,
+body.mobile-controls .takedown-count {
+  display: none;
+}
+body.mobile-controls .checkpoint-heading {
+  font-size: 10px;
+  margin: 5px 0;
+}
+body.mobile-controls .checkpoint-dots {
+  gap: 3px;
+  margin-top: 4px;
+}
+body.mobile-controls .pursuit-panel {
+  top: 70px;
+  right: var(--safe-right);
+  width: 180px;
+}
+body.mobile-controls .pursuit-panel .label {
+  font-size: 9px;
+}
+body.mobile-controls .pursuit-panel strong {
+  font-size: 10px;
+}
+body.mobile-controls .pursuit-panel p {
+  font-size: 9px;
+  margin-top: 4px;
+}
+body.mobile-controls .navigator {
+  left: auto;
+  right: calc(var(--safe-right) + 166px);
+  bottom: var(--safe-bottom);
+  width: 90px;
+}
+body.mobile-controls .map-caption {
+  display: none;
+}
+body.mobile-controls .speed-panel {
+  right: var(--safe-right);
+  bottom: calc(var(--safe-bottom) + 126px);
+  width: 144px;
+}
+body.mobile-controls .speed-value strong {
+  font-size: 36px;
+}
+body.mobile-controls .speed-value span {
+  font-size: 9px;
+}
+body.mobile-controls .condition,
+body.mobile-controls .nitro span,
+body.mobile-controls .turbo-readout {
+  font-size: 9px;
+}
+body.mobile-controls .nitro {
+  margin-top: 6px;
+}
+body.mobile-controls .drift-status {
+  min-height: 12px;
+  font-size: 10px;
+}
+body.mobile-controls .route-cue,
+body.mobile-controls.playing.cockpit-mode .route-cue {
+  top: 72px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  gap: 7px;
+}
+body.mobile-controls .route-cue > span {
+  font-size: 32px;
+}
+body.mobile-controls .route-cue b {
+  font-size: 24px;
+}
+body.mobile-controls .route-cue small {
+  font-size: 8px;
+  letter-spacing: 0.5px;
+}
+body.mobile-controls .toast {
+  top: 37%;
+  max-width: 62%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18px;
+  text-align: center;
+}
+body.mobile-controls .rewind-control {
+  left: calc(var(--safe-left) + 152px);
+  bottom: var(--safe-bottom);
+  transform: none;
+  width: 112px;
+  min-height: 48px;
+  padding: 5px 8px;
+  z-index: 18;
+  touch-action: none;
+}
+body.mobile-controls .rewind-control span {
+  font-size: 10px;
+  white-space: nowrap;
+}
+body.mobile-controls .rewind-control small {
+  font-size: 8px;
+}
+body.mobile-controls .rewind-control .rewind-key {
+  display: none;
+}
+body.mobile-controls #touch-recover {
+  position: fixed;
+  left: calc(var(--safe-left) + 152px);
+  bottom: calc(var(--safe-bottom) + 62px);
+  min-height: 40px;
+  width: 112px;
+  z-index: 15;
+  border: 1px solid #bdc7db66;
+  border-radius: 8px;
+  background: #1b2635ce;
+  color: #e8edf5;
+  font-size: 10px;
+}
+body.mobile-controls.playing #touch-recover {
+  display: block;
+}
+body[data-phase="paused"] #touch-controls,
+body[data-phase="paused"] #touch-recover,
+body[data-phase="won"] #touch-controls,
+body[data-phase="wrecked"] #touch-controls,
+body[data-phase="busted"] #touch-controls {
+  visibility: hidden;
+}
+body.mobile-controls .workshop {
+  max-height: calc(100dvh - 16px);
+  width: min(1240px, calc(100% - 16px));
+  padding: 14px;
+  overscroll-behavior: contain;
+}
+body.mobile-controls .workshop-header {
+  position: sticky;
+  top: -14px;
+  background: #141c28;
+  z-index: 5;
+  padding: 10px 0;
+}
+body.mobile-controls .workshop button {
+  min-height: 44px;
+}
+body.mobile-controls #paint-swatches {
+  flex-wrap: wrap;
+}
+body.mobile-controls #paint-swatches button {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  flex: 0 0 44px;
+  border-radius: 50%;
+}
+body.mobile-controls .garage-preview {
+  touch-action: none;
+}
+body.mobile-controls .loot-dialog {
+  max-height: calc(100dvh - 20px);
+  overflow: auto;
+}
+body.mobile-controls .loot-dialog button {
+  min-height: 44px;
+}
+@media (max-width: 600px) {
+  body.mobile-controls #game > header {
+    flex-wrap: wrap;
+  }
+  body.mobile-controls .top-actions {
+    width: 100%;
+    display: flex;
+  }
+  body.mobile-controls .top-actions .icon-button {
+    flex: 1;
+    padding: 5px 3px;
+    font-size: 9px;
+  }
+  body.mobile-controls .intro {
+    top: 122px;
+  }
+  body.mobile-controls .score-panel,
+  body.mobile-controls .pursuit-panel {
+    top: 120px;
+  }
+  body.mobile-controls .pursuit-panel {
+    width: 160px;
+  }
+  body.mobile-controls .route-cue,
+  body.mobile-controls.playing.cockpit-mode .route-cue {
+    top: 205px;
+  }
+  body.mobile-controls .navigator {
+    right: auto;
+    left: var(--safe-left);
+    bottom: calc(var(--safe-bottom) + 158px);
+    width: 100px;
+  }
+  body.mobile-controls .rewind-control {
+    left: var(--safe-left);
+    bottom: calc(var(--safe-bottom) + 95px);
+    width: 136px;
+  }
+  body.mobile-controls #touch-recover {
+    left: var(--safe-left);
+    right: auto;
+    bottom: calc(var(--safe-bottom) + 274px);
+    width: 100px;
+  }
+  body.mobile-controls .speed-panel {
+    bottom: calc(var(--safe-bottom) + 132px);
+  }
+  body.mobile-controls .garage-showcase {
+    grid-template-columns: 1fr;
+  }
+  body.mobile-controls .garage-preview {
+    min-height: 230px;
+  }
+  body.mobile-controls .workshop-cars {
+    grid-template-columns: 1fr 1fr;
+  }
+  body.mobile-controls .loot-slots {
+    gap: 5px;
+  }
+  body.mobile-controls .loot-slots img {
+    max-width: 100%;
+  }
+}
+@media (max-height: 480px) and (min-width: 601px) {
+  body.mobile-controls .intro {
+    top: 64px;
+  }
+  body.mobile-controls .intro h1 {
+    font-size: 44px;
+  }
+  body.mobile-controls .intro .garage {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  body.mobile-controls .intro .garage b {
+    font-size: 15px;
+  }
+  body.mobile-controls .score-panel,
+  body.mobile-controls .pursuit-panel {
+    top: 64px;
+  }
+  body.mobile-controls .route-cue,
+  body.mobile-controls.playing.cockpit-mode .route-cue {
+    top: 65px;
+  }
+  body.mobile-controls .pursuit-panel p {
+    max-width: 180px;
+  }
+  body.mobile-controls .speed-panel {
+    bottom: calc(var(--safe-bottom) + 120px);
+  }
+  body.mobile-controls .speed-value strong {
+    font-size: 28px;
+  }
+  body.mobile-controls .drift-status {
+    display: none;
+  }
+  body.mobile-controls .navigator {
+    width: 78px;
+  }
+  body.mobile-controls .garage-showcase {
+    grid-template-columns: 1fr 1.2fr;
+  }
+  body.mobile-controls .garage-preview {
+    min-height: 230px;
+  }
+  body.mobile-controls .controls-heading h2 {
+    font-size: 25px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #touch-controls button {
+    transition: none;
+  }
+}

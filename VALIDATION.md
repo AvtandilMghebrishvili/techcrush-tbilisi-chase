@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Mobile driving 1.7.0 — 12 September 2026
+
+`npm test`: **103 passed, 0 failed**. Seven mobile cases cover four screen orientations, calibration/dead zone/filtering, Euler-angle wrap, stale-data neutrality, independent pointer ownership, keyboard priority, auto-gas brake override, actual simulation equivalence/rewind, GPU pixel budgets and portrait camera framing. Production Worker/assets build passes.
+
+Chromium mobile emulation at 844×390 with three simultaneous touch points verified gas + steering + turbo, independent release and cancellation. Browser checks covered denied and granted synthetic motion permission, right-turn mapping, calibration, no-sensor timeout, brake overriding auto gas, graphics changes, pause/reset of held controls, saved settings after reload, garage pinch zoom and a real welcome-box action. Layouts at 360×740, 390×844, 667×375, 844×390 and 1024×768 had no horizontal document overflow. Portrait gameplay/cockpit, garage, reward box and landscape gameplay/settings screenshots were inspected. A 1440×900 desktop keyboard regression passed. No page errors were reported.
+
+The phone path skips the 12,089,548-byte near-tree asset, uses the existing lower-detail tree model and caps Auto/Battery saver rendering at 800,000 pixels. This is a resource budget, not a measured physical-phone FPS guarantee. Game physics, save format and player garages are unchanged. QA uses an isolated in-memory database and ignored capture fixtures; no production test controls are shipped.
+
+**Limit:** these are Chromium emulation and synthetic sensor checks, not physical iPhone/Android, Safari, thermal or device-permission-dialog tests. Real-device gyro calibration and performance still require hardware validation. Touch fallback remains available.
+
 ## Evening lighting and racing interface 1.6.0 — 12 September 2026
 
 `npm test`: **96 passed, 0 failed**. Three new cases cover continuous/deterministic day-night progression, mode overrides, bounded nearest-intact-lamp selection, same-frame broken-lamp cutoff, rewind restoration, zero daylight lamp intensity and fixed scene/light allocation over repeated updates. Existing navigation, driving, destruction, pursuit and saved-garage tests remain passing.

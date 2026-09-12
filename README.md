@@ -51,7 +51,9 @@ Ceilings are on-road values; acceleration time, charge, turns and collisions aff
 | M                     | Sound on/off                                   |
 | Enter                 | Start from the garage                          |
 
-Physical key codes support Georgian keyboard layouts. Touch buttons are included; a desktop keyboard and WebGL2-capable computer are recommended.
+Physical key codes support Georgian keyboard layouts. Phones and tablets have multi-touch driving buttons and optional **gyro / tilt steering**. Open **CONTROLS → ENABLE GYRO**, allow motion access, hold the phone comfortably and tap **CENTER STEERING**. Buttons remain available. [Mobile setup, sensitivity and performance guide](docs/MOBILE.md).
+
+Portrait and landscape layouts include gas, brake/reverse, drift, turbo, rewind, recovery and camera switching. Auto accelerator is optional; braking overrides it. Auto graphics reduces rendering cost on touch devices, and Battery saver / High detail are selectable. A WebGL2 browser and internet connection are required.
 
 ## City lighting
 
@@ -143,6 +145,7 @@ Authored browser modules remain in `dist/`. Build output goes into `dist/client/
 | [Testing](docs/TESTING.md)                 | Unit checks, route controller, browser review |
 | [Deployment](docs/DEPLOYMENT.md)           | Access, Sites, Worker/D1 self-hosting         |
 | [Gameplay trailer](docs/TRAILER.md)       | Watch, download and share the 46-second video |
+| [Mobile driving](docs/MOBILE.md)         | Touch, gyro, calibration, fullscreen and phone graphics |
 | [Validation](VALIDATION.md)                | Observed results and limitations              |
 | [Changelog](CHANGELOG.md)                  | Release changes                               |
 | [Assets](ASSETS.md)                        | Attributions and licenses                     |

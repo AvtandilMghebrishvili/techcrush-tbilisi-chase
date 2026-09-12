@@ -44,6 +44,8 @@ All paths below are relative to `dist/`.
 
 ## Coordinates and input
 
+`mobile-input.js` owns pure screen-relative tilt math, calibration/filtering, pointer ownership, keyboard/touch/gyro composition, portrait camera framing and render budgets. `mobile-ui.js` connects these to explicit sensor permission, driver setup, safe fallback, fullscreen and wake lock. The adapter feeds the existing fixed-step simulation contract; touch/gyro do not implement separate driving physics. See [mobile setup](MOBILE.md).
+
 Distances use approximate metres, time uses seconds and speeds use metres per second. The HUD multiplies speed by 3.6 for km/h. The local map projection is:
 
 ```js

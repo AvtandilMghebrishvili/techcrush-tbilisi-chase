@@ -1,6 +1,6 @@
 # Getting started
 
-Use Node.js **24+**, a WebGL2 browser and hardware acceleration. A keyboard is recommended. Python is needed only to regenerate maps.
+Use Node.js **24+** for local hosting, a WebGL2 browser and hardware acceleration. The hosted game supports keyboards and mobile touch/gyro controls; see [mobile setup](MOBILE.md). Python is needed only to regenerate maps.
 
 Clone the repository or choose GitHub's **Code → Download ZIP** and extract it. In the folder containing package.json, run `npm start`, then open **http://127.0.0.1:4173/**. Choose a car, open the welcome box in Garage, fit parts and start. [Controls](../README.md#cars-and-controls).
 
@@ -37,7 +37,8 @@ A run is banked when you complete a level or leave/restart with the game's butto
 | Garage unavailable | Run the save API and database; static files alone are insufficient |
 | Save pending | Restore connectivity and retry; preserve browser storage |
 | Missing models | Fully extract assets/vendor directories |
-| Low frame rate | Enable GPU acceleration and try desktop Chromium |
+| Low frame rate | Open Controls → Graphics → Battery saver; enable GPU acceleration |
+| Gyro unavailable | Use touch buttons; open the HTTPS game in Safari/Chrome and allow motion access |
 | No sound | Press M; sound starts muted |
 | Paused after changing tabs | Intentional; resume when back |
 | Friends cannot open localhost | Publish the full app using the hosting guide |

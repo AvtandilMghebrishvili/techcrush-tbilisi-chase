@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "TECHCRUSH Nightshift — Tbilisi Chase",
+  "short_name": "Nightshift",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10151f",
+  "theme_color": "#10151f",
+  "description": "Tbilisi car chase with touch and tilt steering. Internet connection required.",
+  "icons": [
+    {
+      "src": "./assets/techcrush-logo.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}
