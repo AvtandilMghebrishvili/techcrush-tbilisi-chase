@@ -2,13 +2,15 @@
 
 Open **YOUR GARAGE** before a run or return to it after banking a completed run. Select the car you want to modify at the top. Each car has independent equipment and paint; the inventory and credits belong to the driver.
 
-Use the sticky **Your Build / Boxes / Upgrades** shortcuts to move around the garage. The close button stays available while scrolling.
+Use the **Build & Paint / Upgrades / Boxes** tabs. Only the active section is laid out, with the car selector, credits, save status and close button always available. Desktop uses a persistent car studio beside the workspace; phones show the studio in Build & Paint and a horizontal photo strip in Upgrades. Arrow keys, Home and End switch the focused tab. Small screens scroll the active content without moving the header.
+
+**Build & Paint** shows four live performance values, paint and the next level’s pursuit summary. Expand **Save & Recovery** here to back up or restore the private garage key. **Boxes** groups Street, Platinum and TECHCRUSH supplies with counts, sources and drop information.
 
 ## See the actual car
 
-The studio uses the same vehicle factories as the driving scene. Drag the car to orbit, scroll to zoom, or choose **Front**, **Rear**, **Wheels**, or **Interior**. **Show fitted** restores the installed build after experimenting. The game world stops rendering behind the open garage, and the studio stops rendering when the garage closes.
+The studio uses the same vehicle factories as the driving scene. Drag the car to orbit, scroll to zoom, or choose **Front**, **Rear**, **Wheels**, or **Cabin**. **Fitted ✓** restores the installed build after experimenting. The game world stops rendering behind the open garage. The studio renders on demand, stops when the garage closes or becomes hidden, and also stops when its pane is hidden on phones. Part artwork is generated only when its panel or a loot drop is displayed and is cached per part/grade. A narrower studio adjusts the camera distance without reducing model or texture quality.
 
-Select **Inspect & Compare** on a part. Bronze, Silver, Gold and Diamond buttons preview that grade without spending credits or inventory. Wheels and spoilers are also previewed on the car. The yellow preview label distinguishes a trial fit from saved equipment. Engine, ECU and other concealed components have a studio assembly view; their internal installation is not an exposed engine-bay model.
+Select a part photograph in **Upgrades**. The single inspector shows that part’s rarity inventory and actions. Grade buttons preview Bronze through Platinum, or all eight grades for the TECHCRUSH car, without spending credits or inventory. Wheels and spoilers are also previewed on the car. The yellow preview label distinguishes a trial fit from saved equipment. Engine, ECU and other concealed components have a studio assembly view; their internal installation is not an exposed engine-bay model.
 
 ## Buy, install and compare
 
@@ -45,3 +47,9 @@ Kutaisi's two secret stunt challenges each award one Platinum box once per profi
 ## Immediate rewards and fusion stars (1.16)
 
 Level clears reveal the earned three-part box before Garage/Next Level. Equip a stronger part directly, sell a spare, or keep it for fusion. Each installed part has a five-star tuning track, with exact duplicate requirements and total bonuses shown in its card. Stars stay with this car slot when rarity is improved. [Rules, examples and safety limits](FUSION.md).
+
+## Compact workshop validation (2.2)
+
+The browser pass exercised 1366×768, 1024×768, 390×844, 360×740, 320×640 and 844×390 layouts. No dialog or control had horizontal overflow. On 1366×768, the outer garage has no scrolling; parts and longer explanations scroll within their own pane. On 390×844, the default part inspector and Boxes fit within the active viewport, with only short content scrolling needed for extra fusion details or small phone heights.
+
+The same pass bought an upgrade, previewed a higher tier without spending, sold a spare, fused twice, installed TECHCRUSH rims, changed paint, opened Street/Creator boxes, claimed a drop, switched tabs with the keyboard and reloaded the saved profile. The studio’s animation request is cancelled after closing and while its mobile pane is hidden. All 199 shared gameplay, profile, economy and API tests remain green. Browser checks use a local SQLite fixture; no public leaderboard rows are created.

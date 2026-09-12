@@ -207,10 +207,13 @@ export class GaragePreview {
         this.camera.fov = 76;
       } else {
         if (this.car.userData.glass) this.car.userData.glass.opacity = 0.55;
+        // Keep the complete body readable in the narrower compact studio.
+        const distance =
+          this.zoom * Math.max(1, 1 / Math.max(0.65, this.camera.aspect));
         this.camera.position.set(
-          Math.sin(this.yaw) * this.zoom,
-          1 + this.zoom * this.pitch,
-          Math.cos(this.yaw) * this.zoom,
+          Math.sin(this.yaw) * distance,
+          1 + distance * this.pitch,
+          Math.cos(this.yaw) * distance,
         );
         this.camera.lookAt(0, 0.6, 0);
         this.camera.fov = 38;

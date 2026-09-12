@@ -1,4 +1,4 @@
-/* Compact entry menu. Static photographs are captured from the actual car models. */
+/* Compact launch panel; model photographs are kept at their original quality. */
 .car-photo {
   display: block;
   width: 100%;
@@ -15,95 +15,135 @@
   max-height: 210px;
 }
 #intro {
-  width: min(640px, calc(100% - 390px));
+  width: min(570px, calc(100% - 390px));
   top: 78px;
   bottom: auto;
-  max-height: calc(100dvh - 108px);
-  padding: 20px;
-  border-radius: 18px;
+  max-height: calc(100dvh - 100px);
+  padding: 17px;
+  border-radius: 15px;
   background: linear-gradient(145deg, #111c29fa, #0b131ff7);
+}
+#intro .intro-content {
+  padding: 0 2px 0 0;
 }
 #intro .menu-choice-grid {
   grid-template-columns: minmax(0, 1fr);
-  gap: 14px;
-}
-#intro .intro-content {
-  padding: 0 3px 0 0;
+  gap: 11px;
 }
 #intro h1 {
-  font-size: 42px;
-  margin: 7px 0;
+  font-size: 36px;
+  margin: 5px 0;
   line-height: 1;
 }
 #intro .intro-copy {
-  margin: 0 0 14px;
-  font-size: 12px;
+  margin: 0 0 12px;
+  font-size: 11px;
+  line-height: 1.4;
 }
 #intro .eyebrow {
   font-size: 8px;
-  letter-spacing: 1.6px;
+  letter-spacing: 1.5px;
+}
+#intro .menu-section-heading {
+  margin-bottom: 6px;
+}
+#intro .menu-section-heading h2 {
+  font:
+    750 10px Barlow,
+    Arial,
+    sans-serif;
+  letter-spacing: 0.6px;
+}
+#intro .map-slots {
+  gap: 6px;
 }
 #intro .map-slots > button {
-  min-height: 82px !important;
-  padding: 10px 12px !important;
-  border-radius: 9px;
+  min-height: 68px !important;
+  padding: 8px 10px !important;
+  border-radius: 8px;
 }
 #intro .map-slots b {
   font-family: inherit;
-  font-size: 18px !important;
+  font-size: 17px !important;
   font-weight: 850;
   letter-spacing: 0;
 }
 #intro .city-state {
-  font-size: 8px;
-  margin-bottom: 5px;
+  font-size: 7px;
+  margin-bottom: 4px;
 }
 #intro .map-slots small {
-  font-size: 10px !important;
+  font-size: 9px !important;
   letter-spacing: 0;
-  margin-top: 5px;
+  margin-top: 4px;
   white-space: nowrap;
 }
-#intro .city-caption {
-  display: none;
-}
+#intro .city-caption,
 #intro .city-unlock {
   display: none;
 }
 #intro .milestone-details {
-  margin-top: 7px;
+  margin-top: 6px;
   border: 0;
   background: #24324780;
-  border-radius: 8px;
+  border-radius: 7px;
 }
 #intro .milestone-details summary {
-  padding: 10px 12px;
-  font-size: 10px;
+  padding: 8px 10px;
+  font-size: 9px;
   letter-spacing: 0.03em;
+  min-height: 30px;
 }
-#intro .menu-section-heading {
-  margin-bottom: 8px;
+#intro #milestone-rewards {
+  grid-template-columns: 1fr;
+  gap: 5px;
+  padding: 6px;
 }
-#intro .menu-section-heading h2 {
-  font:
-    750 11px Barlow,
-    Arial,
-    sans-serif;
-  letter-spacing: 0.7px;
+#intro .milestone-card,
+#intro .creator-milestone {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  padding: 7px 10px;
+  gap: 9px;
+  border-radius: 7px;
+}
+#intro .milestone-card .car-photo,
+#intro .creator-milestone .car-photo {
+  height: 45px;
+}
+#intro .milestone-card small,
+#intro .creator-milestone small {
+  font-size: 9px;
+}
+#intro .milestone-card span,
+#intro .creator-milestone span {
+  font-size: 10px;
+}
+#intro .milestone-card button {
+  min-height: 30px;
+  padding: 6px 8px;
+  font-size: 10px;
 }
 #intro #garage {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 7px !important;
-  overflow: visible;
+  grid-template-columns: none !important;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 12px) / 3);
+  gap: 6px !important;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #c64d6a #243146;
 }
 #intro #garage button[data-car] {
-  padding: 5px 7px 8px !important;
-  min-height: 112px !important;
+  padding: 4px 7px 7px !important;
+  min-height: 117px !important;
   height: auto;
   min-width: 0;
   gap: 2px;
-  border-radius: 10px;
+  border-radius: 8px;
   align-items: stretch;
   text-align: left;
   background: linear-gradient(150deg, #293548, #162231);
@@ -113,6 +153,7 @@
     border-color 0.15s,
     background 0.15s;
   justify-content: flex-start !important;
+  scroll-snap-align: start;
 }
 #intro #garage button[data-car][aria-pressed="true"] {
   border-color: #ff6c8b;
@@ -120,14 +161,14 @@
   box-shadow: inset 0 -2px #ff4a72;
 }
 #intro #garage button[data-car]::after {
-  top: 6px;
-  right: 7px;
-  font-size: 11px;
+  top: 5px;
+  right: 6px;
+  font-size: 10px;
 }
 #intro #garage .car-photo {
-  height: 70px;
+  height: 76px;
   aspect-ratio: auto;
-  filter: drop-shadow(0 6px 6px #0005);
+  filter: drop-shadow(0 5px 6px #0005);
 }
 #intro #garage button b {
   font:
@@ -144,7 +185,7 @@
 }
 #intro #garage button small {
   font:
-    500 8px/1.35 Barlow,
+    500 9px/1.3 Barlow,
     Arial,
     sans-serif;
   letter-spacing: 0;
@@ -164,98 +205,109 @@
   border-color: #b8d8f2;
   background: #2c3d54;
 }
-#intro #car-details {
-  margin: 7px 0 0;
-  line-height: 1.4;
-  font-size: 10px;
-}
-#intro #intro-career,
-#intro #stunt-record {
-  display: none;
-}
-.car-scroll-controls {
-  display: none;
+#intro .car-scroll-controls {
+  display: flex;
   gap: 5px;
 }
-.car-scroll-controls button {
+#intro .car-scroll-controls button {
   width: 30px;
   min-height: 28px;
   border: 1px solid #52647b;
   background: #1f2c3d;
   color: #e0edfa;
-  border-radius: 7px;
+  border-radius: 6px;
   font-size: 15px;
   padding: 2px;
 }
-#intro .community-entry {
-  margin-top: 12px;
-  padding-top: 10px;
-}
-#intro #driver-open {
-  font-size: 11px;
-  padding: 0;
-  min-height: 30px;
-}
-#intro #driver-open small {
-  font-size: 8px;
+#intro .community-entry,
+#intro #car-details,
+#intro #intro-career,
+#intro #stunt-record,
+#intro #menu-car-jump {
+  display: none;
 }
 #intro .menu-launch {
-  padding-top: 12px;
-  margin-top: 10px;
+  padding-top: 9px;
+  margin-top: 8px;
 }
 #intro .launch-summary {
-  margin-bottom: 9px;
-  gap: 10px;
+  margin-bottom: 8px;
+  gap: 8px;
 }
 #intro .wallet {
-  font-size: 17px;
+  font-size: 16px;
 }
 #intro .wallet .coin-icon {
-  width: 21px;
-  height: 21px;
+  width: 20px;
+  height: 20px;
 }
-#intro #menu-car-jump {
-  font-size: 10px;
-  max-width: 45%;
-  overflow-wrap: normal;
+#intro #menu-race-label {
+  font-size: 9px;
+}
+#intro .launch-summary #driver-open {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  min-height: 32px;
+  max-width: 38%;
+  margin-left: auto;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #d7e7f6;
+}
+#intro .launch-summary #driver-open small {
+  font-size: 8px;
+  color: #8fbdcf;
+}
+#intro #driver-name-label {
+  font:
+    700 10px/1.25 Barlow,
+    Arial,
+    sans-serif;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: right;
 }
 #intro .intro-actions {
-  grid-template-columns: 1.25fr 1fr 1fr !important;
-  gap: 8px !important;
+  grid-template-columns: 1.15fr 0.8fr 1.2fr !important;
+  gap: 6px !important;
 }
 #intro .intro-actions button {
   font:
-    750 12px Barlow,
+    750 11px Barlow,
     Arial,
     sans-serif !important;
-  min-height: 48px !important;
-  height: 48px !important;
-  padding: 9px 10px !important;
-  gap: 7px;
-  border-radius: 10px !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 8px !important;
+  gap: 6px;
+  border-radius: 8px !important;
   white-space: nowrap;
   letter-spacing: 0.1px !important;
 }
 #intro .intro-actions button svg {
-  width: 19px;
-  height: 19px;
+  width: 17px;
+  height: 17px;
 }
 #intro #start {
-  min-height: 48px !important;
+  min-height: 44px !important;
   grid-column: auto !important;
 }
 #intro #leaderboard-menu small {
   display: none !important;
 }
 #intro .menu-controls {
-  padding-top: 10px;
-  gap: 8px;
+  padding-top: 8px;
+  gap: 7px;
   margin: 0;
 }
 #intro .menu-controls button {
   min-height: 30px;
   font-size: 9px;
-  padding: 6px 9px;
+  padding: 5px 8px;
 }
 #intro .desktop-menu-hint,
 #intro .mobile-hint {
@@ -269,7 +321,7 @@
 }
 @media (max-width: 1050px) {
   #intro {
-    width: min(640px, calc(100% - 40px));
+    width: min(570px, calc(100% - 32px));
   }
   #mission-card {
     display: none;
@@ -281,90 +333,60 @@
     left: 10px;
     width: calc(100% - 20px);
     max-height: calc(100dvh - 80px);
-    padding: 14px;
+    padding: 13px;
     bottom: auto;
   }
   #intro h1 {
-    font-size: 32px;
+    font-size: 30px;
   }
   #intro .intro-copy {
-    font-size: 11px;
-    margin-bottom: 12px;
+    font-size: 10px;
+    margin-bottom: 10px;
   }
   #intro .map-slots > button {
-    min-height: 79px !important;
-    padding: 8px !important;
+    min-height: 65px !important;
+    padding: 7px !important;
   }
   #intro .map-slots b {
     font-size: 15px !important;
   }
   #intro .map-slots small {
-    font-size: 9px !important;
+    font-size: 8px !important;
   }
-  #intro .map-slots .city-state {
+  #intro .city-state {
     font-size: 7px;
   }
   #intro .menu-choice-grid {
-    gap: 12px;
+    gap: 10px;
   }
   #intro #garage {
-    grid-template-columns: none !important;
-    grid-auto-flow: column;
-    grid-auto-columns: calc(50% - 4px);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 6px;
-    scrollbar-width: thin;
-    scrollbar-color: #c64d6a #243146;
+    grid-auto-columns: calc(50% - 3px);
   }
   #intro #garage button[data-car] {
-    min-height: 126px !important;
-    scroll-snap-align: start;
+    min-height: 112px !important;
   }
   #intro #garage .car-photo {
-    height: 84px;
+    height: 71px;
   }
   #intro #garage button b {
     font-size: 12px !important;
   }
-  #intro #garage button small {
-    font-size: 9px !important;
-  }
-  #intro .car-scroll-controls {
-    display: flex;
-  }
   #intro .intro-actions {
     grid-template-columns: 1fr 1fr !important;
-    gap: 7px !important;
   }
   #intro #start {
     grid-column: 1/-1 !important;
-    height: 46px !important;
-    min-height: 46px !important;
   }
   #intro #workshop-open,
   #intro #leaderboard-menu {
-    height: 42px !important;
-    min-height: 42px !important;
+    min-height: 40px !important;
+    height: 40px !important;
   }
-  #intro #car-details {
+  #intro .launch-summary #driver-open small {
     display: none;
   }
-  #intro .menu-launch {
-    padding-top: 10px;
-    margin-top: 8px;
-  }
-  #intro .menu-controls {
-    padding-top: 8px;
-  }
-  #intro .community-entry {
-    margin-top: 8px;
-    padding-top: 7px;
-  }
   #intro .milestone-details summary {
-    padding: 9px 10px;
-    font-size: 9px;
+    min-height: 32px;
   }
 }
 @media (max-height: 500px) and (min-width: 601px) {
@@ -373,140 +395,48 @@
     left: 12px;
     width: calc(100% - 24px);
     max-height: calc(100dvh - 76px);
-    padding: 12px;
+    padding: 10px 12px;
   }
   #intro .menu-heading {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   #intro h1 {
-    font-size: 27px;
+    font-size: 26px;
   }
   #intro .intro-copy {
     display: none;
   }
   #intro .menu-choice-grid {
     grid-template-columns: 1fr 1.4fr;
-    gap: 12px;
+    gap: 10px;
   }
   #intro #garage {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  }
-  #intro #garage .car-photo {
-    height: 44px;
+    grid-auto-columns: calc((100% - 18px) / 4);
   }
   #intro #garage button[data-car] {
-    min-height: 83px !important;
+    min-height: 94px !important;
+  }
+  #intro #garage .car-photo {
+    height: 53px;
   }
   #intro #garage button b {
     font-size: 10px !important;
   }
   #intro #garage button small {
-    font-size: 7px !important;
+    font-size: 8px !important;
   }
   #intro .menu-launch {
-    padding-top: 8px;
-    margin-top: 8px;
+    padding-top: 7px;
+    margin-top: 6px;
   }
-  #intro .community-entry,
-  #intro .menu-controls,
-  #intro #car-details {
+  #intro .menu-controls {
     display: none;
   }
   #intro .map-slots b {
     font-size: 14px !important;
   }
-}
-
-/* A single row keeps every car name intact without making the launch panel taller. */
-#intro #garage {
-  grid-template-columns: none !important;
-  grid-auto-flow: column;
-  grid-auto-columns: calc((100% - 14px) / 3);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 7px;
-  scrollbar-width: thin;
-  scrollbar-color: #c64d6a #243146;
-}
-#intro #garage button[data-car] {
-  min-height: 144px !important;
-  scroll-snap-align: start;
-}
-#intro #garage .car-photo {
-  height: 100px;
-}
-#intro .car-scroll-controls {
-  display: flex;
-}
-@media (max-width: 600px) {
-  #intro #garage {
-    grid-auto-columns: calc(50% - 4px);
-  }
-  #intro #garage button[data-car] {
-    min-height: 126px !important;
-  }
-  #intro #garage .car-photo {
-    height: 84px;
-  }
-}
-@media (max-height: 500px) and (min-width: 601px) {
-  #intro #garage {
-    grid-template-columns: none !important;
-    grid-auto-columns: calc((100% - 21px) / 4);
-  }
-  #intro #garage button[data-car] {
-    min-height: 100px !important;
-  }
-  #intro #garage .car-photo {
-    height: 60px;
-  }
   #intro .car-scroll-controls button {
-    min-height: 22px;
-    width: 27px;
-  }
-}
-
-#intro .community-entry,
-#intro #car-details,
-#intro #menu-car-jump {
-  display: none;
-}
-#intro .launch-summary #driver-open {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 3px;
-  min-height: 31px;
-  max-width: 42%;
-  margin-left: auto;
-  border: 0;
-  background: none;
-  padding: 0;
-  color: #d7e7f6;
-}
-#intro .launch-summary #driver-open small {
-  font-size: 8px;
-  color: #8fbdcf;
-}
-#intro #driver-name-label {
-  font:
-    700 11px/1.25 Barlow,
-    Arial,
-    sans-serif;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: right;
-}
-@media (max-width: 600px) {
-  #intro .launch-summary #driver-open small {
-    display: none;
-  }
-  #intro #driver-name-label {
-    font-size: 10px;
-  }
-  #intro .launch-summary #driver-open {
-    max-width: 38%;
+    min-height: 24px;
+    width: 28px;
   }
 }

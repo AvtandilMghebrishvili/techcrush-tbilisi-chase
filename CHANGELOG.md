@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0 — 2026-09-13
+
+- Replace the long garage with a bounded Build & Paint / Upgrades / Boxes workspace. Keep the car picker, coin balance, saved status and close control accessible above the active panel.
+- Use a compact photographic part list and a single selected-part inspector. Preserve per-grade spare counts, free installation, exact stat comparisons, paid upgrades, selling and five fusion stars. Put extended explanations and recovery-key actions in expandable sections.
+- Keep the live car, paint controls and original-resolution part/car artwork. Use a horizontal part strip on phones, independent desktop panes, compact loot cards, keyboard tab navigation and a shorter launch menu. Bring the chosen launch car into view after selection.
+- Generate part photographs only when the Upgrades panel or loot is visible; retain cached images and one demand-rendered studio. Stop the hidden mobile studio and avoid rebuilding its car while the garage is closed. Fit the camera to the narrower preview.
+- Preserve the profile schema, existing saves, economy, physics, city progress and ranked course versions. Validate all 199 existing tests, six browser viewport sizes, upgrade/equip/sell/fusion, loot choices, paint persistence and idle rendering.
+
 ## 2.1.0 — 2026-09-13
 
 - Place 48 two-sided TECHCRUSH subscription banners in each city with large Georgian copy and a laughing emoji. Exactly three turn into 4,000-coin smash rewards per new run, selected from its server-issued identifier.

@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**Version 2.2 — a compact workshop.** Switch between **Build & Paint**, **Upgrades** and **Boxes** instead of scrolling through a long garage. Keep the real 3D car, photo part picker, rarity inventory, exact before/after stats and every buy/equip/sell/fusion action. The launch menu and reward cards are smaller, and the hidden mobile studio stops rendering. Existing progress and gameplay rules stay intact. [Garage guide](docs/GARAGE.md).
+
 **Version 2.1 — smash, earn, upgrade.** Every city has 48 two-sided TECHCRUSH banners. Three random banners per chase pay **4,000 coins each**; other player-broken decorations pay **25 coins**, up to 2,500 ordinary-decoration coins per run. Gold map pins mark the cash banners. The compact launch menu uses actual car-model photographs and a swipe/arrow car picker. Strong patrol hits cost up to 10 HP, tanks up to 15 HP, before armor. [Roadside rewards and menu guide](docs/ROADSIDE_REWARDS.md).
 
 **Version 2.0 — three cities, one garage.** Tbilisi, Kutaisi and Batumi are all available from the start. Batumi adds the Black Sea waterfront, palms, Alphabet Tower, Ali & Nino, a Ferris wheel, landmark hotels and a distant airport. Streets follow adapted OpenStreetMap geometry; the environment is an original game interpretation, not a Google Maps scan. [Batumi and version 2.0 guide](docs/BATUMI.md).

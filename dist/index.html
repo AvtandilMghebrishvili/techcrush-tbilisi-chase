@@ -43,6 +43,7 @@
     <link rel="stylesheet" href="./menu.css" />
     <link rel="stylesheet" href="./coastal-update.css" />
     <link rel="stylesheet" href="./menu-polish.css" />
+    <link rel="stylesheet" href="./compact-workshop.css" />
   </head>
   <body>
     <main id="game">
@@ -726,11 +727,23 @@
           </p>
         </section>
       </dialog>
-      <dialog id="workshop" class="workshop" aria-labelledby="workshop-title">
+      <dialog
+        id="workshop"
+        class="workshop"
+        aria-labelledby="workshop-title"
+        data-tab="build"
+      >
         <header class="workshop-header">
-          <div>
-            <span class="eyebrow">TECHCRUSH / PERFORMANCE DIVISION</span>
-            <h2 id="workshop-title">YOUR GARAGE.</h2>
+          <div class="workshop-brand">
+            <span class="eyebrow">TECHCRUSH / WORKSHOP</span>
+            <h2 id="workshop-title">YOUR GARAGE<span>.</span></h2>
+          </div>
+          <div class="garage-wallet">
+            <svg class="coin-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="7" />
+              <path d="M15 8h-5v8h5M8 11h6M8 14h6" /></svg
+            ><strong id="garage-credits">0 CR</strong>
           </div>
           <button
             id="workshop-close"
@@ -740,115 +753,240 @@
             ×
           </button>
         </header>
-        <nav class="workshop-nav" aria-label="Garage shortcuts">
-          <button data-section="garage-showcase">01 · YOUR BUILD</button>
-          <button data-section="box-bench">02 · BOXES</button>
-          <button data-section="parts-heading">03 · UPGRADES</button>
-        </nav>
-        <div class="garage-wallet">
+        <div class="workshop-toolbar">
+          <div id="workshop-cars" class="workshop-cars">
+            <label for="workshop-car-select">EDIT CAR</label
+            ><select
+              id="workshop-car-select"
+              aria-label="Car to upgrade"
+            ></select>
+          </div>
           <b id="garage-level">LEVEL 01</b
-          ><strong id="garage-credits">0 CR</strong
-          ><span id="garage-boxes">0 BOXES</span
           ><small id="garage-save-state">Loading…</small>
         </div>
-        <div
-          id="workshop-cars"
-          class="workshop-cars"
-          aria-label="Car to upgrade"
-        ></div>
-        <section id="garage-showcase" class="garage-showcase">
-          <div class="garage-build">
-            <span class="eyebrow">YOUR CURRENT BUILD</span>
-            <h3 id="garage-selected-car">Original 458</h3>
+        <nav class="workshop-nav" role="tablist" aria-label="Garage sections">
+          <button
+            id="tab-build"
+            role="tab"
+            data-workshop-tab="build"
+            aria-controls="build-panel"
+            aria-selected="true"
+          >
+            01 <span>BUILD & PAINT</span>
+          </button>
+          <button
+            id="tab-parts"
+            role="tab"
+            data-workshop-tab="parts"
+            aria-controls="parts-panel"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            02 <span>UPGRADES</span>
+          </button>
+          <button
+            id="tab-boxes"
+            role="tab"
+            data-workshop-tab="boxes"
+            aria-controls="boxes-panel"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            03 <span>BOXES</span><small id="garage-boxes">0</small>
+          </button>
+        </nav>
+        <div class="workshop-workspace">
+          <section
+            id="garage-showcase"
+            class="garage-showcase"
+            aria-label="Selected car preview"
+          >
+            <div class="garage-build">
+              <span class="eyebrow">YOUR RIDE</span>
+              <h3 id="garage-selected-car">Original 458</h3>
+            </div>
+            <div class="studio-column">
+              <div id="garage-preview" class="garage-preview">
+                <span id="preview-label">YOUR INSTALLED BUILD</span
+                ><small>DRAG TO ROTATE · PINCH / SCROLL TO ZOOM</small>
+              </div>
+              <div
+                id="preview-angles"
+                class="preview-angles"
+                aria-label="Preview camera"
+              >
+                <button data-angle="front">FRONT</button
+                ><button data-angle="rear">REAR</button
+                ><button data-angle="wheels">WHEELS</button
+                ><button data-angle="cabin">CABIN</button
+                ><button id="preview-fitted">FITTED ✓</button>
+              </div>
+            </div>
+            <p class="studio-note">
+              Rims, tires and wings change on your car. Try a grade in Upgrades
+              to preview the fit.
+            </p>
+          </section>
+          <section
+            id="build-panel"
+            class="workshop-panel"
+            role="tabpanel"
+            aria-labelledby="tab-build"
+          >
+            <div class="panel-title">
+              <h3>READY FOR THE STREET</h3>
+              <span>LIVE SPECS</span>
+            </div>
             <div id="garage-stats" class="garage-stats"></div>
-            <p id="level-threat" class="level-threat"></p>
-          </div>
-          <div class="studio-column">
-            <div id="garage-preview" class="garage-preview">
-              <span id="preview-label">YOUR INSTALLED BUILD</span
-              ><small>DRAG TO ROTATE · PINCH / SCROLL TO ZOOM</small>
-            </div>
-            <div
-              id="preview-angles"
-              class="preview-angles"
-              aria-label="Preview camera"
-            >
-              <button data-angle="front">FRONT</button
-              ><button data-angle="rear">REAR</button
-              ><button data-angle="wheels">WHEELS</button
-              ><button data-angle="cabin">INTERIOR</button>
-              <button id="preview-fitted">SHOW FITTED</button>
-            </div>
             <div class="paint-bench">
-              <span>PAINT · FREE</span>
+              <span>PAINT <small>FREE</small></span>
               <div id="paint-swatches"></div>
               <label title="Choose custom paint"
-                >CUSTOM
-                <input
+                >CUSTOM<input
                   id="paint-custom"
                   type="color"
                   aria-label="Custom car paint"
               /></label>
             </div>
-          </div>
-        </section>
-        <section
-          id="part-inspector"
-          class="part-inspector"
-          aria-label="Upgrade comparison"
-        ></section>
-        <p
-          id="upgrade-feedback"
-          class="upgrade-feedback"
-          role="status"
-          aria-live="polite"
-        ></p>
-        <section id="box-bench" class="box-bench">
-          <div>
-            <h3>YOUR NEXT UPGRADE.</h3>
-            <p>14 parts · 5 grades · Platinum from Kutaisi secret boxes.</p>
-            <small
-              >Bronze 55% · Silver 28% · Gold 13% · Diamond 4% per slot</small
-            >
-          </div>
-          <button id="open-box" class="primary">OPEN A BOX ↗</button>
-          <button id="open-platinum-box" class="secondary" disabled>
-            PLATINUM · 0 BOXES
-          </button>
-        </section>
-        <p id="last-drop" class="last-drop"></p>
-        <p id="save-error" role="status"></p>
-        <button id="save-retry" class="secondary" hidden>RETRY SAVE</button>
-        <div id="parts-heading" class="parts-heading">
-          <h3>PERFORMANCE PARTS</h3>
-          <span id="parts-count">14 PARTS</span>
-        </div>
-        <div
-          id="part-filters"
-          class="part-filters"
-          role="group"
-          aria-label="Filter performance parts"
-        >
-          <button data-filter="all" aria-pressed="true">ALL PARTS</button
-          ><button data-filter="power" aria-pressed="false">POWER</button
-          ><button data-filter="handling" aria-pressed="false">HANDLING</button
-          ><button data-filter="body" aria-pressed="false">
-            BODY & WHEELS
-          </button>
-        </div>
-        <div id="part-grid" class="part-grid"></div>
-        <div class="save-footer">
-          <span
-            >Each player has a separate saved garage. Credits are earned in the
-            game.</span
-          ><button id="garage-save-key">BACK UP PRIVATE GARAGE KEY</button
-          ><button id="garage-restore-key">RESTORE GARAGE</button
-          ><input
-            id="garage-key-file"
-            type="file"
-            accept=".json,application/json"
+            <div class="build-brief">
+              <h4>MAKE IT YOURS</h4>
+              <p>
+                Choose a part, compare its effect, then buy or fit a spare. Your
+                installed build is saved for the next chase.
+              </p>
+              <button class="workshop-jump" data-go-tab="parts">
+                BROWSE UPGRADES <span>↗</span>
+              </button>
+            </div>
+            <p id="level-threat" class="level-threat"></p>
+            <details class="garage-backup">
+              <summary>
+                SAVE & RECOVERY <small>Automatic saving is on</small>
+              </summary>
+              <p>
+                Your garage belongs to this browser profile. Keep a private
+                recovery key to restore it on another device.
+              </p>
+              <div class="save-footer">
+                <button id="garage-save-key">BACK UP KEY ↓</button
+                ><button id="garage-restore-key">RESTORE GARAGE</button
+                ><input
+                  id="garage-key-file"
+                  type="file"
+                  accept=".json,application/json"
+                  hidden
+                />
+              </div>
+            </details>
+          </section>
+          <section
+            id="parts-panel"
+            class="workshop-panel"
+            role="tabpanel"
+            aria-labelledby="tab-parts"
             hidden
-          />
+          >
+            <div id="parts-heading" class="panel-title parts-heading">
+              <h3>PERFORMANCE PARTS</h3>
+              <span id="parts-count">14 PARTS</span>
+            </div>
+            <div
+              id="part-filters"
+              class="part-filters"
+              role="group"
+              aria-label="Filter performance parts"
+            >
+              <button data-filter="all" aria-pressed="true">ALL</button
+              ><button data-filter="power" aria-pressed="false">POWER</button
+              ><button data-filter="handling" aria-pressed="false">
+                HANDLING</button
+              ><button data-filter="body" aria-pressed="false">
+                BODY & WHEELS
+              </button>
+            </div>
+            <div class="parts-workspace">
+              <div
+                id="part-grid"
+                class="part-grid"
+                aria-label="Select a part"
+              ></div>
+              <section
+                id="part-inspector"
+                class="part-inspector"
+                aria-label="Upgrade comparison"
+              ></section>
+            </div>
+          </section>
+          <section
+            id="boxes-panel"
+            class="workshop-panel"
+            role="tabpanel"
+            aria-labelledby="tab-boxes"
+            hidden
+          >
+            <div class="panel-title">
+              <h3>YOUR SUPPLY DROPS</h3>
+              <span>3 PARTS / BOX</span>
+            </div>
+            <section id="box-bench" class="box-bench">
+              <article class="supply-card" style="--supply: #ffce73">
+                <div class="supply-visual" aria-hidden="true">✦</div>
+                <div>
+                  <h3>STREET BOX</h3>
+                  <p>Earn a box by clearing a level.</p>
+                  <small>Bronze 55% · Silver 28% · Gold 13% · Diamond 4%</small
+                  ><button id="open-box" class="primary">OPEN A BOX ↗</button>
+                </div>
+              </article>
+              <article class="supply-card" style="--supply: #b4e7fa">
+                <div class="supply-visual" aria-hidden="true">◇</div>
+                <div>
+                  <h3>PLATINUM BOX</h3>
+                  <p>Find hidden stunt boxes across the cities.</p>
+                  <small>Platinum parts for every car.</small
+                  ><button id="open-platinum-box" class="secondary" disabled>
+                    PLATINUM · 0 BOXES
+                  </button>
+                </div>
+              </article>
+              <article class="supply-card" style="--supply: #fe688e">
+                <div class="supply-visual" aria-hidden="true">T</div>
+                <div>
+                  <h3>TECHCRUSH BOX</h3>
+                  <p>Earn one for every 10 banked patrol takedowns.</p>
+                  <small
+                    >Platinum to TECHCRUSH · exclusive grades for the Creator
+                    car.</small
+                  ><button
+                    id="open-creator-box"
+                    class="creator-box-button"
+                    disabled
+                  >
+                    TECHCRUSH · 0 BOXES
+                  </button>
+                </div>
+              </article>
+            </section>
+            <p id="last-drop" class="last-drop"></p>
+            <details class="garage-backup">
+              <summary>HOW TO USE YOUR DROPS</summary>
+              <p>
+                Equip a stronger part for free, sell an extra for credits, or
+                save duplicates for fusion. Fusion needs 5, 10, 15, 20 and 25
+                matching spares; tuning stays on that car.
+              </p>
+            </details>
+          </section>
+        </div>
+        <div class="workshop-status">
+          <p
+            id="upgrade-feedback"
+            class="upgrade-feedback"
+            role="status"
+            aria-live="polite"
+          ></p>
+          <p id="save-error" role="status"></p>
+          <button id="save-retry" class="secondary" hidden>RETRY SAVE</button>
         </div>
       </dialog>
       <dialog id="loot-dialog" class="loot-dialog" aria-labelledby="loot-title">

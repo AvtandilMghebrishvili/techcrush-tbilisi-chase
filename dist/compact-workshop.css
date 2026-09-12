@@ -1,0 +1,1252 @@
+/* One bounded workspace. Only the active section is laid out; photos retain their original resolution. */
+#workshop {
+  width: min(1080px, calc(100% - 32px));
+  height: min(680px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 16px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #101722;
+  border: 1px solid #425168;
+  color: #edf3fa;
+  scroll-padding: 0;
+}
+#workshop[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#workshop *,
+#workshop *::before,
+#workshop *::after {
+  box-sizing: border-box;
+}
+#workshop [hidden] {
+  display: none !important;
+}
+#workshop button,
+#workshop select,
+#workshop summary {
+  font-family: Barlow, Arial, sans-serif;
+  letter-spacing: 0.2px;
+  touch-action: manipulation;
+}
+#workshop button:focus-visible,
+#workshop select:focus-visible,
+#workshop summary:focus-visible {
+  outline: 2px solid #9de5ff;
+  outline-offset: 2px;
+}
+#workshop button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+#workshop .workshop-header {
+  position: static;
+  padding: 0 0 10px;
+  margin: 0;
+  min-height: 48px;
+  flex: none;
+  gap: 14px;
+  background: none;
+  align-items: center;
+  border-bottom: 1px solid #ffffff12;
+}
+#workshop .workshop-header .eyebrow {
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  color: #9babbe;
+}
+#workshop h2 {
+  font:
+    850 25px/0.95 "Barlow Condensed",
+    Barlow,
+    sans-serif;
+  letter-spacing: 0.4px;
+  margin: 4px 0 0;
+}
+#workshop h2 span {
+  color: #ff426a;
+}
+#workshop .icon-close {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  font-size: 24px;
+  border-radius: 9px;
+}
+#workshop .garage-wallet {
+  margin: 0 0 0 auto;
+  padding: 6px 10px;
+  gap: 7px;
+  border: 1px solid #d6ad543b;
+  border-radius: 8px;
+  background: #29261e;
+}
+#workshop .garage-wallet strong {
+  font:
+    750 17px Barlow,
+    Arial,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: #ffe09b;
+  white-space: nowrap;
+}
+#workshop .garage-wallet .coin-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+#workshop .workshop-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  min-width: 0;
+}
+#workshop .workshop-cars {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+#workshop .workshop-cars label {
+  color: #90a6ba;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+#workshop select {
+  max-width: 250px;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 10px;
+  color: #edf3fa;
+  background: #1b283a;
+  border: 1px solid #50637c;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+#workshop #garage-level {
+  font-size: 10px;
+  color: #94d9f5;
+  white-space: nowrap;
+}
+#workshop #garage-save-state {
+  font-size: 9px;
+  color: #a1b5c6;
+  white-space: nowrap;
+}
+#workshop .workshop-nav {
+  position: static;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #080f19;
+  border: 1px solid #ffffff0c;
+  border-radius: 10px;
+  z-index: auto;
+  flex: none;
+}
+#workshop .workshop-nav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 37px;
+  padding: 6px;
+  border: 1px solid transparent;
+  background: none;
+  color: #8d9fb5;
+  border-radius: 7px;
+  font-size: 10px;
+}
+#workshop .workshop-nav button span {
+  font-size: 11px;
+  font-weight: 750;
+  color: #d8e3f0;
+}
+#workshop .workshop-nav button[aria-selected="true"] {
+  background: #29354a;
+  border-color: #5a697e;
+  color: #ff7593;
+  box-shadow: inset 0 -2px #ff5278;
+}
+#workshop #garage-boxes {
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: #ffe09b;
+  background: #503e1f;
+  font-size: 10px;
+}
+#workshop .workshop-workspace {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.7fr) minmax(0, 1.6fr);
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+#workshop .garage-showcase {
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  margin: 0;
+  border: 1px solid #ffffff16;
+  border-radius: 12px;
+  min-width: 0;
+  min-height: 0;
+  background: radial-gradient(ellipse at 50% 35%, #304254, #17212e 70%);
+  overflow: hidden;
+}
+#workshop .garage-build {
+  padding: 14px 14px 0;
+  flex: none;
+}
+#workshop .garage-build .eyebrow {
+  font-size: 8px;
+  color: #93a8bd;
+}
+#workshop .garage-build h3 {
+  margin: 5px 0 0;
+  font:
+    800 24px/1.05 "Barlow Condensed",
+    Barlow,
+    sans-serif;
+}
+#workshop .studio-column {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+#workshop .garage-preview {
+  height: auto;
+  min-height: 170px;
+  flex: 1;
+  background: none;
+}
+#workshop #preview-label {
+  max-width: calc(100% - 20px);
+  left: 10px;
+  top: 12px;
+  font-size: 8px;
+  padding: 5px 7px;
+  line-height: 1.4;
+}
+#workshop .garage-preview > small {
+  font-size: 7px;
+  bottom: 9px;
+  left: 10px;
+  letter-spacing: 0.4px;
+}
+#workshop .preview-angles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 4px 10px 10px;
+  gap: 4px;
+  border: 0;
+}
+#workshop .preview-angles button {
+  min-height: 32px;
+  padding: 5px 2px;
+  font-size: 9px;
+  border-radius: 6px;
+}
+#workshop #preview-fitted {
+  grid-column: 1/-1;
+  margin: 0;
+  min-height: 28px;
+  background: #263b4c;
+  border-color: #56728d;
+  color: #d7e9f6;
+}
+#workshop .studio-note {
+  margin: 0;
+  padding: 10px 14px;
+  border-top: 1px solid #ffffff10;
+  color: #9fb2c5;
+  font-size: 10px;
+  line-height: 1.5;
+}
+#workshop .workshop-panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #5b6a80 transparent;
+  padding-right: 3px;
+}
+#workshop .panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+#workshop .panel-title h3 {
+  font:
+    750 12px Barlow,
+    Arial,
+    sans-serif;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+#workshop .panel-title > span {
+  color: #90a6ba;
+  font-size: 9px;
+  white-space: nowrap;
+}
+#workshop .garage-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+#workshop .garage-stats > div {
+  background: #182435;
+  border: 1px solid #ffffff0e;
+  border-radius: 9px;
+  padding: 12px;
+}
+#workshop .garage-stats small {
+  font-size: 9px;
+  letter-spacing: 0.7px;
+  color: #a8b7c9;
+}
+#workshop .garage-stats strong {
+  font:
+    750 22px/1.15 Barlow,
+    Arial,
+    sans-serif;
+  margin: 5px 0 3px;
+  color: #f0f5fc;
+}
+#workshop .garage-stats em {
+  font-size: 9px;
+  color: #95d9c2;
+}
+#workshop .paint-bench {
+  margin: 12px 0;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #1b2737;
+  border: 1px solid #ffffff14;
+  border-radius: 9px;
+}
+#workshop .paint-bench > span {
+  font-size: 10px;
+  color: #e0e8f4;
+}
+#workshop .paint-bench > span small {
+  display: block;
+  font-size: 8px;
+  color: #97d9bc;
+  margin-top: 4px;
+}
+#workshop #paint-swatches {
+  gap: 3px;
+  display: flex;
+  flex-wrap: wrap;
+}
+#workshop #paint-swatches button {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  flex: 0 0 30px;
+  border: 5px solid #111c2c;
+}
+#workshop .paint-bench label {
+  margin-left: auto;
+  font-size: 8px;
+  gap: 5px;
+}
+#workshop .paint-bench input {
+  width: 30px;
+  height: 30px;
+}
+#workshop .build-brief {
+  padding: 12px;
+  background: #ffffff04;
+  border: 1px solid #ffffff0d;
+  border-radius: 9px;
+}
+#workshop .build-brief h4 {
+  font-size: 10px;
+  margin: 0 0 5px;
+  color: #d4deec;
+}
+#workshop .build-brief p,
+#workshop .garage-backup p {
+  margin: 0 0 9px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #a9bbce;
+}
+#workshop .workshop-jump {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
+  min-height: 36px;
+  font-size: 10px;
+  font-weight: 750;
+  border: 1px solid #805063;
+  border-radius: 7px;
+  color: #ffacc1;
+  background: #3a2434;
+}
+#workshop .level-threat {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #b7a488;
+  margin: 12px 0;
+}
+#workshop .garage-backup {
+  border-top: 1px solid #ffffff12;
+  padding-top: 4px;
+}
+#workshop .garage-backup summary,
+#workshop .part-explanation summary {
+  font-size: 9px;
+  font-weight: 750;
+  color: #b2c2d6;
+  cursor: pointer;
+  min-height: 34px;
+  align-content: center;
+}
+#workshop .garage-backup summary small {
+  font-size: 9px;
+  font-weight: 400;
+  margin-left: 8px;
+  color: #849cb3;
+}
+#workshop .save-footer {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0 0 8px;
+  gap: 6px;
+  border: 0;
+}
+#workshop .save-footer button {
+  min-height: 34px;
+  padding: 7px 10px;
+  font-size: 10px;
+}
+#workshop #parts-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#workshop #parts-heading {
+  margin-bottom: 8px;
+}
+#workshop .part-filters {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  margin: 0 0 10px;
+  flex: none;
+}
+#workshop .part-filters button {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 9px;
+  white-space: nowrap;
+  border-radius: 6px;
+}
+#workshop .parts-workspace {
+  display: grid;
+  grid-template-columns: 158px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  flex: 1;
+}
+#workshop .part-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 1px 4px 2px 1px;
+  scrollbar-width: thin;
+  scrollbar-color: #596c83 transparent;
+  overscroll-behavior: contain;
+}
+#workshop .part-tile {
+  display: flex;
+  align-items: center;
+  flex: none;
+  min-height: 66px;
+  width: 100%;
+  min-width: 0;
+  padding: 3px 6px 3px 2px;
+  gap: 4px;
+  text-align: left;
+  border: 1px solid #354356;
+  border-radius: 8px;
+  background: #182333;
+  color: #ecf3fa;
+  cursor: pointer;
+}
+#workshop .part-tile[aria-pressed="true"] {
+  border-color: #d36d86;
+  background: #322738;
+  box-shadow: inset 2px 0 #ff6388;
+}
+#workshop .part-tile:hover {
+  border-color: #8196ae;
+}
+#workshop .tile-photo {
+  display: block;
+  width: 55px;
+  flex: 0 0 55px;
+}
+#workshop .part-art {
+  margin: 0;
+  width: 100%;
+  aspect-ratio: 8/7;
+  height: auto;
+}
+#workshop .tile-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#workshop .tile-copy b {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+#workshop .tile-copy small {
+  color: var(--tier);
+  font-size: 9px;
+  line-height: 1.15;
+}
+#workshop .tile-copy em {
+  font-size: 7px;
+  line-height: 1.3;
+  font-style: normal;
+  color: #a3ecc7;
+}
+#workshop .part-inspector {
+  display: block;
+  padding: 12px;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #526881 transparent;
+  border: 1px solid #435069;
+  background: #172230;
+  border-radius: 10px;
+}
+#workshop .inspector-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+#workshop .inspector-art {
+  width: 105px;
+  flex: 0 0 105px;
+  padding: 0;
+  background: radial-gradient(ellipse, #42516766, transparent 70%);
+  border: 0;
+  border-radius: 8px;
+}
+#workshop .inspector-copy {
+  min-width: 0;
+}
+#workshop .inspector-copy > small {
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  color: var(--tier);
+}
+#workshop .inspector-copy h3 {
+  font:
+    800 23px/1.05 "Barlow Condensed",
+    Barlow,
+    sans-serif;
+  margin: 4px 0;
+}
+#workshop .fitted-grade {
+  font-size: 10px;
+  color: #e1e8f2;
+}
+#workshop .inspector-copy p {
+  font-size: 10px;
+  line-height: 1.35;
+  color: #a9bbcf;
+  margin: 5px 0 0;
+}
+#workshop .quality-picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 0 12px;
+}
+#workshop .quality-picker button {
+  min-width: 0;
+  min-height: 35px;
+  padding: 5px 2px;
+  font-size: 9px;
+  line-height: 1.1;
+  border-radius: 6px;
+}
+#workshop .quality-picker button small {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  opacity: 0.8;
+}
+#workshop .quality-picker button span {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+#workshop .comparison-meters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+#workshop .comparison-row {
+  min-width: 0;
+}
+#workshop .comparison-row > span {
+  font-size: 9px;
+  line-height: 1.3;
+  display: block;
+}
+#workshop .comparison-numbers {
+  gap: 5px;
+  margin: 4px 0 5px;
+  flex-wrap: wrap;
+}
+#workshop .comparison-numbers b {
+  font-size: 13px;
+}
+#workshop .comparison-numbers strong {
+  font-size: 18px;
+}
+#workshop .comparison-numbers small {
+  font-size: 8px;
+}
+#workshop .meter {
+  height: 4px;
+}
+#workshop .preview-disclaimer,
+#workshop .grade-source {
+  display: block;
+  margin: 10px 0 0;
+  color: #9eafc2;
+  font-size: 9px;
+  line-height: 1.4;
+}
+#workshop .inspector-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  margin: 9px 0 0;
+}
+#workshop .inspector-actions:empty {
+  display: none;
+}
+#workshop .inspector-actions button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  min-height: 35px;
+  padding: 8px 9px;
+  font-size: 10px;
+  letter-spacing: 0;
+  border-radius: 6px;
+  text-align: left;
+}
+#workshop .inspector-actions [data-sell] {
+  color: #b8c8da;
+  background: #223044;
+  border-color: #465971;
+}
+#workshop .inspector-actions [data-inspector-install] {
+  color: #cbffe6;
+  background: #1c5644;
+  border-color: #73c7a2;
+}
+#workshop .fusion-panel {
+  padding: 9px;
+  margin: 10px 0 0;
+  gap: 7px;
+  border-radius: 7px;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+#workshop .fusion-panel > strong {
+  grid-column: 1/-1;
+  display: flex;
+  gap: 6px;
+  font-size: 10px;
+}
+#workshop .fusion-panel > strong span {
+  color: var(--tier);
+}
+#workshop .fusion-panel small {
+  font-size: 9px;
+  line-height: 1.3;
+}
+#workshop .fusion-panel progress {
+  height: 4px;
+}
+#workshop .fusion-panel button {
+  min-height: 32px;
+  max-width: 112px;
+  padding: 5px 7px;
+  font-size: 9px;
+}
+#workshop .part-explanation {
+  margin-top: 6px;
+}
+#workshop .part-explanation p {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #a9bed4;
+  margin: 0 0 8px;
+}
+#workshop .box-bench {
+  display: grid;
+  gap: 9px;
+  padding: 0;
+  background: none;
+  border: 0;
+  margin: 0;
+}
+#workshop .supply-card {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--supply) 9%, #101722),
+    #172332
+  );
+  border: 1px solid color-mix(in srgb, var(--supply) 28%, #28364a);
+  border-radius: 10px;
+  padding: 13px;
+}
+#workshop .supply-visual {
+  width: 65px;
+  height: 65px;
+  display: grid;
+  place-items: center;
+  font:
+    850 30px Barlow,
+    Arial;
+  color: var(--supply);
+  border: 2px solid var(--supply);
+  border-radius: 9px;
+  transform: rotate(-8deg);
+  box-shadow:
+    inset 0 0 0 7px #101722,
+    5px 6px 0 #050a1266;
+  background: linear-gradient(135deg, #ffffff19, #ffffff00);
+}
+#workshop .box-bench h3 {
+  font:
+    800 13px Barlow,
+    Arial,
+    sans-serif;
+  color: var(--supply);
+  margin: 0 0 5px;
+}
+#workshop .box-bench p {
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 0 0 4px;
+}
+#workshop .box-bench small {
+  display: block;
+  font-size: 9px;
+  line-height: 1.4;
+}
+#workshop .box-bench button {
+  display: block;
+  margin: 9px 0 0;
+  padding: 7px 10px;
+  min-height: 34px;
+  height: auto;
+  font:
+    750 10px Barlow,
+    Arial,
+    sans-serif;
+  border-radius: 6px;
+  width: 100%;
+  transform: none;
+  white-space: normal;
+}
+#workshop .last-drop {
+  font-size: 10px;
+  line-height: 1.5;
+  margin: 10px 0;
+}
+#workshop .workshop-status {
+  flex: none;
+  max-height: 65px;
+  overflow: auto;
+}
+#workshop
+  .workshop-status:has(p:empty):not(:has(p:not(:empty))):not(
+    :has(button:not([hidden]))
+  ) {
+  display: none;
+}
+#workshop #upgrade-feedback,
+#workshop #save-error {
+  margin: 0;
+  padding: 8px 10px;
+  background: #173b34;
+  border: 1px solid #2d6d5c;
+  border-radius: 7px;
+  color: #b9f8df;
+  font-size: 11px;
+  line-height: 1.4;
+  min-height: 0;
+}
+#workshop #save-error:not(:empty) {
+  background: #422735;
+  border-color: #9c576b;
+  color: #ffcfda;
+}
+#workshop #upgrade-feedback:empty,
+#workshop #save-error:empty {
+  display: none;
+}
+#workshop #save-retry {
+  min-height: 30px;
+  font-size: 10px;
+  padding: 6px 9px;
+}
+#loot-dialog {
+  width: min(700px, calc(100% - 24px));
+  padding: 18px;
+  border-radius: 14px;
+}
+#loot-dialog h2 {
+  font-size: 28px;
+  margin: 6px 0 14px;
+}
+#loot-dialog .loot-slots {
+  gap: 8px;
+}
+#loot-dialog .loot-slot {
+  padding: 10px;
+  min-height: 0;
+}
+#loot-dialog .part-art {
+  width: 100%;
+  max-width: 140px;
+  margin: 0 auto 7px;
+}
+#loot-dialog .loot-slot strong {
+  font-size: 18px;
+}
+#loot-dialog .loot-slot span {
+  font-size: 11px;
+}
+#loot-dialog .loot-choices {
+  gap: 6px;
+  margin-top: 10px;
+}
+#loot-dialog .loot-choices small {
+  font-size: 10px;
+}
+#loot-dialog .loot-choices button,
+#loot-dialog > .primary,
+#loot-dialog > .secondary {
+  min-height: 36px;
+  padding: 8px 10px;
+  font-size: 11px;
+}
+#loot-dialog #loot-summary {
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+@media (min-width: 801px) and (max-height: 560px) {
+  #workshop {
+    padding: 10px;
+    gap: 6px;
+    height: calc(100dvh - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  #workshop .workshop-header {
+    min-height: 36px;
+    padding-bottom: 6px;
+  }
+  #workshop .workshop-header .eyebrow,
+  #workshop .studio-note {
+    display: none;
+  }
+  #workshop h2 {
+    font-size: 22px;
+  }
+  #workshop .garage-preview {
+    min-height: 70px;
+  }
+  #workshop .garage-build {
+    padding: 8px 10px 0;
+  }
+  #workshop .garage-build h3 {
+    font-size: 20px;
+  }
+  #workshop .preview-angles {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 0 5px 5px;
+  }
+  #workshop #preview-fitted {
+    grid-column: auto;
+  }
+  #workshop .workshop-workspace {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 10px;
+  }
+  #workshop .parts-workspace {
+    grid-template-columns: 135px minmax(0, 1fr);
+  }
+}
+@media (max-width: 800px) {
+  #workshop {
+    width: calc(100% - 16px);
+    height: min(790px, calc(100dvh - 16px));
+    max-height: calc(100dvh - 16px);
+    padding: 12px;
+    border-radius: 12px;
+  }
+  #workshop[open] {
+    gap: 8px;
+  }
+  #workshop .workshop-header {
+    gap: 9px;
+  }
+  #workshop h2 {
+    font-size: 23px;
+  }
+  #workshop .garage-wallet {
+    padding: 6px 8px;
+    gap: 5px;
+  }
+  #workshop .garage-wallet strong {
+    font-size: 15px;
+  }
+  #workshop .workshop-toolbar {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  #workshop .workshop-cars {
+    flex: 1;
+  }
+  #workshop .workshop-cars label {
+    display: none;
+  }
+  #workshop #garage-save-state {
+    width: 100%;
+    font-size: 8px;
+  }
+  #workshop .workshop-nav button {
+    min-height: 38px;
+    gap: 5px;
+    font-size: 9px;
+  }
+  #workshop .workshop-nav button span {
+    font-size: 10px;
+  }
+  #workshop .workshop-workspace {
+    display: block;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #workshop .workshop-panel {
+    overflow: visible;
+    padding: 0;
+  }
+  #workshop .garage-showcase {
+    margin-bottom: 12px;
+  }
+  #workshop:not([data-tab="build"]) .garage-showcase {
+    display: none;
+  }
+  #workshop .garage-build {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px 0;
+  }
+  #workshop .garage-build h3 {
+    margin: 0;
+    font-size: 21px;
+  }
+  #workshop .garage-preview {
+    flex: none;
+    height: 190px;
+    min-height: 0;
+  }
+  #workshop .preview-angles {
+    display: flex;
+    padding: 0 8px 8px;
+  }
+  #workshop .preview-angles button {
+    flex: 1;
+    min-height: 34px;
+  }
+  #workshop .studio-note {
+    display: none;
+  }
+  #workshop .garage-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #workshop .garage-stats > div {
+    padding: 9px;
+  }
+  #workshop .garage-stats strong {
+    font-size: 20px;
+  }
+  #workshop .paint-bench {
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+  #workshop #paint-swatches button {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    flex-basis: 28px;
+  }
+  #workshop .parts-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  #workshop .part-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 144px;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 0 8px;
+    gap: 5px;
+    flex: none;
+    scroll-snap-type: x proximity;
+  }
+  #workshop .part-tile {
+    min-height: 68px;
+    scroll-snap-align: start;
+  }
+  #workshop .part-inspector {
+    overflow: visible;
+    padding: 12px;
+  }
+  #workshop .part-filters button {
+    min-height: 35px;
+    flex: 1;
+    padding: 6px 5px;
+    font-size: 9px;
+  }
+  #workshop .quality-picker {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  #workshop .quality-picker button {
+    min-height: 38px;
+    font-size: 9px;
+  }
+  #workshop .inspector-art {
+    width: 85px;
+    flex-basis: 85px;
+  }
+  #workshop .inspector-actions button {
+    min-height: 38px;
+  }
+  #workshop .comparison-meters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #workshop .supply-card {
+    grid-template-columns: 55px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  #workshop .supply-visual {
+    width: 48px;
+    height: 48px;
+    font-size: 23px;
+  }
+  #workshop .build-brief {
+    padding: 10px;
+  }
+  #workshop .build-brief p {
+    font-size: 10px;
+  }
+  #loot-dialog .loot-slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  #loot-dialog .loot-slot {
+    padding: 7px;
+  }
+  #loot-dialog .loot-slot strong {
+    font-size: 15px;
+  }
+  #loot-dialog .loot-choices button {
+    font-size: 9px;
+    padding: 7px 4px;
+  }
+}
+@media (max-width: 370px) {
+  #workshop {
+    padding: 10px;
+  }
+  #workshop .garage-wallet .coin-icon {
+    display: none;
+  }
+  #workshop .workshop-nav button {
+    gap: 3px;
+  }
+  #workshop .inspector-heading {
+    gap: 7px;
+  }
+  #workshop .inspector-art {
+    width: 75px;
+    flex-basis: 75px;
+  }
+  #workshop .inspector-copy h3 {
+    font-size: 21px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #workshop * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Cancel inherited mobile stacking rules inside the new workspace. */
+#workshop .garage-build {
+  order: 0;
+}
+#workshop .panel-title {
+  flex-direction: row;
+  text-align: left;
+}
+#workshop .paint-bench > span {
+  flex: none;
+  width: auto;
+}
+#workshop .paint-bench label {
+  width: auto;
+  flex: none;
+}
+#workshop .workshop-nav button:not([aria-selected="true"]) {
+  background: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+@media (max-width: 800px) {
+  #workshop .garage-preview {
+    height: 155px;
+  }
+  #workshop .garage-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 5px;
+  }
+  #workshop .garage-stats > div {
+    padding: 8px 6px;
+  }
+  #workshop .garage-stats small {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+  #workshop .garage-stats strong {
+    font-size: 16px;
+    white-space: nowrap;
+  }
+  #workshop .garage-stats em {
+    font-size: 8px;
+  }
+  #workshop .paint-bench {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+  #workshop #paint-swatches {
+    flex: 1;
+    min-width: 0;
+  }
+  #workshop #paint-swatches button {
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    min-height: 25px;
+    flex-basis: 25px;
+    border-width: 4px;
+  }
+  #workshop .build-brief h4 {
+    display: none;
+  }
+  #workshop .panel-title {
+    margin-bottom: 8px;
+  }
+  #workshop #parts-heading {
+    gap: 6px;
+  }
+}
+
+#workshop .part-inspector[data-grade-count="5"] .quality-picker {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+#workshop .workshop-panel:focus-visible {
+  outline: 2px solid #9de5ff;
+  outline-offset: -2px;
+}
+#intro .milestone-card button {
+  grid-column: 2;
+}
+#workshop .tile-copy b {
+  overflow-wrap: anywhere;
+}
+@media (min-width: 801px) and (max-height: 560px) {
+  #workshop .tile-photo {
+    width: 46px;
+    flex-basis: 46px;
+  }
+}
+
+#workshop .studio-column {
+  order: 1;
+}
+#workshop .studio-note {
+  order: 2;
+}
+#workshop .part-inspector.just-fitted {
+  animation: compact-fit 0.6s ease-out;
+}
+@keyframes compact-fit {
+  from {
+    border-color: #98edc6;
+    box-shadow: inset 0 0 0 1px #98edc6;
+  }
+  to {
+    border-color: #435069;
+    box-shadow: none;
+  }
+}

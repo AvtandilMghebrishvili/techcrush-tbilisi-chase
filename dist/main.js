@@ -233,6 +233,15 @@ function chooseCar(id) {
       "aria-pressed",
       String(button.dataset.car === selectedCar),
     );
+  const strip = $("garage"),
+    selected = strip.querySelector('[aria-pressed="true"]');
+  if (selected && !$("intro").hidden) {
+    const bounds = strip.getBoundingClientRect(),
+      card = selected.getBoundingClientRect();
+    if (card.left < bounds.left) strip.scrollLeft += card.left - bounds.left;
+    else if (card.right > bounds.right)
+      strip.scrollLeft += card.right - bounds.right;
+  }
   const c = upgradedSpec(carSpec(id), equipment);
   $("menu-car-jump").textContent = c.name + " · CHANGE ↗";
   $("menu-car-jump").setAttribute(
