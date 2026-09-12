@@ -1,8 +1,16 @@
 // Clip the camera boom against expanded building boxes, including rotated facades.
 // Testing the whole boom also catches walls between the car and an outside camera.
+import { nearbyObstacles } from "./spatial-index.js";
 export function clearCameraPosition(anchor, desired, obstacles) {
   let fraction = 1;
-  for (const o of obstacles) {
+  const radius = Math.hypot(desired.x - anchor.x, desired.z - anchor.z) / 2 + 3;
+  for (const o of nearbyObstacles(
+    obstacles,
+    (anchor.x + desired.x) / 2,
+    (anchor.z + desired.z) / 2,
+    radius,
+  )) {
+    if (o.broken) continue;
     const c = Math.cos(o.angle || 0),
       s = Math.sin(o.angle || 0);
     const ox = o.x ?? (o.minX + o.maxX) / 2;

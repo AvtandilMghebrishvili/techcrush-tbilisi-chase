@@ -1,3 +1,5 @@
+import { updateBridgeRails } from "./bridge-visuals.js";
+import { createWaterSplash, animateWaterSplash } from "./crash-effects.js";
 import * as THREE from "./vendor/three.module.js";
 import { renderBudget, portraitFov } from "./mobile-input.js";
 import { CityLighting, windowGlow } from "./city-lighting.js";
@@ -311,6 +313,7 @@ export class SceneView {
     positionCheckpointArch(this.gate, cp);
   }
   startGame(sim) {
+    updateBridgeRails(this, sim.obstacles, sim.time);
     this.checkpoints = sim.checkpoints;
     this.helicopterMesh = null;
     resetTireSmoke(this.tireSmoke);
@@ -462,10 +465,15 @@ export class SceneView {
       ])
         cars.forEach((car, i) => {
           meshes[i].visible = Math.hypot(car.x - p.x, car.z - p.z) < 330;
-          meshes[i].position.set(car.x, 0, car.z);
-          meshes[i].rotation.y = car.angle;
+          meshes[i].position.set(car.x, car.y || 0, car.z);
+          meshes[i].rotation.set(
+            car.pitch || 0,
+            car.angle,
+            car.roll || 0,
+            "YXZ",
+          );
           if (meshes[i].visible) updateVehicleDamage(meshes[i], car);
-          if (car.destroyed) {
+          if (car.destroyed || car.waterAt != null) {
             if (meshes[i].userData.healthBar)
               meshes[i].userData.healthBar.sprite.visible = false;
             return;
@@ -483,8 +491,13 @@ export class SceneView {
                 car.x - this.camera.position.x,
                 car.z - this.camera.position.z,
               ) > 10;
-          meshes[i].position.set(car.x, 0, car.z);
-          meshes[i].rotation.y = car.angle;
+          meshes[i].position.set(car.x, car.y || 0, car.z);
+          meshes[i].rotation.set(
+            car.pitch || 0,
+            car.angle,
+            car.roll || 0,
+            "YXZ",
+          );
           animateWheels(meshes[i], Math.hypot(car.vx, car.vz), dt);
           if (meshes[i].userData.brakeLights)
             meshes[i].userData.brakeLights.emissiveIntensity =
@@ -496,6 +509,7 @@ export class SceneView {
                   Math.sin(sim.time * 19 + j * Math.PI) > 0 ? 6 : 0.3),
             );
         });
+      updateBridgeRails(this, sim.obstacles, sim.time);
       this.updateGate(sim.checkpoint, sim.checkpoints);
       const mode = CAMERAS[this.cameraMode].id;
       const interior = mode === "cockpit",
@@ -571,7 +585,11 @@ export class SceneView {
       }
       for (const e of sim.impacts || [])
         if (!this.fx.has(e.id) && this.effectTime - e.born < IMPACT_LIFETIME) {
-          const fx = createImpactBurst(this.scene, e);
+          const fx =
+            e.kind === "water"
+              ? createWaterSplash(this.scene, e)
+              : createImpactBurst(this.scene, e);
+          fx.isWater = e.kind === "water";
           fx.isImpact = true;
           this.fx.set(e.id, fx);
         }
@@ -579,7 +597,8 @@ export class SceneView {
         if (this.effectTime - fx.born >= fx.lifetime || fx.born > sim.time) {
           disposeGroup(this.scene, fx.group);
           this.fx.delete(id);
-        } else if (fx.isImpact) animateImpactBurst(fx, this.effectTime);
+        } else if (fx.isWater) animateWaterSplash(fx, this.effectTime);
+        else if (fx.isImpact) animateImpactBurst(fx, this.effectTime);
         else animateExplosion(fx, this.effectTime);
       }
       const flashes = [...this.fx.values()]

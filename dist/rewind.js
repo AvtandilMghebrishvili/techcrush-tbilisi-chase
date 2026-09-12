@@ -35,6 +35,14 @@ export class RewindTimeline {
     if (sim.time + 1e-6 < this.recordAt) return;
     this.recordAt = sim.time + 1 / 30;
     const frame = {
+      barriers: sim.obstacles
+        .filter((b) => b.barrier && b.broken)
+        .map((b) => ({
+          id: b.id,
+          broken: !!b.broken,
+          fallenAt: b.fallenAt || 0,
+          announced: !!b.announced,
+        })),
       player: clone(sim.player),
       police: clone(sim.police),
       traffic: clone(sim.traffic),
@@ -83,6 +91,17 @@ export class RewindTimeline {
         p,
         f.poles?.[i] || { broken: false, fallenAt: 0, fallAngle: 0 },
       );
+    const barriers = new Map((f.barriers || []).map((b) => [b.id, b]));
+    for (const b of sim.obstacles)
+      if (b.barrier)
+        Object.assign(
+          b,
+          barriers.get(b.id) || {
+            broken: false,
+            fallenAt: 0,
+            announced: false,
+          },
+        );
     sim.events.length = 0;
     sim.soundEvents.length = 0;
     sim.soundCooldowns.clear();
@@ -115,9 +134,9 @@ export class RewindTimeline {
               group === "police"
                 ? b[group].find((q) => q.id === car.id)
                 : b[group][j];
-          if (!from || !to) return;
-          for (const k of ["x", "z", "angle"])
-            car[k] = from[k] + (to[k] - from[k]) * alpha;
+          if (!from || !to || from.id !== to.id) return;
+          for (const k of ["x", "z", "y", "roll", "pitch", "angle"])
+            car[k] = (from[k] || 0) + ((to[k] || 0) - (from[k] || 0)) * alpha;
         });
     }
     sim.time = this.cursor;

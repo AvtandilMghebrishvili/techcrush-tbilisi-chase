@@ -251,3 +251,56 @@ export function animateImpactBurst(fx, time) {
   fx.dust.scale.setScalar(0.4 + age * 2.2);
   fx.dust.material.opacity = fade * 0.22 * fx.power;
 }
+export function createWaterSplash(scene, event) {
+  const group = new THREE.Group(),
+    particles = [],
+    rng = seeded(event.id);
+  group.position.set(event.x, -6.2, event.z);
+  scene.add(group);
+  for (let i = 0; i < 22; i++) {
+    const mesh = sprite("#d7ebe4"),
+      angle = rng() * Math.PI * 2,
+      speed = 2 + rng() * 5;
+    mesh.scale.setScalar(0.12 + rng() * 0.3);
+    group.add(mesh);
+    particles.push({
+      mesh,
+      vx: Math.sin(angle) * speed,
+      vz: Math.cos(angle) * speed,
+      vy: 3 + rng() * 5,
+    });
+  }
+  const rings = [];
+  for (let i = 0; i < 3; i++) {
+    const mesh = new THREE.Mesh(
+      new THREE.RingGeometry(0.8, 1, 48),
+      new THREE.MeshBasicMaterial({
+        color: "#b6d5c8",
+        transparent: true,
+        opacity: 0.5,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
+    );
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = 0.02;
+    group.add(mesh);
+    rings.push(mesh);
+  }
+  const fx = { group, particles, rings, born: event.born, lifetime: 1.8 };
+  animateWaterSplash(fx, event.born);
+  return fx;
+}
+export function animateWaterSplash(fx, time) {
+  const age = Math.max(0, time - fx.born),
+    fade = Math.max(0, 1 - age / fx.lifetime);
+  for (const p of fx.particles) {
+    p.mesh.position.set(p.vx * age, p.vy * age - 5 * age * age, p.vz * age);
+    p.mesh.visible = p.mesh.position.y > 0;
+    p.mesh.material.opacity = fade * 0.8;
+  }
+  fx.rings.forEach((m, i) => {
+    m.scale.setScalar(1 + age * (3 + i));
+    m.material.opacity = fade * 0.32;
+  });
+}

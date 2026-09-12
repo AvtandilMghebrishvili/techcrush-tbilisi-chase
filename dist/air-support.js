@@ -1,3 +1,4 @@
+import { nearbyObstacles } from "./spatial-index.js";
 import { containsPoint } from "./city-map.js";
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function createAirSupport(player, level) {
@@ -16,7 +17,15 @@ export function createAirSupport(player, level) {
       };
 }
 export function airLineOfSight(helicopter, player, obstacles) {
-  for (const o of obstacles) {
+  const radius =
+    Math.hypot(helicopter.x - player.x, helicopter.z - player.z) / 2 + 2;
+  for (const o of nearbyObstacles(
+    obstacles,
+    (helicopter.x + player.x) / 2,
+    (helicopter.z + player.z) / 2,
+    radius,
+  )) {
+    if (o.broken) continue;
     const ox = o.x ?? (o.minX + o.maxX) / 2,
       oz = o.z ?? (o.minZ + o.maxZ) / 2;
     const w = (o.w ?? o.maxX - o.minX) / 2,

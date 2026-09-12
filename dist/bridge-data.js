@@ -1,7 +1,7 @@
 import { ROAD_DATA } from "./road-data.js";
 import { LANDMARKS } from "./district-data.js";
 
-// Deck and barrier dimensions are shared with the renderer; railings never break.
+// Deck and barrier dimensions are shared with the renderer.
 export const BRIDGE_DECKS = [
   {
     name: "BARATASHVILI BRIDGE",
@@ -65,7 +65,7 @@ const crossingRoads = ROAD_DATA.edges.map(([a, b, width]) => {
     angle: Math.atan2(dx, dz),
   };
 });
-export const BRIDGE_BARRIERS = rails.flatMap((rail) => {
+const railSpans = rails.flatMap((rail) => {
   const pieces = [],
     count = Math.ceil(rail.d),
     step = rail.d / count;
@@ -103,3 +103,21 @@ export const BRIDGE_BARRIERS = rails.flatMap((rail) => {
   }
   return pieces;
 });
+// Local fracture panels leave the rest of the bridge intact. Normal speed,
+// not glancing travel speed, must exceed 122 km/h to break a section.
+export const BRIDGE_BARRIERS = railSpans
+  .flatMap((rail) => {
+    const count = Math.ceil(rail.d / 6),
+      d = rail.d / count;
+    return Array.from({ length: count }, (_, i) => {
+      const t = -rail.d / 2 + d * (i + 0.5);
+      return {
+        ...rail,
+        x: rail.x + Math.sin(rail.angle) * t,
+        z: rail.z + Math.cos(rail.angle) * t,
+        d,
+        breakSpeed: 34,
+      };
+    });
+  })
+  .map((rail, id) => ({ ...rail, id }));

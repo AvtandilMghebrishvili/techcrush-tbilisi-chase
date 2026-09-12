@@ -17,6 +17,7 @@ names = ['Shota Rustaveli Avenue', 'Nikoloz Baratashvili Avenue', 'Freedom Squar
          'Taras Shevchenko Street', 'Archil Jorjadze Street', 'Aleksandre Griboedov Street',
          'Shio Chitadze Street', 'Giorgi Leonidze Street', 'Merab Kostava Street']
 names += ['Nikoloz Baratashvili Bridge','Kote Abkhazi Street','Shalva Dadiani Street','Lado Asatiani Street','Galaktion Tabidze Street','Ivane Machabeli Street','Gia Abesadze Street','Vakhtang Beridze Street','Chakhrukhadze Street','Erekle Meori Square','Anton Katalikos Street','Harutyun Saiatnova Street','Ierusalimi Street','Betlemi Street','Kosta Khetagurov Street','Abo Tbilieli Street','Grigol Khandzteli Street']
+names += ['Besiki Street', 'Lesia Ukrainka Street', 'Geronti Kikodze Street', 'Paolo Iashvili Street', 'Mikheil Lermontovi Street', 'Sulkhan-Saba Street', 'Vakhtang Mosidze Street', 'Alexandre Dumas Street']
 reference=json.loads((root/'data/reference-streets.json').read_text(encoding='utf8'))
 for i,p in enumerate(reference['roundabouts']):
     lat,lon=p['center'];rx,rz=p['radii']

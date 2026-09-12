@@ -34,26 +34,67 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function geo(lat, lon) {
   return { x: -(lon - 44.799) * 83140, z: (lat - 41.699) * 111320 };
 }
+// A static bounding hierarchy prunes distant streets without approximating the
+// nearest projection. IDs break equal-distance ties in the original road order.
+function roadTree(roads) {
+  const minX = Math.min(...roads.map((r) => Math.min(r.start.x, r.end.x))),
+    maxX = Math.max(...roads.map((r) => Math.max(r.start.x, r.end.x))),
+    minZ = Math.min(...roads.map((r) => Math.min(r.start.z, r.end.z))),
+    maxZ = Math.max(...roads.map((r) => Math.max(r.start.z, r.end.z)));
+  if (roads.length <= 8) return { minX, maxX, minZ, maxZ, roads };
+  const axis = maxX - minX > maxZ - minZ ? "x" : "z";
+  roads.sort(
+    (a, b) => a.start[axis] + a.end[axis] - b.start[axis] - b.end[axis],
+  );
+  const middle = roads.length >> 1;
+  return {
+    minX,
+    maxX,
+    minZ,
+    maxZ,
+    left: roadTree(roads.slice(0, middle)),
+    right: roadTree(roads.slice(middle)),
+  };
+}
+const roadIndex = roadTree([...ROADS]);
 export function nearestRoad(p, street) {
   let best,
     cost = Infinity;
-  for (const road of ROADS) {
-    if (street && !road.name.includes(street)) continue;
-    const { start: a, end: b, length } = road,
-      dx = b.x - a.x,
-      dz = b.z - a.z;
-    const t = Math.max(
-      0,
-      Math.min(1, ((p.x - a.x) * dx + (p.z - a.z) * dz) / (length * length)),
-    );
-    const x = a.x + dx * t,
-      z = a.z + dz * t,
-      d = Math.hypot(x - p.x, z - p.z);
-    if (d < cost) {
-      cost = d;
-      best = { x, z, t, road, angle: road.angle, distance: d };
+  const bound = (n) =>
+    Math.max(n.minX - p.x, 0, p.x - n.maxX) ** 2 +
+    Math.max(n.minZ - p.z, 0, p.z - n.maxZ) ** 2;
+  function visit(node) {
+    if (bound(node) > cost) return;
+    if (node.roads) {
+      for (const road of node.roads) {
+        if (street && !road.name.includes(street)) continue;
+        const { start: a, end: b, length } = road,
+          dx = b.x - a.x,
+          dz = b.z - a.z;
+        const t = Math.max(
+          0,
+          Math.min(
+            1,
+            ((p.x - a.x) * dx + (p.z - a.z) * dz) / (length * length),
+          ),
+        );
+        const x = a.x + dx * t,
+          z = a.z + dz * t,
+          d = (x - p.x) ** 2 + (z - p.z) ** 2;
+        if (d < cost || (d === cost && road.id < best.road.id)) {
+          cost = d;
+          best = { x, z, t, road, angle: road.angle, distance: Math.sqrt(d) };
+        }
+      }
+    } else if (bound(node.left) <= bound(node.right)) {
+      visit(node.left);
+      visit(node.right);
+    } else {
+      visit(node.right);
+      visit(node.left);
     }
   }
+  visit(roadIndex);
   return best;
 }
 // Multi-source Dijkstra accounts for both ends of each projected street segment.
@@ -226,6 +267,7 @@ BUILDINGS.push(
   })),
 );
 export function containsPoint(o, x, z, padding = 0) {
+  if (o.broken) return false;
   if (o.angle === undefined)
     return (
       x > o.minX - padding &&

@@ -1,5 +1,17 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Roads, terrain and river safety 1.9.0 — 12 September 2026
+
+`npm test`: **123 passed, 0 failed**. New coverage checks all road centers and both lanes against water/hills, connected added streets, sedan/SUV/tank water recovery, live riverbank pursuit, player HP/recovery/rewind, immediate panel fracture and restoration, mountain collision, exact nearest-road parity and broad-phase contact parity. The old unbreakable-rail regression was replaced by the new high-impact fracture requirement.
+
+The full level-one controller run won: all six checkpoints followed by eight seconds of escape, with normal throttle/steering/braking and the normal recovery action. A controlled Chrome fixture verified actual patrol mesh descent, one splash, removal of the splash effect, and a new patrol identity on dry road; no page errors occurred. Rendered screenshots revealed a riverbed overlap during development, which was corrected and covered by a regression.
+
+Chrome touch emulation passed simultaneous steering/drift/nitro, tap-to-deplete, independent releases, manual three-finger controls, cancellation and gyro switching. Control hit targets remained clear at 360×740, 390×844, 667×375 and 844×390. Lifecycle checks passed pause/hidden/result suspension, resumed audio, terminal rewind, garage invalidation and six repeated run/garage cycles with stable geometry/texture counts. These are browser emulation tests, not physical-device tests.
+
+The final minified build passed touch drift/nitro, pause, real isolated save-backed box opening, garage preview, persisted settings and box state after reload, and desktop keyboard driving. No missing assets or QA globals were present. Build/link verification confirms that all 21 runtime assets (41,110,441 bytes) remain byte-identical to source.
+
+The local simulation benchmark used 1,200 steps at 120 Hz, a stationary level-three player, normal traffic/pursuit and a living-player fixture. Warm-sample median was **1,956.8 ms before / 752.6 ms after**, about **62% less simulation CPU time** in that workload. This is not a total-game FPS or phone battery claim. See [PERFORMANCE.md](docs/PERFORMANCE.md).
+
 ## Mobile arcade controls and loading 1.8.0 — 12 September 2026
 
 `npm test`: **113 passed, 0 failed**. Six new cases cover one-tap depletion/recharge, simultaneous steering/drift/boost in actual physics, brake priority, thumb ownership/hysteresis, lifecycle cancellation, exact route-cache invalidation and hashed-asset caching. Build and `npm run check:build` pass; all 21 shipped assets match source bytes exactly.

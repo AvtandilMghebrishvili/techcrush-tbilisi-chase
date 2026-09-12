@@ -1,5 +1,15 @@
 # Rendering and audio lifecycle
 
+## World queries 1.9.0
+
+A static 48-metre cell index prunes contact and sightline footprints; query results retain source order for deterministic iterative resolution. The nearest-road bounding hierarchy returns the exact original projection, including road-ID tie breaks. Regression tests compare both indices against complete scans. Broken barriers are skipped by physics, sightlines and camera clipping without rebuilding immutable footprint bounds.
+
+Grass uses 6,500 shared-geometry instanced clusters in spatial tiles and no per-frame JavaScript or new downloaded textures. Bridge panels share two instanced batches; unchanged panel transforms are not uploaded again. Rewind stores only fractured panel state. The earlier on-demand rendering and suspended audio lifecycle remains in place.
+
+Reproduce the simulation workload with `node scripts/benchmark-simulation.mjs`: four 1,200-step runs, discard the warm-up run and take the median of three. On this Windows/Node 24 machine, before-update warm samples were 1,657.5 / 1,956.8 / 1,994.3 ms; final samples were 752.6 / 627.7 / 861.1 ms. Median time fell from 1,956.8 to 752.6 ms (about 62%). The expanded map and new terrain/water checks are included. These are local workload timings, not FPS, total CPU, statistical hardware benchmarks or a physical-phone thermal test.
+
+No texture resolution, vehicle detail, shadow setting, render resolution or existing visibility budget was reduced. The larger map necessarily adds geometry. Six completed browser run/garage cycles held geometry and texture counts stable, with no remaining effects or audio voices after returning to the menu. Pause, hidden tabs, terminal effects and garage inactivity still stop their frame loops.
+
 ## Mobile loading 1.8.0
 
 Production JS/CSS is bundled and minified with content-hashed filenames and safe long-lived code caching. Independent city/car/tree assets load concurrently; the hidden phone cover loads only when needed. Seven unused early reference assets remain in Git but remove **12,719,902 bytes** from deployment. This exclusion is a packaging improvement, not a claim that unrequested files previously slowed browsing. The playable original remains `sports-car.glb`.

@@ -1,3 +1,4 @@
+import { buildGrass } from "./grass.js";
 import * as THREE from "./vendor/three.module.js";
 import { registerBreakable } from "./breakable-props.js";
 import {
@@ -20,34 +21,8 @@ import { buildTbilisiDistricts, terrainMound } from "./tbilisi-districts.js";
 import { LANDMARKS, riverDistance } from "./district-data.js";
 const mat = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.83, ...extra });
-export function terrainHeight(x, z) {
-  const west =
-    315 * Math.exp(-(((x - 1160) / 640) ** 2) - ((z + 390) / 1490) ** 2);
-  const south =
-    215 * Math.exp(-(((x + 30) / 1480) ** 2) - ((z + 1490) / 560) ** 2);
-  const east =
-    260 *
-    Math.exp(-(((x + 2450) / 640) ** 2) - ((z + 400) / 1900) ** 2) *
-    Math.max(0, Math.min(1, (-x - 1630) / 380));
-  const north =
-    210 *
-    Math.exp(-(((z - 1750) / 600) ** 2) - (x / 2100) ** 2) *
-    Math.max(0, Math.min(1, (z - 1050) / 450));
-  const fade = Math.max(
-    0,
-    Math.min(1, Math.max((x - 680) / 350, (-z - 1360) / 380)),
-  );
-  return (
-    (west + south) *
-      (1 +
-        0.055 * Math.sin(x * 0.011) * Math.sin(z * 0.008) +
-        0.025 * Math.sin(x * 0.038 + z * 0.017)) *
-      fade +
-    east +
-    north -
-    3
-  );
-}
+import { terrainHeight, mountainHeight } from "./terrain.js";
+export { terrainHeight } from "./terrain.js";
 function mountains(v) {
   const geometry = new THREE.PlaneGeometry(6200, 5400, 180, 160);
   geometry.rotateX(-Math.PI / 2);
@@ -56,7 +31,7 @@ function mountains(v) {
   for (let i = 0; i < p.count; i++) {
     const x = p.getX(i),
       z = p.getZ(i),
-      h = riverDistance({ x, z }) < 85 ? -9 : terrainHeight(x, z);
+      h = mountainHeight(x, z);
     p.setY(i, h);
     const mottled =
       Math.sin(x * 0.034 + Math.sin(z * 0.028) * 4) * Math.sin(z * 0.063) +
@@ -255,6 +230,7 @@ export function buildRealisticCity(v) {
   mountains(v);
   buildTechcrushGarage(v);
   buildTbilisiDistricts(v);
+  buildGrass(v);
   for (const i of [15, 48, 93, 134, 177]) {
     const n = NODES[i];
     if (n) addFlag(v, n.x + 15, n.z, 10, 0.58);

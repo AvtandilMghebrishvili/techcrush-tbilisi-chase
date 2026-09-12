@@ -324,7 +324,7 @@ export class ChaseAudio {
     this.lastBoost = boost;
     this.wasBoosting = p.boosting;
     const nearby = sim.police
-      .filter((x) => !x.destroyed && x.kind !== "tank")
+      .filter((x) => !x.destroyed && x.waterAt == null && x.kind !== "tank")
       .map((car) => ({ car, ...spatialSound(p, car, 110) }))
       .sort((a, b) => a.distance - b.distance)
       .slice(0, 2);
@@ -428,6 +428,27 @@ export class ChaseAudio {
     const v = pos.gain * (0.14 + 0.28 * strength),
       rate = 0.82 + Math.random() * 0.2;
     const opt = { volume: v, pan, rate };
+    if (event.kind === "water") {
+      this.play(this.noise, {
+        volume: v * 1.6,
+        pan,
+        rate: 0.65,
+        filter: 900,
+        duration: 1.1,
+        attack: 0.012,
+        fade: 0.75,
+      });
+      this.play(this.noise, {
+        volume: v * 0.65,
+        pan,
+        rate: 1.1,
+        filter: 3200,
+        duration: 0.55,
+        attack: 0.03,
+        fade: 0.4,
+      });
+      return;
+    }
     if (event.kind === "pass") {
       const s = this.play(this.noise, {
         volume: clamp(event.impact / 75, 0.15, 1) * 0.27,

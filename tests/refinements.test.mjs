@@ -169,26 +169,36 @@ test("roadside props break at the first contact and visibly move at that same ti
   assert(root.quaternion.angleTo(entry.base) < 1e-8);
   assert(root.position.equals(entry.position));
 });
-test("bridge rails stay solid under repeated high-speed impacts from either side", () => {
+test("bridge panels withstand ordinary hits and fracture only on hard normal impacts", () => {
   assert(BRIDGE_BARRIERS.length >= 8);
-  for (const b of BRIDGE_BARRIERS.filter((b) => b.d > 12))
-    for (const side of [-1, 1]) {
-      const start = JSON.stringify(b),
-        c = vehicle(
-          b.x + Math.cos(b.angle) * side * 5,
-          b.z - Math.sin(b.angle) * side * 5,
-          b.angle - (side * Math.PI) / 2,
+  for (const definition of BRIDGE_BARRIERS.filter((_, i) => i % 9 === 0))
+    for (const side of [-1, 1])
+      for (const speed of [18, 65]) {
+        const b = { ...definition },
+          c = vehicle(
+            b.x + Math.cos(b.angle) * side * 4,
+            b.z - Math.sin(b.angle) * side * 4,
+            b.angle - (side * Math.PI) / 2,
+          );
+        c.vx = -Math.cos(b.angle) * side * speed;
+        c.vz = Math.sin(b.angle) * side * speed;
+        for (let i = 0; i < 35; i++)
+          stepVehicle(c, { throttle: 1 }, 1 / 120, [b]);
+        const offset =
+          (c.x - b.x) * Math.cos(b.angle) - (c.z - b.z) * Math.sin(b.angle);
+        if (speed === 18) {
+          assert(!b.broken);
+          assert(offset * side > 0);
+        } else {
+          assert(b.broken);
+          assert(offset * side < 0);
+        }
+        assert(c.health < 100);
+        assert(
+          !definition.broken,
+          "Shared map data must not acquire run damage",
         );
-      c.vx = -Math.cos(b.angle) * side * 80;
-      c.vz = Math.sin(b.angle) * side * 80;
-      for (let i = 0; i < 15; i++)
-        stepVehicle(c, { throttle: 1 }, 1 / 120, [b]);
-      const offset =
-        (c.x - b.x) * Math.cos(b.angle) - (c.z - b.z) * Math.sin(b.angle);
-      assert(offset * side > 0, "Car crossed an unbreakable rail");
-      assert(c.health < 100);
-      assert.equal(JSON.stringify(b), start);
-    }
+      }
 });
 test("an upside-down living car recovers automatically even without a pre-existing flip timer", () => {
   const s = new ChaseSimulation();

@@ -1,3 +1,5 @@
+import { moundHeight } from "./terrain.js";
+import { buildBridgeRails } from "./bridge-visuals.js";
 import * as THREE from "./vendor/three.module.js";
 import { registerBreakable } from "./breakable-props.js";
 import { BRIDGE_DECKS, BRIDGE_BARRIERS } from "./bridge-data.js";
@@ -26,23 +28,7 @@ export function terrainMound(parent, p, rx, rz, height, mat) {
     const x = pos.getX(i),
       z = pos.getZ(i),
       r = Math.hypot(x / rx, z / rz);
-    const n = nearestRoad({ x: p.x + x, z: p.z + z }),
-      clear = Math.max(
-        0,
-        Math.min(1, (n.distance - n.road.width / 2 - 7) / 28),
-      );
-    const ridge = Math.max(0, 1 - r * r) ** 1.7;
-    pos.setY(
-      i,
-      Math.max(
-        -0.3,
-        height *
-          ridge *
-          (1 + Math.sin(x * 0.066) * Math.sin(z * 0.05) * 0.1) *
-          clear -
-          0.3,
-      ),
-    );
+    pos.setY(i, moundHeight(p.x + x, p.z + z, { ...p, rx, rz, height }));
     const c = new THREE.Color("#ffffff").multiplyScalar(
       0.9 + 0.1 * Math.sin(x * 0.13 + z * 0.19),
     );
@@ -413,22 +399,7 @@ export function buildTbilisiDistricts(v) {
       for (const z of [-4, 4])
         beam([x, 0, z], [x * 0.86, 12, z * 1.8], 0.35, white, g);
   }
-  for (const rail of BRIDGE_BARRIERS) {
-    const curb = box(rail.w, 0.35, rail.d, stone, rail.x, 0.2, rail.z);
-    curb.rotation.y = rail.angle;
-    const top = box(0.14, 0.13, rail.d, metal, rail.x, 1.35, rail.z);
-    top.rotation.y = rail.angle;
-    for (let t = -rail.d / 2 + 0.1; t < rail.d / 2; t += 1.8)
-      box(
-        0.08,
-        1.18,
-        0.08,
-        metal,
-        rail.x + Math.sin(rail.angle) * t,
-        0.77,
-        rail.z + Math.cos(rail.angle) * t,
-      );
-  }
+  buildBridgeRails(v, stone, metal);
   // Rike's lawns, pale paths, red paving panels, fountain and amphitheatre.
   const park = L.rike;
   ellipse(park, 120, 235, grass, -0.01);

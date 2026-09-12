@@ -8,7 +8,7 @@ Tests use Node's built-in test runner. They import simulation and geometry modul
 npm test
 ```
 
-The current suite contains **103 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/mobile.test.mjs`.
+The current suite contains **123 tests**. The [CI workflow](../.github/workflows/ci.yml) runs `npm ci`, tests and production build on Ubuntu and Windows with Node.js 24. It does not deploy. For one focused file, use e.g. `node --test tests/mobile.test.mjs`.
 
 `career.test.mjs` covers full-footprint road clearance, all three bridges in both directions, thin-wall tunneling, distinct car geometry, 14 parts/four tiers, integrated upgrade physics, duplicate rewards, currency settlement, level difficulty, wreck-credit rewind and breakable poles. `save-api.test.mjs` checks isolated profiles, request retries/conflicts, box idempotency and actual SQLite close/reopen persistence.
 
@@ -68,3 +68,5 @@ Record browser/version, device/GPU, commit, steps and observed results with any 
 Run the suite for the release commit, run full routes if mechanics/maps changed, and inspect the final hosted artifact in a browser. Verify the public source includes all local runtime assets and the lockfile. Update `VALIDATION.md` with new evidence rather than silently replacing historical results.
 
 [Back to README](../README.md)
+
+`world-safety.test.mjs` checks expanded road/lane clearance, the rendered riverbed, explicit bridges, patrol and player sinking/respawn, mountain blocking, panel fracture/rewind/visual synchronization and exact spatial-query parity. `node scripts/benchmark-simulation.mjs` runs the reproducible CPU workload documented in PERFORMANCE.md.

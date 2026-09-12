@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.9.0 — 2026-09-12
+
+- Expand the archived OSM street network from 519 nodes / 671 segments to 551 / 704, including Dumas, Kikodze, Lermontovi, Iashvili and Sulkhan-Saba streets. Move two approximate embankment connections onto dry land and regenerate joined asphalt/sidewalks.
+- Add 6,500 instanced grass clusters with shared geometry and spatial culling. Retain existing textures, vehicles, quality settings and lighting.
+- Share hillside profiles between presentation and physics. Roads have clear shoulders; vehicles collide with mountains and landmark mounds instead of driving underneath them.
+- Patrol shortcuts now require continuous land or an explicit bridge. All vehicles fall and sink after entering unsupported water, with splash/foam, spatial water audio and a road respawn. Sunk patrols do not award repeatable wreck cash; the player's recovery costs 20 HP.
+- Divide bridge rails into local fracture panels. Direct normal impacts of at least 34 m/s (about 122 km/h) can break a section immediately; ordinary hits and glancing scrapes remain solid. Rewind restores panel damage and sinking state.
+- Index static obstacle queries and nearest-road projections without changing their exact results. Reuse actor lists and cached barrier references; store only broken panels in rewind frames. Keep menu/hidden-tab/audio suspension.
+
 ## 1.8.0 — 2026-09-12
 
 - Default mobile Auto accelerator and proportional thumb steering with a pull-down drift strip; manual pedals, arrow buttons and gyro remain selectable.

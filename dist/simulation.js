@@ -1,5 +1,13 @@
 import { TREES } from "./world-props.js";
 import { BRIDGE_BARRIERS } from "./bridge-data.js";
+import { nearbyObstacles } from "./spatial-index.js";
+import { resolveTerrain, terrainBlocked } from "./terrain.js";
+import {
+  unsupportedWater,
+  driveableLine,
+  beginWater,
+  stepWater,
+} from "./water.js";
 import {
   freshDamage,
   dentVehicle,
@@ -10,7 +18,6 @@ import {
 import { vehicleContact, treeContact } from "./contacts.js";
 import { RewindTimeline } from "./rewind.js";
 import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
-import { riverDistance } from "./district-data.js";
 import { upgradedSpec, pursuitTuning } from "./progression.js";
 import { checkpointsForLevel } from "./level-routes.js";
 import { createAirSupport, updateAirSupport } from "./air-support.js";
@@ -40,7 +47,10 @@ export const angleDelta = (a, b) =>
   Math.atan2(Math.sin(a - b), Math.cos(a - b));
 export const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function blocks() {
-  return [...BUILDINGS, ...BRIDGE_BARRIERS];
+  return [
+    ...BUILDINGS,
+    ...BRIDGE_BARRIERS.map((b) => ({ ...b, broken: false })),
+  ];
 }
 export function vehicle(x = 0, z = 0, angle = 0) {
   return {
@@ -80,6 +90,7 @@ export function vehicle(x = 0, z = 0, angle = 0) {
   };
 }
 export function resolveCircleRect(car, r, rect) {
+  if (rect.broken) return false;
   if (rect.angle !== undefined) {
     // Conservative broad phase: distant lots need no local transform or contact allocation.
     const bound = (rect.w + rect.d) / 2 + r;
@@ -94,7 +105,7 @@ export function resolveCircleRect(car, r, rect) {
       z: s * dx + c * dz,
       vx: c * car.vx - s * car.vz,
       vz: s * car.vx + c * car.vz,
-      impact: car.impact,
+      impact: 0,
     };
     const hit = resolveCircleRect(local, r, {
       minX: -rect.w / 2,
@@ -103,11 +114,18 @@ export function resolveCircleRect(car, r, rect) {
       maxZ: rect.d / 2,
     });
     if (hit) {
+      if (rect.barrier && local.impact >= rect.breakSpeed) {
+        rect.broken = true;
+        car.vx *= 0.78;
+        car.vz *= 0.78;
+        car.impact = Math.max(car.impact || 0, local.impact * 0.65);
+        return true;
+      }
       car.x = rect.x + c * local.x + s * local.z;
       car.z = rect.z - s * local.x + c * local.z;
       car.vx = c * local.vx + s * local.vz;
       car.vz = -s * local.vx + c * local.vz;
-      car.impact = local.impact;
+      car.impact = Math.max(car.impact || 0, local.impact);
       if (local.impactNormal)
         car.impactNormal = {
           x: c * local.impactNormal.x + s * local.impactNormal.z,
@@ -225,7 +243,7 @@ export function stepVehicle(car, input, dt, obstacles = [], isPlayer = true) {
   for (let i = 0; i < steps; i++) {
     car.x += (car.vx * dt) / steps;
     car.z += (car.vz * dt) / steps;
-    for (const rect of obstacles)
+    for (const rect of nearbyObstacles(obstacles, car.x, car.z, 5))
       resolveCircleRect(car, Math.max(2.1, (car.length || 4.65) / 2), rect);
   }
   if (Math.abs(car.x) > LIMIT) {
@@ -259,7 +277,8 @@ export function lineOfSight(a, b, obstacles) {
   for (let i = 1; i < steps; i++) {
     const x = a.x + ((b.x - a.x) * i) / steps,
       z = a.z + ((b.z - a.z) * i) / steps;
-    if (obstacles.some((o) => containsPoint(o, x, z))) return false;
+    if (nearbyObstacles(obstacles, x, z).some((o) => containsPoint(o, x, z)))
+      return false;
   }
   return true;
 }
@@ -276,6 +295,9 @@ export class ChaseSimulation {
     this.reset();
   }
   reset() {
+    for (const b of this.obstacles)
+      if (b.barrier)
+        Object.assign(b, { broken: false, fallenAt: 0, announced: false });
     this.player = vehicle(START.x, START.z, START.angle);
     this.player.carId = this.selectedCar || "gt";
     this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
@@ -545,10 +567,57 @@ export class ChaseSimulation {
       ].map(roadProjection);
       spawn = candidates.sort((a, b) => distance(b, p) - distance(a, p))[0];
     }
+    spawn = this.safeRoadSpawn(spawn, cop);
+    if (!spawn) {
+      cop.respawnAt = this.time + 0.5;
+      return false;
+    }
     Object.assign(cop, this.makePolice(spawn.x, spawn.z, cop.role));
     cop.lastSeen = { x: p.x, z: p.z };
-    cop.angle = Math.atan2(p.x - cop.x, p.z - cop.z);
+    cop.angle = spawn.angle ?? roadProjection(spawn).angle;
+    cop.waterAt = null;
+    cop.waterAge = 0;
     this.events.push("NEW PATROL INBOUND");
+  }
+  advanceWater(car, dt) {
+    const finished = stepWater(car, dt);
+    if (car.y <= -5.6 && !car.waterSplashed) {
+      car.waterSplashed = true;
+      this.impacts.push({
+        id: "splash:" + this.nextImpactId++,
+        kind: "water",
+        x: car.x,
+        z: car.z,
+        born: this.time,
+        impact: 30,
+      });
+      this.emitSound("water", car, 30, "water:" + (car.id ?? "player"));
+    }
+    return finished;
+  }
+  safeRoadSpawn(target, exclude) {
+    const candidates = [
+      roadProjection(target),
+      ...ROADS.map((r) => ({
+        x: (r.start.x + r.end.x) / 2,
+        z: (r.start.z + r.end.z) / 2,
+        angle: r.angle,
+        road: r,
+      })),
+    ];
+    candidates.sort((a, b) => distance(a, target) - distance(b, target));
+    return candidates.find(
+      (q) =>
+        distance(q, this.player) > 85 &&
+        !unsupportedWater(q) &&
+        !terrainBlocked(q, 3.5) &&
+        !nearbyObstacles(this.obstacles, q.x, q.z, 4).some((b) =>
+          containsPoint(b, q.x, q.z, 3.5),
+        ) &&
+        [...this.traffic, ...this.police].every(
+          (c) => c === exclude || c.waterAt != null || distance(c, q) > 14,
+        ),
+    );
   }
   recover(automatic = false) {
     if (this.phase !== "running") return;
@@ -566,6 +635,8 @@ export class ChaseSimulation {
     const p =
       candidates.find(
         (q) =>
+          !unsupportedWater(q) &&
+          !terrainBlocked(q, 2) &&
           !this.obstacles.some((b) => containsPoint(b, q.x, q.z, 2.2)) &&
           activeCars.every((c) => distance(c, q) > 12),
       ) || projected;
@@ -575,6 +646,8 @@ export class ChaseSimulation {
     Object.assign(this.player, {
       y: 0,
       vy: 0,
+      waterAt: null,
+      waterAge: 0,
       roll: 0,
       pitch: 0,
       airborne: false,
@@ -646,6 +719,8 @@ export class ChaseSimulation {
     );
     const p = this.player;
     const before = { x: p.x, z: p.z };
+    const actors = [p, ...this.traffic, ...this.police];
+    const positions = new Map(actors.map((c) => [c, { x: c.x, z: c.z }]));
     if (
       !p.airborne &&
       !p.flipped &&
@@ -656,7 +731,15 @@ export class ChaseSimulation {
       p.flipTimer = 0.8;
       p.y = 1.38;
     }
-    if (p.flipped) {
+    if (p.waterAt != null) {
+      if (this.advanceWater(p, dt)) {
+        p.health = Math.max(0, p.health - 20);
+        if (p.health > 0) {
+          this.recover(true);
+          positions.set(p, { x: p.x, z: p.z });
+        }
+      }
+    } else if (p.flipped) {
       p.flipTimer = Math.max(
         0,
         (Number.isFinite(p.flipTimer) ? p.flipTimer : 0.8) - dt,
@@ -665,7 +748,10 @@ export class ChaseSimulation {
       p.vz *= Math.exp(-dt * 5);
       p.x += p.vx * dt;
       p.z += p.vz * dt;
-      if (p.flipTimer <= 0 && p.health > 0) this.recover(true);
+      if (p.flipTimer <= 0 && p.health > 0) {
+        this.recover(true);
+        positions.set(p, { x: p.x, z: p.z });
+      }
     } else if (p.airborne) {
       const landed = stepAirborne(
         p,
@@ -710,16 +796,15 @@ export class ChaseSimulation {
       this.nextWaveAt += this.difficulty.waveInterval;
     }
     const travel = distance(p, before);
-    if (!p.airborne && p.y < 1 && riverDistance(p) < 39) {
-      const road = roadProjection(p);
-      if (road.distance > road.road.width / 2 + 2) {
-        p.health = Math.max(0, p.health - 20);
-        if (p.health > 0) this.recover(true);
-        this.events.push("RIVER RECOVERY — HOLD Q TO REWIND");
-      }
-    }
     this.score += travel * 1.8;
     for (const t of this.traffic) {
+      if (t.waterAt != null) {
+        if (this.advanceWater(t, dt)) {
+          t.waterAt = null;
+          t.destroyed = true;
+          t.respawnAt = this.time;
+        } else continue;
+      }
       if (t.destroyed) {
         if (this.time < t.respawnAt) continue;
         const road =
@@ -727,12 +812,22 @@ export class ChaseSimulation {
             (r, i) =>
               i > t.turnSeed % ROADS.length && distance(r.start, p) > 120,
           ) || ROADS[0];
+        const spawn = this.safeRoadSpawn(road.start, t);
+        if (!spawn) continue;
         Object.assign(t, {
-          x: road.start.x,
-          z: road.start.z,
-          angle: road.angle,
-          fromNode: road.a,
-          toNode: road.b,
+          x: spawn.x,
+          z: spawn.z,
+          y: 0,
+          vy: 0,
+          pitch: 0,
+          roll: 0,
+          waterAge: 0,
+          waterAt: null,
+          vx: 0,
+          vz: 0,
+          angle: spawn.angle,
+          fromNode: spawn.road.a,
+          toNode: spawn.road.b,
           id: t.id + 10000,
           health: 100,
           destroyed: false,
@@ -742,6 +837,8 @@ export class ChaseSimulation {
           nearMiss: false,
         });
       }
+      if (t.id >= 20000 && t.vx === 0 && t.vz === 0)
+        positions.set(t, { x: t.x, z: t.z });
       t.hitCooldown = Math.max(0, t.hitCooldown - dt);
       let target = NODES[t.toNode];
       if (distance(t, target) < 7) {
@@ -765,8 +862,8 @@ export class ChaseSimulation {
       t.angle += clamp(angleDelta(desired, t.angle), -2.4 * dt, 2.4 * dt);
       const direction = { x: Math.sin(t.angle), z: Math.cos(t.angle) };
       let cruise = t.cruise;
-      for (const o of [p, ...this.traffic, ...this.police]) {
-        if (o === t) continue;
+      for (const o of actors) {
+        if (o === t || o.waterAt != null) continue;
         const dx = o.x - t.x,
           dz = o.z - t.z,
           ahead = dx * direction.x + dz * direction.z,
@@ -780,7 +877,8 @@ export class ChaseSimulation {
       t.x += t.vx * dt;
       t.z += t.vz * dt;
       t.impact = 0;
-      for (const block of this.obstacles) resolveCircleRect(t, 2.1, block);
+      for (const block of nearbyObstacles(this.obstacles, t.x, t.z, 5))
+        resolveCircleRect(t, 2.1, block);
       dentVehicle(t, t.impact, this.time);
       if (t.impact > 4) this.emitSound("metal", t, t.impact, "wall:" + t.id);
     }
@@ -799,6 +897,8 @@ export class ChaseSimulation {
       this.police.some(
         (cop) =>
           !cop.destroyed &&
+          cop.waterAt == null &&
+          p.waterAt == null &&
           distance(cop, p) < this.difficulty.sight &&
           lineOfSight(cop, p, this.obstacles),
       );
@@ -811,9 +911,17 @@ export class ChaseSimulation {
         time: this.time,
       };
     for (const cop of this.police) {
+      if (cop.waterAt != null) {
+        if (this.advanceWater(cop, dt)) {
+          this.respawnPolice(cop);
+          positions.set(cop, { x: cop.x, z: cop.z });
+        } else continue;
+      }
       if (cop.destroyed) {
-        if (this.time >= cop.respawnAt) this.respawnPolice(cop);
-        else continue;
+        if (this.time >= cop.respawnAt) {
+          this.respawnPolice(cop);
+          positions.set(cop, { x: cop.x, z: cop.z });
+        } else continue;
       }
       cop.hitCooldown = Math.max(0, cop.hitCooldown - dt);
       cop.ramRecovery = Math.max(0, cop.ramRecovery - dt);
@@ -837,9 +945,11 @@ export class ChaseSimulation {
             ROAD_EDGE,
           ),
         };
-        cop.lastSeen = lineOfSight(observation, predicted, this.obstacles)
-          ? predicted
-          : { x: observation.x, z: observation.z };
+        cop.lastSeen =
+          lineOfSight(observation, predicted, this.obstacles) &&
+          driveableLine(observation, predicted)
+            ? predicted
+            : { x: observation.x, z: observation.z };
       }
       if (cop.blockPoint && this.time > cop.blockExpires) {
         cop.blockPoint = null;
@@ -882,7 +992,11 @@ export class ChaseSimulation {
         cop.path = routeBetween(cop, cop.blockPoint || cop.lastSeen);
         cop.repath = this.difficulty.repath;
       }
-      while (cop.path.length > 1 && distance(cop, cop.path[0]) < 10)
+      while (
+        cop.path.length > 1 &&
+        distance(cop, cop.path[0]) < 10 &&
+        driveableLine(cop, cop.path[1])
+      )
         cop.path.shift();
       const holding = cop.blockPoint && distance(cop, cop.blockPoint) < 5;
       let target =
@@ -911,6 +1025,9 @@ export class ChaseSimulation {
         };
         if (lineOfSight(cop, flank, this.obstacles)) target = flank;
       }
+      // Seeing a player across the river does not imply a drivable shortcut.
+      if (!driveableLine(cop, target))
+        target = cop.path[0] || roadProjection(cop);
       const desired = holding
           ? cop.blockPoint.angle
           : Math.atan2(target.x - cop.x, target.z - cop.z),
@@ -940,8 +1057,8 @@ export class ChaseSimulation {
           ),
         );
       }
-      for (const other of [...this.police, ...this.traffic]) {
-        if (other === cop) continue;
+      for (const other of actors) {
+        if (other === cop || other === p || other.waterAt != null) continue;
         const dx = other.x - cop.x,
           dz = other.z - cop.z,
           ahead = dx * Math.sin(cop.angle) + dz * Math.cos(cop.angle),
@@ -973,7 +1090,7 @@ export class ChaseSimulation {
       cop.x += cop.vx * dt;
       cop.z += cop.vz * dt;
       cop.impact = 0;
-      for (const block of this.obstacles)
+      for (const block of nearbyObstacles(this.obstacles, cop.x, cop.z, 5))
         resolveCircleRect(
           cop,
           cop.kind === "tank" ? 3.35 : cop.kind === "suv" ? 2.65 : 2.1,
@@ -1002,6 +1119,8 @@ export class ChaseSimulation {
           const a = allCars[i],
             b = allCars[j];
           if (
+            a.waterAt != null ||
+            b.waterAt != null ||
             (a.destroyed && b.destroyed) ||
             Math.abs((a.y || 0) - (b.y || 0)) > 1.6 ||
             Math.abs(a.x - b.x) > 6 ||
@@ -1045,7 +1164,7 @@ export class ChaseSimulation {
         }
     const breakables = [...this.trees, ...this.poles];
     for (const car of allCars) {
-      if (car.destroyed) continue;
+      if (car.destroyed || car.waterAt != null) continue;
       for (const tree of breakables) {
         if (
           (car.y || 0) > Math.min(2.5, tree.h || 8) ||
@@ -1093,7 +1212,7 @@ export class ChaseSimulation {
           this.damagePolice(car, impact, false);
       }
       // Pairwise pushes cannot leave an officer or civilian inside a building.
-      for (const block of this.obstacles)
+      for (const block of nearbyObstacles(this.obstacles, car.x, car.z, 5))
         if ((car.y || 0) < (block.h || 50) + 1)
           resolveCircleRect(
             car,
@@ -1101,11 +1220,37 @@ export class ChaseSimulation {
             block,
           );
     }
+    for (const car of allCars) {
+      if (car.waterAt != null) continue;
+      const impact = resolveTerrain(car, positions.get(car) || car);
+      if (impact > 4) {
+        dentVehicle(car, impact, this.time);
+        this.emitSound("stone", car, impact, "terrain:" + (car.id ?? "player"));
+        if (car === p && p.invulnerable <= 0) {
+          p.health = Math.max(
+            0,
+            p.health - Math.min(24, impact * 0.5) * p.performance.damageScale,
+          );
+          p.invulnerable = 0.7;
+        }
+      }
+      if (beginWater(car, this.time)) {
+        if (car === p)
+          this.events.push("IN THE RIVER — HOLD REWIND TO GO BACK");
+      }
+    }
+    for (const rail of this.obstacles)
+      if (rail.barrier && rail.broken && !rail.announced) {
+        rail.announced = true;
+        rail.fallenAt = this.time;
+        this.emitSound("metal", rail, 40, "barrier:" + rail.id, true);
+      }
     let closest = Infinity;
     for (const cop of this.police)
-      if (!cop.destroyed) closest = Math.min(closest, distance(cop, p));
+      if (!cop.destroyed && cop.waterAt == null)
+        closest = Math.min(closest, distance(cop, p));
     for (const t of this.traffic) {
-      if (t.destroyed) continue;
+      if (t.destroyed || t.waterAt != null) continue;
       const d = distance(t, p);
       if (d > 4 && d < 7 && Math.abs(p.speed) > 20 && !t.nearMiss) {
         this.score += 150;
@@ -1126,8 +1271,9 @@ export class ChaseSimulation {
       (c) => !c.destroyed && c.blockPoint && distance(c.blockPoint, p) < 110,
     );
     // Resolve dynamic collision displacement against static geometry as well.
-    for (const block of this.obstacles)
-      if ((p.y || 0) < (block.h || 50) + 1) resolveCircleRect(p, 2.1, block);
+    for (const block of nearbyObstacles(this.obstacles, p.x, p.z, 5))
+      if (p.waterAt == null && (p.y || 0) < (block.h || 50) + 1)
+        resolveCircleRect(p, 2.1, block);
     p.speed = p.vx * Math.sin(p.angle) + p.vz * Math.cos(p.angle);
     this.bust = clamp(
       this.bust +
@@ -1139,7 +1285,13 @@ export class ChaseSimulation {
     );
     this.closestPolice = closest;
     const cp = this.checkpoints[this.checkpoint];
-    if (cp && distance(p, cp) < 13 && p.y < 3 && !p.flipped) {
+    if (
+      cp &&
+      p.waterAt == null &&
+      distance(p, cp) < 13 &&
+      p.y < 3 &&
+      !p.flipped
+    ) {
       this.checkpoint++;
       this.runCash += 150;
       const bonus =
@@ -1169,6 +1321,7 @@ export class ChaseSimulation {
         this.police.every(
           (c) =>
             c.destroyed ||
+            c.waterAt != null ||
             distance(c, p) > 100 ||
             (!lineOfSight(c, p, this.obstacles) && distance(c, p) > 60),
         );
