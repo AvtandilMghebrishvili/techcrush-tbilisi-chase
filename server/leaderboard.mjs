@@ -10,6 +10,15 @@ const SORTS = {
 };
 const fields =
   "public_id,display_name,avatar,rank_level,rank_checkpoints,best_score,total_score,wins,badges,week_score,week_wins";
+async function playerStats(DB) {
+  // Covering index: never parse every garage profile on a leaderboard refresh.
+  const row = await DB.prepare(
+    "SELECT COUNT(*) AS total FROM garages WHERE has_played=1",
+  )
+    .bind()
+    .first();
+  return { uniquePlayers: Number(row.total) };
+}
 function publicRow(row, rank) {
   if (!row) return null;
   let badges = [];
@@ -71,6 +80,7 @@ export async function readLeaderboard(DB, url, hash, now = Date.now()) {
   return {
     mode,
     total,
+    stats: await playerStats(DB),
     page: Math.floor(offset / 25),
     pageSize: 25,
     entries: data.results.map((row, i) => publicRow(row, offset + i + 1)),
@@ -150,6 +160,7 @@ async function readLevelTimes(DB, url, hash, now) {
   return {
     mode: "times",
     total,
+    stats: await playerStats(DB),
     page: Math.floor(offset / 25),
     pageSize: 25,
     level,

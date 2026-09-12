@@ -318,11 +318,13 @@
             <div class="rank-grid">
               <div>
                 <small>OVERALL POSITION</small
-                ><strong id="result-rank">…</strong>
+                ><strong id="result-rank">…</strong
+                ><small id="result-rank-total"></small>
               </div>
               <div>
                 <small>LEVEL TIME RANK</small
-                ><strong id="result-time-rank">…</strong>
+                ><strong id="result-time-rank">…</strong
+                ><small id="result-time-total"></small>
               </div>
             </div>
             <p id="result-rank-note"></p>
@@ -435,6 +437,26 @@
             Six checkpoints + escape. Pause/loading excluded; rewind time still
             counts. Compare the same car with Stock only for equal equipment.
             Switch Course to view archived times. Your old progress stays saved.
+          </p>
+          <div class="board-stats" aria-label="Community statistics">
+            <div>
+              <small>UNIQUE PLAYERS</small><strong id="board-unique">—</strong
+              ><span>all-time · guests included</span>
+            </div>
+            <div>
+              <small>IN THIS RANKING</small
+              ><strong id="board-participants">—</strong
+              ><span>matching public drivers</span>
+            </div>
+            <div class="board-your-stat">
+              <small>YOUR POSITION</small
+              ><strong id="board-my-position">—</strong
+              ><span id="board-my-total">on this board</span>
+            </div>
+          </div>
+          <p class="board-stat-note">
+            Unique saved player profiles. Returning with the same garage counts
+            once.
           </p>
           <div class="board-meta">
             <span id="board-count"></span

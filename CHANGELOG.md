@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.14.1 — 2026-09-12
+
+- Add all-time unique player profiles, filtered ranking participants and personal rank denominators to the leaderboard. Finish results also show each rank out of its matching player count.
+- Count a saved garage once when it first starts a chase, including private guests. Page visits and naming an unused profile do not count; restoring the same garage keeps the same identity.
+- Backfill existing active/completed players with an additive indexed database migration. Preserve every garage, upgrade, balance, result and course record. No new polling loop or runtime media assets.
+
 ## 1.14.0 — 2026-09-12
 
 - Show a prominent finish clock, automatic overall and per-level time ranks, saved rewards, Garage / Next Level actions, and Facebook/copy result links. Render immutable server-stored result pages with Open Graph metadata; private drivers stay private.

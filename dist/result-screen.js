@@ -34,6 +34,8 @@ export class ResultScreen {
     this.generation++;
     this.record = null;
     this.url = null;
+    $("result-rank-total").textContent = $("result-time-total").textContent =
+      "";
     $("modal").classList.remove("level-result");
     $("result-ranks").hidden = $("result-sharing").hidden = true;
     $("result-rank-retry").hidden = true;
@@ -58,6 +60,9 @@ export class ResultScreen {
     this.record = record;
     this.url = null;
     $("result-sharing").hidden = true;
+    $("result-rank-total").textContent = $("result-time-total").textContent =
+      "";
+    $("result-rank-retry").hidden = true;
     this.stop();
     $("result-community").textContent = "LEADERBOARD ↗";
     $("restart").disabled = $("garage-back").disabled = false;
@@ -106,7 +111,11 @@ export class ResultScreen {
       if (generation !== this.generation || this.controller !== controller)
         return;
       $("result-rank").textContent = overall.me ? "#" + overall.me.rank : "—";
+      $("result-rank-total").textContent =
+        `OUT OF ${overall.total.toLocaleString()} PLAYERS`;
       $("result-time-rank").textContent = timed.me ? "#" + timed.me.rank : "—";
+      $("result-time-total").textContent =
+        `OUT OF ${timed.total.toLocaleString()} PLAYERS`;
       $("result-rank-note").textContent =
         `Overall: ${overall.total} drivers · Level ${record.level}: ${timed.total} timed drivers · all cars/builds. Positions can change.`;
     } catch {

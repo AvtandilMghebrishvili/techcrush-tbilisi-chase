@@ -149,7 +149,7 @@ export async function handleApi(request, DB) {
           -128,
         );
         const update = DB.prepare(
-          "UPDATE garages SET profile=?,version=version+1,updated_at=?,public_id=?,display_name=?,avatar=?,listed=?,ranked_runs=?,rank_level=?,rank_checkpoints=?,best_score=?,total_score=?,wins=?,badges=?,week_key=?,week_score=?,week_wins=?,rank_at=? WHERE key_hash=? AND version=?",
+          "UPDATE garages SET profile=?,version=version+1,updated_at=?,public_id=?,display_name=?,avatar=?,listed=?,ranked_runs=?,rank_level=?,rank_checkpoints=?,best_score=?,total_score=?,wins=?,badges=?,week_key=?,week_score=?,week_wins=?,rank_at=?,has_played=MAX(has_played,?) WHERE key_hash=? AND version=?",
         ).bind(
           JSON.stringify(profile),
           Date.now(),
@@ -168,6 +168,9 @@ export async function handleApi(request, DB) {
           profile.community.weekScore,
           profile.community.weekWins,
           profile.community.rankAt || Date.now(),
+          Number(
+            body.action.type === "begin-run" || profile.settled.length > 0,
+          ),
           hash,
           version,
         );

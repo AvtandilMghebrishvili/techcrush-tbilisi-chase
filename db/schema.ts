@@ -16,6 +16,7 @@ export const garages = sqliteTable(
     displayName: text("display_name").notNull().default(""),
     avatar: text("avatar").notNull().default("red"),
     listed: integer("listed").notNull().default(0),
+    hasPlayed: integer("has_played").notNull().default(0),
     rankedRuns: integer("ranked_runs").notNull().default(0),
     rankLevel: integer("rank_level").notNull().default(1),
     rankCheckpoints: integer("rank_checkpoints").notNull().default(0),
@@ -29,6 +30,7 @@ export const garages = sqliteTable(
     rankAt: integer("rank_at").notNull().default(0),
   },
   (t) => [
+    index("leaderboard_player_count").on(t.hasPlayed),
     index("leaderboard_progress").on(
       t.listed,
       t.rankLevel,

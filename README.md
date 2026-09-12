@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**New: community statistics** — see all-time unique player profiles, drivers in your selected ranking, and your position out of that total. Guests count after starting a chase; returning with the same saved garage counts once. [Counting and ranking rules](docs/COMMUNITY.md#player-statistics).
+
 **New: clear results & sharing** — a large finish clock, automatic overall/time ranks, Garage / Next Level choices and a Facebook result link. Checkpoints have a musical cue. Levels use varied fair routes and shuffled day/night/dusk starts; occasional brief showers stay lightweight. Roadside props now clear the rendered street outlines. [Results, conditions and sharing](docs/RESULTS.md).
 
 **New: shared level times** — compare successful clears by level, car and stock equipment. Rewind cannot reduce the timer. A prominent gold Leaderboard button opens the rankings. Bridge edges, bank support and building contacts are refined. [Timing rules and fair comparison](docs/LEVEL_TIMES.md).

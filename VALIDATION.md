@@ -1,5 +1,11 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## v1.14.1 — Shared player statistics
+
+- All 162 automated tests pass. Five new SQLite/API tests cover first-play counting, unused profiles, same-key restore/retries, rejected/conflicting starts, private guests, distinct same-name drivers, filtered personal denominators beyond the first 25 rows, and additive historical backfill. Migration preserves exact profile JSON and versions; the aggregate query uses a covering index.
+- The compiled client passes isolated local Chromium checks at 1440×900, 390×844, 360×640 and 667×375. Three played profiles (two public and one guest) produce a global count of three and a public ranking of two. Car and level filters, empty standings, hide-profile, reload and a separate unused browser context retain the correct totals. No QA profiles enter the public database.
+- After closing the leaderboard, no leaderboard request occurs during a 31-second observation. This change reuses the existing dialog refresh lifecycle; it introduces no game-frame work, independent polling, media downloads or graphics changes. Production links resolve and all 21 runtime media assets (41,110,441 bytes) remain byte-identical to source.
+
 ## v1.14.0 — Finish results and fair courses
 
 - 157 unit/integration tests pass, including 300 distinct deterministic checkpoint layouts, full road gate footprints, shuffled lighting bags, asphalt clearance for all planted trees and rail midpoints, linked prop relocation, finite cached checkpoint/finish audio, result metadata/privacy, replay/concurrency, old-course settlement and archived time access.

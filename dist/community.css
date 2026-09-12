@@ -972,3 +972,88 @@
     font-size: 8px;
   }
 }
+
+/* Aggregate player profiles are separate from the current filtered ranking. */
+.board-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 6px;
+}
+.board-stats > div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #657e9955;
+  border-radius: 10px;
+  background: #111e2e;
+}
+.board-stats small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  color: #adc3d7;
+}
+.board-stats strong {
+  display: block;
+  font:
+    800 30px/1.25 Barlow,
+    Arial,
+    sans-serif;
+  color: #f2d587;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.board-stats span {
+  display: block;
+  font-size: 10px;
+  color: #a8b9cb;
+}
+.board-stats .board-your-stat {
+  border-color: #70d6df66;
+  background: #122c38;
+}
+.board-your-stat strong {
+  color: #8eeaf1;
+}
+#community-dialog .board-stat-note {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #9eb0c5;
+  margin: 6px 0;
+}
+.board-self > strong > small {
+  white-space: nowrap;
+  font:
+    600 9px/1.4 Barlow,
+    Arial,
+    sans-serif;
+  color: #b9cde1;
+}
+@media (max-width: 480px) {
+  .board-stats {
+    gap: 6px;
+  }
+  .board-stats > div {
+    padding: 9px 7px;
+  }
+  .board-stats strong {
+    font-size: 25px;
+  }
+  .board-stats small {
+    font-size: 8px;
+  }
+  .board-stats span {
+    font-size: 9px;
+  }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+  .board-stats {
+    margin: 9px 0 4px;
+  }
+  .board-stats > div {
+    padding: 8px 10px;
+  }
+  .board-stats strong {
+    font-size: 25px;
+  }
+}

@@ -4,12 +4,22 @@
 
 ## Join the leaderboard
 
+The statistics above the standings show all-time unique player profiles, participants in the selected ranking, and your position out of that total. See [Player statistics](#player-statistics) for counting rules.
+
 1. Press **Start Chase**, enter a 2–20 character driver name and choose an avatar color. Georgian and Latin letters are supported.
 2. Keep **Show my name and results on the public leaderboard** enabled, then select **Save & Race**. **Play as Guest** keeps results private; you can name the driver later.
 3. Clear a level to bank automatically. After a crash or capture, choose **Bank & Leaderboard**, Garage or Restart. Banking leaves that chase and prevents rewinding it. Before banking, Q/REWIND still lets you recover from the crash.
 4. Use the trophy button to view the board. Opening it during a chase pauses; the unfinished run is not banked. Close it and Resume to keep driving.
 
 A player's browser retains the existing private garage key. Names need not be unique: the public six-character tag distinguishes drivers. Names can be changed under **My Driver** without losing progress. Disable public visibility to remove your row; cars, parts, credits and records remain saved. Garage backup/restore transfers the same driver to another device. Never share the private garage key.
+
+## Player statistics
+
+The three cards show **Unique Players**, **In This Ranking**, and **Your Position**. The first counts saved player identities that have started at least one chase, including private guests. Simply opening the page or naming a profile does not count. Replays, renamed drivers, repeat visits and restoring the same garage key count once. A new browser/key counts separately: these are unique saved profiles, not verified individual humans.
+
+The ranking count includes only matching public drivers. Your position reads, for example, **#12 · out of 150 players**, across every page. Progress, score and weekly rankings use their own participants; time rankings respect the level, course, car and stock-equipment filters and count each driver once. Empty or private standings show no personal rank. Level-finish cards use the corresponding overall/time denominator too. Counts refresh with the existing leaderboard request while the dialog is open; closing or hiding it stops refreshes.
+
+Migration `0004` adds an indexed `has_played` flag and backfills garages with ranked runs, an active ticket or legacy settled runs. The flag is set in the same optimistic update as the first successful `begin-run`, so retries/conflicts cannot double count. Existing profile JSON, versions, equipment and records are untouched. Aggregate statistics expose only a count, never private guest identities. Historical profiles without any retained play evidence first count on their next chase.
 
 Closing a browser mid-run discards that unfinished chase, as before. Previous banked results survive. A guest who later enables public visibility can publish their recorded results. Existing garages retain their level and equipment; historical scores were not recorded, so score totals and achievements start with this update's banked runs.
 
