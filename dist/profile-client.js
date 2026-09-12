@@ -34,6 +34,7 @@ export class ProfileClient {
     this.profile = data.profile;
     this.version = data.version;
     this.driver = data.driver || this.driver;
+    if (Object.hasOwn(data, "publicId")) this.publicId = data.publicId;
     this.onchange();
   }
   async init() {

@@ -161,7 +161,8 @@ export class MobileControls {
           button.disabled ||
           $("controls-dialog").open ||
           $("workshop").open ||
-          $("loot-dialog").open
+          $("loot-dialog").open ||
+          $("community-dialog").open
         )
           return;
         e.preventDefault();
@@ -232,7 +233,7 @@ export class MobileControls {
     return (
       !$("controls-dialog").open &&
       !$("workshop").open &&
-      !$("loot-dialog").open
+      !($("loot-dialog").open || $("community-dialog").open)
     );
   }
   save() {

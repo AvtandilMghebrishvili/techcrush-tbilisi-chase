@@ -1,3 +1,4 @@
+import { readLeaderboard } from "./leaderboard.mjs";
 import {
   newProfile,
   migrateProfile,
@@ -49,6 +50,29 @@ export async function handleApi(request, DB) {
       503,
     );
   const url = new URL(request.url);
+  if (url.pathname === "/api/leaderboard") {
+    if (request.method !== "GET")
+      return json({ error: "Method not allowed" }, 405);
+    const optionalToken = request.headers
+      .get("authorization")
+      ?.replace(/^Bearer /, "");
+    try {
+      const hash = /^[a-f0-9]{64}$/.test(optionalToken || "")
+        ? await keyHash(optionalToken)
+        : null;
+      return json(await readLeaderboard(DB, url, hash));
+    } catch (error) {
+      const invalid = /Choose Progress|Invalid leaderboard/.test(error.message);
+      return json(
+        {
+          error: invalid
+            ? error.message
+            : "Leaderboard is temporarily unavailable. Try Refresh.",
+        },
+        invalid ? 400 : 503,
+      );
+    }
+  }
   if (!["/api/profile", "/api/action"].includes(url.pathname))
     return json({ error: "Not found" }, 404);
   const token = request.headers.get("authorization")?.replace(/^Bearer /, "");
@@ -68,7 +92,7 @@ export async function handleApi(request, DB) {
     )
       return json({ error: "Method not allowed" }, 405);
     const row = await DB.prepare(
-      "SELECT profile,version FROM garages WHERE key_hash = ?",
+      "SELECT profile,version,public_id FROM garages WHERE key_hash = ?",
     )
       .bind(hash)
       .first();
@@ -80,6 +104,7 @@ export async function handleApi(request, DB) {
         },
         404,
       );
+    const publicId = row.public_id || crypto.randomUUID();
     let profile = migrateProfile(JSON.parse(row.profile)),
       version = row.version;
     if (url.pathname === "/api/action") {
@@ -113,17 +138,40 @@ export async function handleApi(request, DB) {
             profile,
             { ...body.action, id: body.id },
             random,
+            { now: Date.now(), runId: crypto.randomUUID() },
           );
         } catch (error) {
           return json({ error: error.message }, 400);
         }
+        if (body.action.type === "settle" && body.action.metrics)
+          profile.community.rankAt = Date.now();
         profile.operations = [...(profile.operations || []), body.id].slice(
           -128,
         );
         const result = await DB.prepare(
-          "UPDATE garages SET profile = ?, version = version + 1, updated_at = ? WHERE key_hash = ? AND version = ?",
+          "UPDATE garages SET profile=?,version=version+1,updated_at=?,public_id=?,display_name=?,avatar=?,listed=?,ranked_runs=?,rank_level=?,rank_checkpoints=?,best_score=?,total_score=?,wins=?,badges=?,week_key=?,week_score=?,week_wins=?,rank_at=? WHERE key_hash=? AND version=?",
         )
-          .bind(JSON.stringify(profile), Date.now(), hash, version)
+          .bind(
+            JSON.stringify(profile),
+            Date.now(),
+            publicId,
+            profile.driver.name,
+            profile.driver.avatar,
+            Number(profile.driver.listed && !!profile.driver.name),
+            profile.community.runs,
+            profile.community.furthestLevel,
+            profile.community.checkpoints,
+            profile.community.bestScore,
+            profile.community.totalScore,
+            profile.community.wins,
+            JSON.stringify(profile.community.badges),
+            profile.community.week,
+            profile.community.weekScore,
+            profile.community.weekWins,
+            profile.community.rankAt || Date.now(),
+            hash,
+            version,
+          )
           .run();
         if (result.meta.changes !== 1)
           return json(
@@ -135,7 +183,12 @@ export async function handleApi(request, DB) {
         version++;
       }
     }
-    return json({ profile, version, driver: hash.slice(0, 6).toUpperCase() });
+    return json({
+      profile,
+      version,
+      driver: hash.slice(0, 6).toUpperCase(),
+      publicId: row.public_id || (version !== row.version ? publicId : null),
+    });
   } catch (error) {
     console.error("Garage storage error:", error.message);
     return json(

@@ -15,6 +15,10 @@ const scalars = [
   "roadblockAhead",
   "stuntScore",
   "runCash",
+  "runDistance",
+  "runDriftSeconds",
+  "runJumps",
+  "runTopSpeed",
   "trafficWrecks",
   "nextImpactId",
 ];

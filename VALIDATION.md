@@ -1,5 +1,15 @@
 # Validation — TECHCRUSH Tbilisi Chase
 
+## Community leaderboard 1.11.0 — 12 September 2026
+
+`npm test`: **134 passed, 0 failed**. Eleven community cases cover Unicode/name validation, private legacy migration, level coefficients, server-derived cash, daily UTC rollover, streak boxes, one-time achievements, consumed/replaced tickets, malformed/implausible results, atomic concurrent settlement, shared ranking/ordering/pagination/personal rank, private-row removal and additive SQLite migration without losing the old garage. Rewind restores every new run metric and recovery teleports no longer produce travel points.
+
+Two isolated Chrome contexts created English and Georgian drivers, drove with normal inputs, banked results and saw each other in the same board. Tests covered high-score/weekly filters, hiding/relisting a profile, identity and best-score persistence after reload, mobile steering/drift/nitro, request failure and retry, and no world frames while the community dialog is open. Closing it stopped leaderboard requests over a 31-second observation. Layout/hit-target checks passed at 390×844, 360×640, 667×375, 844×390 and 1024×768; desktop views were also reviewed at 1440×900.
+
+A controlled local fixture triggered three consecutive physics-step escapes through the real save API: daily bonus appeared only on the first clear, the third clear awarded two boxes, higher-level coefficients changed credits/points, and five badges unlocked. This fixture checks reward/UI integration, not three ordinary driving wins. No test drivers were written to the public database.
+
+The minified client passed shared standings between two independent browser contexts, named-driver reload persistence and absence of debug globals. Its existing production regression also passed mobile drift/nitro/pause, a save-backed three-part box, garage previews, preferences across reload and desktop keyboard driving after the online run started. A source browser check confirmed held W/Shift remain active during start; the Start button now shows a pending state. All 21 runtime art/audio assets (41,110,441 bytes) remain byte-identical to source. Physical-phone/Safari testing and authoritative anti-cheat are outside these local checks; the board is for casual community competition.
+
 ## Compact interface 1.10.0 — 12 September 2026
 
 `npm test`: **123 passed, 0 failed**. The production build and link/asset verification pass. Existing 21 runtime assets (41,110,441 bytes) remain byte-identical; toolbar icons are inline SVG and no additional media is downloaded.

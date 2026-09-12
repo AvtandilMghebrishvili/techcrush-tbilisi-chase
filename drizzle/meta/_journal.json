@@ -8,6 +8,13 @@
       "when": 1789153064871,
       "tag": "0000_cheerful_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789229053584,
+      "tag": "0001_bitter_enchantress",
+      "breakpoints": true
     }
   ]
 }

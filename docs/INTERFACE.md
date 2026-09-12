@@ -8,6 +8,7 @@ The upper-left panel shows level, run earnings, score and six checkpoint marks. 
 
 | Toolbar control | Action |
 | --- | --- |
+| Trophy / Ranks | Shared leaderboard, driver name and achievements |
 | Sliders / Setup | Pause and open driver settings |
 | Camera / C | Switch chase, cockpit, hood and high chase |
 | Sun | Cycle automatic lighting, night, day and dusk |
@@ -27,3 +28,5 @@ The sticky **Your Build**, **Boxes** and **Upgrades** buttons jump to each secti
 ## Keyboard and motion
 
 Tab follows visible controls, with a clear focus outline. Native dialogs and the pause/result overlay keep focus inside; resuming returns focus to Pause. Reduced-motion preferences make garage jumps immediate. The new SVG icons are inline, with no icon font or media downloads. UI work remains event-driven; menu, pause and hidden-page rendering/audio suspension stay active.
+
+The first Start offers a driver nickname or private guest play. The community dialog follows the same keyboard/touch and idle behavior. See [Community racing](COMMUNITY.md).

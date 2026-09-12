@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="./motorsport.css" />
     <link rel="stylesheet" href="./mobile.css" />
     <link rel="stylesheet" href="./ui-refresh.css" />
+    <link rel="stylesheet" href="./community.css" />
     <meta name="theme-color" content="#10151f" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
@@ -68,6 +69,15 @@
           ><span class="brand-sub">NIGHTSHIFT</span>
         </a>
         <div class="top-actions">
+          <button
+            id="leaderboard-open"
+            class="icon-button"
+            aria-label="Community leaderboard and your driver profile"
+            title="Community leaderboard"
+            disabled
+          >
+            RANKS
+          </button>
           <button
             id="control-settings"
             class="icon-button"
@@ -130,6 +140,12 @@
           ></div>
           <p id="car-details" class="car-details"></p>
           <p id="intro-career" class="career-line"></p>
+          <div class="community-entry">
+            <button id="driver-open" type="button">
+              <span id="driver-name-label">CHOOSE YOUR DRIVER NAME</span
+              ><small>PROFILE + ACHIEVEMENTS ↗</small></button
+            ><span id="menu-multiplier"></span>
+          </div>
         </div>
         <div class="intro-actions">
           <button id="workshop-open" class="secondary workshop-link" disabled>
@@ -264,8 +280,159 @@
             BACK TO THE CHASE <span>↗</span></button
           ><button id="restart" class="secondary">RESTART RUN</button>
           <button id="garage-back" class="secondary">CHANGE CAR</button>
+          <button id="result-community" class="secondary">LEADERBOARD</button>
         </div>
       </section>
+      <dialog id="community-dialog" aria-labelledby="community-title">
+        <header class="community-header">
+          <div>
+            <span class="eyebrow">TECHCRUSH / COMMUNITY RACING</span>
+            <h2 id="community-title">THE CITY IS YOURS.</h2>
+          </div>
+          <button
+            id="community-close"
+            class="icon-close"
+            aria-label="Close community"
+          >
+            ×
+          </button>
+        </header>
+        <nav class="community-tabs" aria-label="Community sections">
+          <button data-community-tab="board" aria-pressed="true">
+            LEADERBOARD</button
+          ><button data-community-tab="profile" aria-pressed="false">
+            MY DRIVER
+          </button>
+        </nav>
+        <section id="community-board">
+          <div class="board-heading">
+            <div>
+              <h3>Race your community.</h3>
+              <p id="board-rule">
+                Highest level → checkpoints → best run score.
+              </p>
+            </div>
+            <button id="board-share" class="secondary">
+              INVITE FRIENDS ↗
+            </button>
+          </div>
+          <div
+            id="board-modes"
+            class="board-modes"
+            role="group"
+            aria-label="Leaderboard ranking"
+          >
+            <button data-board-mode="progress" aria-pressed="true">
+              FURTHEST LEVEL</button
+            ><button data-board-mode="score" aria-pressed="false">
+              HIGH SCORE</button
+            ><button data-board-mode="weekly" aria-pressed="false">
+              THIS WEEK
+            </button>
+          </div>
+          <div class="board-meta">
+            <span id="board-count"></span
+            ><button id="board-refresh" type="button">↻ REFRESH</button>
+          </div>
+          <p id="board-status" role="status" aria-live="polite"></p>
+          <div class="board-table-wrap">
+            <table class="board-table">
+              <caption class="visually-hidden">
+                Community driver standings
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">DRIVER</th>
+                  <th scope="col">LEVEL</th>
+                  <th scope="col" id="board-score-heading">BEST SCORE</th>
+                  <th scope="col" class="board-wins">CLEARS</th>
+                </tr>
+              </thead>
+              <tbody id="board-rows"></tbody>
+            </table>
+          </div>
+          <div id="board-empty" hidden>
+            <span>01</span>
+            <h3>First on the streets?</h3>
+            <p>
+              Choose a name and bank your first chase to claim a place. Invite
+              your community to beat it.
+            </p>
+            <button id="board-join" class="primary">CREATE MY DRIVER ↗</button>
+          </div>
+          <div class="board-pagination">
+            <button id="board-prev" class="secondary">← PREVIOUS</button
+            ><span id="board-page"></span
+            ><button id="board-next" class="secondary">NEXT →</button>
+          </div>
+          <div id="board-self" class="board-self"></div>
+          <p class="community-note">
+            Results appear after a level clear, or when you bank a chase through
+            Garage, Restart or Bank & Leaderboard. This is a shared leaderboard,
+            not a live multiplayer race.
+          </p>
+        </section>
+        <section id="community-profile" hidden>
+          <div class="driver-intro">
+            <span id="driver-avatar-preview" class="driver-avatar avatar-red"
+              >?</span
+            >
+            <div>
+              <h3 id="driver-heading">Make a name in Tbilisi.</h3>
+              <p>
+                No account or password. Your driver stays with this browser's
+                saved garage.
+              </p>
+            </div>
+          </div>
+          <form id="driver-form">
+            <label for="driver-name">DRIVER NAME</label
+            ><input
+              id="driver-name"
+              name="nickname"
+              type="text"
+              minlength="2"
+              maxlength="20"
+              autocomplete="nickname"
+              placeholder="Your racing name / შენი სახელი"
+              required
+              aria-describedby="driver-name-help"
+            /><small id="driver-name-help"
+              >2–20 letters or numbers. Names can repeat; your driver tag
+              identifies you.</small
+            >
+            <fieldset class="driver-colors">
+              <legend>YOUR COLOR</legend>
+              <div id="driver-colors"></div>
+            </fieldset>
+            <label class="driver-public"
+              ><input id="driver-public" type="checkbox" checked /> Show my name
+              and results on the public leaderboard</label
+            >
+            <p id="driver-status" role="status" aria-live="polite"></p>
+            <div class="driver-form-actions">
+              <button id="driver-save" class="primary" type="submit">
+                SAVE DRIVER ↗</button
+              ><button id="driver-guest" class="secondary" type="button" hidden>
+                PLAY AS GUEST
+              </button>
+            </div>
+          </form>
+          <div id="driver-career" class="driver-career"></div>
+          <div id="driver-challenges" class="driver-challenges"></div>
+          <div class="achievement-heading">
+            <h3>MAKE YOUR MARK.</h3>
+            <span id="achievement-count"></span>
+          </div>
+          <div id="driver-achievements" class="driver-achievements"></div>
+          <p class="community-note">
+            Keep your progress across devices with Garage → Back up private
+            garage key / Restore garage. Keep that key private. Turning off
+            public visibility removes your row without deleting your garage.
+          </p>
+        </section>
+      </dialog>
       <dialog id="workshop" class="workshop" aria-labelledby="workshop-title">
         <header class="workshop-header">
           <div>

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.11.0 — 2026-09-12
+
+- Add anonymous named drivers with Georgian/English nicknames, six avatar colors, stable public tags and optional public visibility. Retain existing private garage keys and saves.
+- Add a shared server-backed leaderboard: furthest level/checkpoints, best run score and weekly points; top-three medals, pagination, personal rank, refresh, empty/error states and a copy-game-link button. Read-only standings need no account.
+- Scale positive score awards by 1 + 15% per extra level and run/clear credits by 1 + 10%. Show coefficients in the menu and driver profile.
+- Add eight permanent achievements, a 500 CR first-clear UTC daily bonus, consecutive-clear streaks and an extra reward box every third win. Rewind restores all run achievement counters.
+- Start server-issued run tickets, validate result bounds/timing, derive currency on the server, settle idempotently and update public standings atomically with the garage. Invalid/replaced tickets do not trap players in repeated save failures.
+- Add the community dialog to input/audio/render/gyro suspension. Poll standings only while visible, abort on close/hide and retain independent mobile drift/nitro controls. Exclude recovery teleports from travel points.
+- Add an additive database migration, server/physics regressions and an English community guide.
+
 ## 1.10.0 — 2026-09-12
 
 - Refresh the interface with compact graphite panels, readable contrast, red primary actions and consistent rounded buttons. Keep entry controls opaque and the center route cue free of a background.

@@ -1,5 +1,7 @@
 // Small inline icons and native interactions: no icon font or animation loop.
 const icons = {
+  trophy:
+    '<path d="M7 3h10v7a5 5 0 0 1-10 0zM7 5H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4M12 15v5m-4 1h8"/>',
   settings:
     '<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/>',
   camera: '<path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4"/>',
@@ -14,6 +16,7 @@ export function actionLabel(button, label) {
 }
 export function setupInterface() {
   for (const [id, icon, label, key] of [
+    ["leaderboard-open", "trophy", "RANKS", ""],
     ["control-settings", "settings", "SETUP", ""],
     ["camera-toggle", "camera", "CHASE", "C"],
     ["lighting-toggle", "sun", "AUTO · DUSK", ""],

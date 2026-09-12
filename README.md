@@ -2,7 +2,9 @@
 
 ## [▶ PLAY ONLINE — open to everyone](https://nightshift-chase-september.avtandilmghebrishvili.chatgpt.site/)
 
-Play directly in your browser — no installation or sign-in required. Share the link with friends; each browser gets its own saved garage.
+Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
+
+**New: Community leaderboard** — furthest level, best chase and weekly points. Earn eight badges, a daily getaway bonus and a three-win streak box. [Community guide and scoring rules](docs/COMMUNITY.md).
 
 A compact interface keeps the road visible, with quick garage navigation and grouped driver settings. [Interface guide](docs/INTERFACE.md).
 
@@ -24,7 +26,7 @@ A single-player browser 3D chase through central Tbilisi. Clear six checkpoints,
 
 ## Play and save
 
-Each browser receives a separate anonymous garage with **1,000 credits and one welcome box**. Progress is saved on the server without signing in. Share the game URL so friends start their own careers. Garage's **Back up private garage key** and **Restore garage** buttons transfer your progress to another device. Keep that backup private: it grants access to your garage.
+Each browser receives a separate anonymous garage with **1,000 credits and one welcome box**. On your first start, choose a public driver name or Play as Guest. The trophy button opens Leaderboard / My Driver; you can rename your driver or hide your public row anytime. Progress is saved on the server without signing in. Share the game URL so friends start their own careers. Garage's **Back up private garage key** and **Restore garage** buttons transfer your progress to another device. Keep that backup private: it grants access to your garage.
 
 People sharing one browser profile share its garage; use separate browser profiles for separate saves. A live chase is held in memory. Earned credits are banked when a level ends or you use the in-game Garage/Restart controls. Closing the tab mid-chase discards that unfinished run, while previously banked progress remains saved.
 
@@ -75,7 +77,7 @@ Nearby traffic and patrols make a stereo pass-by whoosh based on relative speed 
 
 The garage now has an interactive **3D studio preview** of the selected car, free saved paint colors, tier-specific rims/tires/brakes/spoilers, and a detailed inspector with animated before/after comparisons. Preview any quality for free, then buy the next grade or install an owned part. The same exterior is used in the chase. [Garage guide and controls](docs/GARAGE.md).
 
-Completing a level grants **one box**, **1,800 + 250 × completed level CR**, and the next level. Separate run earnings are **150 CR per checkpoint, 350 CR per player-caused patrol takedown, 120 CR per civilian wreck and 800 CR for escape**. NPC-only crashes do not give free player rewards.
+Completing a level grants **one box**, a clear reward and the next level. Base rewards are **150 CR per checkpoint, 350 CR per player-caused patrol takedown, 120 CR per civilian wreck, 800 CR for escape and 1,800 + 250 × completed level CR for clearing the level**. Each is multiplied by **1 + 0.10 × (level − 1)**, rounded per award. Positive score awards use **1 + 0.15 × (level − 1)**. NPC-only crashes do not give free player rewards. The first clear each UTC day adds **500 CR**; every third consecutive clear adds **one extra box**. Eight one-time achievements award additional credits.
 
 Each box draws exactly three independent parts. Duplicates count separately. Per-slot tier odds are **Bronze 55%, Silver 28%, Gold 13%, Diamond 4%**; all 14 part types are equally likely. There are no real-money purchases.
 

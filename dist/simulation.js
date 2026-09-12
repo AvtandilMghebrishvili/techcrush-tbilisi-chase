@@ -1,3 +1,4 @@
+import { levelRewards, creditAward } from "./community-rules.js";
 import { TREES } from "./world-props.js";
 import { BRIDGE_BARRIERS } from "./bridge-data.js";
 import { nearbyObstacles } from "./spatial-index.js";
@@ -302,6 +303,7 @@ export class ChaseSimulation {
     this.player.carId = this.selectedCar || "gt";
     this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
     this.difficulty = pursuitTuning(this.level);
+    this.rewardRates = levelRewards(this.level);
     this.checkpoints = checkpointsForLevel(this.level);
     this.helicopter = createAirSupport(this.player, this.level);
     this.player.equipment = structuredClone(this.runOptions?.equipment || {});
@@ -312,6 +314,10 @@ export class ChaseSimulation {
     this.player.width = this.player.performance.width;
     this.player.length = this.player.performance.length;
     this.runCash = 0;
+    this.runDistance = 0;
+    this.runDriftSeconds = 0;
+    this.runJumps = 0;
+    this.runTopSpeed = 0;
     this.trafficWrecks = 0;
     this.time = 0;
     this.score = 0;
@@ -522,12 +528,16 @@ export class ChaseSimulation {
     cop.respawnAt = this.time + 5;
     if (credit) {
       this.takedowns++;
-      this.score += 750;
-      this.runCash += 350;
+      this.score += 750 * this.rewardRates.score;
+      this.runCash += creditAward(350, this.level);
     }
     this.explosions.push({ id: cop.id, x: cop.x, z: cop.z, born: this.time });
     this.emitSound("explosion", cop, 40, `explosion:${cop.id}`);
-    this.events.push(credit ? "PATROL DESTROYED  +750" : "PATROL WRECKED");
+    this.events.push(
+      credit
+        ? `PATROL DESTROYED  +${Math.round(750 * this.rewardRates.score)}`
+        : "PATROL WRECKED",
+    );
     return true;
   }
   damageTraffic(car, impact) {
@@ -539,7 +549,7 @@ export class ChaseSimulation {
       car.wreckedAt = this.time;
       car.vx = car.vz = 0;
       car.respawnAt = this.time + 12;
-      this.runCash += 120;
+      this.runCash += creditAward(120, this.level);
       this.trafficWrecks++;
       this.explosions.push({
         id: `traffic-${car.id}`,
@@ -771,9 +781,11 @@ export class ChaseSimulation {
           Math.max(8, landed.damage * 2),
           "landing",
         );
-        const bonus = landed.flipped
-          ? 50
-          : Math.round(150 + landed.distance * 4);
+        const bonus = Math.round(
+          (landed.flipped ? 50 : 150 + landed.distance * 4) *
+            this.rewardRates.score,
+        );
+        if (!landed.flipped) this.runJumps++;
         this.score += bonus;
         this.stuntScore += bonus;
         this.events.push(
@@ -795,8 +807,14 @@ export class ChaseSimulation {
       this.heatLevel++;
       this.nextWaveAt += this.difficulty.waveInterval;
     }
-    const travel = distance(p, before);
-    this.score += travel * 1.8;
+    // Recovery teleports cannot generate distance or travel points.
+    const travel = Math.min(
+      distance(p, before),
+      Math.max(Math.abs(p.speed), Math.hypot(p.vx, p.vz)) * dt + 0.1,
+    );
+    this.runDistance += travel;
+    this.runTopSpeed = Math.max(this.runTopSpeed, Math.abs(p.speed) * 3.6);
+    this.score += travel * 1.8 * this.rewardRates.score;
     for (const t of this.traffic) {
       if (t.waterAt != null) {
         if (this.advanceWater(t, dt)) {
@@ -1253,13 +1271,16 @@ export class ChaseSimulation {
       if (t.destroyed || t.waterAt != null) continue;
       const d = distance(t, p);
       if (d > 4 && d < 7 && Math.abs(p.speed) > 20 && !t.nearMiss) {
-        this.score += 150;
+        this.score += 150 * this.rewardRates.score;
         t.nearMiss = true;
-        this.events.push("NEAR MISS  +150");
+        this.events.push(
+          `NEAR MISS  +${Math.round(150 * this.rewardRates.score)}`,
+        );
       }
     }
     if (p.isDrifting && p.impact < 3) {
-      const points = Math.abs(p.speed) * dt * 0.65;
+      this.runDriftSeconds += dt;
+      const points = Math.abs(p.speed) * dt * 0.65 * this.rewardRates.score;
       this.score += points;
       this.driftScore += points;
     } else if (this.driftScore > 0) {
@@ -1293,13 +1314,15 @@ export class ChaseSimulation {
       !p.flipped
     ) {
       this.checkpoint++;
-      this.runCash += 150;
-      const bonus =
-        1000 +
-        Math.max(
-          0,
-          Math.round(800 - (this.time - this.lastCheckpointTime) * 12),
-        );
+      this.runCash += creditAward(150, this.level);
+      const bonus = Math.round(
+        (1000 +
+          Math.max(
+            0,
+            Math.round(800 - (this.time - this.lastCheckpointTime) * 12),
+          )) *
+          this.rewardRates.score,
+      );
       this.score += bonus;
       this.lastCheckpointTime = this.time;
       const beforeRepair = p.health;
@@ -1328,8 +1351,10 @@ export class ChaseSimulation {
       this.escape = clamp(this.escape + (unseen ? dt : -dt * 1.5), 0, 8);
       if (this.escape >= 8) {
         this.phase = "won";
-        this.runCash += 800;
-        this.score += 3000 + Math.round(p.health * 20);
+        this.runCash += creditAward(800, this.level);
+        this.score += Math.round(
+          (3000 + Math.round(p.health * 20)) * this.rewardRates.score,
+        );
       }
     }
     if (p.health <= 0) {

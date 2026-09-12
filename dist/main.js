@@ -1,3 +1,5 @@
+import { CommunityUI } from "./community-ui.js";
+import { ACHIEVEMENTS } from "./community-rules.js";
 import { setupInterface, actionLabel } from "./interface.js";
 import { ChaseAudio } from "./chase-audio.js";
 import { FrameLoop } from "./frame-loop.js";
@@ -11,6 +13,7 @@ import { GarageUI } from "./garage-ui.js";
 import { upgradedSpec } from "./progression.js";
 const career = new ProfileClient();
 let workshop,
+  community,
   runId = null,
   settlement = null,
   transitioning = false;
@@ -49,9 +52,12 @@ const soundscape = new ChaseAudio();
 const loop = new FrameLoop(frame);
 const wake = () => loop.invalidate();
 function dialogOpen() {
-  return ["workshop", "loot-dialog", "controls-dialog"].some(
-    (id) => $(id).open,
-  );
+  return [
+    "workshop",
+    "loot-dialog",
+    "controls-dialog",
+    "community-dialog",
+  ].some((id) => $(id).open);
 }
 function refreshActivity() {
   loop.setEnabled(!document.hidden);
@@ -154,39 +160,45 @@ function setupGarage() {
   for (const button of garage.querySelectorAll("button"))
     button.onclick = () => chooseCar(button.dataset.car);
   chooseCar(selectedCar);
-  $("garage-back").onclick = async () => {
-    if (transitioning) return;
-    transitioning = true;
-    try {
-      await bankRun();
-    } catch (error) {
-      $("modal-copy").textContent = error.message;
-      transitioning = false;
-      return;
-    }
-    keys.clear();
-    mobile?.clear();
-    agentInput = null;
-    sim.reset();
-    $("modal").hidden = true;
-    $("hud").hidden = true;
-    $("intro").hidden = false;
-    $("mission-card").hidden = false;
-    $("touch-controls").hidden = true;
-    document.body.classList.remove("playing", "turbo-active", "rewinding");
-    view.player.visible = true;
-    view.cockpit.root.visible = false;
-    view.camera.position.set(11, 7.5, -49);
-    view.camera.lookAt(-5, 2, -4);
-    chooseCar(selectedCar);
-    view.player.position.set(4, 0, -30);
-    view.player.rotation.set(0, 0, 0);
-    view.resetPreview();
+  $("garage-back").onclick = () => leaveRun(true);
+}
+async function leaveRun(showGarage = true) {
+  if (transitioning) return false;
+  transitioning = true;
+  try {
+    await bankRun();
+  } catch (error) {
+    $("modal-copy").textContent = error.message;
     transitioning = false;
+    return false;
+  }
+  keys.clear();
+  mobile?.clear();
+  agentInput = null;
+  sim.reset();
+  $("modal").hidden = true;
+  $("hud").hidden = true;
+  $("intro").hidden = false;
+  $("mission-card").hidden = false;
+  $("touch-controls").hidden = true;
+  document.body.classList.remove("playing", "turbo-active", "rewinding");
+  view.player.visible = true;
+  view.cockpit.root.visible = false;
+  view.camera.position.set(11, 7.5, -49);
+  view.camera.lookAt(-5, 2, -4);
+  chooseCar(selectedCar);
+  view.player.position.set(4, 0, -30);
+  view.player.rotation.set(0, 0, 0);
+  view.resetPreview();
+  transitioning = false;
+  if (showGarage) {
     workshop.car = selectedCar;
     workshop.open();
-  };
+  }
+  refreshActivity();
+  return true;
 }
+
 async function bankRun() {
   if (settlement) return settlement;
   if (!runId) return;
@@ -198,7 +210,17 @@ async function bankRun() {
         type: "settle",
         runId: id,
         level: sim.level,
-        cash: sim.runCash,
+        metrics: {
+          time: sim.time,
+          score: Math.floor(sim.score),
+          checkpoints: sim.checkpoint,
+          takedowns: sim.takedowns,
+          trafficWrecks: sim.trafficWrecks,
+          distance: sim.runDistance,
+          driftSeconds: sim.runDriftSeconds,
+          jumps: sim.runJumps,
+          topSpeed: sim.runTopSpeed,
+        },
         result: ["won", "wrecked", "busted"].includes(sim.phase)
           ? sim.phase
           : "abandoned",
@@ -207,6 +229,16 @@ async function bankRun() {
   })();
   try {
     await settlement;
+  } catch (error) {
+    if (error.status === 400 || error.status === 409) {
+      // A rejected/replaced ticket must not trap the player in a save loop.
+      // Network failures retain the outbox and are retried with the same ID.
+      const fresh = await career.request("/api/profile");
+      career.accept(fresh);
+      if (error.status === 400 || fresh.profile.activeRun?.id !== id)
+        runId = null;
+    }
+    throw error;
   } finally {
     settlement = null;
   }
@@ -268,29 +300,29 @@ function audioTick(dt = 0) {
   soundscape.update(sim, input(), dt, CAMERAS[view.cameraMode].id);
 }
 async function start() {
-  if (
-    transitioning ||
-    $("workshop").open ||
-    $("loot-dialog").open ||
-    $("controls-dialog").open
-  )
-    return;
+  if (transitioning || dialogOpen()) return;
+  if (community && !community.ensureDriver(start)) return;
   // Unlock the existing audio context while a tap still has user activation.
   if (!muted) void soundscape.unlock().catch(() => {});
   transitioning = true;
+  keys.clear();
+  mobile?.reset();
+  agentInput = null;
+  const startLabel = $("start").innerHTML;
+  $("start").disabled = true;
+  $("start").setAttribute("aria-busy", "true");
+  $("start").textContent = "STARTING…";
   try {
     await bankRun();
     if (career.pending) await career.retry();
     if (career.profile.selectedCar !== selectedCar)
       await career.mutate({ type: "select", car: selectedCar });
-    keys.clear();
-    mobile?.reset();
-    agentInput = null;
+    await career.mutate({ type: "begin-run", car: selectedCar });
     sim.start(selectedCar, {
       level: career.profile.level,
       equipment: career.profile.cars[selectedCar],
     });
-    runId = crypto.randomUUID();
+    runId = career.profile.activeRun.id;
     view.startGame(sim);
     $("intro").hidden = true;
     $("mission-card").hidden = true;
@@ -306,6 +338,9 @@ async function start() {
     showModal("SAVE PENDING", error.message, "YOUR GARAGE", true);
   } finally {
     transitioning = false;
+    $("start").disabled = false;
+    $("start").removeAttribute("aria-busy");
+    $("start").innerHTML = startLabel;
   }
 }
 function pause() {
@@ -340,6 +375,7 @@ function showModal(title, copy, kicker, end) {
   $("result-score").textContent = end
     ? Math.floor(sim.score).toLocaleString() + " POINTS"
     : "";
+  $("result-community").textContent = "BANK & LEADERBOARD ↗";
   $("modal").hidden = false;
   (end ? $("restart") : $("resume")).focus();
 }
@@ -363,8 +399,12 @@ function finish() {
       "Saving your credits and three-part reward box…";
     void bankRun()
       .then(() => {
+        const reward = career.profile.community.lastReward;
+        const badges = reward.badges
+          .map((id) => ACHIEVEMENTS.find((a) => a.id === id)?.name)
+          .join(", ");
         $("result-reward").textContent =
-          `+${(sim.runCash + 1800 + sim.level * 250).toLocaleString()} CR · +1 BOX · LEVEL ${career.profile.level} UNLOCKED`;
+          `+${reward.cash.toLocaleString()} CR · +${reward.boxes} BOX${reward.boxes === 1 ? "" : "ES"} · LEVEL ${career.profile.level} UNLOCKED${reward.daily ? " · DAILY +500 CR" : ""}${badges ? " · NEW: " + badges : ""}`;
         $("restart").textContent = `START LEVEL ${career.profile.level} ↗`;
         $("garage-back").textContent = "GARAGE · OPEN BOX & UPGRADE";
       })
@@ -804,6 +844,17 @@ try {
       wake();
     },
   });
+  community = new CommunityUI(career, {
+    pause: () => {
+      if (["running", "rewinding"].includes(sim.phase)) pause();
+      keys.clear();
+      mobile?.clear();
+    },
+  });
+  $("leaderboard-open").disabled = false;
+  $("result-community").onclick = async () => {
+    if (await leaveRun(false)) community.open("board");
+  };
   $("control-settings").disabled = false;
   $("mobile-setup").disabled = false;
   $("workshop-open").disabled = false;
@@ -842,9 +893,8 @@ try {
   ];
   addEventListener("keydown", (e) => {
     if (
-      $("workshop").open ||
-      $("loot-dialog").open ||
-      $("controls-dialog").open
+      dialogOpen() ||
+      e.target.closest?.("input,select,textarea,[contenteditable]")
     )
       return;
     if (
@@ -895,7 +945,12 @@ try {
   });
   addEventListener("pageshow", refreshActivity);
   const dialogs = new MutationObserver(refreshActivity);
-  for (const id of ["workshop", "loot-dialog", "controls-dialog"])
+  for (const id of [
+    "workshop",
+    "loot-dialog",
+    "controls-dialog",
+    "community-dialog",
+  ])
     dialogs.observe($(id), { attributes: true, attributeFilter: ["open"] });
   registerTools();
   await view.renderer.compileAsync(view.scene, view.camera);

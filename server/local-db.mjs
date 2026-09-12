@@ -30,6 +30,9 @@ export function openLocalDatabase(filename = ".sites-runtime/garages.sqlite") {
       return {
         bind(...values) {
           return {
+            async all() {
+              return { results: statement.all(...values) };
+            },
             async first() {
               return statement.get(...values) || null;
             },

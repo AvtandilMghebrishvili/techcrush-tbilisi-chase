@@ -1,8 +1,50 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
-
-export const garages = sqliteTable("garages", {
-  keyHash: text("key_hash").primaryKey(),
-  profile: text("profile").notNull(),
-  version: integer("version").notNull().default(0),
-  updatedAt: integer("updated_at").notNull(),
-});
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+export const garages = sqliteTable(
+  "garages",
+  {
+    keyHash: text("key_hash").primaryKey(),
+    profile: text("profile").notNull(),
+    version: integer("version").notNull().default(0),
+    updatedAt: integer("updated_at").notNull(),
+    publicId: text("public_id"),
+    displayName: text("display_name").notNull().default(""),
+    avatar: text("avatar").notNull().default("red"),
+    listed: integer("listed").notNull().default(0),
+    rankedRuns: integer("ranked_runs").notNull().default(0),
+    rankLevel: integer("rank_level").notNull().default(1),
+    rankCheckpoints: integer("rank_checkpoints").notNull().default(0),
+    bestScore: integer("best_score").notNull().default(0),
+    totalScore: integer("total_score").notNull().default(0),
+    wins: integer("wins").notNull().default(0),
+    badges: text("badges").notNull().default("[]"),
+    weekKey: text("week_key").notNull().default(""),
+    weekScore: integer("week_score").notNull().default(0),
+    weekWins: integer("week_wins").notNull().default(0),
+    rankAt: integer("rank_at").notNull().default(0),
+  },
+  (t) => [
+    index("leaderboard_progress").on(
+      t.listed,
+      t.rankLevel,
+      t.rankCheckpoints,
+      t.bestScore,
+      t.rankAt,
+      t.publicId,
+    ),
+    index("leaderboard_score").on(
+      t.listed,
+      t.bestScore,
+      t.rankLevel,
+      t.rankAt,
+      t.publicId,
+    ),
+    index("leaderboard_week").on(
+      t.listed,
+      t.weekKey,
+      t.weekScore,
+      t.weekWins,
+      t.rankAt,
+      t.publicId,
+    ),
+  ],
+);

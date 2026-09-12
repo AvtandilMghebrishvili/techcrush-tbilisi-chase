@@ -1,3 +1,10 @@
+import {
+  newCommunity,
+  normalizeName,
+  AVATARS,
+  validateRun,
+  settleCommunity,
+} from "./community-rules.js";
 // Shared by the game and its save server. Credits have no real-money value.
 export const TIERS = [
   { name: "Stock", color: "#84969e", weight: 0 },
@@ -112,7 +119,10 @@ export const salvageValue = (tier) => [0, 75, 180, 420, 960][tier] || 0;
 export const partKey = (id, tier) => `${id}:${tier}`;
 export function newProfile() {
   return {
-    schema: 2,
+    schema: 3,
+    driver: { name: "", avatar: "red", listed: false },
+    community: newCommunity(),
+    activeRun: null,
     credits: 1000,
     level: 1,
     boxes: 1,
@@ -125,7 +135,10 @@ export function newProfile() {
 }
 export function migrateProfile(profile) {
   const p = structuredClone(profile);
-  p.schema = 2;
+  p.schema = 3;
+  p.driver ||= { name: "", avatar: "red", listed: false };
+  p.community = { ...newCommunity(p.level), ...p.community };
+  p.activeRun ||= null;
   for (const id of CAR_IDS) p.cars[id] ||= {};
   return p;
 }
@@ -187,11 +200,31 @@ export function rollBox(rng = Math.random) {
     return { part: part.id, tier };
   });
 }
-export function applyProgressAction(profile, action, rng = Math.random) {
-  const p = structuredClone(profile);
+export function applyProgressAction(
+  profile,
+  action,
+  rng = Math.random,
+  context = {},
+) {
+  const p = migrateProfile(profile);
   const car = CAR_IDS.includes(action.car) ? action.car : p.selectedCar;
   const item = PARTS.find((x) => x.id === action.part);
-  if (action.type === "select") {
+  if (action.type === "driver") {
+    const name = normalizeName(action.name);
+    if (!AVATARS.includes(action.avatar) || typeof action.listed !== "boolean")
+      throw Error("Choose a valid driver profile.");
+    p.driver = { name, avatar: action.avatar, listed: action.listed };
+  } else if (action.type === "begin-run") {
+    if (!context.runId || !Number.isFinite(context.now))
+      throw Error("Start your chase online.");
+    if (!CAR_IDS.includes(action.car)) throw Error("Choose a valid car.");
+    p.activeRun = {
+      id: context.runId,
+      startedAt: context.now,
+      level: p.level,
+      car: action.car,
+    };
+  } else if (action.type === "select") {
     if (!CAR_IDS.includes(action.car)) throw Error("Unknown car");
     p.selectedCar = car;
   } else if (action.type === "paint") {
@@ -252,22 +285,47 @@ export function applyProgressAction(profile, action, rng = Math.random) {
     )
       throw Error("Invalid run.");
     if (p.settled.includes(action.runId)) return p;
-    const cash = Number(action.cash),
-      level = Number(action.level);
+    const level = Number(action.level);
     if (
-      !Number.isFinite(cash) ||
-      cash < 0 ||
-      cash > 250000 ||
-      level !== p.level
+      level !== p.level ||
+      !["won", "busted", "wrecked", "abandoned"].includes(action.result)
     )
       throw Error("This run does not match the current level.");
-    if (!["won", "busted", "wrecked", "abandoned"].includes(action.result))
-      throw Error("Finish or leave the run first.");
-    p.credits += Math.floor(cash);
-    if (action.result === "won") {
-      p.credits += 1800 + p.level * 250;
-      p.level++;
-      p.boxes++;
+    if (action.metrics) {
+      if (
+        !p.activeRun ||
+        p.activeRun.id !== action.runId ||
+        p.activeRun.level !== level
+      )
+        throw Error(
+          "This chase has already ended or was replaced in another tab.",
+        );
+      const metrics = validateRun(
+        action.metrics,
+        p.activeRun,
+        action.result,
+        context.now,
+      );
+      settleCommunity(p, metrics, action.result, level, context.now);
+      p.activeRun = null;
+    } else {
+      // Already-open pre-community clients may finish their old chase. They do
+      // not create leaderboard entries or achievements and cannot settle a ticket.
+      const cash = Number(action.cash);
+      if (
+        p.activeRun ||
+        p.driver.name ||
+        !Number.isFinite(cash) ||
+        cash < 0 ||
+        cash > 250000
+      )
+        throw Error("Reload the game to start a new online chase.");
+      p.credits += Math.floor(cash);
+      if (action.result === "won") {
+        p.credits += 1800 + p.level * 250;
+        p.level++;
+        p.boxes++;
+      }
     }
     p.settled.push(action.runId);
     p.settled = p.settled.slice(-128);
