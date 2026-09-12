@@ -4,6 +4,10 @@
 
 Play directly in your browser — no installation or sign-in required. Share the link with friends; each browser gets its own saved garage.
 
+**[▶ WATCH / DOWNLOAD THE 46-SECOND GAMEPLAY TRAILER (1080p MP4)](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases/download/v1.6.0/TECHCRUSH-Nightshift-Action-46s-1080p.mp4)**
+
+Actual game footage: city flyovers, police chases, jumps, crashes, car selection, reward boxes, visible garage upgrades and cockpit driving. [Video guide and download instructions](docs/TRAILER.md).
+
 [![Tests](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/actions/workflows/ci.yml/badge.svg)](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/actions/workflows/ci.yml)
 
 [Download complete source](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/archive/refs/heads/main.zip) · [Releases](https://github.com/AvtandilMghebrishvili/techcrush-tbilisi-chase/releases)
@@ -138,6 +142,7 @@ Authored browser modules remain in `dist/`. Build output goes into `dist/client/
 | [Development](docs/DEVELOPMENT.md)         | Assets, roads, migrations, browser tools      |
 | [Testing](docs/TESTING.md)                 | Unit checks, route controller, browser review |
 | [Deployment](docs/DEPLOYMENT.md)           | Access, Sites, Worker/D1 self-hosting         |
+| [Gameplay trailer](docs/TRAILER.md)       | Watch, download and share the 46-second video |
 | [Validation](VALIDATION.md)                | Observed results and limitations              |
 | [Changelog](CHANGELOG.md)                  | Release changes                               |
 | [Assets](ASSETS.md)                        | Attributions and licenses                     |
