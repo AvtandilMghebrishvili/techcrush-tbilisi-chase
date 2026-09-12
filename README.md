@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**Version 2.3 — tune your map.** Open **Setup → Map & Radar** to adjust minimap size (80–160%) and street zoom (0.5–2.5×), with a live preview and saved browser preferences. The full city map adds +/−, drag/pinch navigation, Fit City and Find Me. The radar starts 10% larger and respects small-screen control space. [Map controls](docs/INTERFACE.md#map-size-and-zoom-23).
+
 **Version 2.2 — a compact workshop.** Switch between **Build & Paint**, **Upgrades** and **Boxes** instead of scrolling through a long garage. Keep the real 3D car, photo part picker, rarity inventory, exact before/after stats and every buy/equip/sell/fusion action. The launch menu and reward cards are smaller, and the hidden mobile studio stops rendering. Existing progress and gameplay rules stay intact. [Garage guide](docs/GARAGE.md).
 
 **Version 2.1 — smash, earn, upgrade.** Every city has 48 two-sided TECHCRUSH banners. Three random banners per chase pay **4,000 coins each**; other player-broken decorations pay **25 coins**, up to 2,500 ordinary-decoration coins per run. Gold map pins mark the cash banners. The compact launch menu uses actual car-model photographs and a swipe/arrow car picker. Strong patrol hits cost up to 10 HP, tanks up to 15 HP, before armor. [Roadside rewards and menu guide](docs/ROADSIDE_REWARDS.md).

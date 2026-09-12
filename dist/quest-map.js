@@ -1,3 +1,4 @@
+import { MapViewport } from "./map-viewport.js";
 import { LIMIT } from "./config.js";
 import { ROADS } from "./city-map.js";
 import { RIVER_POLYGON } from "./district-data.js";
@@ -60,6 +61,7 @@ export class QuestMap {
     this.profile = profile;
     this.select = select;
     this.dialog = document.getElementById("quest-map");
+    this.viewport = new MapViewport();
     document.getElementById("quest-map-close").onclick = () =>
       this.dialog.close();
     document.getElementById("quest-map-open").onclick = () => this.open();
@@ -132,5 +134,6 @@ export class QuestMap {
     if (target) dot(target, "#e8ff76", 7, "");
     dot(sim.player, "#ff335c", 8, "YOU");
     this.dialog.showModal();
+    this.viewport.open(mapPoint(sim.player, 1));
   }
 }

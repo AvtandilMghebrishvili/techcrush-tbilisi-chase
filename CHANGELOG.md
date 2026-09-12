@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0 — 2026-09-13
+
+- Add separately adjustable minimap display size (80–160%, default 110%) and world zoom (0.5–2.5×). Keep Setup and full-map controls synchronized, preview changes immediately and persist browser preferences after the slider gesture.
+- Add full-map zoom (100–300%), mouse drag/wheel, touch pinch/pan, keyboard navigation, Fit City and Find Me. Clamp the map to its viewport and retain aligned, constant-size quest pins. Preserve the last map zoom between openings and cities.
+- Keep mobile radar sizing within reserved space and separate Reset Car, Rewind, steering and nitro targets at tested sizes. Remove the radar's rectangular backdrop blur.
+- Reuse one cached street atlas and transform the existing full-map surface without a timer or extra WebGL context. Use a fixed 384px radar buffer, cache its context and retain the existing throttled HUD/paused/hidden lifecycle.
+- Preserve all saved cars, parts, city progress, economic and timed-course rules. Add five tests for preference sanitation, radar bearings, bounded pan, anchored zoom and player recentering; validate desktop/touch UI, persistent preferences and six viewport layouts.
+
 ## 2.2.0 — 2026-09-13
 
 - Replace the long garage with a bounded Build & Paint / Upgrades / Boxes workspace. Keep the car picker, coin balance, saved status and close control accessible above the active panel.

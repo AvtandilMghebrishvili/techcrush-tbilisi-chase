@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="./coastal-update.css" />
     <link rel="stylesheet" href="./menu-polish.css" />
     <link rel="stylesheet" href="./compact-workshop.css" />
+    <link rel="stylesheet" href="./map-controls.css" />
   </head>
   <body>
     <main id="game">
@@ -369,8 +370,8 @@
         <div class="navigator">
           <canvas
             id="map"
-            width="230"
-            height="230"
+            width="384"
+            height="384"
             aria-label="City minimap showing player, police, and next checkpoint"
           ></canvas>
           <button
@@ -477,16 +478,38 @@
         </header>
         <div class="quest-layout">
           <div>
-            <div class="quest-cartography">
-              <canvas
-                id="quest-canvas"
-                width="900"
-                height="900"
-                aria-label="City streets, river, six checkpoints and stunt locations"
-              ></canvas>
-              <div id="quest-pins"></div>
+            <div
+              class="quest-map-tools"
+              role="group"
+              aria-label="Full map zoom"
+            >
+              <button id="quest-zoom-out" aria-label="Zoom out full map">
+                −</button
+              ><output id="quest-zoom-value" aria-live="polite">100%</output
+              ><button id="quest-zoom-in" aria-label="Zoom in full map">
+                +</button
+              ><button id="quest-map-fit">FIT CITY</button
+              ><button id="quest-map-player">FIND ME</button>
+            </div>
+            <div
+              class="quest-cartography"
+              id="quest-viewport"
+              tabindex="0"
+              aria-label="Interactive city map. Drag to pan, pinch or use plus and minus to zoom. Arrow keys move the map."
+              aria-describedby="quest-map-hint"
+            >
+              <div id="quest-surface">
+                <canvas
+                  id="quest-canvas"
+                  width="900"
+                  height="900"
+                  aria-label="City streets, river, six checkpoints and stunt locations"
+                ></canvas>
+                <div id="quest-pins"></div>
+              </div>
               <span class="quest-north">N ↑</span>
             </div>
+            <p id="quest-map-hint">DRAG TO MOVE · SCROLL / PINCH TO ZOOM</p>
             <div class="quest-legend">
               <span>● YOU</span><span>1–6 CHECKPOINTS</span
               ><span>S ROOFTOP</span><span>R RIVER JUMP</span
@@ -494,6 +517,39 @@
             </div>
           </div>
           <div>
+            <details class="map-menu-settings">
+              <summary>MINIMAP SIZE &amp; ZOOM</summary>
+              <label class="map-range" for="quest-radar-size"
+                ><span>Minimap size</span
+                ><output id="quest-radar-size-value">110%</output></label
+              ><input
+                id="quest-radar-size"
+                data-radar-pref="size"
+                type="range"
+                min="80"
+                max="160"
+                step="5"
+                value="110"
+              />
+              <label class="map-range" for="quest-radar-zoom"
+                ><span>Minimap zoom</span
+                ><output id="quest-radar-zoom-value">1.00×</output></label
+              ><input
+                id="quest-radar-zoom"
+                data-radar-pref="zoom"
+                type="range"
+                min="0.5"
+                max="2.5"
+                step="0.25"
+                value="1"
+              />
+              <div class="map-range-hints">
+                <span>WIDER AREA</span><span>CLOSER STREETS</span>
+              </div>
+              <button type="button" data-reset-radar class="map-reset">
+                RESET MINIMAP
+              </button>
+            </details>
             <div id="quest-list"></div>
             <p class="quest-help">
               Select a challenge to guide you to the correct ramp entrance.
@@ -1095,6 +1151,57 @@
           <span><kbd>WASD</kbd> Drive</span><span><kbd>SPACE</kbd> Drift</span>
           <span><kbd>SHIFT</kbd> Nitro</span><span><kbd>Q</kbd> Rewind</span>
         </div>
+        <details class="setup-section" id="map-options">
+          <summary>MAP &amp; RADAR <small>SIZE + ZOOM</small></summary>
+          <div class="radar-setup">
+            <div class="radar-range-controls">
+              <label class="map-range" for="radar-size"
+                ><span>Minimap size</span
+                ><output id="radar-size-value">110%</output></label
+              ><input
+                id="radar-size"
+                data-radar-pref="size"
+                type="range"
+                min="80"
+                max="160"
+                step="5"
+                value="110"
+              />
+              <label class="map-range" for="radar-zoom"
+                ><span>Minimap zoom</span
+                ><output id="radar-zoom-value">1.00×</output></label
+              ><input
+                id="radar-zoom"
+                data-radar-pref="zoom"
+                type="range"
+                min="0.5"
+                max="2.5"
+                step="0.25"
+                value="1"
+              />
+              <div class="map-range-hints">
+                <span>WIDER AREA</span><span>CLOSER STREETS</span>
+              </div>
+              <button type="button" data-reset-radar class="map-reset">
+                RESET MINIMAP
+              </button>
+              <p class="setting-note">
+                Size changes the display; zoom changes the visible area. The
+                size adapts to small screens to keep driving controls clear.
+                Saved in this browser.
+              </p>
+            </div>
+            <div class="radar-sample">
+              <canvas
+                id="radar-preview"
+                width="256"
+                height="256"
+                aria-label="Live minimap settings preview"
+              ></canvas
+              ><small>LIVE PREVIEW</small>
+            </div>
+          </div>
+        </details>
         <section class="setup-section">
           <h3>DRIVING <small>TOUCH + GYRO</small></h3>
           <div class="steering-choice" role="group" aria-label="Steering mode">

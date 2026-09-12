@@ -1,3 +1,5 @@
+import { MapSettings, mapPreferences } from "./map-settings.js";
+import { radarScale } from "./map-preferences.js";
 import { BackgroundMusic } from "./background-music.js";
 import {
   carSilhouette,
@@ -36,7 +38,8 @@ import { GarageUI } from "./garage-ui.js";
 import { upgradedSpec } from "./progression.js";
 const career = new ProfileClient();
 const raceClock = new RaceClock();
-let workshop,
+let mapSettings,
+  workshop,
   community,
   runId = null,
   settlement = null,
@@ -747,11 +750,14 @@ function updateHUD() {
     : "LOSE THE HEAT";
   drawMap();
 }
+const radarCanvas = $("map"),
+  radarContext = radarCanvas.getContext("2d");
 function drawMap() {
-  const c = $("map").getContext("2d"),
-    s = 230 / 1100,
+  const c = radarContext,
+    s = radarScale(mapPreferences.zoom),
     ox = 115 + sim.player.x * s,
     oz = 115 + sim.player.z * s;
+  c.setTransform(radarCanvas.width / 230, 0, 0, radarCanvas.height / 230, 0, 0);
   c.clearRect(0, 0, 230, 230);
   c.save();
   c.beginPath();
@@ -871,6 +877,7 @@ function drawMap() {
   c.beginPath();
   c.arc(115, 115, 112, -Math.PI * 0.65, -Math.PI * 0.35);
   c.stroke();
+  mapSettings?.copyPreview(radarCanvas);
 }
 function frame(dt) {
   const blocked = dialogOpen();
@@ -1074,6 +1081,7 @@ try {
     questMap.open();
     refreshActivity();
   };
+  mapSettings = new MapSettings(drawMap);
   mobile = new MobileControls({
     invalidate: wake,
     pause,
