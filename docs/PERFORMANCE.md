@@ -2,7 +2,7 @@
 
 ## City loading and resource ownership (2.5.1)
 
-City switches bank progress and replace the current navigation entry, avoiding a history stack of old WebGL worlds. Selected-city media starts alongside profile I/O, before geometry construction. Media URLs contain a hash of the shipped asset pack: unchanged files can be reused between cities and code-only releases. Only one current pack ships. There is no Service Worker, CacheStorage copy, prefetch of other cities, or clearing of player storage. The browser controls normal HTTP cache eviction. HTML/profile/API responses retain their fresh-response policy.
+City switches bank progress and replace the current navigation entry, avoiding a history stack of old WebGL worlds. Selected-city media starts alongside profile I/O, before geometry construction. Media URLs contain a hash of the shipped asset pack: unchanged files can be reused between cities and code-only releases. Only one current pack ships. Legacy asset URLs resolve to that same pack so already-open games can finish lazy audio/image requests after an update. There is no Service Worker, CacheStorage copy, prefetch of other cities, or clearing of player storage. The browser controls normal HTTP cache eviction. HTML/profile/API responses retain their fresh-response policy.
 
 A reproduced bottleneck was removal of thousands of sibling meshes during static batching: repeated child-array searches/splices were quadratic. Parent arrays now compact once, preserving child order, removal events, animated subtrees and exact merged vertex data. Successive local source-browser loads at **1280 x 720** measured:
 
