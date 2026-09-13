@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { detachStaticMeshes } from "./static-detach.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import {
   BANK_SITE,
@@ -144,10 +145,9 @@ export function batchStatic(group, tile = 160) {
     batches.get(key).geos.push(g);
     remove.push(o);
   });
-  for (const o of remove) {
-    o.removeFromParent();
-    o.geometry.dispose();
-  }
+  detachStaticMeshes(remove);
+  for (const geometry of new Set(remove.map((o) => o.geometry)))
+    geometry.dispose();
   for (const batch of batches.values()) {
     const g = mergeGeometries(batch.geos);
     batch.geos.forEach((g) => g.dispose());

@@ -1,5 +1,27 @@
 # Rendering and audio lifecycle
 
+## City loading and resource ownership (2.5.1)
+
+City switches bank progress and replace the current navigation entry, avoiding a history stack of old WebGL worlds. Selected-city media starts alongside profile I/O, before geometry construction. Media URLs contain a hash of the shipped asset pack: unchanged files can be reused between cities and code-only releases. Only one current pack ships. There is no Service Worker, CacheStorage copy, prefetch of other cities, or clearing of player storage. The browser controls normal HTTP cache eviction. HTML/profile/API responses retain their fresh-response policy.
+
+A reproduced bottleneck was removal of thousands of sibling meshes during static batching: repeated child-array searches/splices were quadratic. Parent arrays now compact once, preserving child order, removal events, animated subtrees and exact merged vertex data. Successive local source-browser loads at **1280 x 720** measured:
+
+| Selected city / stage | Before | After |
+| --- | ---: | ---: |
+| Kutaisi static city batching | 5,862.3 ms | 149.3 ms |
+| Kutaisi ready milestone | 9,654.7 ms | 4,179.7 ms |
+| Batumi ready milestone | 9,984.4 ms | 3,457.2 ms |
+
+The ready milestone precedes the first normal world frame. These are bounded local observations, not an Internet-bandwidth benchmark or a universal loading guarantee.
+
+Tree classification/pose/color work happens once per tree, then packed data is reused by bark/leaf batches. Exact comparisons cover near/far visibility, color, falling, shrink/despawn and rewind on desktop/mobile budgets. A Node workload of 1,100 trees, eight submesh batches and 500 forced updates measured a warm median **183.50 ms before / 25.30 ms after**, about **86% less CPU work in that isolated routine**. It is not an 86% whole-game FPS improvement. Invisible NPCs skip wheel/light/HP-canvas animation while physics continues. Explosion-light selection avoids a temporary sorted list. Restarts retain an unchanged selected model, reset its damage/boost state, and rebuild when equipment changes.
+
+Page departure and initialization failure stop the frame loop, cancel shader-readiness polling, abort model/audio requests, discard late image/decode results, disconnect observers, close audio and explicitly dispose both renderers/contexts. Reflection render targets now have an owner. A BFCache return rebuilds from saved progress because the old GPU resources are deliberately gone. The cancellable shader adapter uses the pinned Three r180 program interface and needs review when upgrading Three.
+
+Six local start/pause/garage/return cycles held world geometry/textures stable (4,075 / 96 in the initial viewport fixture and 3,647 / 86 in the fixed-viewport fixture); the garage stayed at 67 / 5. Menu probes observed zero additional world/garage frames over 1.2 seconds. An explicit teardown reported zero world geometries/textures, no pending frame, zero voices and both WebGL contexts lost. The garage's internal counter still listed four borrowed/cached textures after disposal while its context was confirmed lost; that counter does not establish live GPU storage. Heap samples were not collected after forced GC and are not evidence of zero retained heap. This is a short lifecycle check, not an exhaustive device/driver leak audit.
+
+All **30 deployed media files (41,859,437 bytes)** remain byte-identical. Geometry/texture resolution, shadow and draw-distance budgets, physics and saved progression are preserved. Part artwork retains at most 32 recent thumbnail entries while the page is open. Physical-phone thermal/FPS testing and universal steady-FPS claims are outside these measurements.
+
 > Current 2.0 rules: all three cities start open; classic cornering and adjustable driving feel; a 180-second night-first Auto cycle; four new earned cars; visual result cards. See [version 2.0 details](BATUMI.md). Earlier measurements and release descriptions below retain their original context.
 
 ## Bonus feedback 1.17.0

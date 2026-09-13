@@ -184,6 +184,25 @@ test("only content-hashed runtime files receive immutable caching, leaving HTML 
     ),
     "no-cache",
   );
+  for (const asset of ["road-day.png", "audio/engine-bed.wav", "tree-near.glb"])
+    assert.match(
+      (
+        await worker.fetch(
+          new Request("https://game.test/assets/v-1234567890abcdef/" + asset),
+          env,
+        )
+      ).headers.get("Cache-Control"),
+      /immutable/,
+    );
+  assert.equal(
+    (
+      await worker.fetch(
+        new Request("https://game.test/assets/v-invalid/road-day.png"),
+        env,
+      )
+    ).headers.get("Cache-Control"),
+    "no-cache",
+  );
   assert.equal(
     (
       await worker.fetch(

@@ -6,6 +6,7 @@ import { paintColor, box, metal } from "./customization.js";
 import { makePartModel } from "./workshop-parts.js";
 import { disposeGroup } from "./effects.js";
 import { FrameLoop } from "./frame-loop.js";
+import { releaseResources } from "./resource-lifetime.js";
 
 export class GaragePreview {
   constructor(host, source) {
@@ -53,15 +54,11 @@ export class GaragePreview {
     this.scene.add(halo);
     this.observer = new ResizeObserver(() => this.resize());
     this.observer.observe(host);
-    document.addEventListener("visibilitychange", () => {
+    this.visibility = () => {
       this.loop.setEnabled(this.active && !document.hidden);
       this.loop.invalidate();
-    });
-    addEventListener("pagehide", () => this.loop.setEnabled(false));
-    addEventListener("pageshow", () => {
-      this.loop.setEnabled(this.active && !document.hidden);
-      this.loop.invalidate();
-    });
+    };
+    document.addEventListener("visibilitychange", this.visibility);
     const c = this.renderer.domElement;
     this.pointers = new Map();
     c.onpointerdown = (e) => {
@@ -183,7 +180,7 @@ export class GaragePreview {
     this.loop.invalidate();
   }
   start() {
-    if (this.active) return;
+    if (this.disposed || this.active) return;
     this.active = true;
     this.loop.setEnabled(!document.hidden);
     this.resize();
@@ -197,6 +194,7 @@ export class GaragePreview {
     this.pinch = 0;
   }
   resize() {
+    if (this.disposed) return;
     const r = this.host.getBoundingClientRect();
     if (!r.width || !r.height) return;
     this.renderer.setSize(r.width, r.height);
@@ -251,8 +249,14 @@ export class GaragePreview {
     }
   };
   artwork(id, tier) {
+    if (this.disposed) return "";
     const key = `${id}:${tier}`;
-    if (this.cache.has(key)) return this.cache.get(key);
+    if (this.cache.has(key)) {
+      const url = this.cache.get(key);
+      this.cache.delete(key);
+      this.cache.set(key, url);
+      return url;
+    }
     const part = makePartModel(id, tier);
     part.updateMatrixWorld(true);
     const bounds = new THREE.Box3().setFromObject(part),
@@ -268,6 +272,9 @@ export class GaragePreview {
     this.renderer.render(this.photoScene, this.photoCamera);
     const url = this.renderer.domElement.toDataURL("image/png");
     this.cache.set(key, url);
+    // Enough for the visible cards and recent rewards; never retain every tier.
+    while (this.cache.size > 32)
+      this.cache.delete(this.cache.keys().next().value);
     disposeGroup(this.photoScene, part);
     this.renderer.setPixelRatio(
       Math.min(devicePixelRatio, this.source.budget?.low ? 1 : 1.5),
@@ -276,6 +283,7 @@ export class GaragePreview {
     return url;
   }
   hydrate(container) {
+    if (this.disposed || document.hidden) return;
     for (const node of container.querySelectorAll("[data-art-part]")) {
       const url = this.artwork(
         node.dataset.artPart,
@@ -284,5 +292,24 @@ export class GaragePreview {
       node.style.backgroundImage = `url("${url}")`;
       node.classList.add("rendered-part");
     }
+  }
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.stop();
+    this.observer.disconnect();
+    document.removeEventListener("visibilitychange", this.visibility);
+    releaseResources([this.scene, this.photoScene], new WeakSet(), {
+      preserveShared: true,
+      protectedTextures: [this.source.daylightHDR, this.source.carAO],
+    });
+    this.cache.clear();
+    this.scene.clear();
+    this.photoScene.clear();
+    this.scene.environment = this.photoScene.environment = null;
+    this.car = this.source = null;
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
+    this.renderer.domElement.remove();
   }
 }

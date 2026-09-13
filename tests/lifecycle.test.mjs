@@ -121,6 +121,11 @@ function audioContext() {
       this.state = "suspended";
       return Promise.resolve();
     },
+    close() {
+      calls.push("closed");
+      this.state = "closed";
+      return Promise.resolve();
+    },
     createBufferSource: node,
     createOscillator: node,
     createGain: node,
@@ -161,6 +166,49 @@ test("muting, menus and background suspend audio DSP; terminal audio stops after
   assert.equal(c.state, "suspended");
   assert.equal(a.voices.size, 0);
   assert(c.nodes.every((n) => n.disconnected));
+});
+test("permanent audio teardown closes the context and cannot reopen it", async () => {
+  const a = new ChaseAudio(),
+    c = audioContext();
+  a.context = c;
+  a.muted = false;
+  a.phase = "running";
+  a.play({ duration: 1 });
+  a.buffers.engine = {};
+  a.dispose();
+  a.dispose();
+  assert.equal(c.state, "closed");
+  assert.equal(c.calls.filter((x) => x === "closed").length, 1);
+  assert.equal(a.voices.size, 0);
+  assert.deepEqual(a.buffers, {});
+  assert(a.requests.signal.aborted);
+  assert.equal(await a.unlock(), false);
+  assert(c.nodes.every((n) => n.disconnected));
+});
+test("an audio decode finishing after teardown cannot refill buffers or start a source", async () => {
+  const originalFetch = globalThis.fetch;
+  const a = new ChaseAudio(),
+    c = audioContext(),
+    decoders = [];
+  a.context = c;
+  c.decodeAudioData = () => new Promise((resolve) => decoders.push(resolve));
+  globalThis.fetch = async () => ({
+    ok: true,
+    arrayBuffer: async () => new ArrayBuffer(8),
+  });
+  try {
+    const loading = a.load();
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(decoders.length, 8);
+    a.dispose();
+    decoders.forEach((resolve) => resolve({ duration: 1 }));
+    await loading;
+    assert.deepEqual(a.buffers, {});
+    assert.equal(c.nodes.length, 0);
+    assert.equal(c.state, "closed");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 test("interrupting collision samples and thumps disconnects their entire audio graph immediately", () => {
   const a = new ChaseAudio(),

@@ -1,4 +1,6 @@
 import { updateSponsorBanners } from "./sponsor-banners.js";
+import { prepareSceneAssets } from "./scene-assets.js";
+import { releaseResources } from "./resource-lifetime.js";
 import { supportedVisualY } from "./vehicle-ground.js";
 import { updateExpansion } from "./expansion-visuals.js";
 import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
@@ -56,7 +58,7 @@ import {
 const material = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.7, ...extra });
 export class SceneView {
-  constructor(canvas) {
+  constructor(canvas, assets) {
     this.mobile =
       matchMedia("(any-pointer: coarse)").matches ||
       navigator.maxTouchPoints > 0;
@@ -107,35 +109,65 @@ export class SceneView {
     sun.shadow.bias = -0.0003;
     this.scene.add(sun);
     this.sun = sun;
-    buildRealisticCity(this);
-    calibrateRoadsideProps(this);
-    batchStreetLamps(this);
-    this.cameraMode = 0;
-    this.cockpit = makeCockpit();
-    this.camera.add(this.cockpit.root);
-    this.scene.add(this.camera);
-    this.fx = new Map();
-    this.routeGuide = makeRouteGuide(this.scene);
-    this.player = this.makeCar("#eecb39");
-    this.player.position.set(START.x, supportedVisualY({ ...START }), START.z);
-    this.scene.add(this.player);
-    this.camera.position.set(START.x - 12, 5.2, START.z + 6);
-    this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
-    this.resize = () => {
-      this.budget = renderBudget(
-        this.quality,
-        this.mobile,
-        innerWidth,
-        innerHeight,
-        devicePixelRatio,
+    this.assetLoad = assets || prepareSceneAssets(this.mobile);
+    try {
+      buildRealisticCity(this);
+      calibrateRoadsideProps(this);
+      batchStreetLamps(this);
+      this.cameraMode = 0;
+      this.cockpit = makeCockpit();
+      this.camera.add(this.cockpit.root);
+      this.scene.add(this.camera);
+      this.fx = new Map();
+      this.routeGuide = makeRouteGuide(this.scene);
+      this.player = this.makeCar("#eecb39");
+      this.player.position.set(
+        START.x,
+        supportedVisualY({ ...START }),
+        START.z,
       );
-      this.renderer.setPixelRatio(this.budget.pixelRatio);
-      this.camera.aspect = innerWidth / innerHeight;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(innerWidth, innerHeight);
-    };
-    addEventListener("resize", this.resize);
-    this.resize();
+      this.scene.add(this.player);
+      this.camera.position.set(START.x - 12, 5.2, START.z + 6);
+      this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
+      this.resize = () => {
+        this.budget = renderBudget(
+          this.quality,
+          this.mobile,
+          innerWidth,
+          innerHeight,
+          devicePixelRatio,
+        );
+        this.renderer.setPixelRatio(this.budget.pixelRatio);
+        this.camera.aspect = innerWidth / innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(innerWidth, innerHeight);
+      };
+      addEventListener("resize", this.resize);
+      this.resize();
+    } catch (error) {
+      this.dispose();
+      throw error;
+    }
+  }
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    removeEventListener("resize", this.resize);
+    // The render target owns its framebuffer as well as its PMREM texture.
+    releaseResources(
+      [this.environmentTarget, this.scene],
+      this.assetLoad.released,
+    );
+    this.assetLoad.dispose();
+    this.scene.clear();
+    this.scene.environment = this.scene.background = null;
+    this.fx?.clear();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
+    this.assetLoad = null;
+    for (const key of Object.keys(this))
+      if (!["disposed", "renderer", "scene", "assetLoad"].includes(key))
+        delete this[key];
   }
   setQuality(mode) {
     this.quality = ["auto", "battery", "high"].includes(mode) ? mode : "auto";
@@ -168,28 +200,13 @@ export class SceneView {
   }
   async loadTextures(progress = () => {}) {
     progress(12, "LOADING STREETS & FACADES");
-    const loader = new THREE.TextureLoader();
-    let completed = 0;
-    const track = (promise) =>
-      promise.then((value) => {
-        progress(
-          12 + Math.round((++completed / 8) * 76),
-          "LOADING CITY, CARS & TREES",
-        );
-        return value;
-      });
-    const [road, facade, logo, wordmark, hill, hillNormal] = await Promise.all([
-      ...[
-        "road-day.png",
-        "limestone.png",
-        "techcrush-logo.jpg",
-        "techcrush-wordmark.png",
-        "hills-diff.jpg",
-        "hills-nor_gl.jpg",
-      ].map((n) => track(loader.loadAsync("./assets/" + n))),
-      track(loadTrees(this)),
-      track(loadSportsAssets(this)),
-    ]);
+    this.assetLoad.progress = progress;
+    const [road, facade, logo, wordmark, hill, hillNormal, trees, sports] =
+      await this.assetLoad.ready;
+    if (this.disposed)
+      throw new DOMException("City loading cancelled", "AbortError");
+    await loadTrees(this, trees);
+    await loadSportsAssets(this, { assets: sports });
     progress(90, "FINISHING CITY MATERIALS");
     applyTechcrushBrand(this, logo.image, wordmark.image);
     logo.dispose();
@@ -360,6 +377,17 @@ export class SceneView {
     for (const m of this.skids) m.visible = false;
   }
   selectCar(id, equipment = {}) {
+    const signature = JSON.stringify([id, equipment]);
+    if (this.playerSignature === signature && this.player) {
+      updateVehicleDamage(this.player, { health: 100 });
+      updateTurboExhaust(
+        this.player,
+        { boosting: false, boostStrength: 0, health: 100 },
+        0,
+      );
+      if (this.player.userData.glass) this.player.userData.glass.opacity = 0.8;
+      return;
+    }
     const spec = carSpec(id),
       previous = this.player;
     this.player =
@@ -384,6 +412,7 @@ export class SceneView {
       disposeGroup(this.scene, previous);
     }
     this.scene.add(this.player);
+    this.playerSignature = signature;
   }
   setCamera(id) {
     const index = CAMERAS.findIndex((c) => c.id === id);
@@ -484,7 +513,11 @@ export class SceneView {
         [sim.police, this.policeMeshes],
       ])
         cars.forEach((car, i) => {
-          meshes[i].visible = Math.hypot(car.x - p.x, car.z - p.z) < 330;
+          const dx = car.x - p.x,
+            dz = car.z - p.z;
+          meshes[i].visible = dx * dx + dz * dz < 330 * 330;
+          // Physics/pursuit still runs; hidden wheels, lamps and HP canvases do not.
+          if (!meshes[i].visible) return;
           meshes[i].position.set(car.x, supportedVisualY(car), car.z);
           meshes[i].rotation.set(
             car.pitch || 0,
@@ -511,13 +544,7 @@ export class SceneView {
                 car.x - this.camera.position.x,
                 car.z - this.camera.position.z,
               ) > 10;
-          meshes[i].position.set(car.x, supportedVisualY(car), car.z);
-          meshes[i].rotation.set(
-            car.pitch || 0,
-            car.angle,
-            car.roll || 0,
-            "YXZ",
-          );
+
           animateWheels(meshes[i], Math.hypot(car.vx, car.vz), dt);
           if (meshes[i].userData.brakeLights)
             meshes[i].userData.brakeLights.emissiveIntensity =
@@ -622,15 +649,18 @@ export class SceneView {
         else if (fx.isImpact) animateImpactBurst(fx, this.effectTime);
         else animateExplosion(fx, this.effectTime);
       }
-      const flashes = [...this.fx.values()]
-        .filter((fx) => fx.light?.intensity > 0)
-        .sort(
-          (a, b) =>
-            a.group.position.distanceToSquared(this.player.position) -
-            b.group.position.distanceToSquared(this.player.position),
-        );
-      this.blastLight.intensity = flashes[0]?.light.intensity || 0;
-      if (flashes[0]) this.blastLight.position.copy(flashes[0].group.position);
+      let flash = null,
+        flashDistance = Infinity;
+      for (const fx of this.fx.values()) {
+        if (!(fx.light?.intensity > 0)) continue;
+        const d = fx.group.position.distanceToSquared(this.player.position);
+        if (d < flashDistance) {
+          flash = fx;
+          flashDistance = d;
+        }
+      }
+      this.blastLight.intensity = flash?.light.intensity || 0;
+      if (flash) this.blastLight.position.copy(flash.group.position);
       if (this.shake > 0) {
         this.camera.position.x += (Math.random() - 0.5) * this.shake;
         this.camera.position.y += (Math.random() - 0.5) * this.shake;

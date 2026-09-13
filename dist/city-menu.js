@@ -32,21 +32,40 @@ export function cityMenu(store, leave) {
         option.textContent = "RIONI GAP · 220+ KM/H";
     }
   }
+  let switching = false;
   async function change(map) {
-    if (map === ACTIVE_MAP || !mapUnlocked(store.profile, map) || store.busy)
+    if (
+      switching ||
+      map === ACTIVE_MAP ||
+      !mapUnlocked(store.profile, map) ||
+      store.busy
+    )
       return;
-    if (!(await leave())) return;
-    const url = new URL(location.href);
-    url.searchParams.set("map", map);
-    url.searchParams.delete("unlock");
-    location.assign(url);
+    switching = true;
+    render();
+    try {
+      if (!(await leave())) {
+        switching = false;
+        render();
+        return;
+      }
+      const url = new URL(location.href);
+      url.searchParams.set("map", map);
+      url.searchParams.delete("unlock");
+      // City choices are one game, not a growing back/forward stack of WebGL worlds.
+      location.replace(url);
+    } catch (error) {
+      switching = false;
+      render();
+      throw error;
+    }
   }
   const render = () => {
     const p = store.profile;
     for (const b of document.querySelectorAll("[data-map]")) {
       const map = b.dataset.map,
         selected = map === ACTIVE_MAP;
-      b.disabled = store.busy;
+      b.disabled = store.busy || switching;
       b.classList.toggle("active-map", selected);
       b.classList.toggle("city-available", !selected);
       b.classList.remove("city-locked");

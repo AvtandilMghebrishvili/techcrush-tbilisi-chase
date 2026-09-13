@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.5.1 — 2026-09-13
+
+- Compact static building/road mesh parents once, replacing quadratic removal while preserving exact geometry and animated props. Cancel shader-readiness polling on departure.
+- Start selected-city media loading in parallel with profile I/O, before world construction. Share one content-addressed media pack across cities and code releases with immutable HTTP caching; ship no duplicate pack or persistent cache worker.
+- Replace city navigation history entries after banking progress. Explicitly release world/garage WebGL contexts, reflection targets, textures, geometry, observers and audio on departure or initialization failure. Abort pending model/audio requests and discard late decoded resources; safely rebuild a BFCache return.
+- Compute each tree pose, color and distance classification once per tree update, preserving exact LOD and destruction/rewind visuals. Skip invisible NPC wheel/light/HP work and avoid sorting explosion lights.
+- Reuse an unchanged selected car between starts, repairing its original geometry and hiding boost effects; changed equipment still rebuilds the model. Bound part thumbnail retention to the 32 most recently used images.
+- Preserve every runtime asset byte, graphics setting, physics rule and saved garage/profile. Add resource ownership, asynchronous teardown, exact tree equivalence, vehicle reuse and cache-policy regressions.
+
 ## 2.5.0 — 2026-09-13
 
 - Give seven procedural vehicles distinct canopy, roof, lighting and body designs; preserve the licensed Original 458. Replace the signature YouTuber model with TECHCRUSH Cyber, a faceted electric pickup with a covered cargo bed, larger wheels and an EV cockpit/voice.

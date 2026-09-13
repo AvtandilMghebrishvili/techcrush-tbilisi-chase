@@ -48,14 +48,39 @@ for (const file of await readdir("dist")) {
       throw Error(`Cannot exclude ${asset}: referenced by ${file}`);
 }
 let excludedBytes = 0;
+// A media pack changes only when its bytes/names change, not on every code fix.
+// Normal browser HTTP caching owns eviction; no Service Worker/CacheStorage copy.
+const mediaHash = createHash("sha256");
+async function hashMedia(directory, prefix = "") {
+  for (const entry of (await readdir(directory, { withFileTypes: true })).sort(
+    (a, b) => a.name.localeCompare(b.name, "en"),
+  )) {
+    if (!prefix && sourceOnly.has(entry.name)) continue;
+    const name = prefix + entry.name;
+    if (entry.isDirectory())
+      await hashMedia(path.join(directory, entry.name), name + "/");
+    else {
+      const bytes = await readFile(path.join(directory, entry.name));
+      mediaHash.update(name + "\0" + bytes.length + "\0").update(bytes);
+    }
+  }
+}
+await hashMedia("dist/assets");
+const mediaVersion = "v-" + mediaHash.digest("hex").slice(0, 16);
+const mediaPrefix = "./assets/" + mediaVersion + "/";
+const versionMedia = (text) => text.replaceAll("./assets/", mediaPrefix);
 for (const entry of await readdir("dist/assets", { withFileTypes: true })) {
   if (sourceOnly.has(entry.name)) {
     excludedBytes += (await lstat("dist/assets/" + entry.name)).size;
     continue;
   }
-  await cp("dist/assets/" + entry.name, "dist/client/assets/" + entry.name, {
-    recursive: true,
-  });
+  await cp(
+    "dist/assets/" + entry.name,
+    "dist/client/assets/" + mediaVersion + "/" + entry.name,
+    {
+      recursive: true,
+    },
+  );
 }
 for (const file of [
   "credits.html",
@@ -72,7 +97,10 @@ for (const file of [
   "batumi-road-surface-data.js",
   "batumi-geo-data.js",
 ])
-  await copyFile("dist/" + file, "dist/client/" + file);
+  await writeFile(
+    "dist/client/" + file,
+    versionMedia(await readFile("dist/" + file, "utf8")),
+  );
 await mkdir("dist/client/vendor", { recursive: true });
 await copyFile(
   "dist/vendor/THREE-LICENSE.txt",
@@ -92,6 +120,21 @@ const js = await build({
   chunkNames: "chunk-[hash]",
   legalComments: "linked",
   plugins: [
+    {
+      name: "versioned-media",
+      setup(build) {
+        build.onLoad({ filter: /\.js$/ }, async ({ path: file }) => {
+          if (file.includes(path.sep + "vendor" + path.sep)) return;
+          const source = await readFile(file, "utf8");
+          if (!source.includes("./assets/")) return;
+          return {
+            contents: versionMedia(source),
+            loader: "js",
+            resolveDir: path.dirname(file),
+          };
+        });
+      },
+    },
     {
       name: "vendored-three",
       setup(build) {
@@ -125,7 +168,7 @@ const css = await build({
   external: ["./assets/*"],
   outfile: "app.css",
 });
-const cssBytes = css.outputFiles[0].contents;
+const cssBytes = Buffer.from(versionMedia(css.outputFiles[0].text));
 const cssName =
   "app-" +
   createHash("sha256").update(cssBytes).digest("hex").slice(0, 12) +
@@ -139,12 +182,13 @@ html = html
   .replace("</head>", `<link rel="stylesheet" href="./${cssName}" />\n</head>`)
   .replace(/\s*<script type="importmap">[\s\S]*?<\/script>/, " ")
   .replace('src="./main.js"', `src="./${path.basename(main)}"`);
-await writeFile(path.join(client, "index.html"), html);
+await writeFile(path.join(client, "index.html"), versionMedia(html));
 console.log(
   `Browser code: ${Object.values(js.metafile.outputs).reduce((n, o) => n + o.bytes, 0)} bytes; CSS: ${cssBytes.length} bytes. Excluded ${excludedBytes} bytes of source-only assets.`,
 );
 await build({
   entryPoints: ["server/worker.mjs"],
+  define: { __MEDIA_VERSION__: JSON.stringify(mediaVersion) },
   bundle: true,
   format: "esm",
   platform: "browser",

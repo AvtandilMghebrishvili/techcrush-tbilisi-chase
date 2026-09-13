@@ -140,6 +140,7 @@ export class GarageUI {
     if (store.lastError) $("save-error").textContent = store.lastError;
   }
   open() {
+    if (this.disposed) return;
     $("workshop").showModal();
     try {
       this.preview ||= new GaragePreview($("garage-preview"), this.view);
@@ -149,6 +150,13 @@ export class GarageUI {
     this.artReady = true;
     this.render();
     this.updatePreviewActivity();
+  }
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.skip?.();
+    cancelAnimationFrame(this.statFrame);
+    this.preview?.dispose();
   }
   updatePreviewActivity() {
     if (
@@ -336,6 +344,7 @@ export class GarageUI {
   }
 
   render() {
+    if (this.disposed) return;
     const active = document.activeElement;
     const focusAttribute = [
       "data-inspect",
@@ -515,7 +524,7 @@ export class GarageUI {
       $("workshop").querySelector(focus)?.focus({ preventScroll: true });
   }
   async openBox(platinum = false, existing = null) {
-    if (this.rolling) return;
+    if (this.disposed || this.rolling) return;
     this.rolling = true;
     this.render();
     try {
@@ -532,6 +541,7 @@ export class GarageUI {
                     : "open-box",
             }),
           );
+      if (this.disposed) return;
       if (profile.lastBox.kind === "creator" && carUnlocked(profile, "creator"))
         this.car = "creator";
       this.lootBoxId = profile.lastBox.id;
@@ -567,14 +577,15 @@ export class GarageUI {
         slot.style.setProperty("--tier", TIERS[reward.tier].color);
         slot.innerHTML = `${partArtwork(part, "", reward.tier)}<strong>${vehiclePartName(part, this.car)}</strong><span>${TIERS[reward.tier].name}</span>`;
         slot.classList.toggle("spinning", !done);
-        if (done) this.preview?.hydrate(slot);
+        if (done && !this.disposed) this.preview?.hydrate(slot);
       };
       await new Promise((resolve) => {
         const begin = performance.now();
         let timer;
         const finish = () => {
           clearInterval(timer);
-          results.forEach((r, i) => show(slots[i], r, true));
+          if (!this.disposed)
+            results.forEach((r, i) => show(slots[i], r, true));
           this.skip = null;
           resolve();
         };
@@ -612,6 +623,7 @@ export class GarageUI {
           if (age > 2550) finish();
         }, 85);
       });
+      if (this.disposed) return;
       $("loot-done").disabled = false;
       $("loot-skip").hidden = true;
       $("loot-summary").textContent =

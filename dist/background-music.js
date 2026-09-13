@@ -14,6 +14,7 @@ export class BackgroundMusic {
     this.sync();
   }
   sync(active = this.active, enabled = this.enabled) {
+    if (this.disposed) return;
     this.active = active;
     this.enabled = enabled;
     if (this.allowed && active && enabled) {
@@ -26,6 +27,8 @@ export class BackgroundMusic {
     this.sync();
   }
   dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
     this.audio.pause();
     this.audio.removeAttribute("src");
     this.audio.load();

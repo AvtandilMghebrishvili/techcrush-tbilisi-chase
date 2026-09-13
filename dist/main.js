@@ -47,6 +47,8 @@ let mapSettings,
 import { LANDMARKS } from "./district-data.js";
 import { RAMPS } from "./stunts.js";
 import { SceneView } from "./view.js";
+import { compileScene } from "./compile-scene.js";
+import { prepareSceneAssets } from "./scene-assets.js";
 import {
   CARS,
   CAMERAS,
@@ -81,6 +83,35 @@ let agentInput = null;
 let selectedCar = "gt";
 const soundscape = new ChaseAudio();
 const music = new BackgroundMusic();
+const pageLifetime = new AbortController();
+let disposed = false,
+  dialogs,
+  sceneAssets;
+function disposePage() {
+  if (disposed) return;
+  disposed = true;
+  pageLifetime.abort();
+  keys.clear();
+  loop.setEnabled(false);
+  dialogs?.disconnect();
+  raceClock.setActive(false);
+  results.stop();
+  community?.stop();
+  mobile?.syncActivity(false);
+  workshop?.dispose();
+  soundscape.dispose();
+  music.dispose();
+  view?.dispose();
+  sceneAssets?.dispose();
+  sceneAssets = null;
+}
+// Register before initialization can yield to a fetch or a shader compilation.
+addEventListener("pagehide", disposePage);
+addEventListener("pageshow", (event) => {
+  // A browser may restore an external navigation from BFCache. Resources were
+  // released deliberately, so rebuild from the saved profile, never a stale GPU.
+  if (event.persisted && disposed) location.reload();
+});
 try {
   muted = localStorage.getItem("techcrush-muted") === "true";
 } catch {}
@@ -135,6 +166,7 @@ function dialogOpen() {
   ].some((id) => $(id).open);
 }
 function refreshActivity() {
+  if (disposed || !sim) return;
   raceClock.setActive(
     !document.hidden &&
       !dialogOpen() &&
@@ -290,12 +322,16 @@ function setupGarage() {
   $("garage-back").onclick = () => leaveRun(true);
 }
 async function leaveRun(showGarage = true) {
-  if (transitioning) return false;
+  if (disposed || transitioning) return false;
   transitioning = true;
   try {
     await bankRun();
   } catch (error) {
     $("modal-copy").textContent = error.message;
+    transitioning = false;
+    return false;
+  }
+  if (disposed) {
     transitioning = false;
     return false;
   }
@@ -440,7 +476,7 @@ function audioTick(dt = 0) {
   soundscape.update(sim, input(), dt, CAMERAS[view.cameraMode].id);
 }
 async function start() {
-  if (transitioning || dialogOpen()) return;
+  if (disposed || transitioning || dialogOpen()) return;
   if (community && !community.ensureDriver(start)) return;
   // Unlock the existing audio context while a tap still has user activation.
   if (!muted) void soundscape.unlock().catch(() => {});
@@ -463,6 +499,7 @@ async function start() {
       car: selectedCar,
       course: TIME_COURSE,
     });
+    if (disposed) return;
     results.reset();
     sim.start(selectedCar, {
       level: cityLevel(career.profile),
@@ -890,6 +927,7 @@ function drawMap() {
   mapSettings?.copyPreview(radarCanvas);
 }
 function frame(dt) {
+  if (disposed) return false;
   const blocked = dialogOpen();
   mobile?.tick(dt);
   if (
@@ -1058,16 +1096,22 @@ function registerTools() {
 }
 try {
   loadingProgress(3, "BUILDING THE CITY");
-  await career.init();
+  sceneAssets = prepareSceneAssets(
+    matchMedia("(any-pointer: coarse)").matches || navigator.maxTouchPoints > 0,
+  );
+  const profileReady = career.init();
+  profileReady.catch(() => {});
+  await new Promise(requestAnimationFrame);
+  if (disposed) throw new DOMException("Page closed", "AbortError");
+  sim = new ChaseSimulation();
+  view = new SceneView($("world"), sceneAssets);
+  await Promise.all([profileReady, view.loadTextures(loadingProgress)]);
+  if (disposed) throw new DOMException("Page closed", "AbortError");
   if (!mapUnlocked(career.profile, ACTIVE_MAP)) {
     location.replace("/?unlock=kutaisi");
-    // Navigation destroys this suspended initialization without starting WebGL.
+    // Keep this compatibility fallback from starting a run on a restricted city.
     await new Promise(() => {});
   }
-  await new Promise(requestAnimationFrame);
-  sim = new ChaseSimulation();
-  view = new SceneView($("world"));
-  await view.loadTextures(loadingProgress);
   view.setupGame(sim);
   try {
     view.lighting.setMode(localStorage.getItem("techcrush-lighting"));
@@ -1205,15 +1249,8 @@ try {
     refreshActivity();
   });
   addEventListener("resize", wake);
-  addEventListener("pagehide", () => {
-    if (["running", "rewinding"].includes(sim.phase)) pause();
-    loop.setEnabled(false);
-    soundscape.setForeground(false);
-    music.sync(false);
-    mobile?.syncActivity(false);
-  });
   addEventListener("pageshow", refreshActivity);
-  const dialogs = new MutationObserver(refreshActivity);
+  dialogs = new MutationObserver(refreshActivity);
   for (const id of [
     "workshop",
     "loot-dialog",
@@ -1224,16 +1261,26 @@ try {
   ])
     dialogs.observe($(id), { attributes: true, attributeFilter: ["open"] });
   registerTools();
-  await view.renderer.compileAsync(view.scene, view.camera);
+  await compileScene(
+    view.renderer,
+    view.scene,
+    view.camera,
+    pageLifetime.signal,
+  );
+  if (disposed) throw new DOMException("Page closed", "AbortError");
   loadingProgress(100, "READY TO RACE");
   $("loading").hidden = true;
   document.body.classList.add("loaded");
   refreshActivity();
 } catch (e) {
-  $("loading").hidden = true;
-  $("error").hidden = false;
-  $("error").textContent =
-    "The city could not load. Try reloading in a browser with WebGL enabled. " +
-    e.message;
-  console.error(e);
+  const cancelled = disposed;
+  disposePage();
+  if (!cancelled) {
+    $("loading").hidden = true;
+    $("error").hidden = false;
+    $("error").textContent =
+      "The city could not load. Try reloading in a browser with WebGL enabled. " +
+      e.message;
+    console.error(e);
+  }
 }

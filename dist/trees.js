@@ -1,15 +1,18 @@
 import { IS_BATUMI } from "./map-selection.js";
 import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-export async function loadTrees(v) {
-  const loader = new GLTFLoader();
-  const models = IS_BATUMI
-    ? [(await import("./palm-model.js")).palmModel()]
+export async function fetchTreeModels(mobile, scope) {
+  const loader = new GLTFLoader(scope.manager);
+  return IS_BATUMI
+    ? [await scope.track(import("./palm-model.js").then((m) => m.palmModel()))]
     : await Promise.all(
-        (v.mobile ? ["tree-far.glb"] : ["tree-near.glb", "tree-far.glb"]).map(
-          (n) => loader.loadAsync("./assets/" + n),
+        (mobile ? ["tree-far.glb"] : ["tree-near.glb", "tree-far.glb"]).map(
+          (n) => scope.track(loader.loadAsync("./assets/" + n)),
         ),
       );
+}
+export async function loadTrees(v, models) {
+  models ||= await fetchTreeModels(v.mobile, v.assetLoad);
   const near = models[0],
     far = models[1] || models[0];
   const bounds = new THREE.Box3().setFromObject(near.scene),
@@ -98,64 +101,99 @@ export function updateTrees(
   if (states.some((t) => t.broken && time - t.fallenAt < 1.5)) force = true;
   if (!force && time < v.trees.nextUpdate) return;
   v.trees.nextUpdate = time + 0.3;
-  const dummy = new THREE.Object3D();
-  for (const { batch, level } of groups) {
-    let count = 0;
+  // A tree's pose/color is shared by its bark/leaf submeshes. Build it once,
+  // classify distance once, then copy the same packed data into each LOD batch.
+  let work = v.trees.work;
+  if (!work || work.states !== states) {
+    work = v.trees.work = {
+      states,
+      dummy: new THREE.Object3D(),
+      axis: new THREE.Vector3(),
+      fall: new THREE.Quaternion(),
+      color: new THREE.Color(),
+      matrices: new Float32Array(states.length * 16),
+      colors: new Float32Array(states.length * 3),
+      levels: new Int8Array(states.length),
+    };
     states.forEach((t, i) => {
-      const d = Math.hypot(t.x - p.x, t.z - p.z);
-      const near = v.trees.lowAsset ? 0 : (v.budget?.treeNear ?? 105),
-        far = v.budget?.treeFar ?? 420;
-      if (level === 0 ? d > near || near === 0 : d <= near || d > far) return;
-      if (t.broken && time - t.fallenAt > 12) return;
-      dummy.position.set(t.x, 0.18, t.z);
-      const s = t.h / height;
-      dummy.scale.set(
-        s * (1.1 + (i % 4) * 0.08),
-        s,
-        s * (1.1 + (i % 3) * 0.08),
-      );
-      dummy.rotation.set(0, i * 2.399, 0);
-      if (t.broken) {
-        const age = Math.max(0, time - t.fallenAt),
-          angle = Math.min(1.49, 0.12 + age * 2.8);
+      treePose(work.dummy, t, i, height);
+      work.dummy.updateMatrix();
+      work.dummy.matrix.toArray(work.matrices, i * 16);
+      work.color
+        .setHSL(
+          0.23 + (i % 5) * 0.012,
+          0.25 + (i % 3) * 0.04,
+          0.75 + (i % 4) * 0.045,
+        )
+        .toArray(work.colors, i * 3);
+    });
+  }
+  const { dummy, axis, fall, matrices, colors, levels } = work;
+  const near = v.trees.lowAsset ? 0 : (v.budget?.treeNear ?? 105),
+    far = v.budget?.treeFar ?? 420,
+    nearSq = near * near,
+    farSq = far * far;
+  let stumpCount = 0;
+  for (let i = 0; i < states.length; i++) {
+    const t = states[i],
+      dx = t.x - p.x,
+      dz = t.z - p.z,
+      d = dx * dx + dz * dz;
+    levels[i] = d > farSq ? -1 : d <= nearSq ? (near ? 0 : -1) : 1;
+    if (t.broken) {
+      const age = Math.max(0, time - t.fallenAt);
+      if (age > 12) levels[i] = -1;
+      else if (levels[i] >= 0) {
+        treePose(dummy, t, i, height);
+        axis.set(Math.cos(t.fallAngle), 0, -Math.sin(t.fallAngle));
         dummy.quaternion.premultiply(
-          new THREE.Quaternion().setFromAxisAngle(
-            new THREE.Vector3(Math.cos(t.fallAngle), 0, -Math.sin(t.fallAngle)),
-            angle,
-          ),
+          fall.setFromAxisAngle(axis, Math.min(1.49, 0.12 + age * 2.8)),
         );
         if (age > 10)
           dummy.scale.multiplyScalar(Math.max(0.001, (12 - age) / 2));
+        dummy.updateMatrix();
+        dummy.matrix.toArray(matrices, i * 16);
       }
+      if (d < farSq) {
+        dummy.position.set(t.x, 0.42, t.z);
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.set(1, 1, 1);
+        dummy.updateMatrix();
+        stumps.setMatrixAt(stumpCount++, dummy.matrix);
+      }
+    } else if (work.broken?.[i]) {
+      // Rewind can restore an intact tree without changing the states array.
+      treePose(dummy, t, i, height);
       dummy.updateMatrix();
-      batch.setMatrixAt(count, dummy.matrix);
+      dummy.matrix.toArray(matrices, i * 16);
+    }
+  }
+  work.broken ||= new Uint8Array(states.length);
+  for (let i = 0; i < states.length; i++)
+    work.broken[i] = states[i].broken ? 1 : 0;
+  for (const { batch, level } of groups) {
+    let count = 0;
+    if (batch.userData.leaves && !batch.instanceColor)
+      batch.setColorAt(0, work.color.setRGB(1, 1, 1));
+    const out = batch.instanceMatrix.array,
+      colorOut = batch.instanceColor?.array;
+    for (let i = 0; i < states.length; i++) {
+      if (levels[i] !== level) continue;
+      for (let j = 0; j < 16; j++) out[count * 16 + j] = matrices[i * 16 + j];
       if (batch.userData.leaves)
-        batch.setColorAt(
-          count,
-          new THREE.Color().setHSL(
-            0.23 + (i % 5) * 0.012,
-            0.25 + (i % 3) * 0.04,
-            0.75 + (i % 4) * 0.045,
-          ),
-        );
+        for (let j = 0; j < 3; j++) colorOut[count * 3 + j] = colors[i * 3 + j];
       count++;
-    });
+    }
     batch.count = count;
     batch.instanceMatrix.needsUpdate = true;
     if (batch.instanceColor) batch.instanceColor.needsUpdate = true;
   }
-  let count = 0;
-  for (const t of states)
-    if (
-      t.broken &&
-      Math.hypot(t.x - p.x, t.z - p.z) < (v.budget?.treeFar ?? 420)
-    ) {
-      dummy.position.set(t.x, 0.42, t.z);
-      dummy.rotation.set(0, 0, 0);
-      dummy.scale.set(1, 1, 1);
-      dummy.updateMatrix();
-      stumps.setMatrixAt(count++, dummy.matrix);
-    }
-  stumps.count = count;
+  stumps.count = stumpCount;
   stumps.instanceMatrix.needsUpdate = true;
+}
+function treePose(dummy, t, i, height) {
+  dummy.position.set(t.x, 0.18, t.z);
+  const s = t.h / height;
+  dummy.scale.set(s * (1.1 + (i % 4) * 0.08), s, s * (1.1 + (i % 3) * 0.08));
+  dummy.rotation.set(0, i * 2.399, 0);
 }

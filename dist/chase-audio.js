@@ -17,6 +17,7 @@ const ASSETS = {
 };
 export class ChaseAudio {
   constructor() {
+    this.requests = new AbortController();
     this.muted = true;
     this.foreground = true;
     this.telemetry = {};
@@ -28,6 +29,7 @@ export class ChaseAudio {
     this.stats = { played: 0, dropped: 0, passes: 0 };
   }
   async unlock() {
+    if (this.disposed) return false;
     if (!this.context) {
       const Context = globalThis.AudioContext || globalThis.webkitAudioContext;
       if (!Context) return false;
@@ -35,7 +37,9 @@ export class ChaseAudio {
       this.build();
       this.loading = this.load().catch(() => {});
     }
-    await this.context.resume();
+    const context = this.context;
+    await context.resume();
+    if (this.disposed) return false;
     this.requestedState = null;
     this.syncContext();
     return true;
@@ -46,6 +50,7 @@ export class ChaseAudio {
     this.syncContext();
   }
   syncContext() {
+    if (this.disposed) return;
     const c = this.context;
     if (!c || c.state === "closed") return;
     const wanted =
@@ -154,15 +159,20 @@ export class ChaseAudio {
     await Promise.all(
       Object.entries(ASSETS).map(async ([key, name]) => {
         try {
-          const r = await fetch("./assets/audio/" + name);
+          const r = await fetch("./assets/audio/" + name, {
+            signal: this.requests.signal,
+          });
           if (!r.ok) throw Error("Audio unavailable");
-          this.buffers[key] = await c.decodeAudioData(await r.arrayBuffer());
+          const bytes = await r.arrayBuffer();
+          if (this.disposed) return;
+          const buffer = await c.decodeAudioData(bytes);
+          if (!this.disposed) this.buffers[key] = buffer;
         } catch {
           this.stats.dropped++;
         }
       }),
     );
-    if (this.buffers.engine) {
+    if (!this.disposed && this.buffers.engine) {
       const source = c.createBufferSource(),
         gain = c.createGain(),
         filter = c.createBiquadFilter();
@@ -177,6 +187,7 @@ export class ChaseAudio {
     }
   }
   setMuted(value) {
+    if (this.disposed) return;
     this.muted = value;
     if (value) this.stopEffects();
     if (this.master)
@@ -195,6 +206,54 @@ export class ChaseAudio {
       voice.dispose();
     }
     this.voices.clear();
+  }
+  dispose() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.requests.abort();
+    this.stopEffects();
+    for (const key of [
+      "engineTone",
+      "engineSub",
+      "intake",
+      "wind",
+      "tires",
+      "skid",
+      "turbo",
+      "turboTone",
+      "chopper",
+      "recording",
+      "sirens",
+    ]) {
+      const voices = Array.isArray(this[key]) ? this[key] : [this[key]];
+      for (const voice of voices)
+        if (voice) {
+          try {
+            voice.source?.stop();
+          } catch {}
+          for (const node of Object.values(voice)) node?.disconnect?.();
+        }
+      this[key] = null;
+    }
+    try {
+      this.chopperPulse?.stop();
+    } catch {}
+    for (const key of [
+      "chopperPulse",
+      "chopperMod",
+      "cabin",
+      "loops",
+      "master",
+      "compressor",
+    ]) {
+      this[key]?.disconnect();
+      this[key] = null;
+    }
+    if (this.context && this.context.state !== "closed")
+      void this.context.close().catch(() => {});
+    this.context = null;
+    this.buffers = {};
+    this.noise = null;
   }
   set(param, value, time, constant = 0.035) {
     param.setTargetAtTime(value, time, constant);

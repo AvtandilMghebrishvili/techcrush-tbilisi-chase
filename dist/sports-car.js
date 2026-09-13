@@ -9,17 +9,32 @@ import {
   turnSteering,
   addHeadlights,
 } from "./vehicle-details.js";
-export async function loadSportsAssets(view, { legacy = true } = {}) {
-  const [hdr, gltf, ao] = await Promise.all([
-    new HDRLoader().loadAsync("./assets/daylight.hdr"),
-    legacy ? new GLTFLoader().loadAsync("./assets/sports-car.glb") : null,
+export function fetchSportsAssets(scope, legacy = true) {
+  return Promise.all([
+    scope.track(
+      new HDRLoader(scope.manager).loadAsync("./assets/daylight.hdr"),
+    ),
     legacy
-      ? new THREE.TextureLoader().loadAsync("./assets/ferrari_ao.png")
+      ? scope.track(
+          new GLTFLoader(scope.manager).loadAsync("./assets/sports-car.glb"),
+        )
+      : null,
+    legacy
+      ? scope.track(
+          new THREE.TextureLoader(scope.manager).loadAsync(
+            "./assets/ferrari_ao.png",
+          ),
+        )
       : null,
   ]);
+}
+export async function loadSportsAssets(view, { legacy = true, assets } = {}) {
+  const [hdr, gltf, ao] =
+    assets || (await fetchSportsAssets(view.assetLoad, legacy));
   hdr.mapping = THREE.EquirectangularReflectionMapping;
   const pmrem = new THREE.PMREMGenerator(view.renderer);
-  view.scene.environment = pmrem.fromEquirectangular(hdr).texture;
+  view.environmentTarget = pmrem.fromEquirectangular(hdr);
+  view.scene.environment = view.environmentTarget.texture;
   pmrem.dispose();
   view.scene.environmentIntensity = 0.85;
   view.scene.background = hdr;

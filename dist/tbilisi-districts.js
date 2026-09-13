@@ -1024,10 +1024,9 @@ export function buildTbilisiDistricts(v) {
     batches.get(key).geos.push(geo);
     remove.push(o);
   });
-  for (const o of remove) {
-    o.removeFromParent();
-    o.geometry.dispose();
-  }
+  detachStaticMeshes(remove);
+  for (const geometry of new Set(remove.map((o) => o.geometry)))
+    geometry.dispose();
   for (const { material, geos } of batches.values()) {
     const merged = mergeGeometries(geos);
     geos.forEach((g) => g.dispose());
@@ -1054,3 +1053,4 @@ export function animateDistricts(v, time) {
     );
   }
 }
+import { detachStaticMeshes } from "./static-detach.js";
