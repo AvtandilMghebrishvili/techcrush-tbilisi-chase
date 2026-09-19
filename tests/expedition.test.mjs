@@ -136,7 +136,8 @@ test("new streets and landmark solids leave roads clear; stunt aprons exclude or
     assert(r, name);
     assert(routeBetween(ROADS[0].start, r.end).length);
   }
-  for (const b of BUILDINGS) assert(!overlapsRoad(b, 2), "Building on a road");
+  for (const b of BUILDINGS.filter((b) => !b.flyoverRail))
+    assert(!overlapsRoad(b, 2), "Building on a road");
   for (const a of STUNT_APRONS)
     for (const b of BUILDINGS.filter((b) => !b.landmark))
       assert(!footprintsOverlap(a, b, 1));

@@ -36,7 +36,8 @@ export function supportedVisualY(car, roll = car.roll || 0) {
     Math.abs(car.pitch || 0) > 0.4
   )
     return y;
-  if (y > 0.3) return y + 0.025;
+  if (y > 0.3)
+    return y + 0.075 + Math.abs(Math.sin(roll)) * (car.width || 2) * 0.45;
   let cache = contacts.get(car);
   if (!cache || Math.hypot(car.x - cache.x, car.z - cache.z) > 0.5) {
     const s = Math.sin(car.angle || 0),

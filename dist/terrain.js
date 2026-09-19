@@ -2,6 +2,10 @@ import { nearestRoad } from "./city-map.js";
 import { IS_KUTAISI, IS_BATUMI, IS_RUSTAVI } from "./map-selection.js";
 import { LANDMARKS, RIVER, riverDistance } from "./district-data.js";
 import { STUNT_ZONES } from "./world-sites.js";
+const civic =
+  !IS_KUTAISI && !IS_BATUMI && !IS_RUSTAVI
+    ? await import("./tbilisi-civic-layout.js")
+    : null;
 const riverMinX = Math.min(...RIVER.map((p) => p.x)) - 85;
 const riverMaxX = Math.max(...RIVER.map((p) => p.x)) + 85;
 export function terrainHeight(x, z) {
@@ -82,6 +86,7 @@ export function mountainHeight(x, z) {
   // The riverbed must stay below the rendered water even on flat city terrain.
   if (x > riverMinX && x < riverMaxX && riverDistance({ x, z }) < 85) return -9;
   let h = terrainHeight(x, z);
+  if (civic) h = (h + 3) * civic.civicGroundClearance(x, z) - 3;
   if (h <= 0) return h;
   // Grade the constructed stunt yard into the hillside; render and collision
   // use this same surface, including the flight corridor and rooftop footprint.

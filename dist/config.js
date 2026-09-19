@@ -1,14 +1,14 @@
 import { IS_KUTAISI, IS_BATUMI, IS_RUSTAVI } from "./map-selection.js";
 export const GRID = 140;
 export const GRID_RADIUS = 4;
-export const ROAD_EDGE = 1650;
+export const ROAD_EDGE = IS_KUTAISI || IS_BATUMI || IS_RUSTAVI ? 1650 : 3000;
 export const LIMIT = IS_RUSTAVI
   ? 2600
   : IS_BATUMI
     ? 3000
     : IS_KUTAISI
       ? 2100
-      : 1900;
+      : 3100;
 export const MAP_SIZE = (LIMIT + 32) * 2;
 export const TOWER = { x: 1070, z: -430, y: 278 };
 export const CARS = [

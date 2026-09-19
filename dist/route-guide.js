@@ -30,6 +30,7 @@ export function sampleRoute(from, route, spacing = 13, reach = 175) {
       points.push({
         x: prior.x + (end.x - prior.x) * t,
         z: prior.z + (end.z - prior.z) * t,
+        y: (prior.y || 0) + ((end.y || 0) - (prior.y || 0)) * t,
         angle: Math.atan2(end.x - prior.x, end.z - prior.z),
         along: next,
       });
@@ -128,7 +129,7 @@ export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
     const offset = guide.secondary ? 1.45 : 0;
     mesh.position.set(
       p.x + Math.cos(p.angle) * offset,
-      style.height + (guide.secondary ? 0.025 : 0),
+      (p.y || 0) + style.height + (guide.secondary ? 0.025 : 0),
       p.z - Math.sin(p.angle) * offset,
     );
     mesh.rotation.set(style.tilt, p.angle, 0, "YXZ");

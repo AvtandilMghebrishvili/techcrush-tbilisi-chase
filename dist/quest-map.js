@@ -27,7 +27,20 @@ export const MAP_PLACES = IS_RUSTAVI
       { ...LANDMARKS.track, name: "MOTORPARK", symbol: "T" },
       { ...LANDMARKS.agency, name: "DRIVING ACADEMY", symbol: "A" },
     ]
-  : [];
+  : !IS_KUTAISI && !IS_BATUMI
+    ? await (async () => {
+        const { HEROES, FREEDOM, KING_DAVID, AXIS } = await import(
+          "./tbilisi-civic-layout.js"
+        );
+        return [
+          { ...FREEDOM, name: "FREEDOM SQUARE", symbol: "F" },
+          { ...HEROES, name: "HEROES FLYOVER", symbol: "H" },
+          { ...KING_DAVID, name: "KING DAVID", symbol: "K" },
+          { ...AXIS, name: "AXIS TOWERS", symbol: "A" },
+          { ...LANDMARKS.narikala, name: "NARIKALA", symbol: "N" },
+        ];
+      })()
+    : [];
 
 const CIVIC_PARKS = IS_RUSTAVI
   ? (await import("./rustavi-civic-data.js")).HEROES_PARKS

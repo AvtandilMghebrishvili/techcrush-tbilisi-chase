@@ -50,7 +50,12 @@ export function setWaypoint(sim, point, name = "CUSTOM DESTINATION") {
   const road = nearestRoad(point);
   if (!road) return null;
   sim.navQuest = null;
-  sim.waypoint = { x: road.x, z: road.z, name };
+  sim.waypoint = {
+    x: road.x,
+    z: road.z,
+    ...(road.y ? { y: road.y } : {}),
+    name,
+  };
   return sim.waypoint;
 }
 const approach = SPECIAL_RAMPS.map((r) => ({

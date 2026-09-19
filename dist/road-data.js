@@ -6,4 +6,9 @@ const data = IS_RUSTAVI
     : IS_KUTAISI
       ? await import("./kutaisi-road-data.js")
       : await import("./tbilisi-road-data.js");
-export const ROAD_DATA = data.ROAD_DATA;
+export const ROAD_DATA =
+  IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
+    ? data.ROAD_DATA
+    : (await import("./tbilisi-civic-layout.js")).extendTbilisiNetwork(
+        data.ROAD_DATA,
+      );

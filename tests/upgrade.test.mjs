@@ -102,7 +102,9 @@ test("Tbilisi streets are connected and all six gates have unobstructed road rou
       const x = r.start.x + (r.end.x - r.start.x) * t,
         z = r.start.z + (r.end.z - r.start.z) * t;
       assert(
-        !blocks().some((b) => containsPoint(b, x, z, 2.2)),
+        !blocks().some((b) =>
+          containsPoint(b, x, z, 2.2, r.start.y + (r.end.y - r.start.y) * t),
+        ),
         `road ${r.id} is blocked`,
       );
     }

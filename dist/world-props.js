@@ -7,6 +7,7 @@ import { LANDMARKS, riverDistance } from "./district-data.js";
 // Shared physical stems and renderer locations. A tree never exists only in the picture.
 export const TREES = [];
 for (const r of ROADS) {
+  if (r.start.y > 0 || r.end.y > 0) continue;
   if ((IS_KUTAISI || IS_BATUMI || IS_RUSTAVI) && r.length < 48) continue;
   const fx = Math.sin(r.angle),
     fz = Math.cos(r.angle),
@@ -94,4 +95,22 @@ if (IS_RUSTAVI) {
           radius: 0.28,
         });
       }
+}
+
+if (!IS_KUTAISI && !IS_BATUMI && !IS_RUSTAVI) {
+  const { HEROES } = await import("./tbilisi-civic-layout.js");
+  // Reuse the existing instanced tree LODs and physical trunks in the new park.
+  for (let i = 0; i < 52; i++) {
+    const a = i * 2.399,
+      r = 24 + Math.sqrt(i / 52) * 34;
+    const x = HEROES.x + Math.cos(a) * r,
+      z = HEROES.z + Math.sin(a) * r;
+    if (
+      Math.abs(x - HEROES.x) < 4 ||
+      Math.abs(z - HEROES.z) < 4 ||
+      !roadClear({ x, z }, 2)
+    )
+      continue;
+    TREES.push({ id: TREES.length, x, z, h: 7 + (i % 4) * 0.8, radius: 0.3 });
+  }
 }

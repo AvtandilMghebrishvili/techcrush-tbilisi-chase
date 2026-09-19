@@ -4,6 +4,8 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**Tbilisi landmark refresh:** Narikala's walls now follow the hillside. Visit the driveable Heroes Square flyover, Freedom Square and St George monument, rounded King David towers and twisting Axis twins. New map pins make each destination easy to find. Existing progress and event rules are retained. [Landmarks, references and validation](docs/TBILISI-LANDMARKS.md).
+
 **CITY WARS — 20 September, 15:00 → 24 September 2026, 21:00 (Tbilisi / UTC+4).**
 Join when the green countdown expires. Compete for each city's cumulative score
 ranking with your existing garage and discover the extra challenge by collecting

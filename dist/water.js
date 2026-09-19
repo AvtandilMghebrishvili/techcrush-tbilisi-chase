@@ -2,6 +2,7 @@ import { RIVER_POLYGON } from "./district-data.js";
 import { BRIDGE_DECKS, PEACE_DECK } from "./bridge-data.js";
 import { overOpenWater, wheelsUnsupported } from "./surface-support.js";
 import { terrainBlocked } from "./terrain.js";
+import { ELEVATED_ROADS, elevatedSurface } from "./elevated-roads.js";
 const bridges = [...BRIDGE_DECKS, PEACE_DECK];
 export function inRiver(p) {
   let inside = false;
@@ -36,8 +37,11 @@ export function driveableLine(a, b) {
     const p = {
       x: a.x + ((b.x - a.x) * i) / steps,
       z: a.z + ((b.z - a.z) * i) / steps,
+      y: (a.y || 0) + (((b.y || 0) - (a.y || 0)) * i) / steps,
     };
     if (unsupportedWater(p) || terrainBlocked(p)) return false;
+    if (ELEVATED_ROADS.length && p.y > 1 && !elevatedSurface(p, p.y))
+      return false;
   }
   return true;
 }

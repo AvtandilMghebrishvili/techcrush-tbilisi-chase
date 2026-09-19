@@ -109,7 +109,8 @@ test("one triangulated asphalt surface covers the connected street centers witho
   }
   const cross = (a, b, x, z) =>
     (b.x - a.x) * (z - a.z) - (b.z - a.z) * (x - a.x);
-  for (const road of ROADS)
+  // Raised decks have their own sloped mesh; the ground asphalt must not fill underneath them.
+  for (const road of ROADS.filter((r) => !r.start.y && !r.end.y))
     for (const t of [0.1, 0.5, 0.9]) {
       const x = road.start.x + (road.end.x - road.start.x) * t,
         z = road.start.z + (road.end.z - road.start.z) * t;

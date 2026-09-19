@@ -11,19 +11,22 @@ const civic =
     ? await import("../dist/rustavi-civic-data.js")
     : null;
 function network(padding) {
-  const polygons = ROADS.map((r) => {
-    const rx = Math.cos(r.angle) * (r.width / 2 + padding),
-      rz = -Math.sin(r.angle) * (r.width / 2 + padding);
-    return [
-      [
-        [r.start.x + rx, r.start.z + rz],
-        [r.end.x + rx, r.end.z + rz],
-        [r.end.x - rx, r.end.z - rz],
-        [r.start.x - rx, r.start.z - rz],
-      ],
-    ];
-  });
+  const polygons = ROADS.filter((r) => !(r.start.y > 0 || r.end.y > 0)).map(
+    (r) => {
+      const rx = Math.cos(r.angle) * (r.width / 2 + padding),
+        rz = -Math.sin(r.angle) * (r.width / 2 + padding);
+      return [
+        [
+          [r.start.x + rx, r.start.z + rz],
+          [r.end.x + rx, r.end.z + rz],
+          [r.end.x - rx, r.end.z - rz],
+          [r.start.x - rx, r.start.z - rz],
+        ],
+      ];
+    },
+  );
   for (const n of NODES) {
+    if (n.y > 0) continue;
     const radius =
       Math.max(...n.links.map((l) => ROADS[l.road].width)) / 2 + padding;
     polygons.push([

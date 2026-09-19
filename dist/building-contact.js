@@ -2,6 +2,15 @@ import { treeContact } from "./contacts.js";
 // Oriented chassis against a static rendered prism. No enclosing collision
 // circle: doors may pass close to a wall while bumpers still hit it head-on.
 export function buildingContact(car, rect) {
+  if (rect.flyoverRail && rect.slope) {
+    const dx = car.x - rect.x,
+      dz = car.z - rect.z;
+    const along = dx * Math.sin(rect.angle) + dz * Math.cos(rect.angle);
+    const t = Math.max(0, Math.min(1, along / rect.slope.length + 0.5));
+    const base = rect.slope.a + (rect.slope.b - rect.slope.a) * t;
+    if ((car.y || 0) + (car.height || 1.6) < base || (car.y || 0) > base + 1.05)
+      return false;
+  }
   if (
     rect.broken ||
     (rect.h != null &&

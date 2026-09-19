@@ -8,9 +8,10 @@ import {
   DISTRICT_SOLIDS,
   LANDMARKS,
 } from "./district-data.js";
-export const NODES = ROAD_DATA.nodes.map(([x, z], id) => ({
+export const NODES = ROAD_DATA.nodes.map(([x, z, y = 0], id) => ({
   x,
   z,
+  y,
   id,
   links: [],
 }));
@@ -89,10 +90,22 @@ export function nearestRoad(p, street) {
         );
         const x = a.x + dx * t,
           z = a.z + dz * t,
-          d = (x - p.x) ** 2 + (z - p.z) ** 2;
+          y = a.y + (b.y - a.y) * t,
+          d =
+            (x - p.x) ** 2 +
+            (z - p.z) ** 2 +
+            (p.y == null ? 0 : (y - p.y) ** 2 * 9);
         if (d < cost || (d === cost && road.id < best.road.id)) {
           cost = d;
-          best = { x, z, t, road, angle: road.angle, distance: Math.sqrt(d) };
+          best = {
+            x,
+            z,
+            y,
+            t,
+            road,
+            angle: road.angle,
+            distance: Math.hypot(x - p.x, z - p.z),
+          };
         }
       }
     } else if (bound(node.left) <= bound(node.right)) {
@@ -172,8 +185,8 @@ export function routeBetween(from, to) {
     b = nearestRoad(to);
   if (a.road.id === b.road.id)
     return [
-      { x: b.x, z: b.z },
-      { x: to.x, z: to.z },
+      { x: b.x, z: b.z, ...(b.y ? { y: b.y } : {}) },
+      { x: to.x, z: to.z, ...((to.y ?? b.y) ? { y: to.y ?? b.y } : {}) },
     ].filter((p, i, all) => !i || dist(p, all[i - 1]) > 0.1);
   let best = Infinity,
     path = [];
@@ -186,10 +199,10 @@ export function routeBetween(from, to) {
       const ids = [end];
       while (ids[0] !== s && t.prev[ids[0]] >= 0) ids.unshift(t.prev[ids[0]]);
       path = [
-        { x: a.x, z: a.z },
-        ...ids.map((i) => ({ x: NODES[i].x, z: NODES[i].z })),
-        { x: b.x, z: b.z },
-        { x: to.x, z: to.z },
+        { x: a.x, z: a.z, y: a.y },
+        ...ids.map((i) => ({ x: NODES[i].x, z: NODES[i].z, y: NODES[i].y })),
+        { x: b.x, z: b.z, ...(b.y ? { y: b.y } : {}) },
+        { x: to.x, z: to.z, ...((to.y ?? b.y) ? { y: to.y ?? b.y } : {}) },
       ];
     }
   const clean = path.filter((p, i) =>
@@ -204,7 +217,12 @@ export function routeBetween(from, to) {
       len = Math.hypot(dx, dz);
     const offset =
       Math.abs((p.x - before.x) * dz - (p.z - before.z) * dx) / (len || 1);
-    if (offset < 0.9 && dist(before, p) + dist(p, after) - len < 0.05)
+    if (
+      offset < 0.9 &&
+      Math.abs((p.y || 0) - (before.y || 0)) < 0.1 &&
+      Math.abs((p.y || 0) - (after.y || 0)) < 0.1 &&
+      dist(before, p) + dist(p, after) - len < 0.05
+    )
       clean.splice(i, 1);
     else i++;
   }
@@ -467,8 +485,20 @@ BUILDINGS.push(
     landmark: true,
   })),
 );
-export function containsPoint(o, x, z, padding = 0) {
+export function containsPoint(o, x, z, padding = 0, y = null) {
   if (o.broken) return false;
+  if (y != null) {
+    let base = o.base || 0,
+      top = o.h ?? Infinity;
+    if (o.flyoverRail) {
+      const along =
+        (x - o.x) * Math.sin(o.angle) + (z - o.z) * Math.cos(o.angle);
+      const t = Math.max(0, Math.min(1, along / o.slope.length + 0.5));
+      base = o.slope.a + (o.slope.b - o.slope.a) * t;
+      top = base + 1.05;
+    }
+    if (base > y + 1.6 || top <= y) return false;
+  }
   if (o.angle === undefined)
     return (
       x > o.minX - padding &&

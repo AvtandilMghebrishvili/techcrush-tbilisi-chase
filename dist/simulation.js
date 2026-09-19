@@ -33,6 +33,7 @@ import {
 import { vehicleContact, treeContact } from "./contacts.js";
 import { RewindTimeline } from "./rewind.js";
 import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
+import { followElevatedRoad } from "./elevated-roads.js";
 import { upgradedSpec, pursuitTuning } from "./progression.js";
 import { passedTraffic } from "./near-miss.js";
 import { checkpointsForLevel } from "./level-routes.js";
@@ -314,7 +315,10 @@ export function lineOfSight(a, b, obstacles) {
   for (let i = 1; i < steps; i++) {
     const x = a.x + ((b.x - a.x) * i) / steps,
       z = a.z + ((b.z - a.z) * i) / steps;
-    if (nearbyObstacles(obstacles, x, z).some((o) => containsPoint(o, x, z)))
+    const y = (a.y || 0) + (((b.y || 0) - (a.y || 0)) * i) / steps;
+    if (
+      nearbyObstacles(obstacles, x, z).some((o) => containsPoint(o, x, z, 0, y))
+    )
       return false;
   }
   return true;
@@ -429,6 +433,7 @@ export class ChaseSimulation {
       );
       if (distance(car, this.player) < 45) continue;
       Object.assign(car, {
+        y: road.start.y + (road.end.y - road.start.y) * t,
         id: 10000 + i,
         hitCooldown: 0,
         destroyed: false,
@@ -671,7 +676,8 @@ export class ChaseSimulation {
       return false;
     }
     Object.assign(cop, this.makePolice(spawn.x, spawn.z, cop.role));
-    cop.lastSeen = { x: p.x, z: p.z };
+    cop.y = spawn.y || 0;
+    cop.lastSeen = { x: p.x, z: p.z, y: p.y || 0 };
     cop.angle = spawn.angle ?? roadProjection(spawn).angle;
     cop.waterAt = null;
     cop.waterAge = 0;
@@ -699,6 +705,7 @@ export class ChaseSimulation {
       ...ROADS.map((r) => ({
         x: (r.start.x + r.end.x) / 2,
         z: (r.start.z + r.end.z) / 2,
+        y: (r.start.y + r.end.y) / 2,
         angle: r.angle,
         road: r,
       })),
@@ -710,7 +717,7 @@ export class ChaseSimulation {
         !unsupportedWater(q) &&
         !terrainBlocked(q, 3.5) &&
         !nearbyObstacles(this.obstacles, q.x, q.z, 4).some((b) =>
-          containsPoint(b, q.x, q.z, 3.5),
+          containsPoint(b, q.x, q.z, 3.5, q.y || 0),
         ) &&
         [...this.traffic, ...this.police].every(
           (c) => c === exclude || c.waterAt != null || distance(c, q) > 14,
@@ -735,14 +742,16 @@ export class ChaseSimulation {
         (q) =>
           !unsupportedWater(q) &&
           !terrainBlocked(q, 2) &&
-          !this.obstacles.some((b) => containsPoint(b, q.x, q.z, 2.2)) &&
+          !this.obstacles.some((b) =>
+            containsPoint(b, q.x, q.z, 2.2, q.y || 0),
+          ) &&
           activeCars.every((c) => distance(c, q) > 12),
       ) || projected;
     this.player.x = p.x;
     this.player.z = p.z;
     this.player.vx = this.player.vz = this.player.speed = 0;
     Object.assign(this.player, {
-      y: 0,
+      y: p.y || 0,
       vy: 0,
       waterAt: null,
       waterAge: 0,
@@ -818,7 +827,9 @@ export class ChaseSimulation {
     const p = this.player;
     const before = { x: p.x, z: p.z };
     const actors = [p, ...this.traffic, ...this.police];
-    const positions = new Map(actors.map((c) => [c, { x: c.x, z: c.z }]));
+    const positions = new Map(
+      actors.map((c) => [c, { x: c.x, z: c.z, y: c.y || 0 }]),
+    );
     if (
       !p.airborne &&
       !p.flipped &&
@@ -894,6 +905,7 @@ export class ChaseSimulation {
     } else {
       stepVehicle(p, input, dt, this.obstacles);
       const rampResult = driveRamp(p, input, dt, this.ramps, before);
+      followElevatedRoad(p, positions.get(p).y);
       if (rampResult === "launch") this.events.push("AIRBORNE — A / D TO ROLL");
       if (rampResult === "impact" && p.impact > 5 && p.invulnerable <= 0) {
         p.health = Math.max(
@@ -946,7 +958,7 @@ export class ChaseSimulation {
         Object.assign(t, {
           x: spawn.x,
           z: spawn.z,
-          y: 0,
+          y: spawn.y || 0,
           vy: 0,
           pitch: 0,
           roll: 0,
@@ -993,7 +1005,12 @@ export class ChaseSimulation {
       const direction = { x: Math.sin(t.angle), z: Math.cos(t.angle) };
       let cruise = t.cruise;
       for (const o of actors) {
-        if (o === t || o.waterAt != null) continue;
+        if (
+          o === t ||
+          o.waterAt != null ||
+          Math.abs((o.y || 0) - (t.y || 0)) > 2
+        )
+          continue;
         const dx = o.x - t.x,
           dz = o.z - t.z,
           ahead = dx * direction.x + dz * direction.z,
@@ -1006,6 +1023,7 @@ export class ChaseSimulation {
       t.speed = Math.hypot(t.vx, t.vz);
       t.x += t.vx * dt;
       t.z += t.vz * dt;
+      followElevatedRoad(t, t.y || 0, dt);
       t.impact = 0;
       for (const block of nearbyObstacles(this.obstacles, t.x, t.z, 5))
         resolveCircleRect(t, 2.1, block);
@@ -1036,6 +1054,7 @@ export class ChaseSimulation {
       this.radioContact = {
         x: p.x,
         z: p.z,
+        y: p.y || 0,
         vx: p.vx,
         vz: p.vz,
         time: this.time,
@@ -1078,8 +1097,8 @@ export class ChaseSimulation {
         cop.lastSeen =
           lineOfSight(observation, predicted, this.obstacles) &&
           driveableLine(observation, predicted)
-            ? predicted
-            : { x: observation.x, z: observation.z };
+            ? { ...predicted, y: observation.y || 0 }
+            : { x: observation.x, z: observation.z, y: observation.y || 0 };
       }
       if (cop.blockPoint && this.time > cop.blockExpires) {
         cop.blockPoint = null;
@@ -1111,6 +1130,7 @@ export class ChaseSimulation {
             cop.blockPoint = {
               x: road.x + Math.cos(road.angle) * lane,
               z: road.z - Math.sin(road.angle) * lane,
+              y: road.y || 0,
               angle: road.angle + Math.PI / 2,
             };
             cop.blockExpires = this.time + 12;
@@ -1152,6 +1172,7 @@ export class ChaseSimulation {
         const flank = {
           x: p.x + Math.sin(p.angle) * 4 + Math.cos(p.angle) * side * 2.8,
           z: p.z + Math.cos(p.angle) * 4 - Math.sin(p.angle) * side * 2.8,
+          y: p.y || 0,
         };
         if (lineOfSight(cop, flank, this.obstacles)) target = flank;
       }
@@ -1190,7 +1211,13 @@ export class ChaseSimulation {
         );
       }
       for (const other of actors) {
-        if (other === cop || other === p || other.waterAt != null) continue;
+        if (
+          other === cop ||
+          other === p ||
+          other.waterAt != null ||
+          Math.abs((other.y || 0) - (cop.y || 0)) > 2
+        )
+          continue;
         const dx = other.x - cop.x,
           dz = other.z - cop.z,
           ahead = dx * Math.sin(cop.angle) + dz * Math.cos(cop.angle),
@@ -1221,6 +1248,7 @@ export class ChaseSimulation {
       }
       cop.x += cop.vx * dt;
       cop.z += cop.vz * dt;
+      followElevatedRoad(cop, cop.y || 0, dt);
       cop.impact = 0;
       for (const block of nearbyObstacles(this.obstacles, cop.x, cop.z, 5))
         resolveCircleRect(

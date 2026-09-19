@@ -206,6 +206,7 @@ export function buildRealisticCity(v) {
   concrete.bumpMap = ptex;
   concrete.bumpScale = 0.05;
   for (const r of ROADS) {
+    if (r.start.y > 0 || r.end.y > 0) continue;
     const fx = Math.sin(r.angle),
       fz = Math.cos(r.angle),
       rx = fz,

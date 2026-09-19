@@ -11,6 +11,8 @@ const corridors = ROAD_DATA.edges.map(([a, b, width]) => {
     w: width,
     d: Math.hypot(q[0] - p[0], q[1] - p[1]),
     angle: Math.atan2(q[0] - p[0], q[1] - p[1]),
+    low: Math.min(p[2] || 0, q[2] || 0),
+    high: Math.max(p[2] || 0, q[2] || 0),
   };
 });
 export function footprintsOverlap(a, b, margin = 0) {
@@ -38,7 +40,12 @@ export function footprintsOverlap(a, b, margin = 0) {
   return true;
 }
 export function overlapsRoad(rect, margin = 2) {
-  return corridors.some((r) => footprintsOverlap(rect, r, margin));
+  return corridors.some(
+    (r) =>
+      (rect.h == null || rect.h >= r.low - 0.1) &&
+      (rect.base || 0) <= r.high + 1.8 &&
+      footprintsOverlap(rect, r, margin),
+  );
 }
 export function placeOffRoad(origin, parts, allowed = () => true) {
   const valid = (p) =>

@@ -1,5 +1,7 @@
 import { buildExpansion } from "./expansion-visuals.js";
-import { moundHeight } from "./terrain.js";
+import { moundHeight, groundHeight } from "./terrain.js";
+import { fortressFoundations } from "./fortress-foundations.js";
+import { buildTbilisiCivic } from "./tbilisi-civic.js";
 import { buildBridgeRails } from "./bridge-visuals.js";
 import * as THREE from "./vendor/three.module.js";
 import { registerBreakable } from "./breakable-props.js";
@@ -758,22 +760,56 @@ export function buildTbilisiDistricts(v) {
   const hillMaterial = material("#8d9276", { vertexColors: true });
   v.localHillMaterials = [...(v.localHillMaterials || []), hillMaterial];
   terrainMound(root, n, 155, 115, 65, hillMaterial);
-  for (let i = 0; i < 9; i++) {
-    const x = n.x - 95 + i * 24,
-      z = n.z + Math.sin(i * 0.65) * 20;
-    box(25, 13, 5, stone, x, 62, z);
-    for (let j = 0; j < 5; j++) box(2.5, 3, 5, stone, x - 10 + j * 5, 70, z);
-    if (i % 3 === 0) {
-      add(new THREE.CylinderGeometry(7, 9, 21, 12), stone, x, 64, z);
-      for (let j = 0; j < 8; j++) {
-        const a = (j * Math.PI) / 4;
-        box(2, 2.5, 2, stone, x + Math.cos(a) * 6, 75, z + Math.sin(a) * 6);
-      }
+  const fortress = fortressFoundations(n, groundHeight);
+  for (const w of fortress.walls) {
+    const group = new THREE.Group();
+    group.position.set(w.x, 0, w.z);
+    group.rotation.y = w.angle;
+    root.add(group);
+    box(w.w, w.top - w.base, w.d, stone, 0, (w.top + w.base) / 2, 0, group);
+    for (let j = -w.d / 2 + 2; j < w.d / 2; j += 5)
+      box(5, 2.5, 2.5, stone, 0, w.top + 1.25, j, group);
+  }
+  for (const t of fortress.towers) {
+    add(
+      new THREE.CylinderGeometry(7, 9, t.top - t.base, 16),
+      stone,
+      t.x,
+      (t.top + t.base) / 2,
+      t.z,
+    );
+    for (let j = 0; j < 10; j++) {
+      const a = (j * Math.PI) / 5;
+      box(
+        2,
+        2.5,
+        2,
+        stone,
+        t.x + Math.cos(a) * 6,
+        t.top + 1.25,
+        t.z + Math.sin(a) * 6,
+      );
     }
   }
   // Moving cable-car cabins above the river, from Rike toward the fortress.
   const start = { x: L.cable.x, y: 14, z: L.cable.z },
-    end = { x: n.x - 65, y: 94, z: n.z + 5 };
+    end = { x: n.x - 65, y: groundHeight(n.x - 65, n.z + 5) + 15, z: n.z + 5 };
+  const terminalBase =
+    Math.min(
+      ...[-7.5, 0, 7.5].flatMap((dx) =>
+        [-5.5, 0, 5.5].map((dz) => groundHeight(end.x + dx, end.z + dz)),
+      ),
+    ) - 3;
+  box(
+    15,
+    end.y - 7 - terminalBase,
+    11,
+    stone,
+    end.x,
+    (end.y - 7 + terminalBase) / 2,
+    end.z,
+  );
+  box(16, 1, 12, silver, end.x, end.y - 6.5, end.z);
   for (const side of [-1, 1])
     beam(
       [start.x + side * 2, start.y, start.z],
@@ -968,6 +1004,7 @@ export function buildTbilisiDistricts(v) {
     }
   }
   buildExpansion(v, root, box, label, v.expansionFacades);
+  buildTbilisiCivic(v, root, { stone, cream, grass }, label);
   // Static meshes are merged in local tiles, retaining culling and dynamic gondolas/water.
   root.updateMatrixWorld(true);
   const batches = new Map(),

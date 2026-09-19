@@ -2,6 +2,7 @@ import { SPECIAL_RAMPS, roofAt } from "./world-sites.js";
 import { IS_KUTAISI, IS_BATUMI, IS_RUSTAVI } from "./map-selection.js";
 import { nearbyObstacles } from "./spatial-index.js";
 import { nearestRoad, geo } from "./city-map.js";
+import { elevatedLanding } from "./elevated-roads.js";
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // Roadside ramps leave the other lane clear. Locations are shared by rendering and physics.
 export const RAMPS = (
@@ -220,7 +221,10 @@ export function stepAirborne(p, input, dt, obstacles, resolve) {
   p.boosting = false;
   p.boostStrength *= Math.exp(-dt * 10);
   const roof = roofAt(p, 1);
-  const surface = roof && previousY >= roof.h - 0.01 && p.vy <= 0 ? roof.h : 0;
+  const surface = Math.max(
+    roof && previousY >= roof.h - 0.01 && p.vy <= 0 ? roof.h : 0,
+    elevatedLanding(p, previousY) ?? 0,
+  );
   if (p.y > surface) return null;
   const landingSpeed = -p.vy,
     upright = Math.cos(p.roll) * Math.cos(p.pitch) > 0.48;
