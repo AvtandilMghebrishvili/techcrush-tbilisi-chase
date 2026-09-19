@@ -1,3 +1,4 @@
+import { buildCableCars, updateCableCars } from "./cable-cars.js";
 import { buildExpansion } from "./expansion-visuals.js";
 import { moundHeight, groundHeight } from "./terrain.js";
 import { fortressFoundations } from "./fortress-foundations.js";
@@ -810,25 +811,9 @@ export function buildTbilisiDistricts(v) {
     end.z,
   );
   box(16, 1, 12, silver, end.x, end.y - 6.5, end.z);
-  for (const side of [-1, 1])
-    beam(
-      [start.x + side * 2, start.y, start.z],
-      [end.x + side * 2, end.y, end.z],
-      0.075,
-      metal,
-    );
   box(23, 7, 13, silver, start.x, 3.5, start.z);
   box(23, 0.3, 10, glass, start.x, 7.2, start.z);
-  v.gondolas = [];
-  for (let i = 0; i < 4; i++) {
-    const g = new THREE.Group();
-    root.add(g);
-    box(3, 2.7, 2.4, red, 0, 0, 0, g);
-    box(3.08, 1.5, 2.45, glass, 0, 0.3, 0, g);
-    beam([0, 1.5, 0], [0, 5, 0], 0.09, metal, g);
-    g.userData.dynamic = true;
-    v.gondolas.push({ group: g, start, end, offset: i / 4 });
-  }
+  buildCableCars(v, root, start, end, 4);
   // Functional stunt ramps, steel side edges and hazard markings.
   for (const r of RAMPS) {
     const g = new THREE.Group();
@@ -1080,14 +1065,6 @@ export function animateDistricts(v, time) {
     f.group.position.x = f.side * (1.2 + Math.cos(time * 0.035) * 1.8);
   if (v.kutaisiWheel) v.kutaisiWheel.rotation.z = time * 0.045;
   if (v.waterTime) v.waterTime.value = time;
-  for (const cabin of v.gondolas || []) {
-    const t = (time * 0.025 + cabin.offset) % 1,
-      { start: a, end: b } = cabin;
-    cabin.group.position.set(
-      a.x + (b.x - a.x) * t,
-      a.y + (b.y - a.y) * t - Math.sin(t * Math.PI) * 7 - 5,
-      a.z + (b.z - a.z) * t,
-    );
-  }
+  updateCableCars(v, time);
 }
 import { detachStaticMeshes } from "./static-detach.js";

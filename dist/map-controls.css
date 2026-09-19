@@ -407,3 +407,25 @@ body.mobile-controls #hud .navigator {
   text-decoration: none;
   font-size: 9px;
 }
+
+#map-place-details {
+  margin: 4px 0 10px;
+  color: #bcd5df;
+  font-size: 12px;
+  line-height: 1.4;
+}
+#map-place-details:empty {
+  display: none;
+}
+
+#quest-pins .banner-pin {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  font-size: 7px;
+  z-index: 3;
+  opacity: 0.85;
+}
+#quest-pins .powerup-pin {
+  z-index: 7;
+}

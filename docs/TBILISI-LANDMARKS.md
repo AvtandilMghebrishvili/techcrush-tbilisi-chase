@@ -10,11 +10,11 @@ Open **Map + Side Quests** and look for **FREEDOM SQUARE (F)**, **HEROES FLYOVER
 
 ## Compact district revision
 
-Following the owner's annotated red/green map, Heroes Square (0, 1050), King David (-280, 850), Axis Towers (110, 670) and Bank of Georgia (-755, 400) occupy the riverside gap beside the original core. Two bank boulevards, connected neighbourhood streets and three new bridges join both sides of Mtkvari. These are compressed gameplay locations, not geographic coordinates. Every bridge uses the same deck dimensions for rendering and vehicle support, with matching bank openings and breakable edge rails.
+Following the owner's annotated red/green map, Heroes Square (0, 1050), King David (-280, 850), Axis Towers (110, 670) and Bank of Georgia (-729, 397) occupy the riverside gap beside the original core. Two bank boulevards, connected neighbourhood streets and three new bridges join both sides of Mtkvari. These are compressed gameplay locations, not geographic coordinates. Every bridge uses the same deck dimensions for rendering and vehicle support, with matching bank openings and breakable edge rails.
 
 Axis has a reserved open forecourt and a street only four metres from its podium; ordinary frontage lots cannot obstruct it. The quiet northern loop stays accessible because it hosts a previously released CITY WARS artifact. The exact segment beside that artifact is retained; the former remote landmark district and its extra frontage lots have been removed.
 
-Flyover panels withstand scrapes and low-speed impacts, but fracture at a normal impact speed of 27 m/s (about 97 km/h). Vehicles can leave the broken edge and land below. The panels use one additional instanced draw call in the existing bridge update, react in the contact frame, and restore with rewind or a new run.
+Flyover panels withstand scrapes and low-speed impacts, but fracture around 180 km/h for a square midspan impact and up to 280 km/h at a glancing angle; entry panels need half that impact, with an 85 km/h minimum. Vehicles can leave the broken edge and land below. The panels use one additional instanced draw call in the existing bridge update, react in the contact frame, and restore with rewind or a new run.
 
 Tbilisi's five released artifact positions and orientations are now explicit stable data in `dist/tbilisi-event-sites.js`. Their banner IDs, road approaches, event collection rules and saved progress are preserved. Fixture checks compare all four cities against the previous public release. No profile migration or leaderboard reset is needed.
 
@@ -46,3 +46,6 @@ Existing player profiles, garages, unlocks, CITY WARS rules and artifact progres
 Tests cover archived graph IDs, connectivity, terrain-contact foundations, both flyover directions, grade separation, airborne landings, NPC falls, clear road centerlines and actual throttle/steering traversal without impacts. The existing save, event, lifecycle, mobile, collision and world suites also run. Browser review uses the actual game renderer for all five landmarks and day/night lighting.
 
 The new static landmark geometry joins existing spatial batches; trees reuse the existing instanced LOD system. No background animation loop, persistent media cache or new high-resolution image download is introduced.
+
+The Bank of Georgia now has a cleared 206 × 176 m surroundings reservation, an open
+forecourt and a 30 m scenic road loop connected to the riverside esplanade.

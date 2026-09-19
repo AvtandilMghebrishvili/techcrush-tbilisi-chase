@@ -63,6 +63,7 @@ const bankParts = [
 // Compressed city landmark: the real headquarters is on Gagarin Street, outside
 // this central-city map. Its interlocking volumes occupy the new riverside block.
 export const BANK_SITE = placeOffRoad(BANK_TARGET, bankParts);
+export const BANK_PLAZA = { ...BANK_SITE, w: 206, d: 176, angle: 0 };
 export const BANK_SOLIDS = bankParts.map((p) => ({
   ...p,
   x: p.x + BANK_SITE.x,
@@ -92,7 +93,7 @@ export function reservedExpansion(rect) {
     TBILISI_EVENT_SITES.some((p) =>
       footprintsOverlap(rect, { ...p, w: 13, d: 5 }, 1),
     ) ||
-    [...STUNT_ZONES, ...BANK_SOLIDS, ...TOWERS].some((s) =>
+    [...STUNT_ZONES, BANK_PLAZA, ...BANK_SOLIDS, ...TOWERS].some((s) =>
       footprintsOverlap(rect, s, 4),
     )
   );

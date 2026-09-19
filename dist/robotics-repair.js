@@ -1,4 +1,5 @@
 import { ROBOTICS_GEARS } from "./city-brand-sites.js";
+import { activeRepairCount } from "./brand-rules.js";
 import { repairBody } from "./damage-state.js";
 
 // One repair per monument per run. Rewind restores both HP and collection state.
@@ -16,7 +17,7 @@ export function collectRoboticsRepair(sim, before) {
   const dx = p.x - before.x,
     dz = p.z - before.z,
     length2 = dx * dx + dz * dz;
-  for (const site of ROBOTICS_GEARS) {
+  for (const site of ROBOTICS_GEARS.slice(0, activeRepairCount(sim.level))) {
     if (sim.gearRepairs.some((q) => q.id === site.id)) continue;
     const t = length2
       ? Math.max(
@@ -36,7 +37,7 @@ export function collectRoboticsRepair(sim, before) {
     p.health = 100;
     repairBody(p, health);
     sim.gearRepairs.push({ id: site.id, time: sim.time });
-    sim.events.push("GRA FULL REPAIR · HP 100%");
+    sim.events.push("GIFT FROM GEORGIAN ROBOTICS ASSOCIATION · HP 100%");
     sim.emitSound("reward", p, 24, "gra-repair:" + site.id);
     break;
   }

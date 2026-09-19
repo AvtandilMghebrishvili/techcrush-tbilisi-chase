@@ -222,6 +222,19 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
     throw Error("Invalid roadside rewards.");
   m.cashBanners = banners;
   m.decorWrecks = decor;
+  // GREX can legitimately destroy the whole bounded patrol pool in one tick.
+  // Older clients omit this counter; they keep their original validation limits.
+  const pulses = metrics.grexPulses ?? [];
+  if (
+    !Array.isArray(pulses) ||
+    pulses.length > 3 ||
+    new Set(pulses).size !== pulses.length ||
+    pulses.some((id) => !Number.isInteger(id) || id < 0 || id > 2)
+  )
+    throw Error("Invalid GREX activations.");
+  m.grexPulses = pulses;
+  const grexAllowance =
+    pulses.length * (12 + Math.min(10, Math.floor((ticket.level - 1) / 2)));
   const elapsed = Math.max(0, (now - ticket.startedAt) / 1000);
   if (
     m.time > elapsed + 2 ||
@@ -229,11 +242,15 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
     m.driftSeconds > m.time + 0.1 ||
     m.distance > m.time * 190 + 40 ||
     m.jumps > m.time / 0.3 + 1 ||
-    m.takedowns > m.time * 2 + 1 ||
+    m.takedowns > m.time * 2 + 1 + grexAllowance ||
     m.trafficWrecks > m.time * 3 + 1 ||
     (result === "won" && (m.checkpoints !== 6 || m.time < 8)) ||
     m.score >
-      (m.distance * 3.5 + m.time * 450 + m.checkpoints * 1800 + 6000) *
+      (m.distance * 3.5 +
+        m.time * 450 +
+        m.checkpoints * 1800 +
+        6000 +
+        grexAllowance * 750) *
         levelRewards(ticket.level).score *
         ticketRewardMultiplier(ticket)
   )

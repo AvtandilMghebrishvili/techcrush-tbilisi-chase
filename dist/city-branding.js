@@ -1,3 +1,5 @@
+import { buildGrex, updateGrex, signMaterial } from "./grex-visuals.js";
+import { activeRepairCount } from "./brand-rules.js";
 import * as THREE from "./vendor/three.module.js";
 import {
   FACADE_BANNERS,
@@ -77,6 +79,16 @@ export function buildCityBranding(v) {
     banner.name = site.brand + " facade banner " + site.id;
     group.add(banner);
   }
+  for (const item of v.cableBannerMeshes || []) {
+    item.mesh.material.dispose();
+    item.mesh.material = v.facadeBrandMaterials[item.brand];
+  }
+  buildGrex(v);
+  const giftGeo = new THREE.PlaneGeometry(6.3, 1.575);
+  const giftMat = signMaterial(
+    ["GIFT FROM", "GEORGIAN ROBOTICS ASSOCIATION", "FULL REPAIR · HP 100%"],
+    ROBOTICS_COLOR,
+  );
   const geometry = gearGeometry();
   const red = new THREE.MeshStandardMaterial({
     color: ROBOTICS_COLOR,
@@ -120,7 +132,18 @@ export function buildCityBranding(v) {
     gear.scale.setScalar(GEAR_RADIUS);
     gear.castShadow = true;
     swivel.add(gear);
-    root.add(base, ring, swivel);
+    const gift = new THREE.Mesh(giftGeo, giftMat);
+    gift.position.set(
+      Math.sin(site.facing) * 3.65,
+      1.0,
+      Math.cos(site.facing) * 3.65,
+    );
+    gift.rotation.y = site.facing;
+    const backGift = new THREE.Mesh(giftGeo, giftMat);
+    backGift.position.copy(gift.position).multiplyScalar(-1);
+    backGift.position.y = 1;
+    backGift.rotation.y = site.facing + Math.PI;
+    root.add(base, ring, swivel, gift, backGift);
     v.decor.add(root);
     v.roboticsGearMeshes.push({ root, swivel, gear, ring, site });
   }
@@ -175,6 +198,7 @@ export function applyCityBranding(v, poster, logo) {
 export function updateCityBranding(v, sim, time) {
   // Only the existing render loop advances these transforms. Pause/hidden tabs
   // stop it; map disposal releases the shared geometry and materials once.
+  updateGrex(v, sim, time);
   for (const item of v.roboticsGearMeshes || []) {
     const near =
       (sim.player.x - item.site.x) ** 2 + (sim.player.z - item.site.z) ** 2 <
@@ -183,7 +207,8 @@ export function updateCityBranding(v, sim, time) {
     const fade = collected
       ? Math.min(1, Math.max(0, time - collected.time) / 0.6)
       : 0;
-    item.root.visible = near && fade < 1;
+    item.root.visible =
+      near && fade < 1 && item.site.id < activeRepairCount(sim.level);
     if (!near) continue;
     item.swivel.scale.setScalar(Math.max(0.001, 1 - fade));
     item.ring.scale.setScalar(1 + fade * 2);

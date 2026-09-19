@@ -294,14 +294,21 @@ export function makeHelicopter() {
   return g;
 }
 export function updateHelicopterMesh(mesh, h, time) {
-  mesh.visible = !!h;
+  mesh.visible = !!h && (!h.destroyed || time - h.wreckedAt < 5);
   if (!h) return;
   mesh.position.set(h.x, h.y, h.z);
   mesh.rotation.y = h.angle;
-  mesh.rotation.z = Math.sin(time * 0.5) * 0.045;
+  mesh.rotation.z = h.destroyed
+    ? Math.min(1.5, (time - h.wreckedAt) * 0.55)
+    : Math.sin(time * 0.5) * 0.045;
+  mesh.rotation.x = h.destroyed ? Math.min(0.7, (time - h.wreckedAt) * 0.3) : 0;
   mesh.userData.rotor.rotation.y = h.rotor;
   mesh.userData.tailRotor.rotation.x = h.rotor * 1.4;
-  mesh.userData.searchlight.intensity = h.tracking ? 2600 : 1000;
+  mesh.userData.searchlight.intensity = h.destroyed
+    ? 0
+    : h.tracking
+      ? 2600
+      : 1000;
   mesh.updateMatrixWorld(true);
   const target = mesh.worldToLocal(
     new THREE.Vector3(h.lastSeen.x, 0.2, h.lastSeen.z),

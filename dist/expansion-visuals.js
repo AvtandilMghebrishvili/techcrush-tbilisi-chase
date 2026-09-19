@@ -222,7 +222,7 @@ export function buildExpansion(v, root, box, label, materials) {
       }
   }
   if (BANK_SOLIDS.length) {
-    box(110, 0.2, 101, metal, BANK_SITE.x, 0.05, BANK_SITE.z, root);
+    box(132, 0.1, 105, stone, BANK_SITE.x, 0.05, BANK_SITE.z, root);
     label(
       "BANK OF GEORGIA · 1975",
       17,

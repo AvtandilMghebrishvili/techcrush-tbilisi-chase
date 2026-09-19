@@ -144,6 +144,7 @@ test("patrol falls, splashes once, stops colliding and respawns clear on a road 
   s.update(1 / 120, {});
   assert(cop.waterAt != null);
   const entered = { x: cop.x, z: cop.z };
+  const entrySpeed = Math.hypot(cop.vx, cop.vz);
   let splashes = 0,
     lowest = 0;
   for (let i = 0; i < 400 && cop.id === oldId; i++) {
@@ -154,8 +155,8 @@ test("patrol falls, splashes once, stops colliding and respawns clear on a road 
       .filter((e) => e.kind === "water").length;
     if (cop.id === oldId)
       assert(
-        Math.hypot(cop.x - entered.x, cop.z - entered.z) < 0.01,
-        "No underwater driving",
+        Math.hypot(cop.vx, cop.vz) <= entrySpeed + 1e-6,
+        "Sinking patrol may coast but must never accelerate or steer underwater",
       );
   }
   assert(lowest < -8);

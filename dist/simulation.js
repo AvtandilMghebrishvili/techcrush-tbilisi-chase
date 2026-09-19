@@ -36,6 +36,7 @@ import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
 import { followElevatedRoad } from "./elevated-roads.js";
 import { upgradedSpec, pursuitTuning } from "./progression.js";
 import { passedTraffic } from "./near-miss.js";
+import { collectGrexPulse, returnGrexPatrols } from "./grex-pulse.js";
 import { collectRoboticsRepair } from "./robotics-repair.js";
 import { checkpointsForLevel } from "./level-routes.js";
 import { createAirSupport, updateAirSupport } from "./air-support.js";
@@ -373,6 +374,8 @@ export class ChaseSimulation {
     this.runJumps = 0;
     this.runQuests = [];
     this.gearRepairs = [];
+    this.grexTriggers = [];
+    this.grexReturnAt = 0;
     this.runTopSpeed = 0;
     this.trafficWrecks = 0;
     this.time = 0;
@@ -656,7 +659,7 @@ export class ChaseSimulation {
       this.emitSound("explosion", car, 35, `explosion:${car.id}`);
     }
   }
-  respawnPolice(cop) {
+  respawnPolice(cop, targetOverride) {
     const p = this.player;
     // Replacements enter on a road well behind the player, never on top of them.
     let spawn = roadProjection({
@@ -672,7 +675,7 @@ export class ChaseSimulation {
       ].map(roadProjection);
       spawn = candidates.sort((a, b) => distance(b, p) - distance(a, p))[0];
     }
-    spawn = this.safeRoadSpawn(spawn, cop);
+    spawn = this.safeRoadSpawn(targetOverride || spawn, cop);
     if (!spawn) {
       cop.respawnAt = this.time + 0.5;
       return false;
@@ -783,6 +786,7 @@ export class ChaseSimulation {
     this.events.push(automatic ? "BACK ON YOUR WHEELS" : "CAR RESET  −200");
   }
   addReinforcement(role, offset) {
+    if (this.grexReturnAt) return;
     if (this.police.length >= this.difficulty.maxUnits) return;
     const p = this.player,
       target = roadProjection({
@@ -820,6 +824,7 @@ export class ChaseSimulation {
     if (this.phase !== "running") return;
     dt = clamp(dt, 0, 0.05);
     this.time += dt;
+    returnGrexPatrols(this);
     this.explosions = this.explosions.filter(
       (e) => this.time - e.born < EXPLOSION_LIFETIME,
     );
@@ -1069,6 +1074,7 @@ export class ChaseSimulation {
         } else continue;
       }
       if (cop.destroyed) {
+        if (this.grexReturnAt) continue;
         if (this.time >= cop.respawnAt) {
           this.respawnPolice(cop);
           positions.set(cop, { x: cop.x, z: cop.z });
@@ -1511,6 +1517,7 @@ export class ChaseSimulation {
     );
     this.closestPolice = closest;
     collectRoboticsRepair(this, positions.get(p));
+    collectGrexPulse(this, positions.get(p));
     const cp = this.checkpoints[this.checkpoint];
     if (
       cp &&

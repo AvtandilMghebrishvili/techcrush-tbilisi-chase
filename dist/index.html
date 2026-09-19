@@ -1022,9 +1022,23 @@
                 </div>
               </article>
               <article class="supply-card" style="--supply: #bfadff">
-                <div class="supply-visual" aria-hidden="true">✦</div>
+                <div class="supply-visual" aria-hidden="true">
+                  <img
+                    src="./assets/grex/grex.webp"
+                    width="64"
+                    height="64"
+                    loading="lazy"
+                    alt=""
+                    style="
+                      width: 100%;
+                      height: 100%;
+                      object-fit: contain;
+                      border-radius: 8px;
+                    "
+                  />
+                </div>
                 <div>
-                  <h3>SPECIAL BOX</h3>
+                  <h3>GREX SPECIAL BOX</h3>
                   <p>Every 5 city levels · 4,000–7,000 coins + 3 parts.</p>
                   <small>Diamond 65% · Platinum 35%</small
                   ><button id="open-special-box" class="secondary" disabled>
@@ -1094,6 +1108,16 @@
       </dialog>
       <dialog id="loot-dialog" class="loot-dialog" aria-labelledby="loot-title">
         <span class="eyebrow">TECHCRUSH / SUPPLY DROP</span>
+        <img
+          id="loot-grex"
+          src="./assets/grex/grex.webp"
+          width="64"
+          height="64"
+          alt="GREX"
+          loading="lazy"
+          hidden
+          style="border-radius: 10px"
+        />
         <h2 id="loot-title">PARTS INCOMING.</h2>
         <div id="loot-slots" class="loot-slots"></div>
         <div id="loot-coins" class="loot-coins" hidden></div>

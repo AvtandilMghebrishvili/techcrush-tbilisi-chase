@@ -4,7 +4,7 @@ export const HEROES = { x: 0, z: 1050, radius: 110 };
 export const FREEDOM = { x: -209, z: -623 };
 export const KING_DAVID = { x: -280, z: 850, w: 102, d: 67 };
 export const AXIS = { x: 110, z: 670, w: 123, d: 81 };
-export const BANK_TARGET = { x: -755, z: 400 };
+export const BANK_TARGET = { x: -729, z: 397 };
 export const RIVERSIDE_BRIDGE_NAMES = [
   "Riverside North Bridge",
   "Riverside Central Bridge",
@@ -262,8 +262,19 @@ export function extendTbilisiNetwork(source) {
       [-860, 465],
       [-1000, 465],
     ],
-    24,
+    30,
     "Bank of Georgia esplanade",
+  );
+  road(
+    [
+      [-650, 350],
+      [-710, 320],
+      [-820, 320],
+      [-840, 400],
+      [-860, 465],
+    ],
+    30,
+    "Bank of Georgia scenic loop",
   );
   road(
     [

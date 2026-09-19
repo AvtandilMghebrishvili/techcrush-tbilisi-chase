@@ -13,7 +13,7 @@ export function prepareSceneAssets(mobile) {
   const track = (p) =>
     p.then((value) => {
       scope.progress(
-        12 + Math.round((++completed / 9) * 76),
+        12 + Math.round((++completed / 10) * 76),
         "LOADING CITY, CARS & TREES",
       );
       return value;
@@ -27,6 +27,7 @@ export function prepareSceneAssets(mobile) {
       "hills-diff.jpg",
       "hills-nor_gl.jpg",
       "robotics/robo-battle.webp",
+      "grex/grex.webp",
     ].map((name) => track(scope.track(loader.loadAsync("./assets/" + name)))),
     track(fetchTreeModels(mobile, scope)),
     track(fetchSportsAssets(scope)),

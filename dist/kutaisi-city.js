@@ -1,3 +1,4 @@
+import { buildCableCars } from "./cable-cars.js";
 import * as THREE from "./vendor/three.module.js";
 import { surfaceGeometry } from "./road-surface.js";
 import { ROAD_SURFACE } from "./road-surface-data.js";
@@ -510,22 +511,7 @@ export function buildKutaisiCity(v) {
   v.kutaisiWheel = wheel;
   const cableA = { x: park.x, y: 32, z: park.z },
     cableB = { x: LANDMARKS.palace.x, y: 12, z: LANDMARKS.palace.z };
-  beam(
-    [cableA.x, cableA.y, cableA.z],
-    [cableB.x, cableB.y, cableB.z],
-    0.045,
-    iron,
-  );
-  v.gondolas = [];
-  for (let i = 0; i < 2; i++) {
-    const g = new THREE.Group();
-    g.userData.dynamic = true;
-    root.add(g);
-    box(3, 2.3, 3, roof, 0, 0, 0, g);
-    box(3.08, 1.4, 3.08, window, 0, 0.35, 0, g);
-    beam([0, 1.5, 0], [0, 5, 0], 0.1, iron, g);
-    v.gondolas.push({ group: g, start: cableA, end: cableB, offset: i * 0.5 });
-  }
+  buildCableCars(v, root, cableA, cableB, 2);
   // Original rooftop challenge annex and matching solid slopes.
   box(
     ROOFTOP.w,

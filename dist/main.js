@@ -392,6 +392,7 @@ async function bankRun() {
           score: Math.floor(sim.score),
           checkpoints: sim.checkpoint,
           takedowns: sim.takedowns,
+          grexPulses: sim.grexTriggers.map((p) => p.id),
           trafficWrecks: sim.trafficWrecks,
           decorWrecks: sim.decorWrecks,
           cashBanners: sim.cashBanners,
@@ -1259,7 +1260,10 @@ try {
     leave: () => leaveRun(false),
     play: () => {
       const ticket = career.profile.activeRun;
-      if (sim.phase === "paused" && (!ticket?.event || career.serverNow() < ticket.eventEndsAt))
+      if (
+        sim.phase === "paused" &&
+        (!ticket?.event || career.serverNow() < ticket.eventEndsAt)
+      )
         pause();
       else return start();
     },

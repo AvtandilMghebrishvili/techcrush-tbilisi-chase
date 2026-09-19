@@ -159,7 +159,7 @@ test("flyover barriers stop slow impacts and high-speed glancing scrapes, and br
     for (const [normal, tangent, broken] of [
       [12, 0, false],
       [2, 65, false],
-      [45, 0, true],
+      [55, 0, true],
     ]) {
       const source = FLYOVER_RAILS.find(
           (r) => r.base === 7.4 && r.side === side,
@@ -198,9 +198,9 @@ test("breaking a flyover panel drops the car to ground and rewind/reset restore 
     x: r.x - nx * 4,
     z: r.z - nz * 4,
     y: 7.4,
-    vx: nx * 45,
-    vz: nz * 45,
-    speed: 45,
+    vx: nx * 55,
+    vz: nz * 55,
+    speed: 55,
     angle: Math.atan2(nx, nz),
   });
   const history = new RewindTimeline();

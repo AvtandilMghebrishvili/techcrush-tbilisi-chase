@@ -556,6 +556,9 @@ export class GarageUI {
       $("loot-done").textContent = existing
         ? "CONTINUE TO RESULTS ↗"
         : "KEEP REMAINING · BACK TO GARAGE ↗";
+      $("loot-grex").hidden = !["special", "platinum"].includes(
+        profile.lastBox.kind,
+      );
       const results = profile.lastBox.items;
       $("loot-summary").textContent = "Opening your three rewards…";
       $("loot-coins").hidden = !profile.lastBox.credits;

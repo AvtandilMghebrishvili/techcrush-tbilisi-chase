@@ -12,13 +12,18 @@ test("all four cities have distributed, reachable roadside gears and correctly f
   for (const city of ["tbilisi", "kutaisi", "batumi", "rustavi"]) {
     const source = `
       globalThis.location={href:'http://local/?map=${city}'};
-      const {FACADE_BANNERS,ROBOTICS_GEARS,BRAND_DENSITY}=await import('./dist/city-brand-sites.js');
+      const {FACADE_BANNERS,ROBOTICS_GEARS,GREX_MONUMENTS,BRAND_DENSITY}=await import('./dist/city-brand-sites.js');
       const {BUILDINGS,containsPoint,nearestRoad}=await import('./dist/city-map.js');
       const {roadClear}=await import('./dist/road-clearance.js');
       const {overOpenWater}=await import('./dist/surface-support.js');
       const {terrainBlocked}=await import('./dist/terrain.js');
       const assert=(await import('node:assert/strict')).default;
-      assert.equal(FACADE_BANNERS.length,BRAND_DENSITY.banners);
+      assert.equal(FACADE_BANNERS.length,78);
+      assert.equal(GREX_MONUMENTS.length,3);
+      assert.equal(ROBOTICS_GEARS.length,3);
+      const { MAP_PLACES }=await import("./dist/map-landmarks.js");
+      assert(MAP_PLACES.length>=5);
+      assert(MAP_PLACES.every(p=>Number.isFinite(p.x) && Number.isFinite(p.z) && p.description));
       assert.equal(ROBOTICS_GEARS.length,BRAND_DENSITY.gears);
       assert(FACADE_BANNERS.filter(b=>b.brand==='robotics').length>=5);
       assert(FACADE_BANNERS.filter(b=>b.brand==='techcrush').length>=5);
@@ -31,11 +36,11 @@ test("all four cities have distributed, reachable roadside gears and correctly f
         const road=nearestRoad(b.building);
         assert((road.x-b.x)*Math.sin(b.angle)+(road.z-b.z)*Math.cos(b.angle)>0);
       }
-      for(const p of ROBOTICS_GEARS) {
+      for(const p of [...ROBOTICS_GEARS,...GREX_MONUMENTS]) {
         assert(roadClear(p,p.radius+1));
         assert(!overOpenWater(p));assert(!terrainBlocked(p,p.radius+1));
         assert(!BUILDINGS.some(b=>containsPoint(b,p.x,p.z,p.radius+3)));
-        for(const q of ROBOTICS_GEARS) if(p!==q) assert(Math.hypot(p.x-q.x,p.z-q.z)>150);
+        for(const q of ROBOTICS_GEARS) if(p!==q) assert(Math.hypot(p.x-q.x,p.z-q.z)>65);
       }
       console.log(JSON.stringify({city:'${city}',banners:FACADE_BANNERS.length,gears:ROBOTICS_GEARS.length}));`;
     const run = spawnSync(

@@ -16,8 +16,8 @@ import { nearbyObstacles } from "./spatial-index.js";
 // Density follows the drivable network, rather than the empty map bounding box.
 const roadLength = ROADS.reduce((sum, r) => sum + r.length, 0);
 export const BRAND_DENSITY = {
-  banners: Math.max(12, Math.min(26, Math.ceil(roadLength / 1500))),
-  gears: Math.max(5, Math.min(10, Math.ceil(roadLength / 5000))),
+  banners: 3 * Math.max(12, Math.min(26, Math.ceil(roadLength / 1500))),
+  gears: 3,
 };
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 function spread(candidates, count, gap) {
@@ -74,7 +74,7 @@ for (const b of BUILDINGS) {
 export const FACADE_BANNERS = spread(
   facadeCandidates,
   BRAND_DENSITY.banners,
-  100,
+  60,
 ).map((p, id) => {
   const draped = id % 3 !== 1;
   const size = Math.min(
@@ -105,6 +105,7 @@ for (const r of ROADS) {
         x: x0 + Math.cos(r.angle) * offset * side,
         z: z0 - Math.sin(r.angle) * offset * side,
         angle: r.angle,
+        facing: r.angle - (side * Math.PI) / 2,
       };
       if (
         !roadClear(p, GEAR_RADIUS + 1) ||
@@ -142,7 +143,15 @@ for (const r of ROADS) {
     }
 }
 export const ROBOTICS_GEARS = spread(
-  gearCandidates,
+  [...gearCandidates],
   BRAND_DENSITY.gears,
   150,
+).map((p, id) => ({ ...p, id, radius: GEAR_RADIUS }));
+
+export const GREX_MONUMENTS = spread(
+  gearCandidates.filter((p) =>
+    ROBOTICS_GEARS.every((g) => distance(p, g) > 65),
+  ),
+  3,
+  200,
 ).map((p, id) => ({ ...p, id, radius: GEAR_RADIUS }));

@@ -71,6 +71,14 @@ export function airLineOfSight(helicopter, player, obstacles) {
 }
 export function updateAirSupport(h, player, obstacles, radio, time, dt, level) {
   if (!h) return;
+  if (h.destroyed) {
+    h.tracking = false;
+    h.vy -= dt * 18;
+    h.y = Math.max(1, h.y + h.vy * dt);
+    h.angle += dt * 0.75;
+    h.rotor += dt * Math.max(0, 20 - (time - h.wreckedAt) * 8);
+    return;
+  }
   h.rotor += dt * 34;
   h.tracking =
     distance(h, player) < 165 && airLineOfSight(h, player, obstacles);

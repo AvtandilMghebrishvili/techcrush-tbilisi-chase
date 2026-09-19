@@ -22,6 +22,7 @@ const scalars = [
   "runTopSpeed",
   "trafficWrecks",
   "nextImpactId",
+  "grexReturnAt",
 ];
 export class RewindTimeline {
   constructor() {
@@ -51,6 +52,7 @@ export class RewindTimeline {
         })),
       runQuests: clone(sim.runQuests),
       gearRepairs: clone(sim.gearRepairs),
+      grexTriggers: clone(sim.grexTriggers),
       cashBanners: clone(sim.cashBanners),
       runArtifacts: clone(sim.runArtifacts),
       player: clone(sim.player),
@@ -81,6 +83,7 @@ export class RewindTimeline {
     for (const k of [
       "runQuests",
       "gearRepairs",
+      "grexTriggers",
       "cashBanners",
       "runArtifacts",
       "player",

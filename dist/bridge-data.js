@@ -77,6 +77,10 @@ const rails = [...BRIDGE_DECKS, PEACE_DECK].flatMap((b) =>
     h: 1.5,
     angle: b.angle,
     barrier: true,
+    bridgeRail: true,
+    deckX: b.x,
+    deckZ: b.z,
+    deckLength: b.length,
     name: b.name,
   })),
 );
@@ -136,8 +140,7 @@ const railSpans = rails.flatMap((rail) => {
   }
   return pieces;
 });
-// Local fracture panels leave the rest of the bridge intact. Normal speed,
-// not glancing travel speed, must exceed 122 km/h to break a section.
+// Local panels keep the rest intact; shared angle-aware rules soften entrances.
 export const BRIDGE_BARRIERS = railSpans
   .flatMap((rail) => {
     const count = Math.ceil(rail.d / 6),
@@ -149,7 +152,15 @@ export const BRIDGE_BARRIERS = railSpans
         x: rail.x + Math.sin(rail.angle) * t,
         z: rail.z + Math.cos(rail.angle) * t,
         d,
-        breakSpeed: 34,
+        breakSpeed: 50,
+        entrance:
+          rail.deckLength / 2 -
+            Math.abs(
+              (rail.x - rail.deckX) * Math.sin(rail.angle) +
+                (rail.z - rail.deckZ) * Math.cos(rail.angle) +
+                t,
+            ) <
+          Math.min(30, rail.deckLength * 0.22),
       };
     });
   })

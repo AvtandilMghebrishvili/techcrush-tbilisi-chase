@@ -59,17 +59,21 @@ export function beginWater(car, time) {
   car.flipped = false;
   car.boosting = false;
   car.boostStrength = 0;
-  car.vy = -1.5;
+  car.vy = Math.min(0, car.vy || 0);
   return true;
 }
 export function stepWater(car, dt) {
   car.waterAge += dt;
-  car.vx *= Math.exp(-dt * 4);
-  car.vz *= Math.exp(-dt * 4);
+  // Preserve the launch velocity until the chassis actually touches the water.
+  const drag = car.y <= -5.8 ? Math.exp(-dt * 2.6) : 1;
+  car.vx *= drag;
+  car.vz *= drag;
+  car.x += car.vx * dt;
+  car.z += car.vz * dt;
   car.vy = car.y > -5.8 ? Math.max(-14, car.vy - dt * 9.8) : -2.3;
   car.y = Math.max(-10, car.y + car.vy * dt);
   car.pitch = Math.min(0.62, car.waterAge * 0.32);
   car.roll = Math.sin(car.waterAge * 2) * 0.12;
-  car.speed = 0;
+  car.speed = Math.hypot(car.vx, car.vz);
   return car.waterAge >= 3;
 }

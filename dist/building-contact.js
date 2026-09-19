@@ -1,3 +1,4 @@
+import { canBreakRail } from "./brand-rules.js";
 import { treeContact } from "./contacts.js";
 // Oriented chassis against a static rendered prism. No enclosing collision
 // circle: doors may pass close to a wall while bumpers still hit it head-on.
@@ -98,7 +99,12 @@ export function buildingContact(car, rect) {
   }
   const impact = Math.max(0, -car.vx * nx - car.vz * nz);
   car.impactNormal = { x: nx, z: nz };
-  if (rect.barrier && impact >= rect.breakSpeed) {
+  if (
+    rect.barrier &&
+    (rect.bridgeRail || rect.flyoverRail
+      ? canBreakRail(car, rect, impact)
+      : impact >= rect.breakSpeed)
+  ) {
     rect.broken = true;
     rect.brokenByPlayer = !!car.carId;
     car.vx *= 0.78;

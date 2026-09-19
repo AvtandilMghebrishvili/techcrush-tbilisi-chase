@@ -1,4 +1,5 @@
 import { updateSponsorBanners } from "./sponsor-banners.js";
+import { applyGrex } from "./grex-visuals.js";
 import { applyCityBranding, updateCityBranding } from "./city-branding.js";
 import { prepareSceneAssets } from "./scene-assets.js";
 import { releaseResources } from "./resource-lifetime.js";
@@ -211,6 +212,7 @@ export class SceneView {
       hill,
       hillNormal,
       robotics,
+      grex,
       trees,
       sports,
     ] = await this.assetLoad.ready;
@@ -221,6 +223,7 @@ export class SceneView {
     progress(90, "FINISHING CITY MATERIALS");
     applyTechcrushBrand(this, logo.image, wordmark.image);
     applyCityBranding(this, robotics, logo.image);
+    applyGrex(this, grex);
     logo.dispose();
     wordmark.dispose();
     for (const t of [road, facade]) {
@@ -637,7 +640,11 @@ export class SceneView {
         ? Math.max(sim.time, this.effectTime || 0) + dt
         : sim.time;
       for (const e of sim.explosions) {
-        if (!this.fx.has(e.id) && this.effectTime - e.born < EXPLOSION_LIFETIME)
+        if (
+          !this.fx.has(e.id) &&
+          this.effectTime - e.born < EXPLOSION_LIFETIME &&
+          (e.x - sim.player.x) ** 2 + (e.z - sim.player.z) ** 2 < 340 ** 2
+        )
           this.fx.set(e.id, createExplosion(this.scene, e));
       }
       for (const e of sim.impacts || [])

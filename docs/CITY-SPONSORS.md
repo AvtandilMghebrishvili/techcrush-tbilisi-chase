@@ -9,8 +9,9 @@ typeset promotional copy.
 ## Placement and artwork
 
 Placement is deterministic and follows each city's drivable road length. Tbilisi
-has 26 facade banners and 9 gear monuments; Kutaisi, Batumi and Rustavi each have
-26 facade banners and 10 monuments. Brands alternate across the selected sites.
+has 78 facade banners; Kutaisi, Batumi and Rustavi each have 78 too (three times
+the previous 26). Each city has three repair sites: levels 1–4 activate one,
+levels 5–9 activate two, and level 10 onward activates all three. Brands alternate across the selected sites.
 One site is near the starting district; subsequent sites maximize coverage.
 
 Banner faces point toward the street and fit the selected building. Landmark
@@ -53,3 +54,36 @@ Pillow. The game uses only the resulting small runtime assets, not the originals
 
 See `tests/city-branding.test.mjs` for all-city clearance, density, facade-fit and
 logo geometry checks.
+
+## GREX pulse and branded supplies
+
+The owner-supplied GREX artwork appears on all rooftop secret crates and the special
+supply card. Its green dinosaur silhouette is traced into one shared extruded mesh
+with its real eye opening and sampled color **#E1FE28**. Three roadside monuments
+per city glow through emissive material; they use no extra lights or render loop.
+The texture is a shared 768px WebP of approximately 5.4 KiB.
+
+Each monument can be used once per run. Contact costs **50 HP** (it can wreck a car
+with 50 HP or less), destroys existing patrols including tanks, and brings down the
+helicopter. Normal takedown awards apply. After **8 seconds of simulation time**,
+patrols return on separated, collision-checked roads around the player and converge
+on their position. Reinforcements are suppressed during that window. Rewind restores
+health, rewards, monuments, police, helicopter and the return deadline together.
+The map's sponsor overlay labels this risk before a driver chooses the waypoint.
+
+Repair pedestals state "Gift from Georgian Robotics Association". Full map icons
+and a compact location legend cover city landmarks, with descriptions and yellow
+waypoint navigation. Event artifact identities and placements remain untouched.
+
+## Driving and cable cars
+
+Water falls retain horizontal launch momentum above the waterline; drag starts at
+contact with the water, and the splash uses the actual landing position. Bridge
+panels use shared incidence-aware rules in every city: midspan square impacts need
+about 180 km/h and glancing impacts approach 280 km/h. Entry panels need half that,
+with an 85 km/h minimum and protection against shallow scrapes.
+
+Tbilisi and Kutaisi cable-car cabins and cables use the same sagging path. Cabins
+stay attached by their hanger, smoothly reverse at stations, and carry small square
+GRA/TECHCRUSH posters below the windows. Geometry/materials are shared and disposed
+with the city. No new timers or background rendering are introduced.

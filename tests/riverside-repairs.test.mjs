@@ -55,7 +55,9 @@ test("GRA repair instantly restores HP and body once, preserves awards, and rese
     sim.gearRepairs.map((g) => g.id),
     [gear.id],
   );
-  assert.ok(sim.events.includes("GRA FULL REPAIR · HP 100%"));
+  assert.ok(
+    sim.events.includes("GIFT FROM GEORGIAN ROBOTICS ASSOCIATION · HP 100%"),
+  );
   sim.player.health = 40;
   const cash = sim.runCash,
     score = sim.score;

@@ -19,31 +19,14 @@ import {
 } from "./navigation-cache.js";
 import { mapClickPoint, routeDistance } from "./hud-math.js";
 import { LANDMARKS } from "./district-data.js";
-import { FACADE_BANNERS, ROBOTICS_GEARS } from "./city-brand-sites.js";
-export const MAP_PLACES = IS_RUSTAVI
-  ? [
-      { ...LANDMARKS.heroes, name: "HEROES SQUARE", symbol: "H" },
-      { ...LANDMARKS.hall, name: "CITY HALL", symbol: "C" },
-      { ...LANDMARKS.monument, name: "NEW MONUMENT", symbol: "D" },
-      { ...LANDMARKS.track, name: "MOTORPARK", symbol: "T" },
-      { ...LANDMARKS.agency, name: "DRIVING ACADEMY", symbol: "A" },
-    ]
-  : !IS_KUTAISI && !IS_BATUMI
-    ? await (async () => {
-        const { HEROES, FREEDOM, KING_DAVID, AXIS } = await import(
-          "./tbilisi-civic-layout.js"
-        );
-        const { BANK_SITE } = await import("./tbilisi-world-sites.js");
-        return [
-          { ...FREEDOM, name: "FREEDOM SQUARE", symbol: "F" },
-          { ...HEROES, name: "HEROES FLYOVER", symbol: "H" },
-          { ...KING_DAVID, name: "KING DAVID", symbol: "K" },
-          { ...AXIS, name: "AXIS TOWERS", symbol: "A" },
-          { ...BANK_SITE, name: "BANK OF GEORGIA", symbol: "B" },
-          { ...LANDMARKS.narikala, name: "NARIKALA", symbol: "N" },
-        ];
-      })()
-    : [];
+import {
+  FACADE_BANNERS,
+  ROBOTICS_GEARS,
+  GREX_MONUMENTS,
+} from "./city-brand-sites.js";
+import { MAP_PLACES } from "./map-landmarks.js";
+export { MAP_PLACES };
+import { activeRepairCount } from "./brand-rules.js";
 
 const CIVIC_PARKS = IS_RUSTAVI
   ? (await import("./rustavi-civic-data.js")).HEROES_PARKS
@@ -160,6 +143,10 @@ export class QuestMap {
   pin(point, name) {
     this.select("");
     setWaypoint(this.sim, point, name);
+    const detail = document.getElementById("map-place-details");
+    if (detail)
+      detail.textContent =
+        MAP_PLACES.find((p) => p.name === name)?.description || "";
     this.draw();
   }
   route(value) {
@@ -181,17 +168,29 @@ export class QuestMap {
             : "TECHCRUSH BANNER",
       })),
       ...ROBOTICS_GEARS.filter(
-        (p) => !this.sim.gearRepairs.some((q) => q.id === p.id),
+        (p) =>
+          p.id < activeRepairCount(this.sim.level) &&
+          !this.sim.gearRepairs.some((q) => q.id === p.id),
       ).map((p) => ({
         ...p,
         symbol: "⚙",
         color: "#ffcd69",
-        name: "GRA FULL REPAIR · HP 100%",
+        name: "GRA GIFT · FULL REPAIR · HP 100%",
+      })),
+      ...GREX_MONUMENTS.filter(
+        (p) => !this.sim.grexTriggers.some((q) => q.id === p.id),
+      ).map((p) => ({
+        ...p,
+        symbol: "G",
+        color: "#e1fe28",
+        name: "GREX PULSE · −50 HP · PATROLS RETURN IN 8s",
       })),
     ]) {
       const point = mapPoint(site, 100),
         pin = document.createElement("button");
-      pin.className = "quest-pin brand-pin";
+      pin.className =
+        "quest-pin brand-pin " +
+        (["GRA", "TC"].includes(site.symbol) ? "banner-pin" : "powerup-pin");
       pin.style.cssText = `left:${point.x}%;top:${point.y}%;--quest:${site.color}`;
       pin.textContent = site.symbol;
       pin.title = site.name;
@@ -230,9 +229,15 @@ export class QuestMap {
     for (const b of this.dialog.querySelectorAll("[data-quest-route]"))
       b.onclick = () => this.route(b.dataset.questRoute);
     const places = document.getElementById("map-places");
+    if (!document.getElementById("map-place-details")) {
+      const detail = document.createElement("p");
+      detail.id = "map-place-details";
+      detail.setAttribute("aria-live", "polite");
+      places.after(detail);
+    }
     places.innerHTML = MAP_PLACES.map(
       (place, i) =>
-        `<button data-map-place="${i}">${place.symbol} · ${place.name}</button>`,
+        `<button title="${place.description}" data-map-place="${i}">${place.symbol} · ${place.name}</button>`,
     ).join("");
     for (const [i, place] of MAP_PLACES.entries()) {
       const point = mapPoint(place, 100),
@@ -241,6 +246,7 @@ export class QuestMap {
       button.style.cssText = `left:${point.x}%;top:${point.y}%;--quest:#afc6d9`;
       button.textContent = place.symbol;
       button.dataset.mapPlace = i;
+      button.title = place.name + " · " + place.description;
       button.setAttribute("aria-label", `Set waypoint to ${place.name}`);
       pins.append(button);
     }

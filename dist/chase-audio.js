@@ -425,7 +425,10 @@ export class ChaseAudio {
       );
       if (n) this.set(s.panner.pan, n.pan, t, 0.06);
     });
-    const air = sim.helicopter ? spatialSound(p, sim.helicopter, 230) : null;
+    const air =
+      sim.helicopter && !sim.helicopter.destroyed
+        ? spatialSound(p, sim.helicopter, 230)
+        : null;
     this.set(this.chopper.gain.gain, air ? air.gain * 0.022 : 0, t, 0.1);
     if (air) this.set(this.chopper.panner.pan, air.pan, t, 0.1);
     this.set(this.chopperMod.gain, air ? air.gain * 0.018 : 0, t, 0.1);
