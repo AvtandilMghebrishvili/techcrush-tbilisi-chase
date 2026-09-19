@@ -1,9 +1,24 @@
 import { ROAD_SURFACE } from "./road-surface-data.js";
 import { indexedPolygons, onIndexedSurface } from "./surface-support.js";
+import { IS_RUSTAVI } from "./map-selection.js";
+const plaza = IS_RUSTAVI
+  ? (await import("./rustavi-district-data.js")).HALL_PLAZA
+  : null;
+const plazaCos = plaza ? Math.cos(plaza.angle) : 0;
+const plazaSin = plaza ? Math.sin(plaza.angle) : 0;
 const sidewalks = indexedPolygons(ROAD_SURFACE.sidewalk);
 const asphalt = indexedPolygons(ROAD_SURFACE.asphalt);
 const contacts = new WeakMap();
 export function tireSurfaceHeight(p) {
+  if (plaza) {
+    const dx = p.x - plaza.x,
+      dz = p.z - plaza.z;
+    if (
+      Math.abs(dx * plazaCos - dz * plazaSin) <= plaza.w / 2 &&
+      Math.abs(dx * plazaSin + dz * plazaCos) <= plaza.d / 2
+    )
+      return 0.205;
+  }
   return onIndexedSurface(sidewalks, p)
     ? 0.18
     : onIndexedSurface(asphalt, p)

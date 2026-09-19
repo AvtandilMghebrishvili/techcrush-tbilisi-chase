@@ -53,6 +53,7 @@ export const TIME_COURSES = [
   "tbilisi-1.17",
   "kutaisi-1.2",
   MAP_COURSES.batumi,
+  MAP_COURSES.rustavi,
   MAP_COURSES.tbilisi,
   MAP_COURSES.kutaisi,
 ];

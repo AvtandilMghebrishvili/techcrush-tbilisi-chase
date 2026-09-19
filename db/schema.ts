@@ -4,6 +4,7 @@ import {
   integer,
   index,
   primaryKey,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 export const garages = sqliteTable(
   "garages",
@@ -102,6 +103,54 @@ export const raceResults = sqliteTable("race_results", {
   durationMs: integer("duration_ms").notNull(),
   score: integer("score").notNull(),
   rewinds: integer("rewinds").notNull(),
+  recordedAt: integer("recorded_at").notNull(),
+});
+export const eventEntries = sqliteTable(
+  "event_entries",
+  {
+    eventId: text("event_id").notNull(),
+    keyHash: text("key_hash")
+      .notNull()
+      .references(() => garages.keyHash),
+    handle: text("handle").notNull(),
+    handleKey: text("handle_key").notNull(),
+    joinedAt: integer("joined_at").notNull(),
+    unlockedAt: integer("unlocked_at"),
+  },
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.keyHash] }),
+    uniqueIndex("event_unique_handle").on(t.eventId, t.handleKey),
+    index("event_discovery").on(t.eventId, t.unlockedAt),
+  ],
+);
+export const eventScores = sqliteTable(
+  "event_scores",
+  {
+    eventId: text("event_id").notNull(),
+    keyHash: text("key_hash")
+      .notNull()
+      .references(() => garages.keyHash),
+    map: text("map").notNull(),
+    score: integer("score").notNull(),
+    runs: integer("runs").notNull(),
+    level: integer("level").notNull(),
+    rankAt: integer("rank_at").notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.keyHash, t.map] }),
+    index("event_city_score").on(t.eventId, t.map, t.score, t.rankAt),
+  ],
+);
+export const eventRuns = sqliteTable("event_runs", {
+  id: text("id").primaryKey(),
+  eventId: text("event_id").notNull(),
+  keyHash: text("key_hash")
+    .notNull()
+    .references(() => garages.keyHash),
+  map: text("map").notNull(),
+  score: integer("score").notNull(),
+  result: text("result").notNull(),
+  metrics: text("metrics").notNull(),
   recordedAt: integer("recorded_at").notNull(),
 });
 export const cityRankings = sqliteTable(

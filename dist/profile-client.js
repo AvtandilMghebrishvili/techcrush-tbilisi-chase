@@ -30,7 +30,13 @@ export class ProfileClient {
     }
     return data;
   }
+  serverNow() {
+    return Date.now() + (this.clockOffset || 0);
+  }
   accept(data) {
+    if (Number.isFinite(data.serverTime))
+      this.clockOffset = data.serverTime - Date.now();
+    this.preview = !!data.preview;
     this.profile = data.profile;
     this.version = data.version;
     this.driver = data.driver || this.driver;

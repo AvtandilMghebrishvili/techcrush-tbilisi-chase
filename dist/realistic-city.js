@@ -1,5 +1,11 @@
 import { facadeMaterial, batchStatic } from "./expansion-visuals.js";
-import { IS_KUTAISI, IS_BATUMI, CITY_NAME } from "./map-selection.js";
+import {
+  IS_KUTAISI,
+  IS_BATUMI,
+  IS_RUSTAVI,
+  CITY_NAME,
+} from "./map-selection.js";
+const rustavi = IS_RUSTAVI ? await import("./rustavi-city.js") : null;
 const batumi = IS_BATUMI ? await import("./batumi-city.js") : null;
 const kutaisi = IS_KUTAISI ? await import("./kutaisi-city.js") : null;
 import { reservedExpansion } from "./world-sites.js";
@@ -52,7 +58,7 @@ function mountains(v) {
   const terrain = new THREE.Mesh(geometry, v.terrainMaterial);
   terrain.receiveShadow = true;
   v.decor.add(terrain);
-  if (IS_KUTAISI || IS_BATUMI) return;
+  if (IS_KUTAISI || IS_BATUMI || IS_RUSTAVI) return;
   const statue = makeKartlisDeda();
   const sx = LANDMARKS.mother.x,
     sz = LANDMARKS.mother.z;
@@ -161,16 +167,19 @@ export function buildRealisticCity(v) {
   v.roadMaterial = road;
   v.buildingMaterials = [];
   v.oldTownMaterials = [];
-  const facades = IS_BATUMI
-    ? batumi.batumiFacades()
-    : IS_KUTAISI
-      ? kutaisi.kutaisiFacades()
-      : ["#f4ecda", "#d8cfbb", "#dad3c6", "#bfc5bf", "#d1bca5"].map((c) => {
-          const m = mat(c);
-          v.buildingMaterials.push(m);
-          return m;
-        });
-  if (IS_KUTAISI || IS_BATUMI) v.buildingMaterials.push(...facades);
+  const facades = IS_RUSTAVI
+    ? rustavi.rustaviFacades()
+    : IS_BATUMI
+      ? batumi.batumiFacades()
+      : IS_KUTAISI
+        ? kutaisi.kutaisiFacades()
+        : ["#f4ecda", "#d8cfbb", "#dad3c6", "#bfc5bf", "#d1bca5"].map((c) => {
+            const m = mat(c);
+            v.buildingMaterials.push(m);
+            return m;
+          });
+  if (IS_KUTAISI || IS_BATUMI || IS_RUSTAVI)
+    v.buildingMaterials.push(...facades);
   const newFacades = [0, 1, 2, 3].map(facadeMaterial);
   v.buildingMaterials.push(...newFacades);
   v.expansionFacades = newFacades;
@@ -287,10 +296,11 @@ export function buildRealisticCity(v) {
   }
   batchStatic(staticCity);
   streetDetails(v, line);
-  if (!IS_KUTAISI && !IS_BATUMI) clockBuilding(v, facades[1]);
+  if (!IS_KUTAISI && !IS_BATUMI && !IS_RUSTAVI) clockBuilding(v, facades[1]);
   mountains(v);
   buildTechcrushGarage(v);
-  if (IS_BATUMI) batumi.buildBatumiCity(v);
+  if (IS_RUSTAVI) rustavi.buildRustaviCity(v);
+  else if (IS_BATUMI) batumi.buildBatumiCity(v);
   else if (IS_KUTAISI) kutaisi.buildKutaisiCity(v);
   else buildTbilisiDistricts(v);
   buildGrass(v);
@@ -307,7 +317,7 @@ function streetDetails(v, line) {
   v.streetLampMaterials = [lamp];
   const trees = [];
   for (const r of ROADS) {
-    if ((IS_KUTAISI || IS_BATUMI) && r.length < 48) continue;
+    if ((IS_KUTAISI || IS_BATUMI || IS_RUSTAVI) && r.length < 48) continue;
     const fx = Math.sin(r.angle),
       fz = Math.cos(r.angle),
       rx = fz,
@@ -315,7 +325,7 @@ function streetDetails(v, line) {
     for (
       let t = 18;
       t < r.length - 9;
-      t += IS_BATUMI ? 95 : IS_KUTAISI ? 74 : 38
+      t += IS_RUSTAVI ? 110 : IS_BATUMI ? 95 : IS_KUTAISI ? 74 : 38
     ) {
       for (const side of [-1, 1]) {
         const x = r.start.x + fx * t + rx * (r.width / 2 + 2.4) * side,
@@ -363,6 +373,19 @@ function streetDetails(v, line) {
   }
   v.treePositions = TREES;
   // Road-name signs orient the player without a cluttered satellite-map overlay.
+  const p = nearestRoad(START);
+  // The civic forecourt is intentionally empty apart from the main monument.
+  if (
+    IS_RUSTAVI &&
+    reservedExpansion({
+      x: p.x - 8,
+      z: p.z - 14,
+      w: 8,
+      d: 1,
+      angle: -Math.PI / 2,
+    })
+  )
+    return;
   const signCanvas = document.createElement("canvas");
   signCanvas.width = 1024;
   signCanvas.height = 256;
@@ -375,22 +398,34 @@ function streetDetails(v, line) {
   c.fillStyle = "#fff";
   c.font = "bold 58px Arial";
   c.textAlign = "center";
+  const rustaviPlace = IS_RUSTAVI
+    ? Math.hypot(START.x - LANDMARKS.heroes.x, START.z - LANDMARKS.heroes.z) <
+      150
+      ? ["რუსთავი · გმირთა მოედანი", "RUSTAVI / HEROES SQUARE"]
+      : Math.hypot(START.x - LANDMARKS.hall.x, START.z - LANDMARKS.hall.z) < 100
+        ? ["რუსთავის მერია", "RUSTAVI / CITY HALL"]
+        : ["რუსთავი · ახალი მოედანი", "RUSTAVI / CITY WARS"]
+    : null;
   c.fillText(
-    IS_BATUMI
-      ? "ბათუმი · შავი ზღვა"
-      : IS_KUTAISI
-        ? "ქუთაისი · რიონის სანაპირო"
-        : "ბარათაშვილის გამზირი",
+    IS_RUSTAVI
+      ? rustaviPlace[0]
+      : IS_BATUMI
+        ? "ბათუმი · შავი ზღვა"
+        : IS_KUTAISI
+          ? "ქუთაისი · რიონის სანაპირო"
+          : "ბარათაშვილის გამზირი",
     512,
     102,
   );
   c.font = "44px Arial";
   c.fillText(
-    IS_BATUMI
-      ? "BATUMI / BLACK SEA"
-      : IS_KUTAISI
-        ? "KUTAISI / RIONI RIVERSIDE"
-        : "BARATASHVILI AVENUE",
+    IS_RUSTAVI
+      ? rustaviPlace[1]
+      : IS_BATUMI
+        ? "BATUMI / BLACK SEA"
+        : IS_KUTAISI
+          ? "KUTAISI / RIONI RIVERSIDE"
+          : "BARATASHVILI AVENUE",
     512,
     184,
   );
@@ -398,16 +433,19 @@ function streetDetails(v, line) {
     new THREE.PlaneGeometry(8, 2),
     new THREE.MeshStandardMaterial({
       map: new THREE.CanvasTexture(signCanvas),
-      side: THREE.DoubleSide,
+      side: THREE.FrontSide,
     }),
   );
-  const p = nearestRoad(START);
   sign.position.set(p.x - 8, 5, p.z - 14);
   sign.rotation.y = -Math.PI / 2;
   const post = new THREE.Group();
   post.position.set(sign.position.x, 0, sign.position.z);
   sign.position.set(0, 5, 0);
   post.add(sign);
+  const reverse = sign.clone();
+  reverse.rotation.y += Math.PI;
+  reverse.position.x += 0.018;
+  post.add(reverse);
   v.decor.add(post);
   v.box(0.12, 5, 0.12, metal, 0, 2.5, 0, post);
   registerBreakable(v, post, post.position.x, post.position.z, 5);

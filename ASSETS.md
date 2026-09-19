@@ -122,3 +122,20 @@ Falcon RS, Rioni GT, Coast X and the TECHCRUSH YouTuber Car are original procedu
 `dist/assets/car-previews/*.webp` contains eight 512 × 288 studio captures made from the game's existing car factories with `scripts/render-car-previews.mjs`. They are real model renders with stock equipment, not AI images. The licensed Original 458 retains its original attribution and license above; the other car designs are original game geometry. All eight images together are about 90 KB. No new manufacturer assets are introduced.
 
 `dist/sponsor-banners.js` draws two original Canvas layouts using the supplied TECHCRUSH logo, Georgian subscribe/smash text and locally rendered emoji. Both sides use separate front-facing surfaces so text is readable in each direction. One shared subscription texture and one shared reward texture serve every billboard in the selected city.
+
+## Private CITY WARS / Rustavi preview
+
+The Rustavi street and river snapshot is attributed to OpenStreetMap contributors,
+ODbL 1.0, retrieved 19 September 2026. See `docs/RUSTAVI.md` for source URLs and
+reproduction instructions. Its civic buildings, hollow diamond monument, horse
+sculptures, race facilities and exam yard are original procedural interpretations
+of the owner's references. No Google imagery ships as a texture. Raw references
+in `Challenge/` stay private and are excluded from Git.
+
+Four optimized WebP packaging photographs under `dist/assets/event/` are derived
+from prize photos supplied by the owner. They depict model prizes, not full-size
+vehicles. Product brands retain their own rights. CITY WARS layouts and five
+additional shared Canvas artifact-banner designs are original game artwork.
+
+
+Rustavi civic revision: original procedural geometry based on the owner's ten Heroes Square / City Hall reference photographs in `Challenge/რუსთავი/`. References remain local; no uploaded reference pixels are bundled. Street / park placement uses the existing OpenStreetMap snapshot (ODbL), including way 1329069774 and node 9995976090. See `docs/RUSTAVI.md` for scale and lane-clearance adaptations.

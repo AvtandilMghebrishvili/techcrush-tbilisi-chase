@@ -1,7 +1,58 @@
 import { ROOFTOP, QUEST_BOX, SPECIAL_RAMPS, roofAt } from "./world-sites.js";
 import { IS_KUTAISI } from "./map-selection.js";
 import { routeBetween } from "./simulation.js";
+import { nearestRoad } from "./city-map.js";
 const routes = new WeakMap();
+const checkpoints = new WeakMap();
+const waypoints = new WeakMap();
+export const checkpointTarget = (sim) => sim.checkpoints[sim.checkpoint];
+function cachedStreetRoute(cache, sim, target) {
+  if (!target) return [];
+  const p = sim.player,
+    old = cache.get(sim);
+  if (
+    old &&
+    old.x === p.x &&
+    old.z === p.z &&
+    old.target === target &&
+    old.tx === target.x &&
+    old.tz === target.z
+  )
+    return old.points;
+  const points = routeBetween(p, target);
+  cache.set(sim, {
+    x: p.x,
+    z: p.z,
+    target,
+    tx: target.x,
+    tz: target.z,
+    points,
+  });
+  return points;
+}
+export const checkpointRoute = (sim) =>
+  cachedStreetRoute(checkpoints, sim, checkpointTarget(sim));
+export const secondaryTarget = (sim) =>
+  sim.waypoint || (sim.navQuest ? navigationTarget(sim) : null);
+export const secondaryRoute = (sim) =>
+  sim.waypoint
+    ? cachedStreetRoute(waypoints, sim, sim.waypoint)
+    : sim.navQuest
+      ? playerRoute(sim)
+      : [];
+// Selecting water or a building targets its nearest reachable street, not a path through it.
+export function setWaypoint(sim, point, name = "CUSTOM DESTINATION") {
+  if (!point) {
+    sim.waypoint = null;
+    return null;
+  }
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.z)) return null;
+  const road = nearestRoad(point);
+  if (!road) return null;
+  sim.navQuest = null;
+  sim.waypoint = { x: road.x, z: road.z, name };
+  return sim.waypoint;
+}
 const approach = SPECIAL_RAMPS.map((r) => ({
   x: r.x - Math.sin(r.angle) * (r.length / 2 + 48),
   z: r.z - Math.cos(r.angle) * (r.length / 2 + 48),

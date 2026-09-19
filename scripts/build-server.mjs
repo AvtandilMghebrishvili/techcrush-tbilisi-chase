@@ -96,6 +96,10 @@ for (const file of [
   "batumi-road-data.js",
   "batumi-road-surface-data.js",
   "batumi-geo-data.js",
+  "rustavi-road-data.js",
+  "rustavi-road-surface-data.js",
+  "rustavi-geo-data.js",
+  "event-rules.js",
 ])
   await writeFile(
     "dist/client/" + file,

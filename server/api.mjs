@@ -1,3 +1,5 @@
+import { EVENT_ID, eventProgress } from "../dist/event-rules.js";
+import { eventBoard } from "./event-board.mjs";
 import { readLeaderboard } from "./leaderboard.mjs";
 import { cityCommunity } from "../dist/map-selection.js";
 import {
@@ -44,7 +46,8 @@ async function readBody(request) {
   }
   return JSON.parse(text + decoder.decode());
 }
-export async function handleApi(request, DB) {
+export async function handleApi(request, DB, options = {}) {
+  const now = options.now ? options.now() : Date.now();
   if (!DB)
     return json(
       { error: "Garage saving is temporarily unavailable. Please try again." },
@@ -74,13 +77,28 @@ export async function handleApi(request, DB) {
       );
     }
   }
-  if (!["/api/profile", "/api/action"].includes(url.pathname))
+  if (
+    !["/api/profile", "/api/action", "/api/event/leaderboard"].includes(
+      url.pathname,
+    )
+  )
     return json({ error: "Not found" }, 404);
   const token = request.headers.get("authorization")?.replace(/^Bearer /, "");
   if (!token || !/^[a-f0-9]{64}$/.test(token))
     return json({ error: "Missing or invalid garage key." }, 401);
   const hash = await keyHash(token);
   try {
+    if (url.pathname === "/api/event/leaderboard") {
+      if (request.method !== "GET")
+        return json({ error: "Method not allowed" }, 405);
+      try {
+        return json(
+          await eventBoard(DB, url, hash, now, options.preview === true),
+        );
+      } catch (error) {
+        return json({ error: error.message }, 400);
+      }
+    }
     if (url.pathname === "/api/profile" && request.method === "POST") {
       await DB.prepare(
         "INSERT INTO garages (key_hash,profile,version,updated_at) VALUES (?,?,0,?) ON CONFLICT(key_hash) DO NOTHING",
@@ -139,7 +157,11 @@ export async function handleApi(request, DB) {
             profile,
             { ...body.action, id: body.id },
             random,
-            { now: Date.now(), runId: crypto.randomUUID() },
+            {
+              now,
+              runId: crypto.randomUUID(),
+              preview: options.preview === true,
+            },
           );
         } catch (error) {
           return json({ error: error.message }, 400);
@@ -186,6 +208,71 @@ export async function handleApi(request, DB) {
             ? `$.maps.${settledMap}.community.lastTime.runId`
             : "$.community.lastTime.runId";
         const statements = [update];
+        const contest = eventProgress(profile);
+        const guard =
+          "EXISTS(SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.operations[#-1]')=?)";
+        if (body.action.type === "join-event")
+          statements.push(
+            DB.prepare(
+              `INSERT INTO event_entries(event_id,key_hash,handle,handle_key,joined_at) SELECT ?,?,?,?,? WHERE ${guard} ON CONFLICT(event_id,key_hash) DO NOTHING`,
+            ).bind(
+              EVENT_ID,
+              hash,
+              contest.handle,
+              contest.handleKey,
+              contest.joinedAt,
+              hash,
+              version + 1,
+              body.id,
+            ),
+          );
+        if (
+          body.action.type === "settle" &&
+          contest?.lastReceipt?.runId === body.action.runId
+        ) {
+          const receipt = contest.lastReceipt,
+            r = contest.scores[receipt.map];
+          if (receipt.unlocked)
+            statements.push(
+              DB.prepare(
+                `UPDATE event_entries SET unlocked_at=COALESCE(unlocked_at,?) WHERE event_id=? AND key_hash=? AND ${guard}`,
+              ).bind(now, EVENT_ID, hash, hash, version + 1, body.id),
+            );
+          statements.push(
+            DB.prepare(
+              `INSERT INTO event_scores(event_id,key_hash,map,score,runs,level,rank_at) SELECT ?,?,?,?,?,?,? WHERE ${guard} ON CONFLICT(event_id,key_hash,map) DO UPDATE SET score=excluded.score,runs=excluded.runs,level=excluded.level,rank_at=excluded.rank_at`,
+            ).bind(
+              EVENT_ID,
+              hash,
+              receipt.map,
+              r.score,
+              r.runs,
+              r.level,
+              r.rankAt,
+              hash,
+              version + 1,
+              body.id,
+            ),
+          );
+          statements.push(
+            DB.prepare(
+              `INSERT INTO event_runs(id,event_id,key_hash,map,score,result,metrics,recorded_at) SELECT ?,?,?,?,?,?,?,? WHERE ${guard} ON CONFLICT(id) DO NOTHING`,
+            ).bind(
+              body.action.runId,
+              EVENT_ID,
+              hash,
+              receipt.map,
+              receipt.score,
+              body.action.result,
+              JSON.stringify(body.action.metrics),
+              now,
+              hash,
+              version + 1,
+              body.id,
+            ),
+          );
+        }
+
         if (body.action.type === "settle" && settledMap !== "tbilisi") {
           const c = profile.maps[settledMap].community;
           statements.push(
@@ -267,12 +354,23 @@ export async function handleApi(request, DB) {
       }
     }
     return json({
-      profile,
+      profile: options.preview ? { ...profile, previewAccess: true } : profile,
+      preview: options.preview === true,
+      serverTime: now,
       version,
       driver: hash.slice(0, 6).toUpperCase(),
       publicId: row.public_id || (version !== row.version ? publicId : null),
     });
   } catch (error) {
+    if (
+      /UNIQUE constraint failed: event_entries.event_id, event_entries.handle_key/.test(
+        error.message,
+      )
+    )
+      return json(
+        { error: "This event username is taken. Choose a different one." },
+        400,
+      );
     console.error("Garage storage error:", error.message);
     return json(
       {

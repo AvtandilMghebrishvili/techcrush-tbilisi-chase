@@ -5,6 +5,7 @@ artifacts/
 *.tar.gz
 referensi quCebis/
 referensi quCebis Qutaisi/
+Challenge/
 dist/client/
 dist/server/
 dist/.openai/

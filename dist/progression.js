@@ -1,3 +1,9 @@
+import {
+  EVENT_ID,
+  joinEvent,
+  stampEventRun,
+  settleEvent,
+} from "./event-rules.js";
 import { TIME_COURSES } from "./race-timing.js";
 import { ticketRewardMultiplier } from "./car-bonuses.js";
 import {
@@ -233,6 +239,7 @@ export function newProfile() {
     maps: {
       kutaisi: { level: 1, community: newCommunity() },
       batumi: { level: 1, community: newCommunity() },
+      rustavi: { level: 1, community: newCommunity() },
     },
     unlockedCars: [],
     carBoxes: [],
@@ -268,6 +275,7 @@ export function migrateProfile(profile) {
   p.maps ||= {};
   p.maps.kutaisi = { level: 1, community: newCommunity(), ...p.maps.kutaisi };
   p.maps.batumi = { level: 1, community: newCommunity(), ...p.maps.batumi };
+  p.maps.rustavi = { level: 1, community: newCommunity(), ...p.maps.rustavi };
   p.cars ||= {};
   p.platinumBoxes ||= 0;
   for (const id of CAR_IDS) p.cars[id] ||= {};
@@ -276,7 +284,7 @@ export function migrateProfile(profile) {
     p.unlockedCars ||= [];
     p.carBoxes ||= [];
     p.claimedCityCars ||= [];
-    for (const map of CITY_IDS)
+    for (const map of Object.keys(CITY_CARS))
       if (
         cityLevel(p, map) >= 6 &&
         !p.claimedCityCars.includes(map) &&
@@ -367,6 +375,7 @@ export function applyProgressAction(
   context = {},
 ) {
   const p = migrateProfile(profile);
+  delete p.previewAccess;
   const car = CAR_IDS.includes(action.car) ? action.car : p.selectedCar;
   if (
     ["select", "begin-run", "paint", "upgrade", "equip", "fuse"].includes(
@@ -376,7 +385,14 @@ export function applyProgressAction(
   )
     throw Error("Unlock this car by reaching its required level in any city.");
   const item = PARTS.find((x) => x.id === action.part);
-  if (action.type === "driver") {
+  if (action.type === "event-notice-seen") {
+    if (action.event !== EVENT_ID || !Number.isFinite(context.now))
+      throw Error("Unknown event notice.");
+    p.eventNotices ||= {};
+    p.eventNotices[EVENT_ID] ||= context.now;
+  } else if (action.type === "join-event") {
+    joinEvent(p, action, context.now);
+  } else if (action.type === "driver") {
     const name = normalizeName(action.name);
     if (!AVATARS.includes(action.avatar) || typeof action.listed !== "boolean")
       throw Error("Choose a valid driver profile.");
@@ -386,7 +402,11 @@ export function applyProgressAction(
       throw Error("Start your chase online.");
     if (!CAR_IDS.includes(action.car)) throw Error("Choose a valid car.");
     const map = action.map || "tbilisi";
-    if (!mapUnlocked(p, map)) throw Error("Choose a valid city.");
+    if (
+      !(context.preview === true && map === "rustavi") &&
+      !mapUnlocked(p, map, context.now)
+    )
+      throw Error("Choose a valid city.");
     if (action.course && !action.course.startsWith(map + "-"))
       throw Error("This timing course belongs to another city.");
     if (action.course && !TIME_COURSES.includes(action.course))
@@ -411,6 +431,7 @@ export function applyProgressAction(
           }
         : {}),
     };
+    stampEventRun(p, action, p.activeRun, context.now);
   } else if (action.type === "select") {
     if (!CAR_IDS.includes(action.car)) throw Error("Unknown car");
     p.selectedCar = car;
@@ -652,6 +673,13 @@ export function applyProgressAction(
         for (const key of ["credits", "boxes", "platinumBoxes", "quests"])
           p[key] = runProfile[key];
       }
+      settleEvent(
+        p,
+        p.activeRun,
+        { ...metrics, artifacts: action.metrics.artifacts },
+        action.result,
+        context.now,
+      );
       p.lastRunMap = map;
       p.activeRun = null;
     } else {

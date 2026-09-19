@@ -1,4 +1,5 @@
 import { addCabinDetails } from "./interior-detail.js";
+import { cockpitSeat } from "./cockpit-view.js";
 import { installWheelKits, addExteriorKit } from "./customization.js";
 import * as THREE from "./vendor/three.module.js";
 import {
@@ -450,7 +451,7 @@ export function makeOriginalSportsCar(id, color, equipment = {}) {
       openTop: !!shape.openTop,
     },
     equipment: { ...equipment },
-    cockpitSeat: { x: 0.36, y: shape.roof - 0.16, z: -0.15 + cabinShift },
+    cockpitSeat: cockpitSeat(shape.roof, cabinShift),
     exhaustPositions: [-0.57, 0.57].map((x) => ({
       x,
       y: 0.4,

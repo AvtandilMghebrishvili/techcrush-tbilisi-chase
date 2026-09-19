@@ -1,7 +1,10 @@
+import { EVENT_ID, ARTIFACT_BANNERS, HUNT_CITIES } from "./event-rules.js";
+import { ACTIVE_MAP } from "./map-selection.js";
 import * as THREE from "./vendor/three.module.js";
 import { registerBreakable } from "./breakable-props.js";
 import { SPONSOR_SITES } from "./sponsor-sites.js";
 function artwork(reward = false, logo) {
+  const artifact = Number.isInteger(reward) ? reward : 0;
   const canvas = document.createElement("canvas");
   canvas.width = 1024;
   canvas.height = 512;
@@ -44,11 +47,30 @@ function artwork(reward = false, logo) {
     512,
     466,
   );
+  if (artifact) {
+    c.fillStyle = "#062830";
+    c.fillRect(0, 152, 1024, 360);
+    c.fillStyle = "#73f0ea";
+    c.font = "900 95px Arial";
+    c.fillText(
+      ["", "FUEL CELL", "GEAR CORE", "SPARK KEY", "RACE WHEEL", "AERO WING"][
+        artifact
+      ],
+      512,
+      277,
+      940,
+    );
+    c.font = "900 70px Arial";
+    c.fillText("ARTIFACT 0" + artifact + " / 05", 512, 378, 940);
+    c.fillStyle = "#ffffff";
+    c.font = "bold 29px Arial";
+    c.fillText("SMASH · COLLECT · UNLOCK THE SECRET", 512, 470, 960);
+  }
   return canvas;
 }
 export function buildSponsorBanners(v) {
   v.sponsorBanners = [];
-  v.sponsorTextures = [false, true].map((r) => {
+  v.sponsorTextures = [false, true, 1, 2, 3, 4, 5].map((r) => {
     const t = new THREE.CanvasTexture(artwork(r));
     t.colorSpace = THREE.SRGBColorSpace;
     return t;
@@ -97,7 +119,7 @@ export function buildSponsorBanners(v) {
 }
 export function brandSponsorBanners(v, logo) {
   for (const [i, t] of v.sponsorTextures.entries()) {
-    const next = artwork(i === 1, logo);
+    const next = artwork(i > 1 ? i - 1 : i === 1, logo);
     t.image.getContext("2d").drawImage(next, 0, 0);
     t.needsUpdate = true;
   }
@@ -107,6 +129,12 @@ export function updateSponsorBanners(v, sim) {
   v.sponsorRun = sim.cashBannerIds;
   for (const b of v.sponsorBanners || []) {
     const reward = sim.phase !== "ready" && sim.cashBannerIds.includes(b.id);
-    for (const f of b.faces) f.material = v.sponsorMaterials[reward ? 1 : 0];
+    const artifact =
+      sim.runOptions?.event === EVENT_ID && HUNT_CITIES.includes(ACTIVE_MAP)
+        ? ARTIFACT_BANNERS.indexOf(b.id)
+        : -1;
+    for (const f of b.faces)
+      f.material =
+        v.sponsorMaterials[artifact >= 0 ? artifact + 2 : reward ? 1 : 0];
   }
 }

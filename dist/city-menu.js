@@ -2,6 +2,7 @@ import { refreshRewards } from "./reward-ui.js";
 import {
   ACTIVE_MAP,
   IS_KUTAISI,
+  IS_RUSTAVI,
   CITY_NAME,
   cityLevel,
   mapUnlocked,
@@ -32,12 +33,27 @@ export function cityMenu(store, leave) {
         option.textContent = "RIONI GAP · 220+ KM/H";
     }
   }
+  if (IS_RUSTAVI) {
+    document.title = "TECHCRUSH · Rustavi Chase";
+    document.querySelector("#intro .intro-copy").textContent =
+      "Steel city. Motorpark. A new getaway.";
+    $("route-selector").querySelector('[value="river"]')?.remove();
+    document.querySelector(".mission-cover").hidden = true;
+    $("mission-card").querySelectorAll("p")[2].textContent =
+      "Use ROUTE to find the Steelworks Skybox. Land on the roof to collect a Platinum part. Hold Q to rewind.";
+  }
+  const secret = document.createElement("button");
+  secret.type = "button";
+  secret.dataset.map = "rustavi";
+  secret.innerHTML =
+    '<span class="city-state"></span><b>SECRET MISSION</b><span class="city-caption">Find 15 artifacts</span><small></small>';
+  document.querySelector(".map-slots").append(secret);
   let switching = false;
   async function change(map) {
     if (
       switching ||
       map === ACTIVE_MAP ||
-      !mapUnlocked(store.profile, map) ||
+      !mapUnlocked(store.profile, map, store.serverNow()) ||
       store.busy
     )
       return;
@@ -65,25 +81,44 @@ export function cityMenu(store, leave) {
     for (const b of document.querySelectorAll("[data-map]")) {
       const map = b.dataset.map,
         selected = map === ACTIVE_MAP;
-      b.disabled = store.busy || switching;
+      const available = mapUnlocked(p, map, store.serverNow());
+      b.disabled = store.busy || switching || !available;
+      if (map === "rustavi") {
+        b.querySelector("b").textContent =
+          available || store.challengeRevealed ? "RUSTAVI" : "SECRET MISSION";
+        b.querySelector(".city-caption").textContent = available
+          ? "Steel city · motorpark"
+          : "5 artifacts × 3 cities";
+      }
       b.classList.toggle("active-map", selected);
       b.classList.toggle("city-available", !selected);
-      b.classList.remove("city-locked");
+      b.classList.toggle("city-locked", !available);
       b.setAttribute("aria-pressed", String(selected));
-      b.querySelector(".city-state").textContent = selected
-        ? "✓ SELECTED"
-        : "PLAY NOW ↗";
-      b.querySelector("small").textContent =
-        `LVL ${cityLevel(p, map)} · BOX AT ${5 * (Math.floor(cityLevel(p, map) / 5) + 1)}`;
+      b.querySelector(".city-state").textContent = !available
+        ? "◇ LOCKED"
+        : selected
+          ? "✓ SELECTED"
+          : "PLAY NOW ↗";
+      b.querySelector("small").textContent = !available
+        ? "EXTRA CHALLENGE"
+        : `LVL ${cityLevel(p, map)} · BOX AT ${5 * (Math.floor(cityLevel(p, map) / 5) + 1)}`;
     }
-    $("menu-city-count").textContent = "3 / 3 OPEN";
+    $("menu-city-count").textContent = mapUnlocked(
+      p,
+      "rustavi",
+      store.serverNow(),
+    )
+      ? "4 / 4 OPEN"
+      : store.challengeRevealed
+        ? "3 OPEN · RUSTAVI LOCKED"
+        : "3 OPEN + SECRET";
     $("menu-race-label").textContent = `${CITY_NAME} · LEVEL ${cityLevel(p)}`;
     $("unlock-title").textContent = "LVL 10 · ALL CARS / LVL 15 · TECHCRUSH";
     $("map-access-note").textContent =
       "Reach either milestone in any city. Bonus boxes every 5 levels.";
     refreshRewards(store);
     $("result-kutaisi").hidden = false;
-    $("result-kutaisi").textContent = "CHOOSE CITY · 3 MAPS ↗";
+    $("result-kutaisi").textContent = "CHOOSE CITY ↗";
   };
   for (const b of document.querySelectorAll("[data-map]"))
     b.onclick = () => void change(b.dataset.map);
@@ -97,4 +132,5 @@ export function cityMenu(store, leave) {
     render();
   };
   render();
+  return render;
 }

@@ -4,6 +4,17 @@
 
 Play directly in your browser — no installation or sign-in required. Choose a driver name, race your community and climb the shared leaderboard. Each browser gets its own saved garage.
 
+**CITY WARS — 20 September, 15:00 → 24 September 2026, 21:00 (Tbilisi / UTC+4).**
+Join when the green countdown expires. Compete for each city's cumulative score
+ranking with your existing garage and discover the extra challenge by collecting
+five different artifacts in each of the three cities. The first complete hunt
+reveals the destination to everyone; each racer must still earn their own access.
+The red countdown shows time remaining. [Event rules and save behavior](docs/CITY_WARS.md).
+
+The event overview is compact on desktop and mobile, with a clear **PLAY** action.
+NPC traffic and police pass through stunt ramps without getting stuck; player
+jumps and ramp collisions remain active. Ordinary saves and rankings are retained.
+
 **Loading and lifecycle update:** city files load alongside your profile, unchanged media is reused between maps, and leaving the game explicitly releases both 3D renderers and audio. Trees and repeated car selection do less work at the same visual quality. [Performance and validation notes](docs/PERFORMANCE.md).
 
 **Version 2.5 — a distinct fleet.** Keep the Original 458 and choose between a rounded coupe, wedge V12, luxury hypercar, rally hatch, long-hood GT, open speedster and the **TECHCRUSH Cyber electric pickup**. Cyber earns **2× driving coins and score**, with a balanced 5% stock speed advantage over Coast X. Aero upgrades replace the factory wing instead of stacking; wheel kits, cabin fittings and garage cameras match each model. Existing car ownership, paint, parts and progress are retained. [Fleet, rewards and upgrade guide](docs/FLEET.md).

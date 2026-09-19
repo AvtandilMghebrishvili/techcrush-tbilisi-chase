@@ -7,6 +7,7 @@ import { makePartModel } from "./workshop-parts.js";
 import { disposeGroup } from "./effects.js";
 import { FrameLoop } from "./frame-loop.js";
 import { releaseResources } from "./resource-lifetime.js";
+import { positionCockpitCamera } from "./cockpit-view.js";
 
 export class GaragePreview {
   constructor(host, source) {
@@ -207,11 +208,9 @@ export class GaragePreview {
     if (this.car) {
       if (this.mode === "cabin") {
         if (this.car.userData.glass) this.car.userData.glass.opacity = 0.13;
-        const s = this.car.userData.cockpitSeat;
-        this.camera.position.set(s.x, s.y, s.z);
-        this.camera.lookAt(s.x, s.y - 0.08, 4);
-        this.camera.fov = 76;
+        positionCockpitCamera(this.camera, this.car);
       } else {
+        this.camera.up.set(0, 1, 0);
         if (this.car.userData.glass) this.car.userData.glass.opacity = 0.55;
         // Fit each model and its installed aero at the current angle/aspect.
         // Eight cached corners also handle long pickups in narrow desktop panes.

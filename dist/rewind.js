@@ -51,6 +51,7 @@ export class RewindTimeline {
         })),
       runQuests: clone(sim.runQuests),
       cashBanners: clone(sim.cashBanners),
+      runArtifacts: clone(sim.runArtifacts),
       player: clone(sim.player),
       police: clone(sim.police),
       traffic: clone(sim.traffic),
@@ -79,6 +80,7 @@ export class RewindTimeline {
     for (const k of [
       "runQuests",
       "cashBanners",
+      "runArtifacts",
       "player",
       "police",
       "traffic",

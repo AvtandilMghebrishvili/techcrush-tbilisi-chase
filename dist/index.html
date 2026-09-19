@@ -45,6 +45,7 @@
     <link rel="stylesheet" href="./menu-polish.css" />
     <link rel="stylesheet" href="./compact-workshop.css" />
     <link rel="stylesheet" href="./map-controls.css" />
+    <link rel="stylesheet" href="./event.css" />
   </head>
   <body>
     <main id="game">
@@ -385,7 +386,7 @@
             MAP + SIDE QUESTS ↗
           </button>
           <div class="map-caption">
-            <span id="district">DOWNTOWN</span><span>N ↑</span>
+            <span id="district">DOWNTOWN</span><span>HEADING ↑</span>
           </div>
         </div>
         <div class="speed-panel">
@@ -409,7 +410,10 @@
         <div id="toast" class="toast" aria-live="polite"></div>
         <div id="route-cue" class="route-cue">
           <span id="direction" aria-hidden="true">↑</span>
-          <div><small>NEXT CHECKPOINT</small><b id="distance">120 M</b></div>
+          <div>
+            <small>NEXT CHECKPOINT</small><b id="distance">120 M</b
+            ><span id="waypoint-cue" hidden></span>
+          </div>
         </div>
       </section>
       <section
@@ -473,7 +477,7 @@
         <header>
           <div>
             <small id="quest-city">EXPLORE &amp; COLLECT</small>
-            <h2 id="quest-map-title">CHOOSE YOUR NEXT CHALLENGE.</h2>
+            <h2 id="quest-map-title">PICK A PLACE. FIND YOUR WAY.</h2>
           </div>
           <button id="quest-map-close" aria-label="Close quest map">
             CLOSE ×
@@ -512,10 +516,16 @@
               </div>
               <span class="quest-north">N ↑</span>
             </div>
-            <p id="quest-map-hint">DRAG TO MOVE · SCROLL / PINCH TO ZOOM</p>
+            <p id="quest-map-hint">
+              TAP TO PIN · DRAG TO MOVE · SCROLL / PINCH TO ZOOM · ENTER TO PIN
+              CENTER
+            </p>
             <div class="quest-legend">
-              <span>● YOU</span><span>1–6 CHECKPOINTS</span
-              ><span>S ROOFTOP</span><span>R RIVER JUMP</span
+              <span>● YOU</span
+              ><span style="color: #73e6ed">● CHECKPOINT ROUTE</span
+              ><span style="color: #ffd43b">◆ YOUR DESTINATION</span
+              ><span>S ROOFTOP</span
+              ><span id="river-quest-legend">R RIVER JUMP</span
               ><span>▪ STREET RAMPS</span>
             </div>
           </div>
@@ -553,14 +563,21 @@
                 RESET MINIMAP
               </button>
             </details>
+            <div class="waypoint-panel">
+              <strong id="waypoint-info" role="status"
+                >TAP A STREET TO SET YOUR DESTINATION</strong
+              ><button id="waypoint-clear" disabled>CLEAR PIN ×</button>
+            </div>
+            <div id="map-places" aria-label="City landmarks"></div>
             <div id="quest-list"></div>
             <p class="quest-help">
-              Select a challenge to guide you to the correct ramp entrance.
-              Build speed before the jump and land upright. Uncollected boxes
-              stay available after updates. The chase and timer pause while this
-              map is open.
+              Tap a place for yellow guidance. Pins snap to the nearest street.
+              Cyan checkpoint arrows always stay active. Choose a challenge for
+              its ramp approach. Build speed before the jump and land upright.
+              Uncollected boxes stay available after updates. The chase and
+              timer pause while this map is open.
             </p>
-            <button id="quest-return">RESUME CHECKPOINT ROUTE ↗</button>
+            <button id="quest-return">RESUME DRIVE ↗</button>
           </div>
         </div>
       </dialog>

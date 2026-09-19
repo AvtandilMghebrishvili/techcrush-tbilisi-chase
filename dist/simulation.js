@@ -4,7 +4,12 @@ import {
   patrolCollisionDamage,
 } from "./banner-rules.js";
 import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
-import { IS_KUTAISI, IS_BATUMI, ACTIVE_MAP } from "./map-selection.js";
+import {
+  IS_KUTAISI,
+  IS_BATUMI,
+  IS_RUSTAVI,
+  ACTIVE_MAP,
+} from "./map-selection.js";
 import { buildingContact } from "./building-contact.js";
 import { levelRewards, creditAward, STUNT_REWARDS } from "./community-rules.js";
 import { carRewardMultiplier } from "./car-bonuses.js";
@@ -27,7 +32,7 @@ import {
 } from "./damage-state.js";
 import { vehicleContact, treeContact } from "./contacts.js";
 import { RewindTimeline } from "./rewind.js";
-import { RAMPS, driveRamp, stepAirborne, resolveRampSolid } from "./stunts.js";
+import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
 import { upgradedSpec, pursuitTuning } from "./progression.js";
 import { passedTraffic } from "./near-miss.js";
 import { checkpointsForLevel } from "./level-routes.js";
@@ -356,6 +361,7 @@ export class ChaseSimulation {
     this.runCash = 0;
     this.decorWrecks = 0;
     this.cashBanners = [];
+    this.runArtifacts = [];
     this.cashBannerIds = cashBannerIds(this.runOptions?.runId || "preview");
     this.runDistance = 0;
     this.runDriftSeconds = 0;
@@ -1350,9 +1356,8 @@ export class ChaseSimulation {
         } else if (impact > 5 && officers.has(car))
           this.damagePolice(car, impact, false);
       }
-      if (car !== p)
-        for (const r of this.ramps)
-          resolveRampSolid(car, r, positions.get(car) || car, false);
+      // Stunt ramps affect the player only; NPCs follow their road lane through
+      // them without braking, launching or forming a roadblock at the high face.
       // Pairwise pushes cannot leave an officer or civilian inside a building.
       for (const block of nearbyObstacles(this.obstacles, car.x, car.z, 5))
         if ((car.y || 0) < (block.h || 50) + 1)
@@ -1412,11 +1417,12 @@ export class ChaseSimulation {
       )
         unlock(
           ROOFTOP.id,
-          IS_KUTAISI || IS_BATUMI
+          IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
             ? "PLATINUM SKYBOX · +1 PLATINUM BOX / 2,500 CR"
             : "SKYBOX FOUND · +1 BOX / 2,500 CR",
         );
       if (
+        !IS_RUSTAVI &&
         p.lastLandingRamp === 5 &&
         p.launchSpeed >= 50 &&
         (IS_KUTAISI
@@ -1425,7 +1431,7 @@ export class ChaseSimulation {
       )
         unlock(
           IS_KUTAISI ? "rioni-gap-v1" : "mtkvari-gap-v1",
-          IS_KUTAISI || IS_BATUMI
+          IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
             ? "RIONI GAP · +1 PLATINUM BOX / 1,500 CR"
             : "MTKVARI GAP · +1 BOX / 1,500 CR",
         );

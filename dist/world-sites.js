@@ -1,9 +1,11 @@
-import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
-const data = IS_BATUMI
-  ? await import("./batumi-world-sites.js")
-  : IS_KUTAISI
-    ? await import("./kutaisi-world-sites.js")
-    : await import("./tbilisi-world-sites.js");
+import { IS_KUTAISI, IS_BATUMI, IS_RUSTAVI } from "./map-selection.js";
+const data = IS_RUSTAVI
+  ? await import("./rustavi-world-sites.js")
+  : IS_BATUMI
+    ? await import("./batumi-world-sites.js")
+    : IS_KUTAISI
+      ? await import("./kutaisi-world-sites.js")
+      : await import("./tbilisi-world-sites.js");
 export const {
   ROOFTOP,
   QUEST_BOX,

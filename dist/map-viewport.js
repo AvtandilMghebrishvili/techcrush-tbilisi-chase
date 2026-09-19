@@ -75,11 +75,13 @@ export class MapViewport {
         startX: event.clientX,
         startY: event.clientY,
       });
+      if (this.pointers.size > 1) this.dragged = true;
       if (!event.target.closest("button")) this.capture(event.pointerId);
     });
     this.host.addEventListener("pointermove", (event) => this.move(event));
     for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
       this.host.addEventListener(type, (event) => {
+        if (type === "pointercancel") this.dragged = true;
         this.pointers.delete(event.pointerId);
         if (!this.pointers.size) this.host.classList.remove("panning");
       });

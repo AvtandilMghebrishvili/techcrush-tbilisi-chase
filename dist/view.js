@@ -44,6 +44,7 @@ import { clearCameraPosition } from "./camera-clearance.js";
 import { animateDistricts } from "./tbilisi-districts.js";
 import { loadSportsAssets, sportsCar, animateWheels } from "./sports-car.js";
 import { makeCockpit, updateCockpit } from "./cockpit.js";
+import { positionCockpitCamera } from "./cockpit-view.js";
 import { makeRouteGuide, updateRouteGuide } from "./route-guide.js";
 import { applyTechcrushBrand } from "./landmarks.js";
 import {
@@ -445,6 +446,7 @@ export class SceneView {
     this.cockpit.root.visible = false;
     this.player.position.set(START.x, supportedVisualY({ ...START }), START.z);
     this.player.rotation.set(0, START.angle, 0);
+    this.camera.up.set(0, 1, 0);
     this.camera.position.set(START.x - 12, 5.2, START.z + 6);
     this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
     this.camera.fov = 56;
@@ -573,25 +575,21 @@ export class SceneView {
         0,
         Math.cos(p.angle),
       );
-      if (interior || hood) {
-        const cabin = this.player.userData.cockpitSeat || {
-          x: 0.36,
-          y: 1.08,
-          z: -0.28,
-        };
-        const seat = interior ? cabin.z : 1.8;
-        const driverOffset = interior ? cabin.x : 0;
+      this.camera.up.set(0, 1, 0);
+      if (interior) {
+        positionCockpitCamera(this.camera, this.player);
+      } else if (hood) {
         this.camera.position.set(
-          p.x + forward.x * seat + forward.z * driverOffset,
-          (p.y || 0) + (interior ? cabin.y : 0.97),
-          p.z + forward.z * seat - forward.x * driverOffset,
+          p.x + forward.x * 1.8,
+          this.player.position.y + 0.97,
+          p.z + forward.z * 1.8,
         );
         this.camera.lookAt(
           p.x + forward.x * 60,
           this.camera.position.y - 0.1,
           p.z + forward.z * 60,
         );
-        this.camera.fov = portraitFov(interior ? 76 : 70, this.camera.aspect);
+        this.camera.fov = portraitFov(70, this.camera.aspect);
       } else {
         const zoom = mode === "aerial" ? 27 : 9 + p.boostStrength * 1.6;
         const target = new THREE.Vector3(
@@ -662,8 +660,9 @@ export class SceneView {
       this.blastLight.intensity = flash?.light.intensity || 0;
       if (flash) this.blastLight.position.copy(flash.group.position);
       if (this.shake > 0) {
-        this.camera.position.x += (Math.random() - 0.5) * this.shake;
-        this.camera.position.y += (Math.random() - 0.5) * this.shake;
+        const shake = interior ? Math.min(this.shake, 0.012) : this.shake;
+        this.camera.position.x += (Math.random() - 0.5) * shake;
+        this.camera.position.y += (Math.random() - 0.5) * shake;
         this.shake = Math.max(0, this.shake - dt);
       }
       this.skidTimer += dt;

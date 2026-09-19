@@ -5,6 +5,7 @@ import {
   MAP_COURSES,
   cityCommunity,
   cityLevel,
+  mapUnlocked,
 } from "./map-selection.js";
 import { carSpec, CARS } from "./config.js";
 import { PARTS } from "./progression.js";
@@ -40,6 +41,7 @@ export class CommunityUI {
     this.color = "red";
     this.guest = false;
     const dialog = $("community-dialog");
+    this.syncCities();
     $("board-map").value = this.map;
     const courses = () => {
       $("time-course").innerHTML = [
@@ -227,7 +229,17 @@ export class CommunityUI {
       $("driver-status").textContent = e.message;
     }
   }
+  syncCities() {
+    const select = $("board-map");
+    if (
+      mapUnlocked(this.store.profile, "rustavi", this.store.serverNow()) &&
+      !select.querySelector('[value="rustavi"]')
+    ) {
+      select.add(new Option("RUSTAVI", "rustavi"));
+    }
+  }
   changed() {
+    this.syncCities();
     const p = this.store.profile;
     if (!p) return;
     const c = cityCommunity(p),

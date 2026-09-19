@@ -1,4 +1,5 @@
 import { addCabinDetails } from "./interior-detail.js";
+import { cockpitSeat } from "./cockpit-view.js";
 import { installWheelKits, addExteriorKit } from "./customization.js";
 import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -183,7 +184,8 @@ export function sportsCar(
     .filter(Boolean);
   group.userData.body = body;
   group.userData.glass = glass?.material;
-  group.userData.cockpitSeat = { x: 0.35, y: 1.06, z: -0.3 };
+  // The licensed 458's windscreen header is lower than its outer roof peak.
+  group.userData.cockpitSeat = cockpitSeat(1.18, 0.33, 0.35);
   group.userData.exhaustPositions = [-0.28, 0, 0.28].map((x) => ({
     x,
     y: 0.41,

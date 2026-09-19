@@ -1,4 +1,4 @@
-import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
+import { IS_KUTAISI, IS_BATUMI, IS_RUSTAVI } from "./map-selection.js";
 const { KUTAISI_GEO } = IS_KUTAISI ? await import("./kutaisi-geo-data.js") : {};
 import { reservedExpansion, EXPANSION_SOLIDS } from "./world-sites.js";
 import { ROAD_DATA } from "./road-data.js";
@@ -35,6 +35,8 @@ export const ROADS = ROAD_DATA.edges.map(([a, b, width, name], id) => {
 });
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function geo(lat, lon) {
+  if (IS_RUSTAVI)
+    return { x: -(lon - 44.985) * 41600, z: (lat - 41.55) * 55660 };
   if (IS_BATUMI)
     return { x: -(lon - 41.621) * 83180, z: (lat - 41.64) * 111320 };
   if (IS_KUTAISI)
@@ -212,16 +214,70 @@ const point = (lat, lon, name, street) => {
   const p = nearestRoad(geo(lat, lon), street);
   return { x: p.x, z: p.z, angle: p.angle, name };
 };
-export const START = IS_BATUMI
-  ? point(41.6515, 41.633, "BATUMI BOULEVARD")
-  : IS_KUTAISI
-    ? { ...point(42.2707, 42.7049, "COLCHIS SQUARE"), angle: Math.PI / 2 }
-    : {
-        ...point(41.69657, 44.80615, "Baratashvili"),
-        angle: 1.66,
-      };
+const rustaviSpawn = () => {
+  // Owner's loopback preview can start at either newly authored landmark.
+  // These shortcuts never change the spawn on the public hostname.
+  const preview = ["127.0.0.1", "localhost", "[::1]"].includes(
+    globalThis.location?.hostname,
+  )
+    ? new URLSearchParams(globalThis.location.search).get("preview")
+    : null;
+  if (preview === "heroes" || preview === "hall") {
+    const target = preview === "heroes" ? LANDMARKS.heroes : LANDMARKS.hall;
+    const origin =
+      preview === "heroes"
+        ? { x: -254, z: 25 }
+        : {
+            x:
+              target.x +
+              Math.sin(target.angle) * 88 +
+              Math.cos(target.angle) * 24,
+            z:
+              target.z +
+              Math.cos(target.angle) * 88 -
+              Math.sin(target.angle) * 24,
+          };
+    const p = nearestRoad(origin);
+    return {
+      x: p.x,
+      z: p.z,
+      angle: Math.atan2(target.x - p.x, target.z - p.z),
+      name: target.name,
+    };
+  }
+  const m = LANDMARKS.monument;
+  let best,
+    cost = Infinity;
+  for (const road of ROADS)
+    for (const t of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+      const x = road.start.x + (road.end.x - road.start.x) * t,
+        z = road.start.z + (road.end.z - road.start.z) * t,
+        distance = Math.hypot(m.x - x, m.z - z);
+      if (distance < 35 || distance > 105) continue;
+      const facing =
+          ((m.x - x) * Math.sin(road.angle) +
+            (m.z - z) * Math.cos(road.angle)) /
+          distance,
+        candidate = Math.abs(distance - 65) + (1 - Math.abs(facing)) * 160;
+      if (candidate < cost) {
+        cost = candidate;
+        best = { x, z, angle: road.angle + (facing < 0 ? Math.PI : 0) };
+      }
+    }
+  return { ...(best || nearestRoad(m)), name: "RUSTAVI CENTRAL SQUARE" };
+};
+export const START = IS_RUSTAVI
+  ? rustaviSpawn()
+  : IS_BATUMI
+    ? point(41.6515, 41.633, "BATUMI BOULEVARD")
+    : IS_KUTAISI
+      ? { ...point(42.2707, 42.7049, "COLCHIS SQUARE"), angle: Math.PI / 2 }
+      : {
+          ...point(41.69657, 44.80615, "Baratashvili"),
+          angle: 1.66,
+        };
 export const CLOCK_PARTS =
-  IS_KUTAISI || IS_BATUMI
+  IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
     ? []
     : [
         // World transform of the renderer's -PI/2 group, including its separate wing.
@@ -257,35 +313,49 @@ export const CLOCK_PARTS =
         })),
       ];
 export const CLOCK_BUILDING =
-  IS_KUTAISI || IS_BATUMI
+  IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
     ? { x: 9999, z: 9999 }
     : placeOffRoad({ x: -410, z: -234 }, CLOCK_PARTS);
-export const CHECKPOINTS = IS_BATUMI
+export const CHECKPOINTS = IS_RUSTAVI
   ? [
-      point(41.654, 41.641, "MIRACLE PARK"),
-      point(41.65, 41.635, "EUROPE SQUARE"),
-      point(41.646, 41.628, "OLD BOULEVARD"),
-      point(41.635, 41.612, "NEW BOULEVARD"),
-      point(41.631, 41.625, "BAGRATIONI AVENUE"),
-      point(41.648, 41.642, "PIAZZA DISTRICT"),
+      point(41.5435, 45.01, "CENTRAL SQUARE"),
+      point(41.547, 45.012, "THEATRE DISTRICT"),
+      point(41.553, 44.993, "MTKVARI CROSSING"),
+      point(41.562, 44.979, "MEGOBROBA AVENUE"),
+      point(41.567, 44.957, "DRIVING ACADEMY"),
+      point(41.572, 44.947, "MOTORPARK"),
     ]
-  : IS_KUTAISI
+  : IS_BATUMI
     ? [
-        point(42.2707, 42.703, "ROYAL BOULEVARD"),
-        point(42.27005, 42.6958, "RUSTAVELI AVENUE"),
-        point(42.2729, 42.6995, "RED BRIDGE DISTRICT"),
-        point(42.2766, 42.703, "BAGRATI APPROACH"),
-        point(42.2729, 42.7085, "GELATI STREET"),
-        point(42.2633, 42.7055, "RIONI EMBANKMENT"),
+        point(41.654, 41.641, "MIRACLE PARK"),
+        point(41.65, 41.635, "EUROPE SQUARE"),
+        point(41.646, 41.628, "OLD BOULEVARD"),
+        point(41.635, 41.612, "NEW BOULEVARD"),
+        point(41.631, 41.625, "BAGRATIONI AVENUE"),
+        point(41.648, 41.642, "PIAZZA DISTRICT"),
       ]
-    : [
-        point(41.6964, 44.80348, "Baratashvili Avenue"),
-        point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
-        point(41.6969, 44.80835, "Baratashvili Bridge", "Baratashvili Bridge"),
-        point(41.6912, 44.81174, "Europe Square", "Europe Square"),
-        point(41.68805, 44.8111, "Abanotubani", "Abano Street"),
-        point(41.694, 44.8015, "Freedom Square", "Freedom"),
-      ];
+    : IS_KUTAISI
+      ? [
+          point(42.2707, 42.703, "ROYAL BOULEVARD"),
+          point(42.27005, 42.6958, "RUSTAVELI AVENUE"),
+          point(42.2729, 42.6995, "RED BRIDGE DISTRICT"),
+          point(42.2766, 42.703, "BAGRATI APPROACH"),
+          point(42.2729, 42.7085, "GELATI STREET"),
+          point(42.2633, 42.7055, "RIONI EMBANKMENT"),
+        ]
+      : [
+          point(41.6964, 44.80348, "Baratashvili Avenue"),
+          point(41.7023, 44.793, "Rustaveli Avenue", "Rustaveli"),
+          point(
+            41.6969,
+            44.80835,
+            "Baratashvili Bridge",
+            "Baratashvili Bridge",
+          ),
+          point(41.6912, 44.81174, "Europe Square", "Europe Square"),
+          point(41.68805, 44.8111, "Abanotubani", "Abano Street"),
+          point(41.694, 44.8015, "Freedom Square", "Freedom"),
+        ];
 // Deterministic street-front lots; the same rotated footprints drive rendering and collision.
 export const BUILDINGS = [];
 if (IS_KUTAISI)
@@ -309,17 +379,23 @@ for (const road of ROADS) {
     fz = Math.cos(road.angle),
     rx = fz,
     rz = -fx;
-  for (let along = 19; along < road.length - 6; along += IS_BATUMI ? 65 : 34) {
+  for (
+    let along = 19;
+    along < road.length - 6;
+    along += IS_RUSTAVI ? 86 : IS_BATUMI ? 65 : 34
+  ) {
     for (const side of [-1, 1]) {
       const w = 24 + rand() * 9,
         d = 18 + rand() * 10,
-        h = IS_BATUMI
-          ? road.start.z < 0
-            ? 18 + Math.floor(rand() * 10) * 3.3
-            : 10 + Math.floor(rand() * 5) * 3.3
-          : IS_KUTAISI
-            ? 8 + Math.floor(rand() * 4) * 3.2
-            : 14 + Math.floor(rand() * 4) * 4;
+        h = IS_RUSTAVI
+          ? 10 + Math.floor(rand() * 6) * 3.2
+          : IS_BATUMI
+            ? road.start.z < 0
+              ? 18 + Math.floor(rand() * 10) * 3.3
+              : 10 + Math.floor(rand() * 5) * 3.3
+            : IS_KUTAISI
+              ? 8 + Math.floor(rand() * 4) * 3.2
+              : 14 + Math.floor(rand() * 4) * 4;
       const offset = road.width / 2 + 5 + d / 2;
       const x = road.start.x + fx * along + rx * offset * side,
         z = road.start.z + fz * along + rz * offset * side;
@@ -363,7 +439,11 @@ for (const road of ROADS) {
   }
 }
 // Keep the pedestrian bridge approaches open without perturbing other seeded lots.
-for (let i = IS_KUTAISI || IS_BATUMI ? -1 : BUILDINGS.length - 1; i >= 0; i--) {
+for (
+  let i = IS_KUTAISI || IS_BATUMI || IS_RUSTAVI ? -1 : BUILDINGS.length - 1;
+  i >= 0;
+  i--
+) {
   const b = BUILDINGS[i];
   if (
     [-65, 65].some((x) =>

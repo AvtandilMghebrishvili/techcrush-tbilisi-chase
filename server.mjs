@@ -4,7 +4,19 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { handleApi } from "./server/api.mjs";
 import { openLocalDatabase } from "./server/local-db.mjs";
-const DB = openLocalDatabase();
+const privatePreview = process.env.TECHCRUSH_PRIVATE_PREVIEW === "1";
+const ownerAccess =
+  privatePreview && process.env.TECHCRUSH_OWNER_ACCESS === "1";
+const port = privatePreview ? 4191 : 4173;
+const previewEpoch = Date.now();
+// Local preview uses ordinary access and real time unless owner testing is explicit.
+const previewNow =
+  ownerAccess && process.env.TECHCRUSH_PREVIEW_TIME
+    ? Date.parse(process.env.TECHCRUSH_PREVIEW_TIME)
+    : previewEpoch;
+const DB = openLocalDatabase(
+  privatePreview ? ".sites-runtime/city-wars-preview.sqlite" : undefined,
+);
 const root = path.resolve("dist");
 const types = {
   ".html": "text/html",
@@ -12,6 +24,7 @@ const types = {
   ".css": "text/css",
   ".jpg": "image/jpeg",
   ".png": "image/png",
+  ".webp": "image/webp",
   ".svg": "image/svg+xml",
   ".zip": "application/zip",
   ".wav": "audio/wav",
@@ -54,6 +67,12 @@ http
             ...(body.length ? { body } : {}),
           }),
           DB,
+          ownerAccess
+            ? {
+                preview: true,
+                now: () => previewNow + Date.now() - previewEpoch,
+              }
+            : {},
         );
         res.writeHead(response.status, Object.fromEntries(response.headers));
         res.end(Buffer.from(await response.arrayBuffer()));
@@ -80,4 +99,8 @@ http
       res.end("Not found");
     }
   })
-  .listen(4173, "127.0.0.1", () => console.log("Local: http://127.0.0.1:4173"));
+  .listen(port, "127.0.0.1", () =>
+    console.log(
+      `Local ${ownerAccess ? "OWNER TEST" : "game"}: http://127.0.0.1:${port}`,
+    ),
+  );

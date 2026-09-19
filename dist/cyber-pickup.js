@@ -1,4 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
+import { cockpitSeat } from "./cockpit-view.js";
 import {
   box,
   mesh,
@@ -217,7 +218,8 @@ export function makeCyberPickup(color, equipment = {}) {
     electric: true,
     wheels: anchors,
     wheelRadius: 0.42,
-    cockpitSeat: { x: 0.36, y: 1.62, z: -0.12 },
+    // The pickup roof slopes down behind its peak; sample at the seat, not 1.86.
+    cockpitSeat: cockpitSeat(1.798),
     exhaustPositions: [],
     bodySurface: { top: () => 1.235, section },
     aeroMount: { z: -2.22, width: 1.87, baseY: 1.232 },

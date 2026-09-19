@@ -7,6 +7,13 @@ import {
 import { TIME_COURSES } from "./race-timing.js";
 import { carRewardMultiplier, ticketRewardMultiplier } from "./car-bonuses.js";
 export const STUNT_REWARDS = {
+  "rustavi-skybox-v1": {
+    cash: 2500,
+    boxes: 0,
+    platinum: 1,
+    name: "Steelworks skybox",
+    map: "rustavi",
+  },
   "batumi-skybox-v1": {
     cash: 3500,
     boxes: 0,

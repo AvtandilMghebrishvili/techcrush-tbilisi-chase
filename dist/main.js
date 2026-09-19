@@ -1,3 +1,5 @@
+import { EventUI } from "./event-ui.js";
+import { eventProgress } from "./event-rules.js";
 import { MapSettings, mapPreferences } from "./map-settings.js";
 import { radarScale } from "./map-preferences.js";
 import { BackgroundMusic } from "./background-music.js";
@@ -17,6 +19,7 @@ import {
   ACTIVE_MAP,
   IS_KUTAISI,
   IS_BATUMI,
+  IS_RUSTAVI,
   cityLevel,
   cityCommunity,
   mapUnlocked,
@@ -29,7 +32,12 @@ import { ACHIEVEMENTS } from "./community-rules.js";
 import { setupInterface, actionLabel } from "./interface.js";
 import { ChaseAudio } from "./chase-audio.js";
 import { FrameLoop } from "./frame-loop.js";
-import { playerRoute, navigationTarget } from "./navigation-cache.js";
+import {
+  checkpointRoute as playerRoute,
+  checkpointTarget as navigationTarget,
+  secondaryRoute,
+  secondaryTarget,
+} from "./navigation-cache.js";
 import { MobileControls } from "./mobile-ui.js";
 import { LIGHTING_MODES } from "./city-lighting.js";
 import { radarPoint, routeDistance } from "./hud-math.js";
@@ -38,7 +46,8 @@ import { GarageUI } from "./garage-ui.js";
 import { upgradedSpec } from "./progression.js";
 const career = new ProfileClient();
 const raceClock = new RaceClock();
-let mapSettings,
+let eventUI,
+  mapSettings,
   workshop,
   community,
   runId = null,
@@ -97,6 +106,7 @@ function disposePage() {
   raceClock.setActive(false);
   results.stop();
   community?.stop();
+  eventUI?.dispose();
   mobile?.syncActivity(false);
   workshop?.dispose();
   soundscape.dispose();
@@ -163,7 +173,8 @@ function dialogOpen() {
     "community-dialog",
     "quest-map",
     "car-reveal",
-  ].some((id) => $(id).open);
+    "event-dialog",
+  ].some((id) => $(id)?.open);
 }
 function refreshActivity() {
   if (disposed || !sim) return;
@@ -296,6 +307,7 @@ function setupGarage() {
   ).join("");
   $("route-selector").onchange = () => {
     sim.navQuest = $("route-selector").value || null;
+    sim.waypoint = null;
     $("route-selector").blur();
     wake();
   };
@@ -383,6 +395,7 @@ async function bankRun() {
           trafficWrecks: sim.trafficWrecks,
           decorWrecks: sim.decorWrecks,
           cashBanners: sim.cashBanners,
+          artifacts: sim.runArtifacts,
           distance: sim.runDistance,
           driftSeconds: sim.runDriftSeconds,
           jumps: sim.runJumps,
@@ -498,6 +511,7 @@ async function start() {
       map: ACTIVE_MAP,
       car: selectedCar,
       course: TIME_COURSE,
+      event: eventUI.runEvent(),
     });
     if (disposed) return;
     results.reset();
@@ -507,8 +521,14 @@ async function start() {
       completedQuests: career.profile.quests?.completed || [],
       bankedTakedowns: totalTakedowns(career.profile),
       runId: career.profile.activeRun.id,
+      event: career.profile.activeRun.event,
+      collectedArtifacts:
+        career.profile.events?.[career.profile.activeRun.event]?.artifacts?.[
+          ACTIVE_MAP
+        ] || [],
     });
     sim.navQuest = $("route-selector").value || null;
+    sim.waypoint = null;
     runId = career.profile.activeRun.id;
     view.startGame(sim);
     raceClock.reset();
@@ -670,6 +690,7 @@ function toast(text) {
   toastUntil = sim.time + 2.8;
 }
 function updateHUD() {
+  eventUI?.update(sim);
   document.body.dataset.phase = sim.phase;
   const p = sim.player;
   if ($("route-selector").value !== (sim.navQuest || ""))
@@ -791,10 +812,20 @@ function updateHUD() {
     $("distance").textContent = "ESCAPE";
   }
   $("route-cue").querySelector("small").textContent = cp
-    ? sim.navQuest
-      ? "STUNT CHALLENGE"
-      : "NEXT CHECKPOINT"
+    ? "NEXT CHECKPOINT"
     : "LOSE THE HEAT";
+  const secondary = secondaryTarget(sim);
+  const cue = $("waypoint-cue");
+  cue.hidden = !secondary;
+  if (secondary) {
+    const route = secondaryRoute(sim),
+      next = route.find((q) => distance(p, q) > 12) || secondary;
+    const delta = angleDelta(Math.atan2(next.x - p.x, next.z - p.z), p.angle);
+    const arrived = distance(p, secondary) < 14;
+    cue.textContent = arrived
+      ? "◆ DESTINATION REACHED"
+      : `${Math.abs(delta) < 0.45 ? "↑" : Math.abs(delta) > 2.4 ? "↶" : delta > 0 ? "←" : "→"} ${Math.round(routeDistance(p, route))} M · ${sim.waypoint ? "YOUR PIN" : "SIDE MISSION"}`;
+  }
   drawMap();
 }
 const radarCanvas = $("map"),
@@ -812,6 +843,9 @@ function drawMap() {
   c.clip();
   c.fillStyle = "#112531";
   c.fillRect(0, 0, 230, 230);
+  c.translate(115, 115);
+  c.rotate(sim.player.angle);
+  c.translate(-115, -115);
   c.drawImage(
     mapAtlas(),
     ox - MAP_EXTENT * s,
@@ -848,12 +882,47 @@ function drawMap() {
     c.arc(marker.x, marker.y, 8, 0, Math.PI * 2);
     c.stroke();
   }
+  const secondary = secondaryTarget(sim);
+  if (secondary) {
+    c.strokeStyle = "#ffd43b";
+    c.lineWidth = 1.8;
+    c.setLineDash([2, 3]);
+    c.beginPath();
+    c.moveTo(115, 115);
+    for (const q of secondaryRoute(sim)) c.lineTo(ox - q.x * s, oz - q.z * s);
+    c.stroke();
+    c.setLineDash([]);
+    const pin = radarPoint(ox - secondary.x * s, oz - secondary.z * s, 98);
+    c.fillStyle = "#ffd43b";
+    c.save();
+    c.translate(pin.x, pin.y);
+    c.rotate(-sim.player.angle);
+    c.beginPath();
+    c.moveTo(0, -6);
+    c.lineTo(5, 0);
+    c.lineTo(0, 6);
+    c.lineTo(-5, 0);
+    c.closePath();
+    c.fill();
+    c.restore();
+  }
+  const north = radarPoint(115, -10000, 101);
+  c.save();
+  c.translate(north.x, north.y);
+  c.rotate(-sim.player.angle);
+  c.fillStyle = "#fff";
+  c.font = "bold 9px Arial";
+  c.textAlign = "center";
+  c.fillText("N", 0, 3);
+  c.restore();
   c.fillStyle = "#d3b37a";
-  const landmark = IS_BATUMI
-    ? LANDMARKS.alphabet
-    : IS_KUTAISI
-      ? LANDMARKS.bagrati
-      : TOWER;
+  const landmark = IS_RUSTAVI
+    ? LANDMARKS.monument
+    : IS_BATUMI
+      ? LANDMARKS.alphabet
+      : IS_KUTAISI
+        ? LANDMARKS.bagrati
+        : TOWER;
   c.fillRect(ox - landmark.x * s - 2, oz - landmark.z * s - 2, 4, 4);
   for (const ramp of RAMPS) {
     const x = ox - ramp.x * s,
@@ -874,7 +943,11 @@ function drawMap() {
     c.fillStyle = "#10202a";
     c.font = "bold 10px Arial";
     c.textAlign = "center";
-    c.fillText(q.symbol, marker.x, marker.y + 3);
+    c.save();
+    c.translate(marker.x, marker.y);
+    c.rotate(-sim.player.angle);
+    c.fillText(q.symbol, 0, 3);
+    c.restore();
     c.textAlign = "start";
   }
   for (const cop of sim.police) {
@@ -928,6 +1001,7 @@ function drawMap() {
 }
 function frame(dt) {
   if (disposed) return false;
+  eventUI?.checkDeadline();
   const blocked = dialogOpen();
   mobile?.tick(dt);
   if (
@@ -1103,16 +1177,34 @@ try {
   profileReady.catch(() => {});
   await new Promise(requestAnimationFrame);
   if (disposed) throw new DOMException("Page closed", "AbortError");
+  if (IS_RUSTAVI) {
+    await profileReady;
+    if (!mapUnlocked(career.profile, ACTIVE_MAP, career.serverNow())) {
+      location.replace("/?mission=locked");
+      await new Promise(() => {});
+    }
+  }
   sim = new ChaseSimulation();
   view = new SceneView($("world"), sceneAssets);
   await Promise.all([profileReady, view.loadTextures(loadingProgress)]);
   if (disposed) throw new DOMException("Page closed", "AbortError");
-  if (!mapUnlocked(career.profile, ACTIVE_MAP)) {
-    location.replace("/?unlock=kutaisi");
+  if (!mapUnlocked(career.profile, ACTIVE_MAP, career.serverNow())) {
+    location.replace("/?mission=locked");
     // Keep this compatibility fallback from starting a run on a restricted city.
     await new Promise(() => {});
   }
   view.setupGame(sim);
+  if (
+    IS_RUSTAVI &&
+    career.profile.previewAccess &&
+    ["localhost", "127.0.0.1"].includes(location.hostname)
+  ) {
+    const links = document.createElement("div");
+    links.className = "private-preview-places";
+    links.innerHTML =
+      '<small>PRIVATE TEST · START LOCATION</small><a href="?map=rustavi&preview=heroes">HEROES SQUARE ↗</a><a href="?map=rustavi&preview=hall">CITY HALL ↗</a><a href="?map=rustavi">NEW MONUMENT ↗</a>';
+    document.querySelector("#intro .intro-copy").after(links);
+  }
   try {
     view.lighting.setMode(localStorage.getItem("techcrush-lighting"));
   } catch {}
@@ -1157,7 +1249,45 @@ try {
       mobile?.clear();
     },
   });
-  cityMenu(career, () => leaveRun(false));
+  const refreshCityMenu = cityMenu(career, () => leaveRun(false));
+  eventUI = new EventUI(career, {
+    pause: () => {
+      if (["running", "rewinding"].includes(sim.phase)) pause();
+      keys.clear();
+      mobile?.clear();
+    },
+    leave: () => leaveRun(false),
+    play: () => {
+      const ticket = career.profile.activeRun;
+      if (sim.phase === "paused" && (!ticket?.event || career.serverNow() < ticket.eventEndsAt))
+        pause();
+      else return start();
+    },
+    refresh: refreshActivity,
+    cities: () => {
+      refreshCityMenu();
+      community.syncCities();
+    },
+    deadline: async () => {
+      if (sim.phase === "rewinding") sim.timeline.release(sim);
+      if (sim.phase === "running") pause();
+      const finalRun = runId;
+      try {
+        await bankRun();
+        await leaveRun(false);
+        eventUI.render();
+        eventUI.open();
+        eventUI.message(
+          eventProgress(career.profile)?.lastReceipt?.runId === finalRun
+            ? "CITY WARS FINISHED · Your final event points are saved. Standings remain available in the archive."
+            : "CITY WARS FINISHED · Career progress is saved. This run arrived after the event save window and was excluded from event standings.",
+        );
+      } catch (error) {
+        eventUI.open();
+        eventUI.message(error.message);
+      }
+    },
+  });
   $("leaderboard-open").disabled = false;
   $("community-dialog").addEventListener("close", () => {
     if (sim.phase === "won" && results.record && !$("modal").hidden)
@@ -1258,6 +1388,7 @@ try {
     "community-dialog",
     "quest-map",
     "car-reveal",
+    "event-dialog",
   ])
     dialogs.observe($(id), { attributes: true, attributeFilter: ["open"] });
   registerTools();
@@ -1271,6 +1402,7 @@ try {
   loadingProgress(100, "READY TO RACE");
   $("loading").hidden = true;
   document.body.classList.add("loaded");
+  eventUI.announce();
   refreshActivity();
 } catch (e) {
   const cancelled = disposed;

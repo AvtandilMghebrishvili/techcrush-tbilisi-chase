@@ -39,7 +39,7 @@ test("three cities are open; bonus and takedown boxes persist while cars await t
   p.credits = 12345;
   p.cars.gt = { engine: 4, stars: { engine: 3 }, paint: "#123456" };
   p.inventory = { "rims:4": 7 };
-  for (const map of CITY_IDS) {
+  for (const map of CITY_IDS.filter((map) => map !== "rustavi")) {
     assert(mapUnlocked(p, map));
     if (map === "tbilisi") p.level = 5;
     else p.maps[map].level = 5;

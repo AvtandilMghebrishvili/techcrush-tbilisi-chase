@@ -292,3 +292,94 @@ body.mobile-controls #hud .navigator {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
+
+#hud #route-cue #waypoint-cue {
+  display: block;
+  color: #ffd43b;
+  font:
+    800 clamp(8px, 0.8vw, 11px) / 1.5 Arial,
+    sans-serif;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+  text-shadow: 0 1px 4px #000;
+}
+#hud #route-cue #waypoint-cue[hidden] {
+  display: none;
+}
+.waypoint-panel {
+  background: #ffd43b10;
+  border: 1px solid #ffd43b44;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+#waypoint-info {
+  color: #ffe480;
+  font-size: 11px;
+  line-height: 1.5;
+  flex: 1;
+}
+#quest-map-close {
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 8px 10px;
+}
+#waypoint-clear,
+#map-places button {
+  border: 1px solid #a6b8ca40;
+  background: #243348;
+  color: #f4f8fc;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+  min-height: 36px;
+}
+#waypoint-clear:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+#map-places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+#quest-pins .place-pin {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+}
+#quest-viewport::after {
+  content: "+";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff70;
+  pointer-events: none;
+}
+
+.private-preview-places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0;
+}
+.private-preview-places small {
+  color: #9ab8c6;
+  font-size: 8px;
+}
+.private-preview-places a {
+  color: #ffe08a;
+  border: 1px solid #ffe08a38;
+  padding: 7px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 9px;
+}

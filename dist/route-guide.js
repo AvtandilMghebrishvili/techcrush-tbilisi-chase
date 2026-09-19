@@ -1,6 +1,11 @@
 import * as THREE from "./vendor/three.module.js";
 import { distance } from "./simulation.js";
-import { playerRoute, navigationTarget } from "./navigation-cache.js";
+import {
+  checkpointRoute,
+  checkpointTarget,
+  secondaryRoute,
+  secondaryTarget,
+} from "./navigation-cache.js";
 
 const GUIDE_VIEWS = {
   chase: { scale: 0.68, height: 0.23, tilt: 0, screenWidth: 0.085 },
@@ -37,7 +42,7 @@ export function sampleRoute(from, route, spacing = 13, reach = 175) {
   return points;
 }
 
-export function makeRouteGuide(scene) {
+export function makeRouteGuide(scene, secondary = false) {
   const group = new THREE.Group();
   group.userData.environment = true;
   group.visible = false;
@@ -58,7 +63,7 @@ export function makeRouteGuide(scene) {
     const mesh = new THREE.Mesh(
       geometry,
       new THREE.MeshBasicMaterial({
-        color: "#74fff0",
+        color: secondary ? "#ffd43b" : "#74fff0",
         transparent: true,
         opacity: 0.8,
         depthWrite: false,
@@ -70,17 +75,26 @@ export function makeRouteGuide(scene) {
     group.add(mesh);
     return mesh;
   });
-  return { group, arrows, points: [], checkpoint: -1 };
+  return {
+    group,
+    arrows,
+    points: [],
+    checkpoint: -1,
+    secondary,
+    extra: secondary ? null : makeRouteGuide(scene, true),
+  };
 }
 
 export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
+  if (guide.extra) updateRouteGuide(guide.extra, sim, mode, camera);
   const style = GUIDE_VIEWS[mode] || GUIDE_VIEWS.chase;
   const interior = mode === "cockpit" || mode === "hood";
-  const cp = navigationTarget(sim);
+  const cp = guide.secondary ? secondaryTarget(sim) : checkpointTarget(sim);
   guide.group.visible = !!cp && ["running", "paused"].includes(sim.phase);
   if (!guide.group.visible) return;
   if (
     sim.checkpoint !== guide.checkpoint ||
+    cp !== guide.target ||
     guide.navQuest !== sim.navQuest ||
     sim.level !== guide.level ||
     sim.player.x !== guide.originX ||
@@ -88,7 +102,11 @@ export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
   ) {
     // Sample the current position each moving frame, rather than jumping every
     // 200 ms. The street graph already caches its shortest-path trees.
-    guide.points = sampleRoute(sim.player, playerRoute(sim));
+    guide.points = sampleRoute(
+      sim.player,
+      guide.secondary ? secondaryRoute(sim) : checkpointRoute(sim),
+    );
+    guide.target = cp;
     guide.checkpoint = sim.checkpoint;
     guide.level = sim.level;
     guide.navQuest = sim.navQuest;
@@ -106,7 +124,13 @@ export function updateRouteGuide(guide, sim, mode = "chase", camera = null) {
     if (!p) return;
     const wave = (Math.sin(p.along * 0.11 - sim.time * 3.3) + 1) / 2;
     // Animate only light: no bobbing or expanding arrows across the windshield.
-    mesh.position.set(p.x, style.height, p.z);
+    // Two small parallel ribbons remain distinguishable on shared road sections.
+    const offset = guide.secondary ? 1.45 : 0;
+    mesh.position.set(
+      p.x + Math.cos(p.angle) * offset,
+      style.height + (guide.secondary ? 0.025 : 0),
+      p.z - Math.sin(p.angle) * offset,
+    );
     mesh.rotation.set(style.tilt, p.angle, 0, "YXZ");
     mesh.material.opacity =
       (interior ? 0.64 + wave * 0.16 : 0.48 + wave * 0.24) *

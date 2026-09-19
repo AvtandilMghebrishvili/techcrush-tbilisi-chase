@@ -6,6 +6,10 @@ import ClipperLib from "clipper-lib";
 import { writeFile } from "node:fs/promises";
 import { ROADS, NODES } from "../dist/city-map.js";
 import { RIVER_POLYGON } from "../dist/district-data.js";
+const civic =
+  ACTIVE_MAP === "rustavi"
+    ? await import("../dist/rustavi-civic-data.js")
+    : null;
 function network(padding) {
   const polygons = ROADS.map((r) => {
     const rx = Math.cos(r.angle) * (r.width / 2 + padding),
@@ -45,7 +49,17 @@ function network(padding) {
           Math.cos(a.angle) * sz * (a.d / 2 + padding),
       ]),
     ]);
-  return clip(polygons, [], "ctUnion");
+  if (civic) polygons.push([civic.HEROES_PLAZA]);
+  let joined = clip(polygons, [], "ctUnion");
+  if (civic) {
+    const radius = Math.max(0.5, 5.5 - padding);
+    const island = Array.from({ length: 8 }, (_, i) => [
+      civic.HEROES.x + Math.sin((i * Math.PI) / 4 + Math.PI / 8) * radius,
+      civic.HEROES.z + Math.cos((i * Math.PI) / 4 + Math.PI / 8) * radius,
+    ]);
+    joined = clip(joined, [[island]], "ctDifference");
+  }
+  return joined;
 }
 function clip(subject, other, operation) {
   const c = new ClipperLib.Clipper(),

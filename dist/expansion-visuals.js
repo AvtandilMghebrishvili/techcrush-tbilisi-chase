@@ -221,17 +221,27 @@ export function buildExpansion(v, root, box, label, materials) {
               );
       }
   }
-  box(110, 0.2, 101, metal, BANK_SITE.x, 0.05, BANK_SITE.z, root);
-  label("BANK OF GEORGIA · 1975", 17, 1.3, BANK_SITE.x, 7, BANK_SITE.z + 42, 0);
-  label(
-    "SPACE CITY / TBILISI LANDMARK",
-    15,
-    0.7,
-    BANK_SITE.x,
-    5.8,
-    BANK_SITE.z + 42,
-    0,
-  );
+  if (BANK_SOLIDS.length) {
+    box(110, 0.2, 101, metal, BANK_SITE.x, 0.05, BANK_SITE.z, root);
+    label(
+      "BANK OF GEORGIA · 1975",
+      17,
+      1.3,
+      BANK_SITE.x,
+      7,
+      BANK_SITE.z + 42,
+      0,
+    );
+    label(
+      "SPACE CITY / TBILISI LANDMARK",
+      15,
+      0.7,
+      BANK_SITE.x,
+      5.8,
+      BANK_SITE.z + 42,
+      0,
+    );
+  }
   for (const t of TOWERS) {
     box(t.w, t.h, t.d, materials[3], t.x, t.h / 2, t.z, root);
     for (let y = 4; y < t.h; y += 7)
@@ -326,7 +336,9 @@ export function buildExpansion(v, root, box, label, materials) {
   beacon.position.y = 5.5;
   crate.add(beacon);
   label(
-    "SKYBOX · +1 UPGRADE BOX",
+    ROOFTOP.id === "rustavi-skybox-v1"
+      ? "SKYBOX · PLATINUM PART"
+      : "SKYBOX · +1 UPGRADE BOX",
     14,
     1.4,
     QUEST_BOX.x,

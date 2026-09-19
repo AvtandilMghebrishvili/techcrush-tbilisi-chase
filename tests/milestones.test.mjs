@@ -1,3 +1,4 @@
+import { EVENT_END } from "../dist/event-rules.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -32,7 +33,10 @@ function win(profile, map) {
     profile,
     { type: "begin-run", map, car: "classic" },
     undefined,
-    { runId: `milestone-${map}-${cityLevel(profile, map)}`, now: 1000 },
+    {
+      runId: `milestone-${map}-${cityLevel(profile, map)}`,
+      now: EVENT_END + 1000,
+    },
   );
   const action = {
     type: "settle",
@@ -42,7 +46,9 @@ function win(profile, map) {
     metrics,
     autoOpenBox: true,
   };
-  const next = applyProgressAction(p, action, () => 0.8, { now: 100000 });
+  const next = applyProgressAction(p, action, () => 0.8, {
+    now: EVENT_END + 100000,
+  });
   assert.deepEqual(
     applyProgressAction(next, action),
     next,
@@ -98,12 +104,12 @@ test("bonus boxes arrive on entering each fifth level, independently in every ci
     p = win(p, map);
     assert.equal(cityCommunity(p, map).lastReward.mysteryBoxes, 0);
   }
-  assert.equal(p.mysteryBoxes, 3);
+  assert.equal(p.mysteryBoxes, CITY_IDS.length);
   assert.deepEqual(p.carBoxes, []);
   setLevel(p, "batumi", 1000000);
   p = migrateProfile(p);
-  assert.equal(p.mysteryBoxes, 200002);
-  assert.equal(Object.keys(p.levelMilestones).length, 3);
+  assert.equal(p.mysteryBoxes, 200000 + CITY_IDS.length - 1);
+  assert.equal(Object.keys(p.levelMilestones).length, CITY_IDS.length);
   assert.deepEqual(migrateProfile(p), p);
 });
 test("legacy migration preserves claimed and pending cars, equipment, wallet, inventory and retroactive milestones", () => {
