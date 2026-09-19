@@ -1,4 +1,5 @@
 import { RIVERSIDE_BRIDGE_NAMES } from "./tbilisi-civic-layout.js";
+import { onMetekhiLayby, LAYBY_RAILS } from "./metekhi-layby.js";
 import { onAsphalt } from "./road-clearance.js";
 import { IS_KUTAISI, IS_BATUMI, IS_RUSTAVI } from "./map-selection.js";
 const { KUTAISI_GEO } = IS_KUTAISI ? await import("./kutaisi-geo-data.js") : {};
@@ -116,6 +117,7 @@ const railSpans = rails.flatMap((rail) => {
     const crossing =
       i === count ||
       onAsphalt(p) ||
+      onMetekhiLayby(p, 0.2) ||
       crossingRoads.some((r) => {
         if (Math.abs(Math.cos(r.angle - rail.angle)) > 0.94) return false;
         const u = Math.max(
@@ -141,7 +143,7 @@ const railSpans = rails.flatMap((rail) => {
   return pieces;
 });
 // Local panels keep the rest intact; shared angle-aware rules soften entrances.
-export const BRIDGE_BARRIERS = railSpans
+export const BRIDGE_BARRIERS = [...railSpans, ...LAYBY_RAILS]
   .flatMap((rail) => {
     const count = Math.ceil(rail.d / 6),
       d = rail.d / count;

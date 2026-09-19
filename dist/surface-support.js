@@ -1,4 +1,5 @@
 import { ROAD_SURFACE } from "./road-surface-data.js";
+import { onMetekhiLayby } from "./metekhi-layby.js";
 // Ray crossings are indexed by their Z band. A car near the river inspects only
 // nearby edges, not thousands of distant street vertices on every physics step.
 const BAND = 64;
@@ -61,7 +62,8 @@ export function onIndexedSurface(index, p) {
   return false;
 }
 const water = indexedPolygons(ROAD_SURFACE.openWater);
-export const overOpenWater = (p) => onIndexedSurface(water, p);
+export const overOpenWater = (p) =>
+  !onMetekhiLayby(p) && onIndexedSurface(water, p);
 
 // A bumper overhang is not a fall: the chassis remains supported while any
 // tire contact is still on a rendered deck, pavement, bank cap or dry ground.

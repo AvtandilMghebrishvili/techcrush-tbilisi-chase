@@ -1,3 +1,4 @@
+import { METEKHI_LAYBY } from "./metekhi-layby.js";
 import { buildCableCars, updateCableCars } from "./cable-cars.js";
 import { buildExpansion } from "./expansion-visuals.js";
 import { moundHeight, groundHeight } from "./terrain.js";
@@ -296,6 +297,11 @@ export function buildTbilisiDistricts(v) {
       }
     }
   }
+  if (METEKHI_LAYBY) {
+    const b = METEKHI_LAYBY;
+    const deck = box(b.w, 0.5, b.d, stone, b.x, -0.18, b.z);
+    deck.rotation.y = b.angle;
+  }
   // Baratashvili is a broad driving deck, with proper sidewalk edges and bridge railings.
   const bridges = BRIDGE_DECKS.map((b) => [
     b.name,
@@ -338,13 +344,18 @@ export function buildTbilisiDistricts(v) {
     }
     for (const z of [-length * 0.28, length * 0.28])
       box(width * 0.7, 5.5, 4, stone, 0, -3.7, z, g);
+    const signOffset =
+      METEKHI_LAYBY &&
+      Math.hypot(p.x - METEKHI_LAYBY.x, p.z - METEKHI_LAYBY.z) < 20
+        ? 18
+        : 0;
     label(
       name,
       14,
       1.4,
-      p.x + Math.cos(angle) * (width / 2 + 2),
+      p.x + Math.cos(angle) * (width / 2 + 2) + Math.sin(angle) * signOffset,
       3.8,
-      p.z - Math.sin(angle) * (width / 2 + 2),
+      p.z - Math.sin(angle) * (width / 2 + 2) + Math.cos(angle) * signOffset,
       angle - Math.PI / 2,
     );
   }
