@@ -1,5 +1,5 @@
 import * as THREE from "./vendor/three.module.js";
-import { cablePoint, cabinProgress } from "./cable-path.js";
+import { cableLoopPoint, cableLoopPhase } from "./cable-path.js";
 
 export function buildCableCars(v, root, start, end, count) {
   const steel = new THREE.MeshStandardMaterial({
@@ -25,24 +25,14 @@ export function buildCableCars(v, root, start, end, count) {
     parent.add(m);
     return m;
   };
-  for (const side of [-1, 1]) {
-    const points = Array.from({ length: 65 }, (_, i) => {
-      const p = cablePoint(start, end, i / 64, side);
-      return new THREE.Vector3(p.x, p.y, p.z);
-    });
-    root.add(
-      new THREE.Mesh(
-        new THREE.TubeGeometry(
-          new THREE.CatmullRomCurve3(points),
-          64,
-          0.07,
-          5,
-          false,
-        ),
-        steel,
-      ),
-    );
-  }
+  const curve = new THREE.Curve();
+  curve.getPoint = (t, target = new THREE.Vector3()) => {
+    const p = cableLoopPoint(start, end, t);
+    return target.set(p.x, p.y, p.z);
+  };
+  root.add(
+    new THREE.Mesh(new THREE.TubeGeometry(curve, 768, 0.07, 5, true), steel),
+  );
   v.gondolas = [];
   v.cableBannerMeshes = [];
   for (let i = 0; i < count; i++) {
@@ -79,14 +69,13 @@ export function buildCableCars(v, root, start, end, count) {
 function placeCabin(cabin, time) {
   const { start, end } = cabin,
     length = Math.hypot(end.x - start.x, end.z - start.z);
-  const p = cablePoint(
+  const p = cableLoopPoint(
     start,
     end,
-    cabinProgress(time, cabin.offset, length),
-    cabin.side,
+    cableLoopPhase(time, cabin.offset, length),
   );
   cabin.group.position.set(p.x, p.y - 5, p.z);
-  cabin.group.rotation.y = Math.atan2(end.x - start.x, end.z - start.z);
+  cabin.group.rotation.y = p.heading;
 }
 export function updateCableCars(v, time) {
   for (const cabin of v.gondolas || []) placeCabin(cabin, time);

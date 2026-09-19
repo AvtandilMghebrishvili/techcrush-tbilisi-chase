@@ -1,9 +1,13 @@
+import { buildHeritagePlazas } from "./heritage-plazas.js";
+import { buildHeritage } from "./city-heritage.js";
 import { buildCableCars } from "./cable-cars.js";
 import * as THREE from "./vendor/three.module.js";
 import { surfaceGeometry } from "./road-surface.js";
 import { ROAD_SURFACE } from "./road-surface-data.js";
 import {
   KUTAISI_SITES,
+  FORECOURTS,
+  CABLE_STATIONS,
   LANDMARKS,
   RIVER_POLYGON,
   RIVER_BANKS,
@@ -326,12 +330,28 @@ export function buildKutaisiCity(v) {
     );
     return o;
   };
+  buildHeritagePlazas(root, FORECOURTS, stone, cream);
   for (const s of KUTAISI_SITES) {
     const g = new THREE.Group();
     g.position.set(s.x, 0, s.z);
     g.rotation.y = s.angle;
     root.add(g);
-    if (s.style === "fountain") {
+    if (
+      s.style !== "theatre" &&
+      buildHeritage(s, g, {
+        add,
+        box,
+        cylinder,
+        beam,
+        cream,
+        stone,
+        glass,
+        gold,
+        iron,
+      })
+    ) {
+      // Architecture shares the parent city batch and materials.
+    } else if (s.style === "fountain") {
       cylinder(12.5, 1.4, stone, 0, 0.7, 0, g, 48);
       cylinder(11.9, 0.08, glass, 0, 1.45, 0, g, 48);
       cylinder(4.8, 2.4, stone, 0, 2.55, 0, g);
@@ -464,8 +484,12 @@ export function buildKutaisiCity(v) {
       Math.min(25, s.w * 0.8),
       1.2,
       0,
-      s.style === "fountain" ? 1.3 : Math.min(4, s.h * 0.3),
-      s.d / 2 + 0.45,
+      s.style === "fountain"
+        ? 1.3
+        : s.style === "museum"
+          ? 7.3
+          : Math.min(4, s.h * 0.3),
+      s.d / 2 + 0.75,
       0,
       g,
     );
@@ -509,9 +533,32 @@ export function buildKutaisiCity(v) {
     beam([park.x + 9, 0, park.z + z], [park.x, 26, park.z], 0.45, cream);
   }
   v.kutaisiWheel = wheel;
-  const cableA = { x: park.x, y: 32, z: park.z },
-    cableB = { x: LANDMARKS.palace.x, y: 12, z: LANDMARKS.palace.z };
-  buildCableCars(v, root, cableA, cableB, 2);
+  const [cableA, cableB] = CABLE_STATIONS;
+  for (const station of CABLE_STATIONS) {
+    // Open platforms, attached pylons, and a canopy above the turnaround.
+    box(12, 0.45, 15, cream, station.x, station.y - 6.3, station.z);
+    box(12, 0.4, 15, roof, station.x, station.y + 1.1, station.z);
+    for (const x of [-5, 5])
+      for (const z of [-6, 6])
+        box(
+          0.6,
+          station.y + 1,
+          0.6,
+          iron,
+          station.x + x,
+          (station.y + 1) / 2,
+          station.z + z,
+        );
+    label(
+      "KUTAISI CABLE CAR",
+      10,
+      1,
+      station.x,
+      station.y - 4.7,
+      station.z + 7.55,
+    );
+  }
+  buildCableCars(v, root, cableA, cableB, 4);
   // Original rooftop challenge annex and matching solid slopes.
   box(
     ROOFTOP.w,

@@ -1,3 +1,5 @@
+import { landmarkForecourt, insideForecourts } from "./landmark-clearance.js";
+import { RELEASED_EVENT_SITES } from "./released-event-sites.js";
 import { BATUMI_GEO } from "./batumi-geo-data.js";
 import { placeOffRoad } from "./map-clearance.js";
 export const project = (lat, lon) => ({
@@ -68,16 +70,28 @@ export const BATUMI_SITES = [
   site("HILTON", 41.6478, 41.6254, 43, 30, 90, "hilton"),
   site("DANCING FOUNTAINS", 41.6357, 41.6107, 40, 24, 3, "fountain"),
   site("CHACHA TOWER", 41.6529, 41.6443, 16, 16, 25, "chacha"),
+  site("DRAMA THEATRE", 41.6525, 41.6378, 48, 32, 23, "theatre"),
+  site("BOULEVARD COLONNADES", 41.65325, 41.6327, 44, 13, 10, "colonnades"),
+  site("MOTHER OF GOD CATHEDRAL", 41.6453, 41.6407, 30, 46, 39, "gothic"),
+  site("NEPTUNE FOUNTAIN", 41.6531, 41.6376, 14, 14, 12, "neptune"),
 ];
 for (const s of BATUMI_SITES) {
   const p = placeOffRoad(
     s,
     [{ x: 0, z: 0, w: s.w + 2, d: s.d + 2, angle: s.angle }],
-    (q) => !inSea(q) && riverDistance(q) > 12,
+    (q) =>
+      !inSea(q) &&
+      riverDistance(q) > 12 &&
+      RELEASED_EVENT_SITES.batumi.every(
+        (a) => Math.hypot(a.x - q.x, a.z - q.z) > Math.hypot(s.w, s.d) / 2 + 18,
+      ),
   );
   s.x = p.x;
   s.z = p.z;
 }
+export const FORECOURTS = BATUMI_SITES.map(landmarkForecourt);
+export const landmarkViewReserved = (p, padding = 0) =>
+  insideForecourts(p, padding, FORECOURTS);
 export const LANDMARKS = {
   alphabet: BATUMI_SITES[0],
   ali: BATUMI_SITES[1],
@@ -93,6 +107,38 @@ export const LANDMARKS = {
   airport: project(41.6103, 41.5997),
 };
 export const DISTRICT_SOLIDS = BATUMI_SITES.flatMap((s) => {
+  if (s.style === "gothic")
+    return [
+      { ...s, h: 1 },
+      { ...s, w: 24, d: 44, base: 1, h: 22 },
+      ...[-10, 10].map((x) => ({
+        ...s,
+        x: s.x + x,
+        z: s.z + 17,
+        w: 8,
+        d: 9,
+        h: 40,
+      })),
+    ];
+  if (s.style === "colonnades")
+    return [-1, 1].flatMap((side) => [
+      { ...s, x: s.x + side * 12.5, w: 19, d: 13, h: 0.5 },
+      ...[side * 4.5, side * 12.5, side * 20.5].flatMap((x) =>
+        [-4.5, 4.5].map((z) => ({
+          ...s,
+          x: s.x + x,
+          z: s.z + z,
+          w: 1.8,
+          d: 1.8,
+          h: 8.2,
+        })),
+      ),
+    ]);
+  if (s.style === "neptune")
+    return [
+      { ...s, h: 1, cylinder: { radius: 7 } },
+      { ...s, w: 4, d: 4, h: 9 },
+    ];
   if (
     [
       "ali",
@@ -117,8 +163,24 @@ export const DISTRICT_SOLIDS = BATUMI_SITES.flatMap((s) => {
   return [s];
 });
 export const RETAINING_WALLS = [];
+for (const s of BATUMI_SITES.filter((s) =>
+  ["colonnades", "gothic", "theatre", "neptune"].includes(s.style),
+)) {
+  DISTRICT_SOLIDS.push({
+    ...s,
+    x: s.x,
+    z: s.z + s.d / 2 + 4,
+    w: 12,
+    d: 0.3,
+    h: 1.2,
+  });
+}
 export const reservedDistrict = (p, padding = 0) =>
   inSea(p) ||
+  landmarkViewReserved(p, padding) ||
+  RELEASED_EVENT_SITES.batumi.some(
+    (a) => Math.hypot(a.x - p.x, a.z - p.z) < padding + 12,
+  ) ||
   riverDistance(p) < 30 + padding ||
   BATUMI_SITES.some(
     (s) =>

@@ -4,6 +4,11 @@ import { inRiver } from "./water.js";
 import { reservedExpansion } from "./world-sites.js";
 import { ROADS, BUILDINGS, nearestRoad, containsPoint } from "./city-map.js";
 import { LANDMARKS, riverDistance } from "./district-data.js";
+const landmarkViewReserved = IS_KUTAISI
+  ? (await import("./kutaisi-district-data.js")).landmarkViewReserved
+  : IS_BATUMI
+    ? (await import("./batumi-district-data.js")).landmarkViewReserved
+    : () => false;
 // Shared physical stems and renderer locations. A tree never exists only in the picture.
 export const TREES = [];
 for (const r of ROADS) {
@@ -28,6 +33,7 @@ for (const r of ROADS) {
       if (
         ((IS_KUTAISI || IS_BATUMI || IS_RUSTAVI) && inRiver({ x, z })) ||
         !roadClear({ x, z }, 1.2) ||
+        landmarkViewReserved({ x, z }, 4) ||
         reservedExpansion({ x, z, w: 2, d: 2, angle: 0 }) ||
         riverDistance({ x, z }) < 47 ||
         road.distance <= road.road.width / 2 + 1.4 ||
@@ -64,6 +70,7 @@ for (const [p, rx, rz, count] of IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
     const road = nearestRoad({ x, z });
     if (
       !roadClear({ x, z }, 1.2) ||
+      landmarkViewReserved({ x, z }, 4) ||
       ((IS_KUTAISI || IS_BATUMI || IS_RUSTAVI) &&
         (inRiver({ x, z }) ||
           BUILDINGS.some((b) => containsPoint(b, x, z, 1)))) ||

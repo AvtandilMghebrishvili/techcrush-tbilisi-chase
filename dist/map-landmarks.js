@@ -46,6 +46,10 @@ export const MAP_PLACES = IS_RUSTAVI
           "H",
           "F",
           "C",
+          "D",
+          "G",
+          "✝",
+          "N",
         ];
         const descriptions = [
           "Georgian alphabet helix tower",
@@ -61,6 +65,10 @@ export const MAP_PLACES = IS_RUSTAVI
           "Waterfront hotel",
           "Dancing fountain basin",
           "Historic clock tower",
+          "Classical theatre with an open public square",
+          "White paired colonnades on the boulevard",
+          "Twin-spired Gothic cathedral",
+          "Golden Neptune and sculpted fountain basin",
         ];
         return [
           ...BATUMI_SITES.map((p, i) =>
@@ -77,7 +85,7 @@ export const MAP_PLACES = IS_RUSTAVI
             ...KUTAISI_SITES.map((p, i) =>
               place(
                 p,
-                ["F", "T", "B", "O", "P", "G", "S", "R"][i],
+                ["F", "T", "B", "O", "P", "G", "S", "R", "H", "D"][i],
                 p.name,
                 [
                   "Golden Colchis fountain",
@@ -88,6 +96,8 @@ export const MAP_PLACES = IS_RUSTAVI
                   "Historic market district",
                   "Kutaisi synagogue",
                   "Old royal neighbourhood",
+                  "Historic museum with arched stone facade",
+                  "Glass-domed former parliament in the compact western district",
                 ][i],
               ),
             ),

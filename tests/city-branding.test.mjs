@@ -18,7 +18,9 @@ test("all four cities have distributed, reachable roadside gears and correctly f
       const {overOpenWater}=await import('./dist/surface-support.js');
       const {terrainBlocked}=await import('./dist/terrain.js');
       const assert=(await import('node:assert/strict')).default;
-      assert.equal(FACADE_BANNERS.length,78);
+      assert.equal(FACADE_BANNERS.length,BRAND_DENSITY.banners);
+      assert(FACADE_BANNERS.length >= (["kutaisi","batumi"].includes("${city}") ? 108 : 78));
+      assert(ROBOTICS_GEARS.every(p=>p.mainStreet));
       assert.equal(GREX_MONUMENTS.length,3);
       assert.equal(ROBOTICS_GEARS.length,3);
       const { MAP_PLACES }=await import("./dist/map-landmarks.js");

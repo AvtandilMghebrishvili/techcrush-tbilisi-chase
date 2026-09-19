@@ -1,3 +1,5 @@
+import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
+import { MAP_PLACES } from "./map-landmarks.js";
 import {
   BUILDINGS,
   ROADS,
@@ -16,21 +18,35 @@ import { nearbyObstacles } from "./spatial-index.js";
 // Density follows the drivable network, rather than the empty map bounding box.
 const roadLength = ROADS.reduce((sum, r) => sum + r.length, 0);
 export const BRAND_DENSITY = {
-  banners: 3 * Math.max(12, Math.min(26, Math.ceil(roadLength / 1500))),
+  banners:
+    IS_KUTAISI || IS_BATUMI
+      ? 3 *
+        Math.min(
+          44,
+          Math.ceil(26 + BUILDINGS.length / 220 + roadLength / 40000),
+        )
+      : 3 * Math.max(12, Math.min(26, Math.ceil(roadLength / 1500))),
   gears: 3,
 };
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
-function spread(candidates, count, gap) {
-  const result = [];
+const mainStreet = (r) =>
+  (r.width >= 22 ||
+    /avenue|boulevard|square|embankment|highway|rustaveli|chavchavadze|tsereteli|aghmashenebeli|agmashenebeli|gorgiladze|gogebashvili|ninoshvili/i.test(
+      r.name,
+    )) &&
+  !/lane|dead end|exit|[1-9](st|nd|rd|th)/i.test(r.name);
+function spread(candidates, count, gap, initial = []) {
+  const result = [...initial];
   if (!candidates.length) return result;
   // One near the starting district; the remainder cover the whole road network.
   candidates.sort((a, b) => distance(a, START) - distance(b, START));
-  result.push(candidates.shift());
+  if (!result.length) result.push(candidates.shift());
   while (result.length < count && candidates.length) {
     let best = -1,
       bestDistance = gap;
     candidates.forEach((p, i) => {
-      const d = Math.min(...result.map((q) => distance(p, q)));
+      const separation = Math.min(...result.map((q) => distance(p, q)));
+      const d = separation > gap ? separation * (p.priority || 1) : 0;
       if (d > bestDistance) {
         best = i;
         bestDistance = d;
@@ -69,12 +85,20 @@ for (const b of BUILDINGS) {
     angle,
     building: b,
     faceWidth: side ? b.d : b.w,
+    street: road.road.name,
+    mainStreet: mainStreet(road.road),
+    priority: mainStreet(road.road) ? 4 : 1,
   });
 }
 export const FACADE_BANNERS = spread(
   facadeCandidates,
   BRAND_DENSITY.banners,
   60,
+  spread(
+    facadeCandidates.filter((p) => p.mainStreet),
+    Math.ceil(BRAND_DENSITY.banners * 0.8),
+    35,
+  ),
 ).map((p, id) => {
   const draped = id % 3 !== 1;
   const size = Math.min(
@@ -105,6 +129,9 @@ for (const r of ROADS) {
         x: x0 + Math.cos(r.angle) * offset * side,
         z: z0 - Math.sin(r.angle) * offset * side,
         angle: r.angle,
+        street: r.name,
+        mainStreet: mainStreet(r),
+        roadWidth: r.width,
         facing: r.angle - (side * Math.PI) / 2,
       };
       if (
@@ -142,11 +169,39 @@ for (const r of ROADS) {
       if (clear) gearCandidates.push(p);
     }
 }
-export const ROBOTICS_GEARS = spread(
-  [...gearCandidates],
-  BRAND_DENSITY.gears,
-  150,
-).map((p, id) => ({ ...p, id, radius: GEAR_RADIUS }));
+// Repair gifts are easy to find: start square and two prominent landmark districts.
+const repairAnchors = [
+  START,
+  ...MAP_PLACES.filter((p) => Math.hypot(p.x - START.x, p.z - START.z) < 2100),
+];
+const centralCandidates = gearCandidates.filter(
+  (p) => p.mainStreet && Math.hypot(p.x - START.x, p.z - START.z) < 2400,
+);
+const repairSites = [];
+for (let i = 0; i < 3; i++) {
+  const candidates = centralCandidates.filter((p) =>
+    repairSites.every((q) => distance(p, q) > 170),
+  );
+  const pool = candidates.length
+    ? candidates
+    : gearCandidates.filter((p) =>
+        repairSites.every((q) => distance(p, q) > 170),
+      );
+  pool.sort((a, b) => {
+    const score = (p) =>
+      i === 0
+        ? distance(p, START)
+        : Math.min(...repairAnchors.slice(1).map((q) => distance(p, q))) -
+          Math.min(450, ...repairSites.map((q) => distance(p, q))) * 0.35;
+    return score(a) - score(b);
+  });
+  if (pool[0]) repairSites.push(pool[0]);
+}
+export const ROBOTICS_GEARS = repairSites.map((p, id) => ({
+  ...p,
+  id,
+  radius: GEAR_RADIUS,
+}));
 
 export const GREX_MONUMENTS = spread(
   gearCandidates.filter((p) =>

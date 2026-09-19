@@ -4,8 +4,8 @@ import { overOpenWater } from "./surface-support.js";
 import { reservedExpansion } from "./world-sites.js";
 import { BANNER_COUNT } from "./banner-rules.js";
 import { ACTIVE_MAP } from "./map-selection.js";
-import { TBILISI_EVENT_SITES } from "./tbilisi-event-sites.js";
-const anchors = ACTIVE_MAP === "tbilisi" ? TBILISI_EVENT_SITES : [];
+import { RELEASED_EVENT_SITES } from "./released-event-sites.js";
+const anchors = RELEASED_EVENT_SITES[ACTIVE_MAP];
 export const SPONSOR_SITES = [];
 const roads = [...ROADS].sort(
   (a, b) =>

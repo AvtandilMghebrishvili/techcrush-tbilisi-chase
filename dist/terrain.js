@@ -8,6 +8,9 @@ const civic =
     : null;
 const riverMinX = Math.min(...RIVER.map((p) => p.x)) - 85;
 const riverMaxX = Math.max(...RIVER.map((p) => p.x)) + 85;
+const landmarkCourts = IS_KUTAISI
+  ? (await import("./kutaisi-district-data.js")).FORECOURTS
+  : [];
 export function terrainHeight(x, z) {
   if (IS_BATUMI) return -9;
   if (IS_RUSTAVI)
@@ -88,6 +91,19 @@ export function mountainHeight(x, z) {
   let h = terrainHeight(x, z);
   if (civic) h = (h + 3) * civic.civicGroundClearance(x, z) - 3;
   if (h <= 0) return h;
+  // Grade the existing hillside into each civic forecourt, matching physics and mesh.
+  for (const { apron, approach } of landmarkCourts)
+    for (const r of [apron, approach]) {
+      const dx = x - r.x,
+        dz = z - r.z,
+        a = r.angle || 0;
+      const d = Math.hypot(
+        Math.max(0, Math.abs(dx * Math.cos(a) - dz * Math.sin(a)) - r.w / 2),
+        Math.max(0, Math.abs(dx * Math.sin(a) + dz * Math.cos(a)) - r.d / 2),
+      );
+      if (d < 4) return -3;
+      if (d < 34) h = Math.min(h, ((h + 3) * (d - 4)) / 30 - 3);
+    }
   // Grade the constructed stunt yard into the hillside; render and collision
   // use this same surface, including the flight corridor and rooftop footprint.
   if (IS_KUTAISI) {

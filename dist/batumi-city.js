@@ -1,8 +1,11 @@
+import { buildHeritagePlazas } from "./heritage-plazas.js";
+import { buildHeritage } from "./city-heritage.js";
 import * as THREE from "./vendor/three.module.js";
 import { surfaceGeometry } from "./road-surface.js";
 import { ROAD_SURFACE } from "./road-surface-data.js";
 import {
   BATUMI_SITES,
+  FORECOURTS,
   LANDMARKS,
   RIVER_POLYGON,
   RIVER,
@@ -143,12 +146,27 @@ export function buildBatumiCity(v) {
         box(19, 0.04, 19, garden, x, -0.2, z);
       }
   }
+  buildHeritagePlazas(root, FORECOURTS, stone, cream);
   for (const s of BATUMI_SITES) {
     const g = new THREE.Group();
     g.position.set(s.x, 0, s.z);
     g.rotation.y = s.angle;
     root.add(g);
-    if (s.style === "alphabet") {
+    if (
+      buildHeritage(s, g, {
+        add,
+        box,
+        cylinder,
+        beam,
+        cream,
+        stone,
+        glass,
+        gold,
+        iron,
+      })
+    ) {
+      // Architecture shares the parent city batch and materials.
+    } else if (s.style === "alphabet") {
       cylinder(11, 2, stone, 0, 1, 0, g);
       cylinder(5, 105, glass, 0, 54, 0, g);
       for (let side = 0; side < 2; side++)
@@ -313,7 +331,10 @@ export function buildBatumiCity(v) {
         }
       }
     }
-    if (s.style !== "alphabet")
+    if (["colonnades", "gothic", "theatre", "neptune"].includes(s.style)) {
+      box(12, 1.2, 0.3, stone, 0, 0.6, s.d / 2 + 4, g);
+      label(s.name, 11.5, 0.75, 0, 0.65, s.d / 2 + 4.17, 0, g);
+    } else if (s.style !== "alphabet")
       label(s.name, Math.min(28, s.w + 8), 1.7, 0, 3, s.d / 2 + 0.12, 0, g);
   }
   // Airport is a distant skyline detail, not a disconnected drivable runway.
