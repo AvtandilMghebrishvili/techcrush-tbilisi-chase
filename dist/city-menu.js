@@ -1,3 +1,4 @@
+import { ROOFTOP_QUESTS } from "./world-sites.js";
 import { refreshRewards } from "./reward-ui.js";
 import {
   ACTIVE_MAP,
@@ -41,6 +42,12 @@ export function cityMenu(store, leave) {
     document.querySelector(".mission-cover").hidden = true;
     $("mission-card").querySelectorAll("p")[2].textContent =
       "Use ROUTE to find the Steelworks Skybox. Land on the roof to collect a Platinum part. Hold Q to rewind.";
+  }
+  for (const q of ROOFTOP_QUESTS.slice(1)) {
+    const option = document.createElement("option");
+    option.value = q.roof.id;
+    option.textContent = q.roof.name + " · 200+ KM/H";
+    $("route-selector").append(option);
   }
   const secret = document.createElement("button");
   secret.type = "button";

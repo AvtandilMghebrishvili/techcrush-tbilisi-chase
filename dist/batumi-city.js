@@ -18,13 +18,15 @@ import { RAMPS } from "./stunts.js";
 import { ROOFTOP, QUEST_BOX } from "./world-sites.js";
 const mat = (color, extra = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
-export const batumiFacades = () =>
-  [1, 2, 1, 3, 3].map((type, i) => {
-    const m = facadeMaterial(type);
+export const batumiFacades = () => {
+  const palette = new Map();
+  return [1, 2, 1, 3, 3].map((type, i) => {
+    const m = facadeMaterial(type, palette);
     m.userData.metricFacade = true;
     m.color.set(["#eee1c8", "#f1e5d1", "#ded8ca", "#c6e3ed", "#dde9ee"][i]);
     return m;
   });
+};
 export function buildBatumiCity(v) {
   const root = new THREE.Group();
   root.userData.environment = true;
@@ -33,7 +35,7 @@ export function buildBatumiCity(v) {
     iron = mat("#465663", { metalness: 0.7 }),
     red = mat("#ef2148"),
     gold = mat("#dbb85f", { metalness: 0.8, roughness: 0.3 }),
-    glass = facadeMaterial(3),
+    glass = v.expansionFacades[3].clone(),
     white = mat("#d8ebef"),
     stone = mat("#bcc5b7");
   glass.userData.metricFacade = true;
@@ -301,7 +303,7 @@ export function buildBatumiCity(v) {
     } else {
       box(s.w, s.h, s.d, glass, 0, s.h / 2, 0, g);
       for (const side of [-1, 1])
-        box(1.4, s.h, s.d + 0.4, cream, side * (s.w / 2 - 0.7), s.h / 2, 0, g);
+        box(1.4, s.h, s.d + 0.4, cream, side * (s.w / 2 - 0.64), s.h / 2, 0, g);
       if (s.style === "sheraton") {
         box(s.w + 2, 3, s.d + 2, cream, 0, s.h - 1, 0, g);
         add(new THREE.ConeGeometry(12, 24, 4), cream, 0, s.h + 12, 0, g);

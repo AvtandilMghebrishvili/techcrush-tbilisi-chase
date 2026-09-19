@@ -25,8 +25,9 @@ const mat = (color, extra = {}) =>
 
 // Original reference-informed lime plaster / stone facades, shared emission masks.
 export function kutaisiFacades() {
+  const palette = new Map();
   return [0, 1, 2, 1, 2].map((style, i) => {
-    const m = facadeMaterial(style);
+    const m = facadeMaterial(style, palette);
     m.color.set(["#d5c9b5", "#f1e3be", "#dce4db", "#cebdac", "#e4dcd0"][i]);
     m.map.repeat.y = m.emissiveMap.repeat.y = 0.5;
     return m;

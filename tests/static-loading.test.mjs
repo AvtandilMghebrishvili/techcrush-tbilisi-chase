@@ -51,10 +51,15 @@ test("static batching retains transformed vertices and skips animated subtrees",
   assert.equal(moving.parent, root);
   assert.equal(child.parent, moving);
   const merged = root.children.find((o) => o.isMesh);
-  assert.deepEqual(
-    Array.from(merged.geometry.attributes.position.array),
-    expected,
-  );
+  root.updateMatrixWorld(true);
+  const actual = merged.geometry.clone().applyMatrix4(merged.matrixWorld)
+    .attributes.position.array;
+  assert.equal(actual.length, expected.length);
+  for (let i = 0; i < actual.length; i++)
+    assert(
+      Math.abs(actual[i] - expected[i]) < 0.00003,
+      "batch must preserve world coordinates",
+    );
   assert.equal(root.children.length, 2);
 });
 function fixture() {

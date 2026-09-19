@@ -46,8 +46,8 @@ export function buildGrex(v) {
     color: "#ffffff",
     toneMapped: false,
   });
-  if (v.questCrate) {
-    const face = new THREE.PlaneGeometry(2.42, 2.42);
+  const face = new THREE.PlaneGeometry(2.42, 2.42);
+  for (const crate of v.questCrates || (v.questCrate ? [v.questCrate] : [])) {
     for (let i = 0; i < 4; i++) {
       const angle = (i * Math.PI) / 2,
         panel = new THREE.Mesh(face, v.grexCrateMaterial);
@@ -57,7 +57,7 @@ export function buildGrex(v) {
         Math.cos(angle) * 1.825,
       );
       panel.rotation.y = angle;
-      v.questCrate.root.add(panel);
+      crate.root.add(panel);
     }
   }
   const geo = grexGeometry(),

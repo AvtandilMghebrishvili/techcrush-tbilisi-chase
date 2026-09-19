@@ -189,5 +189,6 @@ export class MapViewport {
       `${Math.round(zoom * 100)}%`;
     document.getElementById("quest-zoom-in").disabled = zoom >= 3;
     document.getElementById("quest-zoom-out").disabled = zoom <= 1;
+    this.onchange?.();
   }
 }

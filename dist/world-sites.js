@@ -8,6 +8,8 @@ const data = IS_RUSTAVI
       : await import("./tbilisi-world-sites.js");
 export const {
   ROOFTOP,
+  ROOFTOPS,
+  ROOFTOP_QUESTS,
   QUEST_BOX,
   SPECIAL_RAMPS,
   STUNT_APRONS,

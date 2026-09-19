@@ -1,3 +1,4 @@
+import { EXTRA_ROOFTOP_LAYOUTS } from "./extra-rooftops.js";
 import {
   cashBannerIds,
   CASH_BANNER_REWARD,
@@ -7,6 +8,14 @@ import {
 import { TIME_COURSES } from "./race-timing.js";
 import { carRewardMultiplier, ticketRewardMultiplier } from "./car-bonuses.js";
 export const STUNT_REWARDS = {
+  ...Object.fromEntries(
+    Object.entries(EXTRA_ROOFTOP_LAYOUTS).flatMap(([map, sites]) =>
+      sites.map((p, i) => [
+        `${map}-skybox-${i + 2}-v1`,
+        { map, cash: 2500, boxes: 0, platinum: 1, name: p[3] + " Skybox" },
+      ]),
+    ),
+  ),
   "rustavi-skybox-v1": {
     cash: 2500,
     boxes: 0,
@@ -258,7 +267,10 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
   const quests = metrics.quests ?? [];
   if (
     !Array.isArray(quests) ||
-    quests.length > 2 ||
+    quests.length >
+      Object.values(STUNT_REWARDS).filter(
+        (q) => (q.map || "tbilisi") === (ticket.map || "tbilisi"),
+      ).length ||
     new Set(quests).size !== quests.length ||
     quests.some(
       (id) =>

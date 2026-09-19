@@ -83,6 +83,8 @@ export class SceneView {
     this.scene.fog = new THREE.FogExp2("#b8c1c5", 0.00052);
     this.renderer = new THREE.WebGLRenderer({
       canvas,
+      // Uses EXT_clip_control where available; normal depth remains the fallback.
+      reversedDepthBuffer: true,
       antialias: !this.budget.low,
       powerPreference: "high-performance",
     });
@@ -92,7 +94,7 @@ export class SceneView {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.94;
-    this.camera = new THREE.PerspectiveCamera(56, 1, 0.06, 4800);
+    this.camera = new THREE.PerspectiveCamera(56, 1, 0.4, 4800);
     this.hemisphere = new THREE.HemisphereLight("#dce8f3", "#78776b", 0.75);
     this.scene.add(this.hemisphere);
     this.blastLight = new THREE.PointLight("#ff9736", 0, 19, 2);
@@ -115,6 +117,16 @@ export class SceneView {
     this.assetLoad = assets || prepareSceneAssets(this.mobile);
     try {
       buildRealisticCity(this);
+      // A positive offset moves toward the eye with reversed depth. Keep façade
+      // fills behind their cornices on either depth convention.
+      const facadeBias = this.renderer.capabilities.reversedDepthBuffer
+        ? -1
+        : 1;
+      for (const material of this.buildingMaterials) {
+        if (!material.userData.originalFacade) continue;
+        material.polygonOffsetFactor = facadeBias;
+        material.polygonOffsetUnits = facadeBias;
+      }
       calibrateRoadsideProps(this);
       batchStreetLamps(this);
       this.cameraMode = 0;
@@ -333,8 +345,9 @@ export class SceneView {
       opacity: 0.65,
       depthWrite: false,
     });
+    const skidGeometry = new THREE.PlaneGeometry(0.22, 1);
     for (let i = 0; i < 160; i++) {
-      const skid = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 1), skidMat);
+      const skid = new THREE.Mesh(skidGeometry, skidMat);
       skid.rotation.x = -Math.PI / 2;
       skid.visible = false;
       this.scene.add(skid);
@@ -464,6 +477,7 @@ export class SceneView {
     this.camera.position.set(START.x - 12, 5.2, START.z + 6);
     this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
     this.camera.fov = 56;
+    this.camera.near = 0.4;
     this.camera.updateProjectionMatrix();
     this.updateGate(0);
   }
@@ -578,6 +592,8 @@ export class SceneView {
       const mode = CAMERAS[this.cameraMode].id;
       const interior = mode === "cockpit",
         hood = mode === "hood";
+      // Retain dashboard close-ups; outdoor views need much more depth precision.
+      this.camera.near = interior ? 0.06 : hood ? 0.15 : 0.4;
       if (this.player.userData.glass)
         this.player.userData.glass.opacity = interior ? 0.16 : 0.8;
       this.player.visible = !hood;

@@ -1,3 +1,4 @@
+import { extraRooftops, findRoof } from "./extra-rooftops.js";
 import { placeOffRoad, footprintsOverlap } from "./map-clearance.js";
 import { BANK_TARGET } from "./tbilisi-civic-layout.js";
 import { CIVIC_SOLIDS, reservedCivic } from "./tbilisi-civic-data.js";
@@ -47,7 +48,16 @@ export const STUNT_APRONS = [
   { x: -685, z: -440, w: 21, d: 105, angle: -Math.PI / 2 },
   { x: -942, z: -440, w: 30, d: 176, angle: -Math.PI / 2 },
 ];
+const extras = extraRooftops("tbilisi");
+export const ROOFTOPS = [ROOFTOP, ...extras.map((q) => q.roof)];
+export const ROOFTOP_QUESTS = [
+  { roof: ROOFTOP, ramp: SPECIAL_RAMPS[0], box: QUEST_BOX },
+  ...extras,
+];
+SPECIAL_RAMPS.push(...extras.map((q) => q.ramp));
+STUNT_APRONS.push(...extras.map((q) => q.apron));
 export const STUNT_ZONES = [
+  ...extras.flatMap((q) => q.zones.filter((zone) => zone !== q.apron)),
   ROOFTOP,
   ...STUNT_APRONS,
   { x: 420, z: 623, w: 50, d: 68, angle: 0 },
@@ -82,7 +92,7 @@ export const TOWERS = [
   tower: true,
 }));
 export const EXPANSION_SOLIDS = [
-  ROOFTOP,
+  ...ROOFTOPS,
   ...BANK_SOLIDS,
   ...TOWERS,
   ...CIVIC_SOLIDS,
@@ -98,9 +108,4 @@ export function reservedExpansion(rect) {
     )
   );
 }
-export function roofAt(p, margin = 0) {
-  return Math.abs(p.x - ROOFTOP.x) < ROOFTOP.w / 2 - margin &&
-    Math.abs(p.z - ROOFTOP.z) < ROOFTOP.d / 2 - margin
-    ? ROOFTOP
-    : null;
-}
+export const roofAt = (p, margin = 0) => findRoof(ROOFTOPS, p, margin);

@@ -1,8 +1,14 @@
+import {
+  availablePowerups,
+  powerupIconSVG,
+  separatePowerupPins,
+} from "./powerup-map.js";
+import { STUNT_REWARDS } from "./community-rules.js";
 import { MapViewport } from "./map-viewport.js";
 import { LIMIT } from "./config.js";
 import { ROADS } from "./city-map.js";
 import { RIVER_POLYGON } from "./district-data.js";
-import { SPECIAL_RAMPS, QUEST_BOX } from "./world-sites.js";
+import { SPECIAL_RAMPS, ROOFTOP_QUESTS } from "./world-sites.js";
 import { RAMPS } from "./stunts.js";
 import {
   CITY_NAME,
@@ -16,33 +22,38 @@ import {
   secondaryTarget,
   secondaryRoute,
   setWaypoint,
+  questRouteId,
 } from "./navigation-cache.js";
 import { mapClickPoint, routeDistance } from "./hud-math.js";
 import { LANDMARKS } from "./district-data.js";
-import {
-  FACADE_BANNERS,
-  ROBOTICS_GEARS,
-  GREX_MONUMENTS,
-} from "./city-brand-sites.js";
+import { FACADE_BANNERS } from "./city-brand-sites.js";
 import { MAP_PLACES } from "./map-landmarks.js";
 export { MAP_PLACES };
-import { activeRepairCount } from "./brand-rules.js";
 
 const CIVIC_PARKS = IS_RUSTAVI
   ? (await import("./rustavi-civic-data.js")).HEROES_PARKS
   : [];
 export const MAP_EXTENT = LIMIT + 80;
-export const QUEST_PINS = SPECIAL_RAMPS.filter((r) => r.quest).map((r, i) => ({
-  ...r,
-  route: i ? "river" : "skybox",
-  symbol: i ? "R" : "S",
-  color: i ? "#72edf2" : "#e3adff",
-  title: i ? (IS_KUTAISI ? "RIONI GAP" : "MTKVARI GAP") : "ROOFTOP SKYBOX",
-  reward:
-    IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
-      ? "PLATINUM BOX"
+export const QUEST_PINS = SPECIAL_RAMPS.filter((r) => r.quest).map((r) => {
+  const roofIndex = ROOFTOP_QUESTS.findIndex((q) => q.ramp === r);
+  return {
+    ...r,
+    route: questRouteId(r),
+    symbol: roofIndex >= 0 ? `S${roofIndex + 1}` : "R",
+    color: roofIndex >= 0 ? "#e3adff" : "#72edf2",
+    title:
+      roofIndex > 0
+        ? ROOFTOP_QUESTS[roofIndex].roof.name
+        : roofIndex === 0
+          ? "ROOFTOP SKYBOX"
+          : IS_KUTAISI
+            ? "RIONI GAP"
+            : "MTKVARI GAP",
+    reward: STUNT_REWARDS[r.quest]?.platinum
+      ? "PLATINUM BOX + CREDITS"
       : "PARTS BOX + CREDITS",
-}));
+  };
+});
 export const mapPoint = (point, size = 900) => ({
   x: ((MAP_EXTENT - point.x) / (MAP_EXTENT * 2)) * size,
   y: ((MAP_EXTENT - point.z) / (MAP_EXTENT * 2)) * size,
@@ -103,6 +114,7 @@ export class QuestMap {
     this.select = select;
     this.dialog = document.getElementById("quest-map");
     this.viewport = new MapViewport();
+    this.viewport.onchange = () => this.layoutPowerups();
     document.getElementById("map-sponsors").onchange = () => this.brandPins();
     document.getElementById("quest-map-close").onclick = () =>
       this.dialog.close();
@@ -140,13 +152,15 @@ export class QuestMap {
       pick(rect.left + rect.width / 2, rect.top + rect.height / 2);
     });
   }
-  pin(point, name) {
+  pin(point, name, description) {
     this.select("");
     setWaypoint(this.sim, point, name);
     const detail = document.getElementById("map-place-details");
     if (detail)
       detail.textContent =
-        MAP_PLACES.find((p) => p.name === name)?.description || "";
+        description ||
+        MAP_PLACES.find((p) => p.name === name)?.description ||
+        "";
     this.draw();
   }
   route(value) {
@@ -156,47 +170,54 @@ export class QuestMap {
   brandPins() {
     const pins = document.getElementById("quest-pins");
     pins.querySelectorAll(".brand-pin").forEach((pin) => pin.remove());
-    if (!document.getElementById("map-sponsors").checked) return;
-    for (const site of [
-      ...FACADE_BANNERS.map((p) => ({
-        ...p,
-        symbol: p.brand === "robotics" ? "GRA" : "TC",
-        color: p.brand === "robotics" ? "#f2394b" : "#69c6d5",
-        name:
-          p.brand === "robotics"
-            ? "GRA · ROBO BATTLE BANNER"
-            : "TECHCRUSH BANNER",
-      })),
-      ...ROBOTICS_GEARS.filter(
-        (p) =>
-          p.id < activeRepairCount(this.sim.level) &&
-          !this.sim.gearRepairs.some((q) => q.id === p.id),
-      ).map((p) => ({
-        ...p,
-        symbol: "⚙",
-        color: "#ffcd69",
-        name: "GRA GIFT · FULL REPAIR · HP 100%",
-      })),
-      ...GREX_MONUMENTS.filter(
-        (p) => !this.sim.grexTriggers.some((q) => q.id === p.id),
-      ).map((p) => ({
-        ...p,
-        symbol: "G",
-        color: "#e1fe28",
-        name: "GREX PULSE · −50 HP · PATROLS RETURN IN 8s",
-      })),
-    ]) {
+    const banners = document.getElementById("map-sponsors").checked
+      ? FACADE_BANNERS.map((p) => ({
+          ...p,
+          symbol: p.brand === "robotics" ? "GRA" : "TC",
+          color: p.brand === "robotics" ? "#f2394b" : "#69c6d5",
+          name:
+            p.brand === "robotics"
+              ? "GRA · ROBO BATTLE 2026"
+              : "TECHCRUSH · SUBSCRIBE",
+          banner: true,
+        }))
+      : [];
+    for (const site of [...banners, ...availablePowerups(this.sim)]) {
       const point = mapPoint(site, 100),
         pin = document.createElement("button");
       pin.className =
         "quest-pin brand-pin " +
         (["GRA", "TC"].includes(site.symbol) ? "banner-pin" : "powerup-pin");
       pin.style.cssText = `left:${point.x}%;top:${point.y}%;--quest:${site.color}`;
-      pin.textContent = site.symbol;
-      pin.title = site.name;
+      if (site.kind) pin.innerHTML = powerupIconSVG(site.kind);
+      else pin.textContent = site.symbol;
+      pin.title =
+        site.name + (site.description ? " · " + site.description : "");
       pin.setAttribute("aria-label", `Set waypoint to ${site.name}`);
-      pin.onclick = () => this.pin(site, site.name);
+      pin.onclick = () => this.pin(site, site.name, site.description);
       pins.append(pin);
+    }
+    this.layoutPowerups();
+  }
+  layoutPowerups() {
+    const rect = this.viewport.surface.getBoundingClientRect();
+    if (!rect.width) return;
+    const buttons = [...this.dialog.querySelectorAll(".powerup-pin")];
+    const pins = buttons.map((button) => ({
+      button,
+      x: (parseFloat(button.style.left) * rect.width) / 100,
+      y: (parseFloat(button.style.top) * rect.height) / 100,
+    }));
+    for (const p of separatePowerupPins(pins)) {
+      const dx = p.x - p.anchorX,
+        dy = p.y - p.anchorY;
+      p.button.style.setProperty("--pin-dx", dx + "px");
+      p.button.style.setProperty("--pin-dy", dy + "px");
+      p.button.style.setProperty("--tether-length", Math.hypot(dx, dy) + "px");
+      p.button.style.setProperty(
+        "--tether-angle",
+        Math.atan2(-dy, -dx) + "rad",
+      );
     }
   }
   open() {
@@ -255,6 +276,13 @@ export class QuestMap {
         const place = MAP_PLACES[Number(button.dataset.mapPlace)];
         this.pin(place, place.name);
       };
+    for (const item of this.dialog.querySelectorAll("[data-powerup]")) {
+      if (!item.querySelector("svg"))
+        item.insertAdjacentHTML(
+          "afterbegin",
+          powerupIconSVG(item.dataset.powerup),
+        );
+    }
     this.brandPins();
     this.draw();
     this.dialog.showModal();
@@ -288,7 +316,8 @@ export class QuestMap {
       c.font = "bold 15px Arial";
       c.fillText(label, p.x + size + 5, p.y + 5);
     };
-    dot(QUEST_BOX, "#e3adff", 5, "ROOF CRATE");
+    for (const [i, q] of ROOFTOP_QUESTS.entries())
+      dot(q.box, "#e3adff", 5, `ROOF ${i + 1}`);
     sim.checkpoints.forEach((p, i) =>
       dot(p, i < sim.checkpoint ? "#66827a" : "#ffffff", 5, String(i + 1)),
     );

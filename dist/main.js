@@ -1,3 +1,8 @@
+import {
+  availablePowerups,
+  drawPowerupIcon,
+  separatePowerupPins,
+} from "./powerup-map.js";
 import { EventUI } from "./event-ui.js";
 import { eventProgress } from "./event-rules.js";
 import { MapSettings, mapPreferences } from "./map-settings.js";
@@ -950,6 +955,19 @@ function drawMap() {
     c.fillText(q.symbol, 0, 3);
     c.restore();
     c.textAlign = "start";
+  }
+  const powerupPins = availablePowerups(sim).map((site) => ({
+    site,
+    ...radarPoint(ox - site.x * s, oz - site.z * s, 84),
+  }));
+  for (const pin of separatePowerupPins(powerupPins, 20, 88)) {
+    c.strokeStyle = pin.site.color;
+    c.lineWidth = 0.8;
+    c.beginPath();
+    c.moveTo(pin.anchorX, pin.anchorY);
+    c.lineTo(pin.x, pin.y);
+    c.stroke();
+    drawPowerupIcon(c, pin.site, pin.x, pin.y, -sim.player.angle);
   }
   for (const cop of sim.police) {
     if (cop.destroyed) continue;

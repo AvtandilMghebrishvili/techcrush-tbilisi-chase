@@ -85,7 +85,7 @@ test("Rustavi connected streets include the real motorpark and collision-safe la
   assert.equal(SPONSOR_SITES.length, 48);
   assert.deepEqual(
     QUEST_PINS.map((q) => q.quest),
-    ["rustavi-skybox-v1"],
+    ["rustavi-skybox-v1", "rustavi-skybox-2-v1", "rustavi-skybox-3-v1"],
     "academy practice ramp must not pretend to be a reward quest",
   );
   const seen = new Set([0]),
@@ -154,10 +154,22 @@ test("Rustavi rooftop launch works at speed, needs a committed approach and rewi
     slow.update(1 / 120, { throttle: slow.player.airborne ? 0 : 0.25 });
   assert.equal(slow.runQuests.length, 0);
   for (const r of SPECIAL_RAMPS) {
-    const p = vehicle(r.x, r.z + r.length / 2 + 0.2);
-    p.vz = -20;
-    assert(resolveRampSolid(p, r, { x: r.x, z: r.z + r.length / 2 + 2 }));
-    assert(p.vz >= 0, "high end blocks driving through the ramp");
+    const p = vehicle(
+      r.x + Math.sin(r.angle) * (r.length / 2 + 0.2),
+      r.z + Math.cos(r.angle) * (r.length / 2 + 0.2),
+    );
+    p.vx = -Math.sin(r.angle) * 20;
+    p.vz = -Math.cos(r.angle) * 20;
+    assert(
+      resolveRampSolid(p, r, {
+        x: r.x + Math.sin(r.angle) * (r.length / 2 + 2),
+        z: r.z + Math.cos(r.angle) * (r.length / 2 + 2),
+      }),
+    );
+    assert(
+      p.vx * Math.sin(r.angle) + p.vz * Math.cos(r.angle) >= 0,
+      "high end blocks driving through the ramp",
+    );
   }
 });
 test("Rustavi bridges support both lane edges and physically driven centre lines", () => {

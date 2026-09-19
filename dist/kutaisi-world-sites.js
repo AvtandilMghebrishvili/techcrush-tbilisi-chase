@@ -1,3 +1,4 @@
+import { extraRooftops, findRoof } from "./extra-rooftops.js";
 import { footprintsOverlap } from "./map-clearance.js";
 // Original stunt construction on dry side streets. Main traffic lanes stay open.
 export const ROOFTOP = {
@@ -48,7 +49,16 @@ export const STUNT_APRONS = [
   { x: -186, z: -665, w: 21, d: 110, angle: Math.PI / 2 },
   { x: 116, z: -665, w: 30, d: 120, angle: Math.PI / 2 },
 ];
+const extras = extraRooftops("kutaisi");
+export const ROOFTOPS = [ROOFTOP, ...extras.map((q) => q.roof)];
+export const ROOFTOP_QUESTS = [
+  { roof: ROOFTOP, ramp: SPECIAL_RAMPS[0], box: QUEST_BOX },
+  ...extras,
+];
+SPECIAL_RAMPS.push(...extras.map((q) => q.ramp));
+STUNT_APRONS.push(...extras.map((q) => q.apron));
 export const STUNT_ZONES = [
+  ...extras.flatMap((q) => q.zones.filter((zone) => zone !== q.apron)),
   ROOFTOP,
   ...STUNT_APRONS,
   { x: 1540, z: -858, w: 50, d: 68, angle: 0 },
@@ -56,11 +66,7 @@ export const STUNT_ZONES = [
 export const BANK_SITE = { x: 9999, z: 9999 };
 export const BANK_SOLIDS = [];
 export const TOWERS = [];
-export const EXPANSION_SOLIDS = [ROOFTOP];
+export const EXPANSION_SOLIDS = [...ROOFTOPS];
 export const reservedExpansion = (rect) =>
   STUNT_ZONES.some((s) => footprintsOverlap(rect, s, 4));
-export const roofAt = (p, margin = 0) =>
-  Math.abs(p.x - ROOFTOP.x) < ROOFTOP.w / 2 - margin &&
-  Math.abs(p.z - ROOFTOP.z) < ROOFTOP.d / 2 - margin
-    ? ROOFTOP
-    : null;
+export const roofAt = (p, margin = 0) => findRoof(ROOFTOPS, p, margin);

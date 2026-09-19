@@ -3,7 +3,7 @@ import {
   breakReward,
   patrolCollisionDamage,
 } from "./banner-rules.js";
-import { ROOFTOP, QUEST_BOX, roofAt } from "./world-sites.js";
+import { ROOFTOP_QUESTS, roofAt } from "./world-sites.js";
 import {
   IS_KUTAISI,
   IS_BATUMI,
@@ -1445,20 +1445,23 @@ export class ChaseSimulation {
           this.emitSound("reward", p, 20, "quest:" + id);
         }
       };
-      if (
-        p.lastLandingRamp === 4 &&
-        roofAt(p) &&
-        Math.abs(p.y - ROOFTOP.h) < 0.2 &&
-        distance(p, QUEST_BOX) < 7
-      )
-        unlock(
-          ROOFTOP.id,
-          IS_KUTAISI || IS_BATUMI || IS_RUSTAVI
-            ? "PLATINUM SKYBOX · +1 PLATINUM BOX / 2,500 CR"
-            : "SKYBOX FOUND · +1 BOX / 2,500 CR",
-        );
+      for (const q of ROOFTOP_QUESTS) {
+        if (
+          p.lastLandingRamp === q.ramp.id &&
+          roofAt(p) === q.roof &&
+          Math.abs(p.y - q.roof.h) < 0.2 &&
+          distance(p, q.box) < 7
+        )
+          unlock(
+            q.roof.id,
+            STUNT_REWARDS[q.roof.id].platinum
+              ? "PLATINUM SKYBOX · +1 PLATINUM BOX / 2,500 CR"
+              : "SKYBOX FOUND · +1 BOX / 2,500 CR",
+          );
+      }
       if (
         !IS_RUSTAVI &&
+        !IS_BATUMI &&
         p.lastLandingRamp === 5 &&
         p.launchSpeed >= 50 &&
         (IS_KUTAISI

@@ -20,7 +20,8 @@ function canvasTexture(canvas) {
 }
 // Four original facade atlases: weathered brick, stucco balconies, limestone
 // arches and glazed offices. Drawn once; window masks share exactly the same layout.
-export function facadeMaterial(style) {
+export function facadeMaterial(style, palette) {
+  if (palette?.has(style)) return palette.get(style).clone();
   const c = document.createElement("canvas"),
     e = document.createElement("canvas");
   c.width = e.width = 512;
@@ -101,26 +102,41 @@ export function facadeMaterial(style) {
     emissiveIntensity: 0,
     roughness: style === 3 ? 0.28 : 0.9,
     metalness: style === 3 ? 0.45 : 0,
+    // Masonry/glazing sits behind coplanar trim rather than alternating pixels.
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
   });
   m.userData.originalFacade = true;
+  palette?.set(style, m);
   return m;
 }
-export function batchStatic(group, tile = 160) {
+export function batchStatic(group, tile = 320) {
   group.updateMatrixWorld(true);
   const batches = new Map(),
     remove = [];
+  const inverse = group.matrixWorld.clone().invert();
+  const pos = new THREE.Vector3(),
+    transform = new THREE.Matrix4();
   group.traverse((o) => {
-    if (!o.isMesh || Array.isArray(o.material)) return;
+    if (!o.isMesh || o.isInstancedMesh || Array.isArray(o.material)) return;
     for (let p = o; p && p !== group; p = p.parent)
       if (p.userData.dynamic) return;
-    const pos = new THREE.Vector3().setFromMatrixPosition(o.matrixWorld);
+    pos.setFromMatrixPosition(o.matrixWorld).applyMatrix4(inverse);
+    const tx = Math.floor(pos.x / tile),
+      tz = Math.floor(pos.z / tile);
     const key =
-      o.material.uuid +
-      ":" +
-      Math.floor(pos.x / tile) +
-      ":" +
-      Math.floor(pos.z / tile);
-    if (!batches.has(key)) batches.set(key, { mat: o.material, geos: [] });
+      o.material.uuid + `:${tx}:${tz}:${o.castShadow}:${o.receiveShadow}`;
+    if (!batches.has(key))
+      batches.set(key, {
+        mat: o.material,
+        geos: [],
+        x: (tx + 0.5) * tile,
+        z: (tz + 0.5) * tile,
+        castShadow: o.castShadow,
+        receiveShadow: o.receiveShadow,
+      });
+    const batch = batches.get(key);
     const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
     if (o.material.userData.metricFacade && g.attributes.uv) {
       const p = g.attributes.position,
@@ -133,7 +149,13 @@ export function batchStatic(group, tile = 160) {
           p.getY(i) / 14,
         );
     }
-    g.applyMatrix4(o.matrixWorld);
+    // Write local coordinates once: large world-space floats needlessly lose
+    // precision on small façade/roof details, especially in the coastal city.
+    transform
+      .makeTranslation(-batch.x, 0, -batch.z)
+      .multiply(inverse)
+      .multiply(o.matrixWorld);
+    g.applyMatrix4(transform);
     if (!g.attributes.uv)
       g.setAttribute(
         "uv",
@@ -142,7 +164,7 @@ export function batchStatic(group, tile = 160) {
           2,
         ),
       );
-    batches.get(key).geos.push(g);
+    batch.geos.push(g);
     remove.push(o);
   });
   detachStaticMeshes(remove);
@@ -154,7 +176,11 @@ export function batchStatic(group, tile = 160) {
     if (!g) continue;
     g.computeBoundingSphere();
     const m = new THREE.Mesh(g, batch.mat);
-    m.castShadow = m.receiveShadow = true;
+    m.castShadow = batch.castShadow;
+    m.receiveShadow = batch.receiveShadow;
+    m.position.set(batch.x, 0, batch.z);
+    m.updateMatrix();
+    m.matrixAutoUpdate = false;
     group.add(m);
   }
 }
@@ -349,11 +375,13 @@ export function buildExpansion(v, root, box, label, materials) {
   v.questCrate = { root: crate, beacon };
 }
 export function updateExpansion(v, sim) {
-  if (!v.questCrate) return;
-  const done =
-    sim.runQuests.includes(ROOFTOP.id) ||
-    sim.runOptions?.completedQuests?.includes(ROOFTOP.id);
-  v.questCrate.root.visible = !done;
-  v.questCrate.beacon.rotation.y = sim.time * 0.8;
-  v.questCrate.beacon.position.y = 5.5 + Math.sin(sim.time * 2) * 0.3;
+  for (const crate of v.questCrates || []) {
+    const done =
+      sim.runQuests.includes(crate.id) ||
+      sim.runOptions?.completedQuests?.includes(crate.id);
+    crate.root.visible = !done;
+    if (done) continue;
+    crate.beacon.rotation.y = sim.time * 0.8;
+    crate.beacon.position.y = 5.5 + Math.sin(sim.time * 2) * 0.3;
+  }
 }

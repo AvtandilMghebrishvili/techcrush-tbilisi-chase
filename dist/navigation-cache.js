@@ -1,4 +1,4 @@
-import { ROOFTOP, QUEST_BOX, SPECIAL_RAMPS, roofAt } from "./world-sites.js";
+import { ROOFTOP_QUESTS, SPECIAL_RAMPS, roofAt } from "./world-sites.js";
 import { IS_KUTAISI } from "./map-selection.js";
 import { routeBetween } from "./simulation.js";
 import { nearestRoad } from "./city-map.js";
@@ -68,25 +68,38 @@ const lips = SPECIAL_RAMPS.map((r) => ({
   z: r.z + (Math.cos(r.angle) * r.length) / 2,
   name: r.name,
 }));
-const boxTarget = { ...QUEST_BOX, name: "SKYBOX · COLLECT THE ROOF CRATE" };
+const boxTargets = ROOFTOP_QUESTS.map((q) => ({
+  ...q.box,
+  name: "SKYBOX · COLLECT THE ROOF CRATE",
+}));
+export function questRouteId(r) {
+  return r === SPECIAL_RAMPS[0]
+    ? "skybox"
+    : r.quest?.includes("gap")
+      ? "river"
+      : r.quest;
+}
+const selectedRampIndex = (sim) =>
+  SPECIAL_RAMPS.findIndex((r) => r.quest && questRouteId(r) === sim.navQuest);
 const riverTarget = IS_KUTAISI
   ? { x: 83, z: -665, name: "RIONI GAP · LAND UPRIGHT" }
   : { x: -925, z: -440, name: "MTKVARI GAP · LAND UPRIGHT" };
 export function navigationTarget(sim) {
   const p = sim.player;
+  const i = selectedRampIndex(sim),
+    ramp = SPECIAL_RAMPS[i];
+  const rooftopIndex = ROOFTOP_QUESTS.findIndex((q) => q.ramp === ramp),
+    q = ROOFTOP_QUESTS[rooftopIndex];
   if (
-    sim.navQuest === "skybox" &&
-    ((roofAt(p) && p.y >= ROOFTOP.h - 0.2) || (p.airborne && p.lastRamp === 4))
+    q &&
+    ((roofAt(p) === q.roof && p.y >= q.roof.h - 0.2) ||
+      (p.airborne && p.lastRamp === ramp.id))
   )
-    return boxTarget;
+    return boxTargets[rooftopIndex];
   if (sim.navQuest === "river" && p.airborne && p.lastRamp === 5)
     return riverTarget;
-  if (
-    sim.navQuest === "skybox" ||
-    (sim.navQuest === "river" && SPECIAL_RAMPS[1])
-  ) {
-    const i = sim.navQuest === "skybox" ? 0 : 1,
-      r = SPECIAL_RAMPS[i],
+  if (ramp) {
+    const r = SPECIAL_RAMPS[i],
       dx = p.x - r.x,
       dz = p.z - r.z;
     const along = dx * Math.sin(r.angle) + dz * Math.cos(r.angle),
@@ -122,12 +135,12 @@ export function playerRoute(sim) {
       cx: cp.x,
       cz: cp.z,
       points:
-        cp === boxTarget || cp === riverTarget || lips.includes(cp)
+        boxTargets.includes(cp) || cp === riverTarget || lips.includes(cp)
           ? [cp]
           : routeBetween(p, cp),
     };
     if (sim.navQuest && approach.includes(cp))
-      cached.points.push(lips[sim.navQuest === "skybox" ? 0 : 1]);
+      cached.points.push(lips[selectedRampIndex(sim)]);
     routes.set(sim, cached);
   }
   return cached.points;

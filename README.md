@@ -17,6 +17,8 @@ The event overview is compact on desktop and mobile, with a clear **PLAY** actio
 NPC traffic and police pass through stunt ramps without getting stuck; player
 jumps and ramp collisions remain active. Ordinary saves and rankings are retained.
 
+**City performance and rooftop update:** fewer static render calls with unchanged visual detail, stable high-rise façades, three rooftop boxes per city, and always-visible repair/dinosaur map icons. Existing garages and CITY WARS artifact locations stay intact. [Measured results and validation](docs/PERFORMANCE.md#september-2026-city-rendering-rooftop-routes-and-recovery-pins).
+
 **Loading and lifecycle update:** city files load alongside your profile, unchanged media is reused between maps, and leaving the game explicitly releases both 3D renderers and audio. Trees and repeated car selection do less work at the same visual quality. [Performance and validation notes](docs/PERFORMANCE.md).
 
 **Version 2.5 — a distinct fleet.** Keep the Original 458 and choose between a rounded coupe, wedge V12, luxury hypercar, rally hatch, long-hood GT, open speedster and the **TECHCRUSH Cyber electric pickup**. Cyber earns **2× driving coins and score**, with a balanced 5% stock speed advantage over Coast X. Aero upgrades replace the factory wing instead of stacking; wheel kits, cabin fittings and garage cameras match each model. Existing car ownership, paint, parts and progress are retained. [Fleet, rewards and upgrade guide](docs/FLEET.md).

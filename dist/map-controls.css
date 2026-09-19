@@ -428,4 +428,49 @@ body.mobile-controls #hud .navigator {
 }
 #quest-pins .powerup-pin {
   z-index: 7;
+  background: #0d1924;
+  color: var(--quest);
+  border: 2px solid var(--quest);
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+}
+#quest-pins .powerup-pin svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.powerup-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.powerup-legend svg {
+  width: 16px;
+  height: 16px;
+}
+.powerup-legend[data-powerup="gear"] {
+  color: #f2394b;
+}
+.powerup-legend[data-powerup="grex"] {
+  color: #e1fe28;
+}
+
+#quest-pins .powerup-pin {
+  transform: translate(-50%, -50%) scale(var(--pin-scale, 1))
+    translate(var(--pin-dx, 0px), var(--pin-dy, 0px));
+}
+#quest-pins .powerup-pin::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--tether-length, 0px);
+  height: 1px;
+  background: currentColor;
+  transform-origin: left center;
+  transform: rotate(var(--tether-angle, 0rad));
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: -1;
 }

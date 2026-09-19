@@ -1,3 +1,4 @@
+import { buildExtraRooftops } from "./rooftop-visuals.js";
 import { facadeMaterial, batchStatic } from "./expansion-visuals.js";
 import {
   IS_KUTAISI,
@@ -181,7 +182,7 @@ export function buildRealisticCity(v) {
           });
   if (IS_KUTAISI || IS_BATUMI || IS_RUSTAVI)
     v.buildingMaterials.push(...facades);
-  const newFacades = [0, 1, 2, 3].map(facadeMaterial);
+  const newFacades = [0, 1, 2, 3].map((style) => facadeMaterial(style));
   v.buildingMaterials.push(...newFacades);
   v.expansionFacades = newFacades;
   const staticCity = new THREE.Group();
@@ -305,6 +306,7 @@ export function buildRealisticCity(v) {
   else if (IS_BATUMI) batumi.buildBatumiCity(v);
   else if (IS_KUTAISI) kutaisi.buildKutaisiCity(v);
   else buildTbilisiDistricts(v);
+  buildExtraRooftops(v);
   buildCityBranding(v);
   buildGrass(v);
   for (const i of [15, 48, 93, 134, 177]) {

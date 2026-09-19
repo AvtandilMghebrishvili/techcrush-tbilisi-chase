@@ -1,3 +1,4 @@
+import { extraRooftops, findRoof } from "./extra-rooftops.js";
 import { footprintsOverlap } from "./map-clearance.js";
 import { EXAM_YARD, HALL_PLAZA } from "./rustavi-district-data.js";
 // An original industrial stunt yard, west of the old-town riverbank.
@@ -39,7 +40,16 @@ export const SPECIAL_RAMPS = [
   },
 ];
 export const STUNT_APRONS = [{ x: 910, z: -54, w: 18, d: 122, angle: 0 }];
+const extras = extraRooftops("rustavi");
+export const ROOFTOPS = [ROOFTOP, ...extras.map((q) => q.roof)];
+export const ROOFTOP_QUESTS = [
+  { roof: ROOFTOP, ramp: SPECIAL_RAMPS[0], box: QUEST_BOX },
+  ...extras,
+];
+SPECIAL_RAMPS.push(...extras.map((q) => q.ramp));
+STUNT_APRONS.push(...extras.map((q) => q.apron));
 export const STUNT_ZONES = [
+  ...extras.flatMap((q) => q.zones.filter((zone) => zone !== q.apron)),
   ROOFTOP,
   ...STUNT_APRONS,
   { x: 910, z: 42, w: 50, d: 68, angle: 0 },
@@ -47,12 +57,8 @@ export const STUNT_ZONES = [
 export const BANK_SITE = { x: 9999, z: 9999 };
 export const BANK_SOLIDS = [];
 export const TOWERS = [];
-export const EXPANSION_SOLIDS = [ROOFTOP];
+export const EXPANSION_SOLIDS = [...ROOFTOPS];
 export const reservedExpansion = (r) =>
   footprintsOverlap(r, HALL_PLAZA, 3) ||
   STUNT_ZONES.some((s) => footprintsOverlap(r, s, 4));
-export const roofAt = (p, margin = 0) =>
-  Math.abs(p.x - ROOFTOP.x) < ROOFTOP.w / 2 - margin &&
-  Math.abs(p.z - ROOFTOP.z) < ROOFTOP.d / 2 - margin
-    ? ROOFTOP
-    : null;
+export const roofAt = (p, margin = 0) => findRoof(ROOFTOPS, p, margin);
