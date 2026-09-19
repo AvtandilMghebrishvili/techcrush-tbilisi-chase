@@ -90,8 +90,32 @@ body.mobile-controls #hud .navigator {
   color: #91a6bd;
   letter-spacing: 0.8px;
 }
+.map-sponsor-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 7px;
+  color: #ff8799;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.map-sponsor-toggle input {
+  accent-color: #f2394b;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+#quest-pins .brand-pin {
+  font-size: 9px;
+  width: 25px;
+  height: 25px;
+  z-index: 2;
+  border-radius: 5px;
+}
 .quest-map-tools {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;

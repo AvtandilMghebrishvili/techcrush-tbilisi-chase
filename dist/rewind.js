@@ -50,6 +50,7 @@ export class RewindTimeline {
           brokenByPlayer: !!b.brokenByPlayer,
         })),
       runQuests: clone(sim.runQuests),
+      gearRepairs: clone(sim.gearRepairs),
       cashBanners: clone(sim.cashBanners),
       runArtifacts: clone(sim.runArtifacts),
       player: clone(sim.player),
@@ -79,6 +80,7 @@ export class RewindTimeline {
     for (const k of scalars) sim[k] = f[k];
     for (const k of [
       "runQuests",
+      "gearRepairs",
       "cashBanners",
       "runArtifacts",
       "player",

@@ -1,9 +1,15 @@
 // Original, reference-guided city extension. Metres in the existing Tbilisi frame.
 // Existing road/node IDs are retained so saved event artifacts remain stable.
-export const HEROES = { x: 975, z: 1160, radius: 110 };
+export const HEROES = { x: 0, z: 1050, radius: 110 };
 export const FREEDOM = { x: -209, z: -623 };
-export const KING_DAVID = { x: 980, z: 1420, w: 102, d: 67 };
-export const AXIS = { x: 1210, z: 1035, w: 123, d: 81 };
+export const KING_DAVID = { x: -280, z: 850, w: 102, d: 67 };
+export const AXIS = { x: 110, z: 670, w: 123, d: 81 };
+export const BANK_TARGET = { x: -755, z: 400 };
+export const RIVERSIDE_BRIDGE_NAMES = [
+  "Riverside North Bridge",
+  "Riverside Central Bridge",
+  "Riverside South Bridge",
+];
 export const FLYOVER_NAME = "Heroes Square Flyover";
 const polar = (a, r, y = 0) => [
   HEROES.x + Math.sin(a) * r,
@@ -69,9 +75,9 @@ export function civicGroundClearance(x, z) {
   // Tiny per-building cutouts create vertical cliffs and bury adjoining blocks.
   for (const site of [
     ...CIVIC_RESERVES,
-    { x: 1020, z: 1220, w: 780, d: 790 },
+    { x: -360, z: 600, w: 1480, d: 1280 },
     // Keep the already released artifact's quiet approach on the old street.
-    { x: 1030, z: 1710, w: 140, d: 640 },
+    { x: 1010, z: 1510, w: 350, d: 1120 },
   ])
     distance = Math.min(
       distance,
@@ -100,51 +106,199 @@ export function extendTbilisiNetwork(source) {
     for (let i = 1; i < ids.length; i++)
       if (ids[i] !== ids[i - 1]) edges.push([ids[i - 1], ids[i], width, name]);
   };
-  const north = source.nodes[217]; // Merab Kostava endpoint in the archived graph.
   const south = polar(Math.PI, 225),
     west = polar(-Math.PI / 2, 225);
-  road(
-    [north, [900, 930], south, [1005, 985], [997, 1020], HEROES_RING[12]],
-    26,
-    "Merab Kostava Avenue · Heroes approach",
-  );
-  road([...HEROES_RING, HEROES_RING[0]], 24, "Heroes Square");
+  // New playable blocks fill the owner's marked riverside gap. Original core
+  // nodes/edges remain untouched; every crossing below has an explicit deck.
   road(
     [
-      HEROES_RING[18],
-      west,
-      [750, 1320],
-      [850, 1378],
-      [1110, 1378],
-      [1150, 1300],
-      HEROES_RING[0],
+      source.nodes[451],
+      [170, 530],
+      [240, 560],
+      [240, 717],
+      [100, 717],
+      south,
+      [30, 875],
+      [22, 910],
+      HEROES_RING[12],
     ],
+    26,
+    "Kostava · Heroes approach",
+  );
+  road([...HEROES_RING, HEROES_RING[0]], 24, "Heroes Square");
+  road([HEROES_RING[18], west, [-385, 1050]], 24, "Heroes riverside approach");
+  road(
+    [HEROES_RING[0], [-230, 1160], [-385, 1050]],
     23,
+    "Heroes waterfront loop",
+  );
+  road(
+    [source.nodes[171], [-120, 450], [-150, 600], [-150, 717], [100, 717]],
+    24,
+    "Ilia Chavchavadze Avenue · Axis Towers",
+  );
+  road(
+    [[-385, 805], [-120, 805], south],
+    24,
     "Merab Aleksidze Street · King David",
   );
   road(
-    [HEROES_RING[6], [1310, 1160], [1310, 1082], [1100, 1082], south],
-    25,
-    "Ilia Chavchavadze Avenue · Axis Towers",
+    [
+      [-120, 805],
+      [-150, 717],
+    ],
+    22,
+    "Axis / King David link",
   );
-  road([source.nodes[581], [650, 1030], west], 22, "Chabua Amirejibi Highway");
-  // A second connection to the existing city avoids a single long access road.
-  road([source.nodes[213], [900, 930]], 22, "Kostava connector");
-  // This section hosts an existing event artifact. Its road and collectible
-  // stay exactly where released, even though the landmarks move south.
+  road(
+    [source.nodes[445], [-270, 200], [-300, 350], [-120, 450]],
+    22,
+    "Riverside city link",
+  );
   road(
     [
-      [1110, 1378],
-      [1185, 1500],
-      [1080, 1660],
+      [-300, 350],
+      [-395, 350],
+    ],
+    22,
+    "Quay south approach",
+  );
+  road(
+    [
+      [-150, 600],
+      [-385, 600],
+    ],
+    24,
+    "Quay central approach",
+  );
+  road(
+    [
+      source.nodes[502],
+      [-505, 150],
+      [-395, 350],
+      [-385, 600],
+      [-385, 805],
+      [-385, 1000],
+      [-385, 1050],
+    ],
+    26,
+    "Mtkvari west-bank boulevard",
+  );
+  road(
+    [
+      source.nodes[545],
+      [-810, -80],
+      [-710, 150],
+      [-690, 215],
+      [-650, 350],
+      [-636, 465],
+      [-615, 600],
+      [-615, 750],
+      [-615, 1000],
+    ],
+    26,
+    "Mtkvari east-bank boulevard",
+  );
+  road(
+    [
+      [-385, 1000],
+      [-615, 1000],
+    ],
+    30,
+    RIVERSIDE_BRIDGE_NAMES[0],
+  );
+  road(
+    [
+      [-385, 600],
+      [-615, 600],
+    ],
+    30,
+    RIVERSIDE_BRIDGE_NAMES[1],
+  );
+  road(
+    [
+      [-505, 150],
+      [-710, 150],
+    ],
+    28,
+    RIVERSIDE_BRIDGE_NAMES[2],
+  );
+  road(
+    [
+      [-615, 1000],
+      [-785, 900],
+      [-895, 750],
+      [-970, 600],
+      [-1000, 465],
+      [-1020, 350],
+      [-1060, 150],
+      [-1000, -80],
+      [-810, -80],
+    ],
+    24,
+    "Riverside outer avenue",
+  );
+  road(
+    [
+      [-615, 750],
+      [-780, 750],
+      [-895, 750],
+    ],
+    22,
+    "Riverside gardens street",
+  );
+  road(
+    [
+      [-615, 600],
+      [-860, 600],
+      [-970, 600],
+    ],
+    24,
+    "Riverside central street",
+  );
+  road(
+    [
+      [-636, 465],
+      [-860, 465],
+      [-1000, 465],
+    ],
+    24,
+    "Bank of Georgia esplanade",
+  );
+  road(
+    [
+      [-780, 750],
+      [-860, 600],
+      [-860, 465],
+      [-860, 260],
+      [-1060, 150],
+    ],
+    22,
+    "Riverside neighbourhood street",
+  );
+  road(
+    [
+      [-860, 260],
+      [-690, 215],
+    ],
+    20,
+    "Bank riverside access",
+  );
+  // Retain the exact released artifact segment, without the old distant
+  // landmark district. This quiet service loop carries no new building lots.
+  road(
+    [
+      source.nodes[217],
+      [880, 1130],
+      [940, 1500],
       [1010, 1800],
       [1040, 1990],
-      [1180, 1990],
-      [1220, 1750],
-      [1185, 1500],
+      [1130, 1950],
+      [1080, 1550],
+      [880, 1130],
     ],
     23,
-    "Aleksidze · hillside loop",
+    "North service road",
   );
   road(FLYOVER_PATH, 14, FLYOVER_NAME);
   return { ...source, nodes, edges };

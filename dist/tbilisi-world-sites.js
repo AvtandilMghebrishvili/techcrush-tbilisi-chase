@@ -1,4 +1,5 @@
 import { placeOffRoad, footprintsOverlap } from "./map-clearance.js";
+import { BANK_TARGET } from "./tbilisi-civic-layout.js";
 import { CIVIC_SOLIDS, reservedCivic } from "./tbilisi-civic-data.js";
 import { TBILISI_EVENT_SITES } from "./tbilisi-event-sites.js";
 
@@ -60,8 +61,8 @@ const bankParts = [
   { x: 0, z: 0, w: 91, d: 15, base: 38, h: 49 },
 ].map((p) => ({ ...p, angle: 0 }));
 // Compressed city landmark: the real headquarters is on Gagarin Street, outside
-// this central-city map. Its interlocking volumes are reproduced in a north plaza.
-export const BANK_SITE = placeOffRoad({ x: 500, z: 900 }, bankParts);
+// this central-city map. Its interlocking volumes occupy the new riverside block.
+export const BANK_SITE = placeOffRoad(BANK_TARGET, bankParts);
 export const BANK_SOLIDS = bankParts.map((p) => ({
   ...p,
   x: p.x + BANK_SITE.x,

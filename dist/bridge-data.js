@@ -1,3 +1,4 @@
+import { RIVERSIDE_BRIDGE_NAMES } from "./tbilisi-civic-layout.js";
 import { onAsphalt } from "./road-clearance.js";
 import { IS_KUTAISI, IS_BATUMI, IS_RUSTAVI } from "./map-selection.js";
 const { KUTAISI_GEO } = IS_KUTAISI ? await import("./kutaisi-geo-data.js") : {};
@@ -22,14 +23,18 @@ export const BRIDGE_DECKS = IS_RUSTAVI
             width: 31,
           },
           ...ROAD_DATA.edges
-            .filter((r) => r[3] === "Metekhi Bridge")
-            .map(([a, b, width]) => {
+            .filter(
+              (r) =>
+                r[3] === "Metekhi Bridge" ||
+                RIVERSIDE_BRIDGE_NAMES.includes(r[3]),
+            )
+            .map(([a, b, width, name]) => {
               const p = ROAD_DATA.nodes[a],
                 q = ROAD_DATA.nodes[b],
                 dx = q[0] - p[0],
                 dz = q[1] - p[1];
               return {
-                name: "METEKHI BRIDGE",
+                name: name.toUpperCase(),
                 x: (p[0] + q[0]) / 2,
                 z: (p[1] + q[1]) / 2,
                 angle: Math.atan2(dx, dz),

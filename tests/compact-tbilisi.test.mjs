@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 import * as THREE from "../dist/vendor/three.module.js";
 import { AXIS, KING_DAVID, HEROES } from "../dist/tbilisi-civic-layout.js";
+import { BANK_SITE } from "../dist/tbilisi-world-sites.js";
 import { FLYOVER_RAILS } from "../dist/tbilisi-civic-data.js";
 import {
   ROADS,
@@ -115,9 +116,29 @@ test("all new ground streets and flyover centerlines are free of complete buildi
     }
   }
 });
-test("landmarks adjoin the old city and Axis has a clear, direct road frontage", () => {
-  for (const p of [HEROES, AXIS, KING_DAVID])
-    assert.ok(Math.hypot(p.x - NODES[217].x, p.z - NODES[217].z) < 550);
+test("relocated landmarks occupy the requested riverside gap and Axis has clear road frontage", () => {
+  // World coordinates traced from the owner's red/green annotated map.
+  const green = [
+    [339, 1215],
+    [-218, 1222],
+    [-860, 880],
+    [-1345, 289],
+    [-1095, -217],
+    [-239, -95],
+    [-189, 282],
+    [339, 503],
+  ];
+  const inside = (p) => {
+    let hit = false;
+    for (let i = 0, j = green.length - 1; i < green.length; j = i++) {
+      const [x, z] = green[i],
+        [a, b] = green[j];
+      if (z > p.z !== b > p.z && p.x < ((a - x) * (p.z - z)) / (b - z) + x)
+        hit = !hit;
+    }
+    return hit;
+  };
+  for (const p of [HEROES, AXIS, KING_DAVID, BANK_SITE]) assert.ok(inside(p));
   for (const dx of [-58, -34, 0, 34, 58]) {
     const p = { x: AXIS.x + dx, z: AXIS.z + 31 },
       n = nearestRoad(p);

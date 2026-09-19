@@ -1,16 +1,18 @@
 # Tbilisi landmark refresh
 
-The September 2026 refresh adds a playable northern/western city extension, Heroes Square flyover, Freedom Square monument, King David and Axis Towers, and repairs Narikala's foundations.
+The September 2026 refresh adds a compact riverside district, Heroes Square flyover, Freedom Square monument, King David and Axis Towers, and repairs Narikala's foundations.
 
 These are original procedural models guided by photographs, adapted to the game's compressed arcade city. They are not a survey, a one-to-one street reconstruction, or Google imagery pasted into the game.
 
 ## Visiting the landmarks
 
-Open **Map + Side Quests** and look for **FREEDOM SQUARE (F)**, **HEROES FLYOVER (H)**, **KING DAVID (K)**, **AXIS TOWERS (A)** and **NARIKALA (N)**. Clicking the map sets the existing yellow secondary route while checkpoint directions remain active. The northern extension connects to the existing Merab Kostava endpoint; the flyover has two graded entrances and a separate street below.
+Open **Map + Side Quests** and look for **FREEDOM SQUARE (F)**, **HEROES FLYOVER (H)**, **KING DAVID (K)**, **AXIS TOWERS (A)**, **BANK OF GEORGIA (B)** and **NARIKALA (N)**. Clicking the map sets the existing yellow secondary route while checkpoint directions remain active. The riverside district joins the old core at several street endpoints; the flyover has two graded entrances and a separate street below.
 
 ## Compact district revision
 
-Heroes Square, King David and Axis Towers now sit within 550 metres of the old Kostava endpoint instead of separate distant outposts. Three connections join the old street graph. Axis has a reserved open forecourt and a street only four metres from its podium; ordinary frontage lots cannot obstruct it. The quiet northern loop stays accessible because it hosts a previously released CITY WARS artifact.
+Following the owner's annotated red/green map, Heroes Square (0, 1050), King David (-280, 850), Axis Towers (110, 670) and Bank of Georgia (-755, 400) occupy the riverside gap beside the original core. Two bank boulevards, connected neighbourhood streets and three new bridges join both sides of Mtkvari. These are compressed gameplay locations, not geographic coordinates. Every bridge uses the same deck dimensions for rendering and vehicle support, with matching bank openings and breakable edge rails.
+
+Axis has a reserved open forecourt and a street only four metres from its podium; ordinary frontage lots cannot obstruct it. The quiet northern loop stays accessible because it hosts a previously released CITY WARS artifact. The exact segment beside that artifact is retained; the former remote landmark district and its extra frontage lots have been removed.
 
 Flyover panels withstand scrapes and low-speed impacts, but fracture at a normal impact speed of 27 m/s (about 97 km/h). Vehicles can leave the broken edge and land below. The panels use one additional instanced draw call in the existing bridge update, react in the contact frame, and restore with rewind or a new run.
 
@@ -18,13 +20,13 @@ Tbilisi's five released artifact positions and orientations are now explicit sta
 
 ## Models and reference sources
 
-| Landmark | Reproduced features | Visual reference |
-| --- | --- | --- |
-| Narikala | Connected stepped stone curtain walls, crenellations, round turrets, embedded foundations and supported upper cable-car terminal | Existing Tbilisi scene and terrain |
-| Heroes Square | Curving concrete flyover, separated deck, piers, guardrails and central memorial with planted island | [CRP construction photographs](https://www.crp.ge/?full=project&lang=eng&page=full&project=38) |
-| Freedom Square | Stepped stone base, fluted white column, gilded horse/rider/lance silhouette and historic city-hall frontage | [Freedom Monument photos](https://madloba.info/tbilisi/monuments-and-statues/freedom-monument/) |
-| Axis Towers | 37 storeys, opposite two-degree floor rotations, pale horizontal bands and dark glazed twin | [Axis official description](https://axistowers.ge/en/company/about-us) |
-| King David | Two unequal rounded glass towers, white floor ribbons and roof crowns | [King David official site](https://kdr.ge/), [building photographs](https://korter.ge/en/king-david-residences-tbilisi) |
+| Landmark       | Reproduced features                                                                                                              | Visual reference                                                                                                        |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Narikala       | Connected stepped stone curtain walls, crenellations, round turrets, embedded foundations and supported upper cable-car terminal | Existing Tbilisi scene and terrain                                                                                      |
+| Heroes Square  | Curving concrete flyover, separated deck, piers, guardrails and central memorial with planted island                             | [CRP construction photographs](https://www.crp.ge/?full=project&lang=eng&page=full&project=38)                          |
+| Freedom Square | Stepped stone base, fluted white column, gilded horse/rider/lance silhouette and historic city-hall frontage                     | [Freedom Monument photos](https://madloba.info/tbilisi/monuments-and-statues/freedom-monument/)                         |
+| Axis Towers    | 37 storeys, opposite two-degree floor rotations, pale horizontal bands and dark glazed twin                                      | [Axis official description](https://axistowers.ge/en/company/about-us)                                                  |
+| King David     | Two unequal rounded glass towers, white floor ribbons and roof crowns                                                            | [King David official site](https://kdr.ge/), [building photographs](https://korter.ge/en/king-david-residences-tbilisi) |
 
 Reference photographs are used for inspection only and are not shipped as game textures. The game reuses its existing asphalt, vegetation and masonry assets alongside a small original window canvas.
 

@@ -39,9 +39,9 @@ test("every building footprint clears all road widths, including landmark wings"
     "A car cannot remain inside the visible wing",
   );
 });
-test("all three bridges are driveable through the river in both directions", () => {
+test("all six bridges are driveable through the river in both directions", () => {
   const bridges = ROADS.filter((r) => /Bridge/.test(r.name));
-  assert(new Set(bridges.map((r) => r.name)).size === 3);
+  assert.equal(new Set(bridges.map((r) => r.name)).size, 6);
   for (const road of bridges)
     for (const reverse of [false, true]) {
       const sim = new ChaseSimulation();

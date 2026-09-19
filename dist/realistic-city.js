@@ -24,6 +24,7 @@ import {
 } from "./city-map.js";
 import { flagTexture, addFlag, tower } from "./scenery.js";
 import { buildTechcrushGarage } from "./landmarks.js";
+import { buildCityBranding } from "./city-branding.js";
 import { makeKartlisDeda } from "./kartlis-deda.js";
 import { TREES } from "./world-props.js";
 import { TOWER } from "./config.js";
@@ -304,6 +305,7 @@ export function buildRealisticCity(v) {
   else if (IS_BATUMI) batumi.buildBatumiCity(v);
   else if (IS_KUTAISI) kutaisi.buildKutaisiCity(v);
   else buildTbilisiDistricts(v);
+  buildCityBranding(v);
   buildGrass(v);
   for (const i of [15, 48, 93, 134, 177]) {
     const n = NODES[i];

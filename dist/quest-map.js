@@ -19,6 +19,7 @@ import {
 } from "./navigation-cache.js";
 import { mapClickPoint, routeDistance } from "./hud-math.js";
 import { LANDMARKS } from "./district-data.js";
+import { FACADE_BANNERS, ROBOTICS_GEARS } from "./city-brand-sites.js";
 export const MAP_PLACES = IS_RUSTAVI
   ? [
       { ...LANDMARKS.heroes, name: "HEROES SQUARE", symbol: "H" },
@@ -32,11 +33,13 @@ export const MAP_PLACES = IS_RUSTAVI
         const { HEROES, FREEDOM, KING_DAVID, AXIS } = await import(
           "./tbilisi-civic-layout.js"
         );
+        const { BANK_SITE } = await import("./tbilisi-world-sites.js");
         return [
           { ...FREEDOM, name: "FREEDOM SQUARE", symbol: "F" },
           { ...HEROES, name: "HEROES FLYOVER", symbol: "H" },
           { ...KING_DAVID, name: "KING DAVID", symbol: "K" },
           { ...AXIS, name: "AXIS TOWERS", symbol: "A" },
+          { ...BANK_SITE, name: "BANK OF GEORGIA", symbol: "B" },
           { ...LANDMARKS.narikala, name: "NARIKALA", symbol: "N" },
         ];
       })()
@@ -117,6 +120,7 @@ export class QuestMap {
     this.select = select;
     this.dialog = document.getElementById("quest-map");
     this.viewport = new MapViewport();
+    document.getElementById("map-sponsors").onchange = () => this.brandPins();
     document.getElementById("quest-map-close").onclick = () =>
       this.dialog.close();
     document.getElementById("quest-map-open").onclick = () => this.open();
@@ -161,6 +165,40 @@ export class QuestMap {
   route(value) {
     this.select(value);
     this.dialog.close();
+  }
+  brandPins() {
+    const pins = document.getElementById("quest-pins");
+    pins.querySelectorAll(".brand-pin").forEach((pin) => pin.remove());
+    if (!document.getElementById("map-sponsors").checked) return;
+    for (const site of [
+      ...FACADE_BANNERS.map((p) => ({
+        ...p,
+        symbol: p.brand === "robotics" ? "GRA" : "TC",
+        color: p.brand === "robotics" ? "#f2394b" : "#69c6d5",
+        name:
+          p.brand === "robotics"
+            ? "GRA · ROBO BATTLE BANNER"
+            : "TECHCRUSH BANNER",
+      })),
+      ...ROBOTICS_GEARS.filter(
+        (p) => !this.sim.gearRepairs.some((q) => q.id === p.id),
+      ).map((p) => ({
+        ...p,
+        symbol: "⚙",
+        color: "#ffcd69",
+        name: "GRA FULL REPAIR · HP 100%",
+      })),
+    ]) {
+      const point = mapPoint(site, 100),
+        pin = document.createElement("button");
+      pin.className = "quest-pin brand-pin";
+      pin.style.cssText = `left:${point.x}%;top:${point.y}%;--quest:${site.color}`;
+      pin.textContent = site.symbol;
+      pin.title = site.name;
+      pin.setAttribute("aria-label", `Set waypoint to ${site.name}`);
+      pin.onclick = () => this.pin(site, site.name);
+      pins.append(pin);
+    }
   }
   open() {
     const sim = this.sim,
@@ -211,6 +249,7 @@ export class QuestMap {
         const place = MAP_PLACES[Number(button.dataset.mapPlace)];
         this.pin(place, place.name);
       };
+    this.brandPins();
     this.draw();
     this.dialog.showModal();
     this.viewport.open(mapPoint(sim.player, 1));

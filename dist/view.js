@@ -1,4 +1,5 @@
 import { updateSponsorBanners } from "./sponsor-banners.js";
+import { applyCityBranding, updateCityBranding } from "./city-branding.js";
 import { prepareSceneAssets } from "./scene-assets.js";
 import { releaseResources } from "./resource-lifetime.js";
 import { supportedVisualY } from "./vehicle-ground.js";
@@ -202,14 +203,24 @@ export class SceneView {
   async loadTextures(progress = () => {}) {
     progress(12, "LOADING STREETS & FACADES");
     this.assetLoad.progress = progress;
-    const [road, facade, logo, wordmark, hill, hillNormal, trees, sports] =
-      await this.assetLoad.ready;
+    const [
+      road,
+      facade,
+      logo,
+      wordmark,
+      hill,
+      hillNormal,
+      robotics,
+      trees,
+      sports,
+    ] = await this.assetLoad.ready;
     if (this.disposed)
       throw new DOMException("City loading cancelled", "AbortError");
     await loadTrees(this, trees);
     await loadSportsAssets(this, { assets: sports });
     progress(90, "FINISHING CITY MATERIALS");
     applyTechcrushBrand(this, logo.image, wordmark.image);
+    applyCityBranding(this, robotics, logo.image);
     logo.dispose();
     wordmark.dispose();
     for (const t of [road, facade]) {
@@ -701,6 +712,7 @@ export class SceneView {
       sim.phase === "ready" ? performance.now() / 1000 : sim.time;
     updateScenery(this, worldTime);
     animateDistricts(this, worldTime);
+    updateCityBranding(this, sim, worldTime);
     updateTrees(this, sim.player, worldTime, sim.trees);
     updateRouteGuide(
       this.routeGuide,

@@ -393,6 +393,7 @@ if (IS_KUTAISI)
 let seed = 197;
 const rand = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
 for (const road of ROADS) {
+  if (road.name === "North service road") continue;
   const fx = Math.sin(road.angle),
     fz = Math.cos(road.angle),
     rx = fz,

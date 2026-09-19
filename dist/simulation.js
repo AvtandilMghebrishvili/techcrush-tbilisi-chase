@@ -36,6 +36,7 @@ import { RAMPS, driveRamp, stepAirborne } from "./stunts.js";
 import { followElevatedRoad } from "./elevated-roads.js";
 import { upgradedSpec, pursuitTuning } from "./progression.js";
 import { passedTraffic } from "./near-miss.js";
+import { collectRoboticsRepair } from "./robotics-repair.js";
 import { checkpointsForLevel } from "./level-routes.js";
 import { createAirSupport, updateAirSupport } from "./air-support.js";
 // Deterministic, renderer-independent simulation. Distances are metres, time is seconds.
@@ -371,6 +372,7 @@ export class ChaseSimulation {
     this.runDriftSeconds = 0;
     this.runJumps = 0;
     this.runQuests = [];
+    this.gearRepairs = [];
     this.runTopSpeed = 0;
     this.trafficWrecks = 0;
     this.time = 0;
@@ -1508,6 +1510,7 @@ export class ChaseSimulation {
       4,
     );
     this.closestPolice = closest;
+    collectRoboticsRepair(this, positions.get(p));
     const cp = this.checkpoints[this.checkpoint];
     if (
       cp &&
