@@ -1,5 +1,6 @@
 import { placeOffRoad, footprintsOverlap } from "./map-clearance.js";
 import { CIVIC_SOLIDS, reservedCivic } from "./tbilisi-civic-data.js";
+import { TBILISI_EVENT_SITES } from "./tbilisi-event-sites.js";
 
 // Original arcade stunt sites. Coordinates are stable IDs, never save-file indices.
 export const ROOFTOP = {
@@ -87,6 +88,9 @@ export const EXPANSION_SOLIDS = [
 export function reservedExpansion(rect) {
   return (
     reservedCivic(rect) ||
+    TBILISI_EVENT_SITES.some((p) =>
+      footprintsOverlap(rect, { ...p, w: 13, d: 5 }, 1),
+    ) ||
     [...STUNT_ZONES, ...BANK_SOLIDS, ...TOWERS].some((s) =>
       footprintsOverlap(rect, s, 4),
     )

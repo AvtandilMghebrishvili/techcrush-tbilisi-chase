@@ -202,7 +202,7 @@ test("mounds and mountain slopes push vehicles back instead of letting them tunn
 });
 test("a glancing fast scrape does not fracture a rail, and a hard local hit rewinds cleanly", () => {
   const s = isolated(),
-    b = s.obstacles.find((b) => b.barrier),
+    b = s.obstacles.find((b) => b.barrier && !b.flyoverRail),
     c = vehicle(b.x + Math.cos(b.angle) * 2, b.z - Math.sin(b.angle) * 2);
   c.vx = Math.sin(b.angle) * 80 - Math.cos(b.angle) * 5;
   c.vz = Math.cos(b.angle) * 80 + Math.sin(b.angle) * 5;

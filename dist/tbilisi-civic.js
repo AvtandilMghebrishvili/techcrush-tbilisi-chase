@@ -10,6 +10,7 @@ import {
   FLYOVER_RAILS,
 } from "./tbilisi-civic-data.js";
 import { FLYOVER_PATH } from "./tbilisi-civic-layout.js";
+import { buildElevatedRails } from "./bridge-visuals.js";
 
 // Original procedural landmark models, batched with the rest of the district.
 // Shared window textures/emissive materials use the existing day/night update.
@@ -322,23 +323,7 @@ export function buildTbilisiCivic(v, root, shared, label) {
     box(p.w, p.h, p.d, concrete, 0, p.h / 2, 0, g);
     box(6.5, 0.6, 3.4, concrete, 0, p.h - 0.2, 0, g);
   }
-  for (const r of FLYOVER_RAILS) {
-    const g = new THREE.Group();
-    g.position.set(r.x, (r.slope.a + r.slope.b) / 2 + 0.53, r.z);
-    g.rotation.y = r.angle;
-    root.add(g);
-    const rail = box(
-      r.w,
-      1.05,
-      Math.hypot(r.d, r.slope.b - r.slope.a),
-      white,
-      0,
-      0,
-      0,
-      g,
-    );
-    rail.rotation.x = -Math.atan2(r.slope.b - r.slope.a, r.slope.length);
-  }
+  buildElevatedRails(v, FLYOVER_RAILS, white);
   cyl(11, 13, 0.5, stone, HEROES.x, 0.2, HEROES.z);
   for (let i = 0; i < 24; i++) {
     const g = new THREE.Group();

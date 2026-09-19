@@ -26,6 +26,28 @@ export function buildBridgeRails(view, stone, metal) {
 const panel = new THREE.Object3D(),
   piece = new THREE.Object3D(),
   matrix = new THREE.Matrix4();
+// Elevated panels share the normal bridge update: no extra animation loop,
+// one instanced draw call, and rewind/reset use the simulation's barrier state.
+export function buildElevatedRails(view, rails, material) {
+  const list = rails.map((rail) => ({
+    rail,
+    y: 0.525,
+    z: 0,
+    w: rail.w,
+    h: 1.05,
+    d: Math.hypot(rail.d, rail.slope.b - rail.slope.a),
+  }));
+  const mesh = new THREE.InstancedMesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    material,
+    list.length,
+  );
+  mesh.castShadow = mesh.receiveShadow = true;
+  mesh.frustumCulled = false;
+  view.decor.add(mesh);
+  (view.bridgeRails ||= []).push({ mesh, list, previous: new Map() });
+  updateBridgeRails(view, [...BRIDGE_BARRIERS, ...rails], 0);
+}
 export function updateBridgeRails(view, barriers, time) {
   if (
     view.bridgeStateSource !== barriers ||
@@ -48,12 +70,17 @@ export function updateBridgeRails(view, barriers, time) {
       if (batch.previous.get(i) === fall) return;
       batch.previous.set(i, fall);
       dirty = true;
+      const side = rail.side || 1;
+      const height = rail.slope ? (rail.slope.a + rail.slope.b) / 2 : 0;
+      const pitch = rail.slope
+        ? -Math.atan2(rail.slope.b - rail.slope.a, rail.slope.length)
+        : 0;
       panel.position.set(
-        rail.x + Math.cos(rail.angle) * fall * 1.8,
-        -fall * 0.55,
-        rail.z - Math.sin(rail.angle) * fall * 1.8,
+        rail.x + Math.cos(rail.angle) * side * fall * 1.8,
+        height - fall * (rail.flyoverRail ? height + 0.55 : 0.55),
+        rail.z - Math.sin(rail.angle) * side * fall * 1.8,
       );
-      panel.rotation.set(0, rail.angle, -fall * 1.45, "YXZ");
+      panel.rotation.set(pitch, rail.angle, -side * fall * 1.45, "YXZ");
       panel.updateMatrix();
       piece.position.set(0, p.y, p.z);
       piece.scale.set(p.w, p.h, p.d);

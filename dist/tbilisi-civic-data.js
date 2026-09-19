@@ -129,6 +129,10 @@ for (let i = 1; i < FLYOVER_PATH.length; i++) {
   if (Math.max(a[2] || 0, b[2] || 0) < 1.8) continue;
   for (const side of [-1, 1])
     FLYOVER_RAILS.push({
+      id: `heroes-flyover-${i}-${side}`,
+      barrier: true,
+      breakSpeed: 27,
+      side,
       x: (a[0] + b[0]) / 2 + Math.cos(angle) * side * 7.15,
       z: (a[1] + b[1]) / 2 - Math.sin(angle) * side * 7.15,
       w: 0.38,

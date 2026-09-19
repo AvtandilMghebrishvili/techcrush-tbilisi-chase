@@ -1,9 +1,9 @@
 // Original, reference-guided city extension. Metres in the existing Tbilisi frame.
 // Existing road/node IDs are retained so saved event artifacts remain stable.
-export const HEROES = { x: 1420, z: 1660, radius: 110 };
+export const HEROES = { x: 975, z: 1160, radius: 110 };
 export const FREEDOM = { x: -209, z: -623 };
-export const KING_DAVID = { x: 1170, z: 2100, w: 102, d: 67 };
-export const AXIS = { x: 2650, z: 1280, w: 123, d: 81 };
+export const KING_DAVID = { x: 980, z: 1420, w: 102, d: 67 };
+export const AXIS = { x: 1210, z: 1035, w: 123, d: 81 };
 export const FLYOVER_NAME = "Heroes Square Flyover";
 const polar = (a, r, y = 0) => [
   HEROES.x + Math.sin(a) * r,
@@ -59,7 +59,8 @@ export const FLYOVER_PATH = [
 export const CIVIC_RESERVES = [
   { ...HEROES, w: 285, d: 285, angle: 0 },
   { ...KING_DAVID, w: 122, d: 89, angle: 0 },
-  { ...AXIS, w: 143, d: 103, angle: 0 },
+  // Reserve the complete street frontage, including the open forecourt.
+  { ...AXIS, z: AXIS.z + 7, w: 158, d: 110, angle: 0 },
   { ...FREEDOM, w: 25, d: 25, angle: 0 },
 ];
 export function civicGroundClearance(x, z) {
@@ -68,7 +69,9 @@ export function civicGroundClearance(x, z) {
   // Tiny per-building cutouts create vertical cliffs and bury adjoining blocks.
   for (const site of [
     ...CIVIC_RESERVES,
-    { x: 1900, z: 1775, w: 2360, d: 1570 },
+    { x: 1020, z: 1220, w: 780, d: 790 },
+    // Keep the already released artifact's quiet approach on the old street.
+    { x: 1030, z: 1710, w: 140, d: 640 },
   ])
     distance = Math.min(
       distance,
@@ -101,16 +104,7 @@ export function extendTbilisiNetwork(source) {
   const south = polar(Math.PI, 225),
     west = polar(-Math.PI / 2, 225);
   road(
-    [
-      north,
-      [945, 1110],
-      [1080, 1240],
-      [1260, 1360],
-      south,
-      [1450, 1485],
-      [1442, 1520],
-      HEROES_RING[12],
-    ],
+    [north, [900, 930], south, [1005, 985], [997, 1020], HEROES_RING[12]],
     26,
     "Merab Kostava Avenue · Heroes approach",
   );
@@ -119,39 +113,38 @@ export function extendTbilisiNetwork(source) {
     [
       HEROES_RING[18],
       west,
-      [1080, 1660],
-      [1010, 1800],
-      [1040, 1990],
-      [1040, 2185],
-      [1300, 2240],
-      [1550, 2150],
+      [750, 1320],
+      [850, 1378],
+      [1110, 1378],
+      [1150, 1300],
       HEROES_RING[0],
     ],
     23,
     "Merab Aleksidze Street · King David",
   );
   road(
-    [
-      HEROES_RING[6],
-      [1600, 1660],
-      [1730, 1490],
-      [1950, 1400],
-      [2260, 1380],
-      [2530, 1380],
-      [2780, 1380],
-      [2860, 1230],
-      [2720, 1120],
-      [2440, 1135],
-      [2180, 1200],
-      [1950, 1400],
-    ],
+    [HEROES_RING[6], [1310, 1160], [1310, 1082], [1100, 1082], south],
     25,
     "Ilia Chavchavadze Avenue · Axis Towers",
   );
+  road([source.nodes[581], [650, 1030], west], 22, "Chabua Amirejibi Highway");
+  // A second connection to the existing city avoids a single long access road.
+  road([source.nodes[213], [900, 930]], 22, "Kostava connector");
+  // This section hosts an existing event artifact. Its road and collectible
+  // stay exactly where released, even though the landmarks move south.
   road(
-    [HEROES_RING[6], [1690, 1610], [1730, 1490]],
-    22,
-    "Chabua Amirejibi Highway",
+    [
+      [1110, 1378],
+      [1185, 1500],
+      [1080, 1660],
+      [1010, 1800],
+      [1040, 1990],
+      [1180, 1990],
+      [1220, 1750],
+      [1185, 1500],
+    ],
+    23,
+    "Aleksidze · hillside loop",
   );
   road(FLYOVER_PATH, 14, FLYOVER_NAME);
   return { ...source, nodes, edges };

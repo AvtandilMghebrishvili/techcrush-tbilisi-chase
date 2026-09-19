@@ -100,6 +100,7 @@ export function buildingContact(car, rect) {
   car.impactNormal = { x: nx, z: nz };
   if (rect.barrier && impact >= rect.breakSpeed) {
     rect.broken = true;
+    rect.brokenByPlayer = !!car.carId;
     car.vx *= 0.78;
     car.vz *= 0.78;
     car.impact = Math.max(car.impact || 0, impact * 0.65);

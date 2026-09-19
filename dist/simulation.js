@@ -65,7 +65,7 @@ export const angleDelta = (a, b) =>
 export const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 export function blocks() {
   return [
-    ...BUILDINGS,
+    ...BUILDINGS.map((b) => (b.barrier ? { ...b, broken: false } : b)),
     ...BRIDGE_BARRIERS.map((b) => ({ ...b, broken: false })),
   ];
 }

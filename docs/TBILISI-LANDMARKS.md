@@ -8,6 +8,14 @@ These are original procedural models guided by photographs, adapted to the game'
 
 Open **Map + Side Quests** and look for **FREEDOM SQUARE (F)**, **HEROES FLYOVER (H)**, **KING DAVID (K)**, **AXIS TOWERS (A)** and **NARIKALA (N)**. Clicking the map sets the existing yellow secondary route while checkpoint directions remain active. The northern extension connects to the existing Merab Kostava endpoint; the flyover has two graded entrances and a separate street below.
 
+## Compact district revision
+
+Heroes Square, King David and Axis Towers now sit within 550 metres of the old Kostava endpoint instead of separate distant outposts. Three connections join the old street graph. Axis has a reserved open forecourt and a street only four metres from its podium; ordinary frontage lots cannot obstruct it. The quiet northern loop stays accessible because it hosts a previously released CITY WARS artifact.
+
+Flyover panels withstand scrapes and low-speed impacts, but fracture at a normal impact speed of 27 m/s (about 97 km/h). Vehicles can leave the broken edge and land below. The panels use one additional instanced draw call in the existing bridge update, react in the contact frame, and restore with rewind or a new run.
+
+Tbilisi's five released artifact positions and orientations are now explicit stable data in `dist/tbilisi-event-sites.js`. Their banner IDs, road approaches, event collection rules and saved progress are preserved. Fixture checks compare all four cities against the previous public release. No profile migration or leaderboard reset is needed.
+
 ## Models and reference sources
 
 | Landmark | Reproduced features | Visual reference |

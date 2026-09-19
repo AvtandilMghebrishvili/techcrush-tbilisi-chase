@@ -3,6 +3,9 @@ import { roadClear } from "./road-clearance.js";
 import { overOpenWater } from "./surface-support.js";
 import { reservedExpansion } from "./world-sites.js";
 import { BANNER_COUNT } from "./banner-rules.js";
+import { ACTIVE_MAP } from "./map-selection.js";
+import { TBILISI_EVENT_SITES } from "./tbilisi-event-sites.js";
+const anchors = ACTIVE_MAP === "tbilisi" ? TBILISI_EVENT_SITES : [];
 export const SPONSOR_SITES = [];
 const roads = [...ROADS].sort(
   (a, b) =>
@@ -20,7 +23,11 @@ for (const separation of [120, 75, 35]) {
         z =
           (r.start.z + r.end.z) / 2 -
           Math.sin(r.angle) * (r.width / 2 + 3.2) * side;
-      if (SPONSOR_SITES.some((p) => Math.hypot(x - p.x, z - p.z) < separation))
+      if (
+        [...SPONSOR_SITES, ...anchors].some(
+          (p) => Math.hypot(x - p.x, z - p.z) < separation,
+        )
+      )
         continue;
       const legal = [-5, 0, 5].every((s) => {
         const p = { x: x + Math.cos(angle) * s, z: z - Math.sin(angle) * s };
@@ -31,6 +38,12 @@ for (const separation of [120, 75, 35]) {
         );
       });
       if (!legal || reservedExpansion({ x, z, w: 11, d: 2, angle })) continue;
+      // Insert fixed collectible slots before assigning ordinary sponsor IDs.
+      while (anchors.some((p) => p.id === SPONSOR_SITES.length))
+        SPONSOR_SITES.push({
+          ...anchors.find((p) => p.id === SPONSOR_SITES.length),
+        });
+      if (SPONSOR_SITES.length === BANNER_COUNT) break;
       SPONSOR_SITES.push({ id: SPONSOR_SITES.length, x, z, angle });
       if (SPONSOR_SITES.length === BANNER_COUNT) break;
     }
