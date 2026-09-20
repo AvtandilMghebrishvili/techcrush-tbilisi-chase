@@ -338,11 +338,12 @@ export class GarageUI {
       actualStars = partStars(fitted, part.id),
       copies = profile.inventory[partKey(part.id, actual)] || 0,
       fusionCost = FUSION_COSTS[actualStars];
-    const grades = TIERS.slice(1, maxTier + 1)
-      .map((q, i) => {
-        const grade = i + 1,
-          count = profile.inventory[partKey(part.id, grade)] || 0;
-        return `<button data-quality="${grade}" style="--quality:${q.color}" aria-pressed="${tier === grade}" title="${q.name}: ${count} spare parts${actual === grade ? ", fitted" : ""}"><span>${q.name}</span><small>${actual === grade ? "✓ " : ""}×${count}</small></button>`;
+    const grades = TIERS.slice(0, maxTier + 1)
+      .map((q, grade) => {
+        const count =
+            grade === 0 ? 0 : profile.inventory[partKey(part.id, grade)] || 0,
+          isFitted = actual === grade;
+        return `<button class="${isFitted ? "quality-installed" : ""}" data-quality="${grade}" data-installed="${isFitted}" style="--quality:${q.color}" aria-pressed="${tier === grade}" title="${q.name}${grade ? `: ${count} spare parts` : ": factory setup"}${isFitted ? ", currently fitted" : ""}"><span>${isFitted ? "✓ " : ""}${q.name}</span><small>${isFitted ? "FITTED" : grade === 0 ? "FACTORY" : `×${count}`}</small></button>`;
       })
       .join("");
     const buy =
@@ -361,9 +362,15 @@ export class GarageUI {
       ? `<div class="fusion-panel"><strong><span>EXTRA BOOST · ${TIERS[actual].name} ${"★".repeat(actualStars)}${"☆".repeat(5 - actualStars)}</span><span>+${Math.round(FUSION_BONUSES[actualStars] * 100)}%</span></strong>${fusionCost ? `<div class="fusion-next"><small>${copies}/${fusionCost} same parts · next boost +${Math.round(FUSION_BONUSES[actualStars + 1] * 100)}%</small><progress max="${fusionCost}" value="${Math.min(fusionCost, copies)}"></progress></div><button data-fuse="${part.id}" ${busy || copies < fusionCost ? "disabled" : ""}>BOOST WITH ${fusionCost} PARTS → ${"★".repeat(actualStars + 1)}</button>` : "<small>Maximum five-star boost reached</small>"}</div>`
       : "";
     const section = $("part-inspector");
-    section.dataset.gradeCount = String(maxTier);
+    const tierSteps = Array.from(
+      { length: maxTier },
+      (_, i) =>
+        `<i class="${i < actual ? "is-on" : ""}" style="--step:${TIERS[i + 1].color}"></i>`,
+    ).join("");
+    section.dataset.gradeCount = String(maxTier + 1);
     section.style.setProperty("--tier", TIERS[tier].color);
-    section.innerHTML = `<div class="inspector-heading"><div class="inspector-art">${partArtwork(part, "", tier)}</div><div class="inspector-copy"><small>${installed ? "FITTED ✓" : "UPGRADE PREVIEW"}</small><h3>${vehiclePartName(part, this.car)}</h3><span class="fitted-grade">Installed: ${TIERS[actual].name}${"+".repeat(actualStars)}</span><p>${part.effect}</p></div></div>
+    section.innerHTML = `<div class="inspector-heading"><div class="inspector-art">${partArtwork(part, "", tier)}</div><div class="inspector-copy"><small>${installed ? "UPGRADE INSTALLED" : tier === actual ? "CURRENT BUILD" : "UPGRADE PREVIEW"}</small><h3>${vehiclePartName(part, this.car)}</h3><div class="installed-status"><span>✓ CURRENTLY FITTED</span><strong>${TIERS[actual].name.toUpperCase()}${actualStars ? ` · ${"★".repeat(actualStars)}` : ""}</strong><small>${actual ? `GRADE ${actual}/${maxTier}` : "FACTORY PART"}</small></div><div class="tier-progress" aria-label="Upgrade level ${actual} of ${maxTier}">${tierSteps}</div><p>${part.effect}</p></div></div>
+      ${tier !== actual ? `<div class="upgrade-route"><span><small>NOW</small><b>✓ ${TIERS[actual].name}${actualStars ? ` ${"★".repeat(actualStars)}` : ""}</b></span><em>→</em><span><small>PREVIEW</small><b>↑ ${TIERS[tier].name}${stars ? ` ${"★".repeat(stars)}` : ""}</b></span></div>` : ""}
       <div class="quality-picker" role="group" aria-label="Preview quality and spare inventory">${grades}</div>
       <div class="upgrade-impact"><b>WHAT GETS STRONGER</b>${upgradeBenefits(
         carSpec(this.car),
@@ -516,16 +523,18 @@ export class GarageUI {
     $("part-grid").innerHTML = visibleParts
       .map((part) => {
         const tier = p.cars[this.car][part.id] || 0,
-          stars = partStars(p.cars[this.car], part.id);
+          stars = partStars(p.cars[this.car], part.id),
+          maxTier = this.car === "creator" ? 8 : 5;
         const owned = TIERS.slice(1, this.car === "creator" ? 9 : 6)
           .map((_, i) => i + 1)
           .filter((t) => (p.inventory[partKey(part.id, t)] || 0) > 0);
         const best = Math.max(0, ...owned),
-          previewTier = Math.max(
-            best,
-            Math.min(this.car === "creator" ? 8 : 5, tier + 1),
-          );
-        return `<button class="part-tile" data-part="${part.id}" data-inspect="${part.id}" data-tier="${previewTier}" aria-pressed="${part.id === this.selectedPart}" style="--tier:${TIERS[tier || 1].color}"><span class="tile-photo">${partArtwork(part, "", tier || 1)}</span><span class="tile-copy"><b>${vehiclePartName(part, this.car)}</b><small>${TIERS[tier].name}${"+".repeat(stars)} · ${part.effect}</small>${best > tier ? "<em>FREE UPGRADE READY ↑</em>" : ""}</span></button>`;
+          previewTier = Math.max(best, Math.min(maxTier, tier + 1)),
+          levelBars = Array.from(
+            { length: maxTier },
+            (_, i) => `<i class="${i < tier ? "is-on" : ""}"></i>`,
+          ).join("");
+        return `<button class="part-tile ${tier ? "is-upgraded" : "is-stock"}" data-part="${part.id}" data-inspect="${part.id}" data-tier="${previewTier}" data-installed-tier="${tier}" aria-label="${vehiclePartName(part, this.car)}, ${TIERS[tier].name} currently fitted${stars ? `, ${stars} star boost` : ""}" aria-pressed="${part.id === this.selectedPart}" style="--tier:${TIERS[tier].color}"><span class="installed-badge">✓ ${TIERS[tier].name.toUpperCase()}${stars ? ` ${"★".repeat(stars)}` : ""}</span><span class="tile-photo">${partArtwork(part, "", tier || 1)}</span><span class="tile-copy"><b>${vehiclePartName(part, this.car)}</b><small>${part.effect}</small><span class="tile-tier-meter" aria-hidden="true">${levelBars}</span>${best > tier ? "<em>FREE UPGRADE READY ↑</em>" : tier ? `<em class="power-level">UPGRADE LEVEL ${tier}/${maxTier}</em>` : '<em class="factory-level">FACTORY PART · READY TO UPGRADE</em>'}</span></button>`;
       })
       .join("");
     for (const button of $("part-grid").querySelectorAll("[data-inspect]"))
