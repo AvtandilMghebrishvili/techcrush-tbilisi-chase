@@ -600,17 +600,25 @@
 }
 
 #workshop:not([data-shop="true"]) .preview-angles {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  padding: 2px 8px 7px;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 4;
+  grid-template-columns: 1fr 1fr;
+  width: 150px;
+  padding: 5px;
+  border: 1px solid #46586a;
+  border-radius: 7px;
+  background: #0b1219e8;
 }
 
 #workshop:not([data-shop="true"]) #preview-fitted {
-  grid-column: auto;
+  grid-column: 1 / -1;
 }
 
 #workshop:not([data-shop="true"]) .studio-note {
-  align-self: end;
-  margin: 0 0 38px;
+  align-self: start;
+  margin: 46px 0 0;
   padding: 9px;
   border: 1px solid #405162;
   border-radius: 6px;
@@ -637,27 +645,26 @@
 
 #workshop:not([data-shop="true"]) .parts-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 126px minmax(180px, 1fr);
+  grid-template-columns: minmax(700px, 1fr) minmax(285px, 0.38fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 8px;
 }
 
 #workshop:not([data-shop="true"]) .part-grid {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(110px, 1fr);
-  grid-template-rows: 1fr;
+  grid-template-columns: repeat(7, minmax(90px, 1fr));
+  grid-template-rows: repeat(2, minmax(96px, 1fr));
+  grid-auto-flow: row;
   gap: 6px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 1px 2px 5px;
+  overflow: hidden;
+  padding: 1px 2px 2px;
 }
 
 #workshop:not([data-shop="true"]) .part-tile {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  min-height: 116px;
+  min-height: 96px;
   padding: 5px;
   gap: 3px;
   text-align: center;
@@ -676,8 +683,8 @@
 }
 
 #workshop:not([data-shop="true"]) .tile-photo {
-  width: 65px;
-  flex: 0 0 65px;
+  width: 56px;
+  flex: 0 0 56px;
   margin: 0 auto;
 }
 
@@ -700,6 +707,20 @@
 
 #workshop:not([data-shop="true"]) .part-inspector {
   padding: 9px 12px;
+  overflow: auto;
+}
+
+@media (max-width: 1120px) and (min-width: 801px) {
+  #workshop:not([data-shop="true"]) #parts-panel {
+    overflow: auto;
+  }
+  #workshop:not([data-shop="true"]) .parts-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 220px minmax(180px, auto);
+  }
+  #workshop:not([data-shop="true"]) .part-grid {
+    grid-template-columns: repeat(7, minmax(95px, 1fr));
+  }
 }
 
 @media (max-width: 800px) {
@@ -725,6 +746,17 @@
   #workshop:not([data-shop="true"]) .studio-note {
     display: none;
   }
+  #workshop:not([data-shop="true"]) .preview-angles {
+    position: static;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: auto;
+    padding: 4px 10px 10px;
+    border: 0;
+    background: none;
+  }
+  #workshop:not([data-shop="true"]) #preview-fitted {
+    grid-column: 1 / -1;
+  }
   #workshop:not([data-shop="true"]) #build-panel .garage-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -735,6 +767,8 @@
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 108px;
+    grid-template-columns: none;
+    grid-template-rows: 1fr;
     height: 122px;
     margin-bottom: 8px;
   }
