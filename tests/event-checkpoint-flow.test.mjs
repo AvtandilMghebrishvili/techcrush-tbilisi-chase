@@ -10,7 +10,7 @@ test("a passed checkpoint is saved immediately without ending the active chase",
     newProfile(),
     { type: "begin-run", map: "tbilisi", car: "classic" },
     undefined,
-    { now: EVENT_START, runId: "checkpoint-save-run" },
+    { now: EVENT_START, runId: "checkpoint-save-run", preview: true },
   );
   p = applyProgressAction(
     p,
@@ -77,5 +77,8 @@ test("focus loss clears input without opening the pause modal", async () => {
   assert.match(blur, /keys\.clear\(\)/);
   assert.doesNotMatch(blur, /pause\(\)/);
   assert.match(source, /openPrimaryLeaderboard/);
+  assert.match(source, /PLAY CITY WARS/);
+  assert.match(source, /JOIN CITY WARS/);
+  assert.match(source, /onclick = primaryPlay/);
   assert.match(await readFile("dist/event-ui.js", "utf8"), /REGULAR RANKS/);
 });

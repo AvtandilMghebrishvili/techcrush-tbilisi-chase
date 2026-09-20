@@ -176,6 +176,7 @@ test("online city boards and time results remain separate; one identity is count
         body: body ? JSON.stringify(body) : undefined,
       }),
       DB,
+      { eventExclusive: false },
     );
   await request("/api/profile", "POST");
   const hash = await keyHash(token);

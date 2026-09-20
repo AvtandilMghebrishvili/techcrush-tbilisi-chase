@@ -195,9 +195,7 @@ function refreshActivity() {
   loop.setEnabled(foreground);
   soundscape.setForeground(foreground && !dialogOpen());
   music.sync(
-    foreground &&
-      !dialogOpen() &&
-      ["ready", "running"].includes(sim?.phase),
+    foreground && !dialogOpen() && ["ready", "running"].includes(sim?.phase),
     !muted,
   );
   mobile?.syncActivity();
@@ -1297,6 +1295,14 @@ try {
     },
   });
   const refreshCityMenu = cityMenu(career, () => leaveRun(false));
+  const syncPrimaryPlay = () => {
+    if ($("start").getAttribute("aria-busy") === "true") return;
+    if (eventPhase(career.serverNow()) === "live")
+      $("start").textContent = eventProgress(career.profile)
+        ? "PLAY CITY WARS"
+        : "JOIN CITY WARS";
+    else $("start").textContent = "START CHASE";
+  };
   eventUI = new EventUI(career, {
     pause: () => {
       if (["running", "rewinding"].includes(sim.phase)) pause();
@@ -1314,6 +1320,7 @@ try {
       else return start();
     },
     refresh: refreshActivity,
+    primary: syncPrimaryPlay,
     regularBoard: () => community.open("board"),
     cities: () => {
       refreshCityMenu();
@@ -1339,6 +1346,18 @@ try {
       }
     },
   });
+  const primaryPlay = () => {
+    if (
+      eventPhase(career.serverNow()) === "live" &&
+      !eventProgress(career.profile)
+    ) {
+      eventUI.open();
+      eventUI.message("Join CITY WARS to start your chase.");
+      return;
+    }
+    return start();
+  };
+  syncPrimaryPlay();
   const openPrimaryLeaderboard = () => {
     if (eventPhase(career.serverNow()) !== "ended") eventUI.open();
     else community.open("board");
@@ -1360,7 +1379,7 @@ try {
     workshop.car = selectedCar;
     workshop.open();
   };
-  $("start").onclick = start;
+  $("start").onclick = primaryPlay;
   $("camera-toggle").onclick = () => switchCamera();
   $("lighting-toggle").disabled = false;
   $("lighting-toggle").onclick = switchLighting;
@@ -1368,7 +1387,7 @@ try {
   $("pause").onclick = pause;
   $("pause").disabled = true;
   $("resume").onclick = pause;
-  $("restart").onclick = start;
+  $("restart").onclick = primaryPlay;
   $("sound").onclick = toggleSound;
   const relevant = [
     "w",
@@ -1415,7 +1434,7 @@ try {
       }
       if (k === "m") toggleSound();
       if (k === "c") switchCamera();
-      if (k === "Enter" && sim.phase === "ready") start();
+      if (k === "Enter" && sim.phase === "ready") primaryPlay();
     }
   });
   addEventListener("keyup", (e) => {

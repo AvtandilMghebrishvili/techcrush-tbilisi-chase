@@ -1,5 +1,7 @@
 import {
   EVENT_ID,
+  eventPhase,
+  eventProgress,
   joinEvent,
   stampEventRun,
   settleEvent,
@@ -411,6 +413,13 @@ export function applyProgressAction(
       throw Error("This timing course belongs to another city.");
     if (action.course && !TIME_COURSES.includes(action.course))
       throw Error("Reload to use a supported course.");
+    if (
+      context.exclusiveEvent === true &&
+      context.preview !== true &&
+      eventPhase(context.now) === "live" &&
+      !eventProgress(p)
+    )
+      throw Error("Join CITY WARS before starting a chase.");
     p.activeRun = {
       id: context.runId,
       startedAt: context.now,

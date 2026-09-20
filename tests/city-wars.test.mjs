@@ -94,17 +94,36 @@ test("joined profiles cannot bypass event enrollment by omitting the mode on any
   );
   assert.equal(after.activeRun.event, undefined);
   assert.deepEqual(eventProgress(after), archived);
-  const nonMember = applyProgressAction(
-    newProfile(),
-    {
-      type: "begin-run",
-      map: "tbilisi",
-      car: "classic",
-    },
-    undefined,
-    { now: EVENT_START, runId: "non-member-regular" },
+  assert.throws(
+    () =>
+      applyProgressAction(
+        newProfile(),
+        {
+          type: "begin-run",
+          map: "tbilisi",
+          car: "classic",
+        },
+        undefined,
+        {
+          now: EVENT_START,
+          runId: "non-member-regular",
+          exclusiveEvent: true,
+        },
+      ),
+    /Join CITY WARS/,
   );
-  assert.equal(nonMember.activeRun.event, undefined);
+  const ownerPreview = applyProgressAction(
+    newProfile(),
+    { type: "begin-run", map: "tbilisi", car: "classic" },
+    undefined,
+    {
+      now: EVENT_START,
+      runId: "owner-preview",
+      preview: true,
+      exclusiveEvent: true,
+    },
+  );
+  assert.equal(ownerPreview.activeRun.event, undefined);
 });
 test("event dates, server-only eligibility and legacy garages preserve all existing upgrades", () => {
   assert.equal(EVENT_START, Date.parse("2026-09-20T15:00:00+04:00"));
@@ -125,7 +144,7 @@ test("event dates, server-only eligibility and legacy garages preserve all exist
         { ...p, previewAccess: true },
         { type: "begin-run", car: "gt", map: "rustavi" },
         undefined,
-        { now: EVENT_START, runId: "locked-run" },
+        { now: EVENT_START, runId: "locked-run", exclusiveEvent: true },
       ),
     /valid city/,
   );
@@ -335,6 +354,13 @@ test("API unique names, transactional totals, ranking isolation, secret gate, de
     pb = await call(b, "/api/profile");
     assert.equal(pb.version, 0);
     assert(!eventProgress(pb.profile));
+    const blockedRegular = await act(b, pb, {
+      type: "begin-run",
+      map: "tbilisi",
+      car: "classic",
+    });
+    assert.equal(blockedRegular.status, 400);
+    assert.match(blockedRegular.error, /Join CITY WARS/);
     pb = await act(b, pb, join("OtherRacer"));
     assert.equal(pb.status, 200);
     const ordinary = await act(a, pa, {

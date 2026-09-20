@@ -161,6 +161,8 @@ export async function handleApi(request, DB, options = {}) {
               now,
               runId: crypto.randomUUID(),
               preview: options.preview === true,
+              exclusiveEvent:
+                options.preview !== true && options.eventExclusive !== false,
             },
           );
         } catch (error) {

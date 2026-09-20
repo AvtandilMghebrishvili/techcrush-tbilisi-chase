@@ -141,6 +141,7 @@ async function fixture() {
         body: body ? JSON.stringify(body) : undefined,
       }),
       DB,
+      { eventExclusive: false },
     );
   }
   async function action(token, data, version) {

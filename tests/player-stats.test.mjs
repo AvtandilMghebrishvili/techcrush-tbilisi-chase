@@ -19,6 +19,7 @@ function fixture(t) {
         ...(body ? { body: JSON.stringify(body) } : {}),
       }),
       DB,
+      { eventExclusive: false },
     );
   const board = async (token = null, query = "") =>
     (await req(token, "/api/leaderboard" + query)).json();

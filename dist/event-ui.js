@@ -278,6 +278,7 @@ export class EventUI {
   }
   render() {
     this.syncMode();
+    this.actions.primary?.();
     const p = this.store.profile,
       progress = eventProgress(p),
       phase = eventPhase(this.store.serverNow()),

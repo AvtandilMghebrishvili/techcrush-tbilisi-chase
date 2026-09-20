@@ -141,6 +141,7 @@ test("saved result links expose only a listed driver's immutable validated finis
         body: body ? JSON.stringify(body) : undefined,
       }),
       DB,
+      { eventExclusive: false },
     );
   const act = async (action) => {
     const profile = await (await req("/api/profile")).json();

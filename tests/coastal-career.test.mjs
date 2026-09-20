@@ -160,6 +160,7 @@ test("Batumi uses the real shared database, stores its rank separately, and serv
         body: JSON.stringify({ version, id: crypto.randomUUID(), action }),
       }),
       db,
+      { eventExclusive: false },
     );
     const data = await r.json();
     assert.equal(r.status, 200, JSON.stringify(data));

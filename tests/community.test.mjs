@@ -236,6 +236,7 @@ async function apiFixture() {
           body: body ? JSON.stringify(body) : undefined,
         }),
         DB,
+        { eventExclusive: false },
       );
     },
   };
