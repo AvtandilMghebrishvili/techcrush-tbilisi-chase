@@ -12,6 +12,9 @@ import {
   HUNT_CITIES,
   eventPhase,
   eventProgress,
+  collectedArtifacts,
+  activeArtifactHints,
+  artifactNumber,
 } from "./event-rules.js";
 import { carRequirement, refreshRewards, coinIcon } from "./reward-ui.js";
 import { ACTIVE_MAP, CITY_NAME, cityLevel } from "./map-selection.js";
@@ -286,7 +289,7 @@ export class GarageUI {
       .then((profile) => {
         const price = profile.lastPurchase?.price || artifactPrice(0);
         $("upgrade-feedback").textContent =
-          `${map.toUpperCase()} search area revealed for ${price.toLocaleString()} CR. Open the city map and search inside the yellow zone.`;
+          `${map.toUpperCase()} · ARTIFACT #${artifactNumber(profile.lastPurchase.artifact)} · Search area revealed for ${price.toLocaleString()} CR. Find this missing artifact inside the yellow zone.`;
       })
       .catch(() => {});
   }
@@ -621,21 +624,19 @@ export class GarageUI {
     const contest = eventProgress(p),
       artifactsLive = eventPhase(this.store.serverNow()) === "live";
     for (const map of HUNT_CITIES) {
-      const collected = contest?.artifacts?.[map] || [],
+      const collected = collectedArtifacts(p, map),
         found = collected.length,
-        activeHint = (contest?.artifactHints?.[map] || []).find(
-          (id) => !collected.includes(id),
-        ),
+        activeHint = activeArtifactHints(p, map)[0],
         purchases = contest?.artifactPurchases?.[map] || 0,
         price = artifactPrice(purchases),
         progress = document.querySelector(`[data-artifact-progress="${map}"]`),
         button = document.querySelector(`[data-buy-artifact="${map}"]`);
-      progress.textContent = `${found} / ${ARTIFACT_BANNERS.length} FOUND${activeHint != null ? " · YELLOW AREA ACTIVE" : ""}`;
+      progress.textContent = `${found} / 5 FOUND · ${ARTIFACT_BANNERS.map((id) => `${artifactNumber(id)}${collected.includes(id) ? "✓" : "○"}`).join(" ")}`;
       button.textContent =
         found >= ARTIFACT_BANNERS.length
           ? "ALL 5 COLLECTED ✓"
           : activeHint != null
-            ? "SEARCH AREA ACTIVE · OPEN MAP"
+            ? `SEARCH #${artifactNumber(activeHint)} · YELLOW AREA ON MAP`
             : `REVEAL AREA · ${price.toLocaleString()} CR`;
       button.disabled =
         !contest ||
@@ -660,6 +661,17 @@ export class GarageUI {
     if (this.artReady && $("workshop").open && this.tab === "parts") {
       this.preview?.hydrate($("part-grid"));
       this.preview?.hydrate($("part-inspector"));
+    } else if (
+      this.artReady &&
+      $("workshop").open &&
+      this.tab !== "boxes" &&
+      this.car === "batmobile"
+    ) {
+      this.preview?.hydrate(
+        $("part-grid").querySelector('[data-part="spoiler"]'),
+      );
+      if (this.selectedPart === "spoiler")
+        this.preview?.hydrate($("part-inspector"));
     }
     if (focus)
       $("workshop").querySelector(focus)?.focus({ preventScroll: true });

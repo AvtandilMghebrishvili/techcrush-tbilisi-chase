@@ -1,23 +1,33 @@
 import { PARTS, TIERS, upgradedSpec } from "./progression.js";
 export const vehiclePartName = (part, car) =>
-  car === "creator"
-    ? {
-        engine: "AWD motors",
-        ecu: "Motor controller",
-        turbo: "Power boost",
-        tank: "Boost battery",
-        cooler: "Battery cooling",
-        gearbox: "EV reduction gear",
-        exhaust: "Power inverter",
-      }[part.id] || part.name
-    : part.name;
+  car === "batmobile" && part.id === "spoiler"
+    ? "Twin bat fins"
+    : car === "creator"
+      ? {
+          engine: "AWD motors",
+          ecu: "Motor controller",
+          turbo: "Power boost",
+          tank: "Boost battery",
+          cooler: "Battery cooling",
+          gearbox: "EV reduction gear",
+          exhaust: "Power inverter",
+        }[part.id] || part.name
+      : part.name;
 export const vehiclePartDetails = (part, car) =>
-  car === "creator" &&
-  ["engine", "ecu", "turbo", "tank", "cooler", "gearbox", "exhaust"].includes(
-    part.id,
-  )
-    ? "Electric drivetrain upgrade. Uses your existing compatible inventory and rarity; the comparison below shows the exact performance change. No combustion engine or exhaust is added."
-    : PART_DETAILS[part.id];
+  car === "batmobile" && part.id === "spoiler"
+    ? "Upgrades both rear bat fins together: taller swept tips, sculpted edges and grade-colored trim. Preserves the twin-fin design without adding a standard spoiler. Improves downforce and high-speed control."
+    : car === "creator" &&
+        [
+          "engine",
+          "ecu",
+          "turbo",
+          "tank",
+          "cooler",
+          "gearbox",
+          "exhaust",
+        ].includes(part.id)
+      ? "Electric drivetrain upgrade. Uses your existing compatible inventory and rarity; the comparison below shows the exact performance change. No combustion engine or exhaust is added."
+      : PART_DETAILS[part.id];
 export function partArtwork(part, extraClass = "", tier = 1) {
   const index = PARTS.findIndex((p) => p.id === part.id);
   return `<div class="part-art ${extraClass}" data-art-part="${part.id}" data-art-tier="${tier}" role="img" aria-label="${TIERS[tier]?.name} ${part.name} assembly" style="--art-x:${((index % 4) / 3) * 100}%;--art-y:${(Math.floor(index / 4) / 3) * 100}%"></div>`;

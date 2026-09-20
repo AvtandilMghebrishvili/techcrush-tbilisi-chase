@@ -8,6 +8,7 @@ import { disposeGroup } from "./effects.js";
 import { FrameLoop } from "./frame-loop.js";
 import { releaseResources } from "./resource-lifetime.js";
 import { positionCockpitCamera } from "./cockpit-view.js";
+import { makeBatFins } from "./batmobile.js";
 
 export class GaragePreview {
   constructor(host, source) {
@@ -253,14 +254,15 @@ export class GaragePreview {
   };
   artwork(id, tier) {
     if (this.disposed) return "";
-    const key = `${id}:${tier}`;
+    const batFins = this.carId === "batmobile" && id === "spoiler";
+    const key = `${batFins ? "bat-fins" : id}:${tier}`;
     if (this.cache.has(key)) {
       const url = this.cache.get(key);
       this.cache.delete(key);
       this.cache.set(key, url);
       return url;
     }
-    const part = makePartModel(id, tier);
+    const part = batFins ? makeBatFins(tier) : makePartModel(id, tier);
     part.updateMatrixWorld(true);
     const bounds = new THREE.Box3().setFromObject(part),
       center = bounds.getCenter(new THREE.Vector3()),

@@ -150,3 +150,79 @@ test("ambiguous owner names are skipped and additional hints use only unfinished
     db.close();
   }
 });
+
+test("Batmobile gift adds 1000 BAT boxes only to the two previously compensated identities, once", () => {
+  const db = fixture(),
+    owner = "fcfa3ee8eec3d9d8f89f0b496cd0c534c89af5f2519098bc26dbfcb74080a861";
+  try {
+    const a = seed(db, ani, "Ani", "Ani");
+    seed(db, owner, "techcrush-mac", "CITIARS", true);
+    seed(db, "untouched", "Another", "Another");
+    db.exec(migration);
+    const p = JSON.parse(
+      db.prepare("SELECT profile FROM garages WHERE key_hash=?").get(owner)
+        .profile,
+    );
+    p.unlockedCars.push("batmobile");
+    p.cars.batmobile = { spoiler: 8, paint: "#123456" };
+    p.batBoxes = 17;
+    db.prepare("UPDATE garages SET profile=? WHERE key_hash=?").run(
+      JSON.stringify(p),
+      owner,
+    );
+    // An identical display name is deliberately insufficient to receive the gift.
+    seed(db, "same-name", "techcrush-mac", "Clone", true);
+    const before = db.prepare("SELECT * FROM garages ORDER BY key_hash").all();
+    const sql = readFileSync(
+      "drizzle/0012_batmobile_support_grant.sql",
+      "utf8",
+    );
+    db.exec(sql);
+    for (const old of before) {
+      const row = db
+        .prepare("SELECT * FROM garages WHERE key_hash=?")
+        .get(old.key_hash);
+      if (![ani, owner].includes(old.key_hash)) {
+        assert.deepEqual(row, old);
+        continue;
+      }
+      const next = JSON.parse(row.profile),
+        prev = JSON.parse(old.profile);
+      assert.equal(next.batBoxes, (prev.batBoxes || 0) + 1000);
+      assert.equal(
+        next.unlockedCars.filter((c) => c === "batmobile").length,
+        1,
+      );
+      assert.deepEqual(next.cars, prev.cars);
+      assert.equal(row.version, old.version + 1);
+      delete next.batBoxes;
+      delete prev.batBoxes;
+      delete next.unlockedCars;
+      delete prev.unlockedCars;
+      delete next.supportAdjustments.batmobileGift20260921;
+      assert.deepEqual(next, prev);
+      for (const key of Object.keys(old).filter(
+        (k) => !["profile", "version", "updated_at"].includes(k),
+      ))
+        assert.deepEqual(row[key], old[key]);
+    }
+    assert.equal(
+      db
+        .prepare(
+          "SELECT COUNT(*) n FROM support_adjustments WHERE case_id='batmobile-gift-2026-09-21'",
+        )
+        .get().n,
+      2,
+    );
+    const snapshot = db
+      .prepare("SELECT * FROM garages ORDER BY key_hash")
+      .all();
+    db.exec(sql);
+    assert.deepEqual(
+      db.prepare("SELECT * FROM garages ORDER BY key_hash").all(),
+      snapshot,
+    );
+  } finally {
+    db.close();
+  }
+});

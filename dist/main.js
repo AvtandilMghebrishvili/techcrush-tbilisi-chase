@@ -4,7 +4,11 @@ import {
   separatePowerupPins,
 } from "./powerup-map.js";
 import { EventUI } from "./event-ui.js";
-import { eventPhase, eventProgress } from "./event-rules.js";
+import {
+  eventPhase,
+  eventProgress,
+  collectedArtifacts,
+} from "./event-rules.js";
 import { MapSettings, mapPreferences } from "./map-settings.js";
 import { radarScale } from "./map-preferences.js";
 import { BackgroundMusic } from "./background-music.js";
@@ -111,6 +115,7 @@ let disposed = false,
   dialogs,
   sceneAssets;
 let savedCheckpoint = 0,
+  savedArtifacts = new Set(),
   checkpointSave = Promise.resolve(),
   pageFocused = true;
 function disposePage() {
@@ -545,15 +550,13 @@ async function start() {
       batTakedowns: career.profile.batTakedowns || 0,
       runId: career.profile.activeRun.id,
       event: career.profile.activeRun.event,
-      collectedArtifacts:
-        career.profile.events?.[career.profile.activeRun.event]?.artifacts?.[
-          ACTIVE_MAP
-        ] || [],
+      collectedArtifacts: collectedArtifacts(career.profile, ACTIVE_MAP),
     });
     sim.navQuest = $("route-selector").value || null;
     sim.waypoint = null;
     runId = career.profile.activeRun.id;
     savedCheckpoint = career.profile.activeRun.savedCheckpoint || 0;
+    savedArtifacts = new Set();
     view.startGame(sim);
     raceClock.reset();
     $("intro").hidden = true;
@@ -730,6 +733,27 @@ function updateHUD() {
     : "FREE ROAM";
   scoreFeedbackUI.update(sim);
   $("progress").textContent = sim.checkpoint + " / 6";
+  if (
+    runId &&
+    sim.runArtifacts.some((id) => !savedArtifacts.has(id)) &&
+    career.profile.activeRun?.id === runId &&
+    sim.time >= sim.runArtifacts.length * 0.25 &&
+    sim.runDistance >= sim.runArtifacts.length * 8
+  ) {
+    const action = {
+      type: "artifact-progress",
+      runId,
+      artifacts: [...sim.runArtifacts],
+      time: sim.time,
+      distance: sim.runDistance,
+    };
+    for (const id of action.artifacts) savedArtifacts.add(id);
+    // At most five small saves per city run. The final settlement retries all finds.
+    checkpointSave = checkpointSave
+      .catch(() => {})
+      .then(() => career.mutate(action))
+      .catch(() => {});
+  }
   if (
     runId &&
     sim.checkpoint > savedCheckpoint &&

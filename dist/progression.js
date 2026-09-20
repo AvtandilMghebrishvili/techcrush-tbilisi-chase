@@ -7,6 +7,8 @@ import {
   joinEvent,
   stampEventRun,
   settleEvent,
+  collectedArtifacts,
+  activeArtifactHints,
 } from "./event-rules.js";
 import { TIME_COURSES } from "./race-timing.js";
 import {
@@ -500,10 +502,10 @@ export function applyProgressAction(
     if (!contest) throw Error("Join CITY WARS before buying an artifact.");
     if (!HUNT_CITIES.includes(action.map))
       throw Error("Choose a valid artifact city.");
-    const owned = contest.artifacts[action.map] || [];
+    const owned = collectedArtifacts(p, action.map);
     contest.artifactHints ||= {};
     const hints = (contest.artifactHints[action.map] ||= []);
-    const activeHint = hints.find((id) => !owned.includes(id));
+    const activeHint = activeArtifactHints(p, action.map)[0];
     if (activeHint != null)
       throw Error(
         "Find the artifact inside the active search area before revealing another.",
@@ -575,6 +577,36 @@ export function applyProgressAction(
         : {}),
     };
     stampEventRun(p, action, p.activeRun, context.now);
+  } else if (action.type === "artifact-progress") {
+    const ticket = p.activeRun,
+      ids = action.artifacts;
+    if (
+      !ticket ||
+      ticket.id !== action.runId ||
+      ticket.event !== EVENT_ID ||
+      !HUNT_CITIES.includes(ticket.map) ||
+      !eventProgress(p) ||
+      !Number.isFinite(context.now) ||
+      context.now >= ticket.eventEndsAt + 30000 ||
+      !Array.isArray(ids) ||
+      !ids.length ||
+      ids.length > 5 ||
+      new Set(ids).size !== ids.length ||
+      ids.some((id) => !ARTIFACT_BANNERS.includes(id)) ||
+      !Number.isFinite(action.time) ||
+      !Number.isFinite(action.distance) ||
+      action.time < ids.length * 0.25 ||
+      action.distance < ids.length * 8 ||
+      action.time > (context.now - ticket.startedAt) / 1000 + 2 ||
+      action.time > (ticket.eventEndsAt - ticket.startedAt) / 1000 + 0.25 ||
+      action.distance > action.time * 220 + 100
+    )
+      throw Error("Artifact progress could not be verified.");
+    const contest = eventProgress(p);
+    contest.artifacts[ticket.map] = collectedArtifacts(p, ticket.map, ids);
+    ticket.savedArtifacts = [
+      ...new Set([...(ticket.savedArtifacts || []), ...ids]),
+    ];
   } else if (action.type === "checkpoint-progress") {
     const checkpoint = Number(action.checkpoint),
       ticket = p.activeRun;

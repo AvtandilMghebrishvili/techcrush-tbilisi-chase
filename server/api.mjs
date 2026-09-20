@@ -278,7 +278,7 @@ export async function handleApi(request, DB, options = {}) {
               body.id,
             ),
           );
-        if (body.action.type === "buy-artifact" && huntComplete(profile))
+        if (body.action.type === "artifact-progress" && huntComplete(profile))
           statements.push(
             DB.prepare(
               `UPDATE event_entries SET unlocked_at=COALESCE(unlocked_at,?) WHERE event_id=? AND key_hash=? AND ${guard}`,

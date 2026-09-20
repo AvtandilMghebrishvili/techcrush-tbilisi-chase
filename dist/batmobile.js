@@ -1,11 +1,10 @@
 import * as T from "./vendor/three.module.js";
-import { installWheelKits, addExteriorKit } from "./customization.js";
+import { installWheelKits } from "./customization.js";
 import {
   makeSteering,
   bindSteering,
   addHeadlights,
 } from "./vehicle-details.js";
-import { cockpitSeat } from "./cockpit-view.js";
 import { addCabinDetails } from "./interior-detail.js";
 import { MODEL_SHAPES } from "./vehicle-designs.js";
 const metal = (color, roughness = 0.34, metalness = 0.64) =>
@@ -114,6 +113,68 @@ function bat(p, color) {
   );
 }
 
+export function makeBatFins(tier = 0, bodyMaterial = metal("#1e2831")) {
+  // The upgrade belongs to the two fins, never to a generic transverse spoiler.
+  const fins = new T.Group(),
+    grade = Math.max(0, Math.min(8, tier));
+  fins.name = "bat-twin-fins";
+  fins.userData.grade = grade;
+  const trim = metal(
+    [
+      "#bc9650",
+      "#b9794c",
+      "#bfcbd3",
+      "#edc35d",
+      "#8adeeb",
+      "#c8b4ec",
+      "#5cd7a0",
+      "#e75b78",
+      "#f3a84d",
+    ][grade],
+  );
+  for (const side of [-1, 1]) {
+    const fin = new T.Shape(),
+      height = 2.15 + grade * 0.045,
+      tip = -2.95 - grade * 0.025;
+    fin.moveTo(-1.22, 1.1);
+    fin.lineTo(tip, height);
+    if (grade >= 3) {
+      fin.lineTo(tip + 0.19, height - 0.4);
+      fin.lineTo(-3.24, height - 0.25);
+    }
+    fin.lineTo(-3.28, 1.18);
+    fin.lineTo(-2.4, 0.96);
+    fin.closePath();
+    const f = mesh(
+      fins,
+      new T.ExtrudeGeometry(fin, {
+        depth: 0.09 + grade * 0.006,
+        bevelEnabled: false,
+      }),
+      bodyMaterial,
+    );
+    f.name = side < 0 ? "bat-fin-left" : "bat-fin-right";
+    f.rotation.y = -Math.PI / 2;
+    f.position.x = side * 1.16;
+    rod(
+      fins,
+      [side * 1.16, 1.13, -1.26],
+      [side * 1.16, height - 0.03, tip],
+      0.018 + grade * 0.0015,
+      trim,
+    );
+    for (let n = 0; n < Math.ceil(grade / 2); n++)
+      rod(
+        fins,
+        [side * 1.16, 1.22 + n * 0.115, -2.35 - n * 0.1],
+        [side * 1.16, 1.36 + n * 0.115, -2.82 - n * 0.08],
+        0.016,
+        trim,
+      );
+  }
+  return fins;
+}
+
 export function makeBatmobile(color = "#1e2831", equipment = {}) {
   const mats = {
     body: metal("#1e2831", 0.31, 0.72),
@@ -158,7 +219,8 @@ export function makeBatmobile(color = "#1e2831", equipment = {}) {
     [
       [-3.24, 0.91, 0.38, 0.97],
       [-2.1, 1.08, 0.34, 1.1],
-      [-0.4, 0.98, 0.28, 1.11],
+      [-1.1, 0.98, 0.28, 0.68],
+      [0.72, 0.93, 0.25, 0.68],
       [1.35, 0.93, 0.25, 1.18],
       [2.9, 0.91, 0.27, 0.9],
       [3.66, 0.69, 0.31, 0.57],
@@ -195,7 +257,7 @@ export function makeBatmobile(color = "#1e2831", equipment = {}) {
     ],
     mats.body,
   );
-  rod(p, [0, 1.87, 0.23], [0, 1.245, 1.12], 0.025, mats.black);
+  // One unobstructed windscreen; the pillars sit at the canopy edges.
   for (const s of [-1, 1]) {
     rod(p, [s * 0.58, 1.84, 0.22], [s * 0.74, 1.24, 1.1], 0.035, mats.edge);
     rod(p, [s * 0.65, 1.81, -1.02], [s * 0.78, 1.14, -1.65], 0.035, mats.edge);
@@ -271,29 +333,13 @@ export function makeBatmobile(color = "#1e2831", equipment = {}) {
     for (let n = 0; n < 4; n++)
       box(p, 0.025, 0.11, 0.017, mats.edge, s * (0.43 + n * 0.12), 0.44, 3.67);
     box(p, 0.53, 0.04, 0.085, mats.gold, s * 1.0, 0.315, 3.48);
-    // Rear fins use closed solids rather than decorative transparent planes.
-    const fin = new T.Shape();
-    fin.moveTo(-1.22, 1.1);
-    fin.lineTo(-2.95, 2.15);
-    fin.lineTo(-3.28, 1.18);
-    fin.lineTo(-2.4, 0.96);
-    fin.lineTo(-1.22, 1.1);
-    const fg = new T.ExtrudeGeometry(fin, { depth: 0.09, bevelEnabled: false });
-    const f = mesh(p, fg, mats.body);
-    f.rotation.y = -Math.PI / 2;
-    f.position.x = s * 1.16;
-    rod(p, [s * 1.16, 1.13, -1.26], [s * 1.16, 2.12, -2.95], 0.018, mats.gold);
     box(p, 0.65, 0.095, 0.04, mats.red, s * 0.85, 0.9, -3.27);
     for (let n = 0; n < 5; n++)
       box(p, 0.045, 0.16, 0.62, mats.black, s * (0.36 + n * 0.13), 1.135, -2.0);
   }
-  const stockWing = new T.Group();
-  stockWing.name = "rear-wing";
-  p.add(stockWing);
-  p.userData.exteriorKit = stockWing;
-  box(stockWing, 2.48, 0.09, 0.33, mats.body, 0, 1.3, -3.13).name =
-    "aero-blade";
-  box(stockWing, 2.3, 0.018, 0.035, mats.gold, 0, 1.35, -3.29);
+  const fins = makeBatFins(equipment.spoiler || 0, mats.body);
+  p.add(fins);
+  p.userData.exteriorKit = fins;
   const nozzle = mesh(
     p,
     new T.CylinderGeometry(0.39, 0.47, 0.48, 20, 1, true),
@@ -342,12 +388,57 @@ export function makeBatmobile(color = "#1e2831", equipment = {}) {
   for (let n = 0; n < 4; n++)
     box(p, 0.63, 0.019, 0.05, mats.black, 0, 1.21 - n * 0.018, 1.22 + n * 0.1);
 
-  box(p, 1.3, 0.1, 0.28, mats.black, 0, 1.1, 0.7);
+  // A fitted cockpit tub replaces the old solid hood running through the cabin.
+  const cabin = new T.Group();
+  cabin.name = "bat-cockpit-shell";
+  p.add(cabin);
+  const upholstery = metal("#252d35", 0.91, 0.05);
+  box(cabin, 1.4, 0.08, 1.85, upholstery, 0, 0.71, -0.19);
+  box(cabin, 1.28, 0.73, 0.13, upholstery, 0, 1.37, -1.06).name =
+    "rear-bulkhead";
+  box(cabin, 1.12, 0.035, 1.19, upholstery, 0, 1.815, -0.43);
+  box(cabin, 1.42, 0.19, 0.28, upholstery, 0, 1.06, 0.75);
+  box(cabin, 1.36, 0.035, 0.035, mats.gold, 0, 1.16, 0.6);
+  for (const side of [-1, 1]) {
+    box(cabin, 0.1, 0.33, 1.6, upholstery, side * 0.73, 0.92, -0.12);
+    box(cabin, 0.055, 0.025, 0.96, mats.gold, side * 0.667, 1.08, -0.16);
+    box(cabin, 0.1, 0.04, 0.21, mats.edge, side * 0.65, 0.97, -0.17);
+    box(cabin, 0.4, 0.27, 0.14, mats.black, side * 0.33, 1.43, -0.91);
+    for (let n = 0; n < 3; n++)
+      box(
+        cabin,
+        0.32,
+        0.015,
+        0.018,
+        mats.edge,
+        side * 0.33,
+        1.15 + n * 0.06,
+        -0.98,
+      );
+  }
   for (const side of [-1, 1]) {
     box(p, 0.45, 0.14, 0.58, mats.black, side * 0.33, 0.7, -0.4);
     box(p, 0.45, 0.58, 0.16, mats.black, side * 0.33, 1.02, -0.75);
   }
-  const rotor = makeSteering(p, mats.black, mats.gold, 0.32, 1.17, 0.45);
+  const rotor = makeSteering(p, mats.black, mats.gold, 0.32, 1.3, 0.46);
+  // Open-top control yoke keeps the instrument screen visible above the grips.
+  rotor.children[0].geometry.dispose();
+  rotor.children[0].geometry = new T.TubeGeometry(
+    new T.CatmullRomCurve3(
+      Array.from({ length: 33 }, (_, i) => {
+        const a = 0.92 + (i / 32) * (Math.PI * 2 - 1.84);
+        return new T.Vector3(
+          Math.sin(a) * 0.168,
+          Math.max(-0.135, Math.cos(a) * 0.168),
+          0,
+        );
+      }),
+    ),
+    32,
+    0.023,
+    8,
+    false,
+  );
   bindSteering(p, rotor);
   Object.assign(p.userData, {
     shape: "batmobile",
@@ -358,13 +449,13 @@ export function makeBatmobile(color = "#1e2831", equipment = {}) {
     wheelSteering: steering,
     wheelRadius: 0.7,
     equipment: { ...equipment },
-    cockpitSeat: cockpitSeat(1.85, 0, 0.32),
+    cockpitSeat: { x: 0.32, y: 1.64, z: -0.12 },
     exhaustPositions: [{ x: 0, y: 0.76, z: -3.59 }],
     bodySurface: { top: () => 1.12, section: () => ({ w: 1.0, h: 1.12 }) },
     aeroMount: { z: -3.05, width: 2.4, baseY: 1.12 },
     cabinLayout: {
-      lift: 0.17,
-      shift: 0.28,
+      lift: 0.28,
+      shift: 0.4,
       roof: 1.85,
       roofRear: -1.04,
       roofFront: 0.23,
@@ -372,7 +463,6 @@ export function makeBatmobile(color = "#1e2831", equipment = {}) {
     },
   });
   installWheelKits(p, equipment);
-  if (equipment.spoiler) addExteriorKit(p, equipment, "batmobile");
   addHeadlights(p, [
     { x: -1.1, y: 0.59, z: 3.5 },
     { x: 1.1, y: 0.59, z: 3.5 },

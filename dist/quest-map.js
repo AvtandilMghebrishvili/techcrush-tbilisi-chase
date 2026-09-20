@@ -28,7 +28,11 @@ import {
 import { mapClickPoint, routeDistance } from "./hud-math.js";
 import { LANDMARKS } from "./district-data.js";
 import { FACADE_BANNERS } from "./city-brand-sites.js";
-import { ARTIFACT_SEARCH_RADIUS, activeArtifactHints } from "./event-rules.js";
+import {
+  ARTIFACT_SEARCH_RADIUS,
+  activeArtifactHints,
+  artifactNumber,
+} from "./event-rules.js";
 import { SPONSOR_SITES } from "./sponsor-sites.js";
 import { MAP_PLACES } from "./map-landmarks.js";
 export { MAP_PLACES };
@@ -343,7 +347,11 @@ export class QuestMap {
       c.shadowBlur = 0;
       c.fillStyle = "#ffe98a";
       c.font = "900 16px Arial";
-      c.fillText("ARTIFACT SEARCH AREA", center.x + radius + 8, center.y + 5);
+      c.fillText(
+        `ARTIFACT #${artifactNumber(search.artifact.id)} · SEARCH AREA`,
+        center.x + radius + 8,
+        center.y + 5,
+      );
       c.restore();
     }
     c.strokeStyle = "#73e6ed";

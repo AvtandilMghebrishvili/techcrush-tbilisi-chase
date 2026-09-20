@@ -1,5 +1,10 @@
 // Shared reward limits: optional counters keep pre-2.1 clients compatible.
-import { EVENT_ID, ARTIFACT_BANNERS, HUNT_CITIES } from "./event-rules.js";
+import {
+  EVENT_ID,
+  ARTIFACT_BANNERS,
+  HUNT_CITIES,
+  artifactNumber,
+} from "./event-rules.js";
 import { ACTIVE_MAP } from "./map-selection.js";
 import { carCashMultiplier } from "./car-bonuses.js";
 export const BANNER_COUNT = 48;
@@ -38,7 +43,9 @@ export function breakReward(sim, prop) {
       ...(sim.runOptions.collectedArtifacts || []),
       ...sim.runArtifacts,
     ]).size;
-    sim.events.push(`CITY WARS · ARTIFACT ${count}/5 · BANK TO SAVE`);
+    sim.events.push(
+      `CITY WARS · ARTIFACT #${artifactNumber(prop.bannerId)} FOUND · ${count}/5 · SAVING`,
+    );
     sim.emitSound?.("reward", sim.player, 20, "artifact:" + prop.bannerId);
   }
   if (prop.bannerId != null && sim.cashBannerIds.includes(prop.bannerId)) {

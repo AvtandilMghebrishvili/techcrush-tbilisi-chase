@@ -8,17 +8,36 @@ export const EVENT_SAVE_GRACE = 30000;
 export const HUNT_CITIES = ["tbilisi", "kutaisi", "batumi"];
 export const ARTIFACT_BANNERS = [0, 3, 6, 9, 12];
 export const ARTIFACT_SEARCH_RADIUS = 85;
+// Stable banner IDs are distinct from the visible artifact numbers (1–5).
+export const artifactNumber = (id) => ARTIFACT_BANNERS.indexOf(Number(id)) + 1;
+export const artifactIds = (values = []) =>
+  [
+    ...new Set(
+      values
+        .filter(
+          (id) =>
+            typeof id === "number" ||
+            (typeof id === "string" && /^\d+$/.test(id)),
+        )
+        .map(Number),
+    ),
+  ].filter((id) => ARTIFACT_BANNERS.includes(id));
+export const collectedArtifacts = (p, map, runArtifacts = []) =>
+  artifactIds([
+    ...(eventProgress(p)?.artifacts?.[map] || []),
+    ...(p?.activeRun?.event === EVENT_ID && p.activeRun.map === map
+      ? p.activeRun.savedArtifacts || []
+      : []),
+    ...runArtifacts,
+  ]);
 export const eventPhase = (now) =>
   now < EVENT_START ? "upcoming" : now < EVENT_END ? "live" : "ended";
 export const eventProgress = (p) => p?.events?.[EVENT_ID];
 export const activeArtifactHints = (p, map, runArtifacts = []) => {
   const contest = eventProgress(p),
-    found = new Set([
-      ...(contest?.artifacts?.[map] || []),
-      ...(runArtifacts || []),
-    ]);
-  return [...new Set(contest?.artifactHints?.[map] || [])].filter(
-    (id) => ARTIFACT_BANNERS.includes(id) && !found.has(id),
+    found = new Set(collectedArtifacts(p, map, runArtifacts));
+  return artifactIds(contest?.artifactHints?.[map] || []).filter(
+    (id) => !found.has(id),
   );
 };
 export const activeArtifactHint = (p, map, runArtifacts = []) =>
@@ -27,10 +46,8 @@ export const activeArtifactHint = (p, map, runArtifacts = []) =>
 export const enrolledEvent = (p, now) =>
   eventProgress(p) && now < EVENT_END ? EVENT_ID : undefined;
 export const huntComplete = (p) =>
-  HUNT_CITIES.every((map) =>
-    ARTIFACT_BANNERS.every((id) =>
-      (eventProgress(p)?.artifacts?.[map] || []).includes(id),
-    ),
+  HUNT_CITIES.every(
+    (map) => collectedArtifacts(p, map).length === ARTIFACT_BANNERS.length,
   );
 export const secretOpen = (p, now = Date.now()) =>
   !!p?.previewAccess || now >= EVENT_END || huntComplete(p);
@@ -113,9 +130,7 @@ export function settleEvent(p, ticket, metrics, result, now) {
     throw Error("Artifact route could not be verified.");
   const before = huntComplete(p);
   if (HUNT_CITIES.includes(map))
-    event.artifacts[map] = [
-      ...new Set([...(event.artifacts[map] || []), ...artifacts]),
-    ];
+    event.artifacts[map] = collectedArtifacts(p, map, artifacts);
   const row = (event.scores[map] ||= {
     score: 0,
     runs: 0,
