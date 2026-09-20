@@ -176,12 +176,7 @@ export class GarageUI {
     this.preview?.dispose();
   }
   updatePreviewActivity() {
-    if (
-      $("workshop").open &&
-      this.tab !== "boxes" &&
-      (!this.compactMedia.matches || this.tab === "build")
-    )
-      this.preview?.start();
+    if ($("workshop").open && this.tab !== "boxes") this.preview?.start();
     else this.preview?.stop();
     this.preview?.resize();
   }
@@ -262,6 +257,7 @@ export class GarageUI {
     this.selectedPart = part;
     this.inspection = { part, tier };
     this.render();
+    $("part-inspector").scrollTop = 0;
     this.preview?.angle(
       part === "spoiler"
         ? "rear"
@@ -291,7 +287,7 @@ export class GarageUI {
       tier,
       partStars(after, part.id),
     );
-    if (this.tab !== "parts" || !$("workshop").open) return;
+    if (this.tab === "boxes" || !$("workshop").open) return;
     this.selectedPart = part.id;
     this.renderInspector(part, tier, before, true, partStars(after, part.id));
     this.preview?.hydrate($("part-inspector"));
@@ -373,7 +369,7 @@ export class GarageUI {
       ${tier !== actual ? `<div class="upgrade-route"><span><small>NOW</small><b>✓ ${TIERS[actual].name}${actualStars ? ` ${"★".repeat(actualStars)}` : ""}</b></span><em>→</em><span><small>PREVIEW</small><b>↑ ${TIERS[tier].name}${stars ? ` ${"★".repeat(stars)}` : ""}</b></span></div>` : ""}
       <div class="quality-picker" role="group" aria-label="Preview quality and spare inventory">${grades}</div>
       ${install ? `<div class="upgrade-ready-callout"><span>↑↑ BETTER PART OWNED</span><strong>${TIERS[tier].name.toUpperCase()} IS READY TO FIT</strong></div>` : ""}
-      ${buy || install ? `<div class="inspector-actions primary-actions">${buy}${install}</div>` : ""}
+      ${buy || install ? `<div class="inspector-actions primary-actions">${install || buy}</div>` : ""}
       <div class="upgrade-impact"><b>WHAT GETS STRONGER</b>${upgradeBenefits(
         carSpec(this.car),
         equipment,
@@ -507,7 +503,7 @@ export class GarageUI {
     const inspected = PARTS.find((x) => x.id === this.selectedPart) || PARTS[0];
     this.renderInspector(
       inspected,
-      this.inspection?.tier ||
+      this.inspection?.tier ??
         Math.min(
           this.car === "creator" ? 8 : 5,
           (p.cars[this.car][inspected.id] || 0) + 1,

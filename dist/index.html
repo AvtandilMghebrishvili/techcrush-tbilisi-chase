@@ -880,58 +880,57 @@
         </nav>
         <div class="workshop-workspace">
           <section
-            id="garage-showcase"
-            class="garage-showcase"
-            aria-label="Selected car preview"
-          >
-            <div class="garage-build">
-              <span class="eyebrow">YOUR RIDE</span>
-              <h3 id="garage-selected-car">Original 458</h3>
-              <small id="garage-car-class">HERITAGE</small>
-            </div>
-            <div class="studio-column">
-              <div id="garage-preview" class="garage-preview">
-                <span id="preview-label">YOUR INSTALLED BUILD</span
-                ><small>DRAG TO ROTATE · PINCH / SCROLL TO ZOOM</small>
-              </div>
-              <div
-                id="preview-angles"
-                class="preview-angles"
-                aria-label="Preview camera"
-              >
-                <button data-angle="front">FRONT</button
-                ><button data-angle="rear">REAR</button
-                ><button data-angle="wheels">WHEELS</button
-                ><button data-angle="cabin">CABIN</button
-                ><button id="preview-fitted">FITTED ✓</button>
-              </div>
-            </div>
-            <p class="studio-note">
-              Rims, tires and wings change on your car. Try a grade in Upgrades
-              to preview the fit.
-            </p>
-          </section>
-          <section
             id="build-panel"
             class="workshop-panel"
             role="tabpanel"
             aria-labelledby="tab-build"
           >
-            <div class="panel-title">
-              <h3>READY FOR THE STREET</h3>
-              <span>LIVE SPECS</span>
-            </div>
-            <div id="garage-stats" class="garage-stats"></div>
-            <div class="paint-bench">
-              <span>PAINT <small>FREE</small></span>
-              <div id="paint-swatches"></div>
-              <label title="Choose custom paint"
-                >CUSTOM<input
-                  id="paint-custom"
-                  type="color"
-                  aria-label="Custom car paint"
-              /></label>
-            </div>
+            <section
+              id="garage-showcase"
+              class="garage-showcase"
+              aria-label="Selected car preview"
+            >
+              <div class="garage-build">
+                <span class="eyebrow">YOUR RIDE</span>
+                <h3 id="garage-selected-car">Original 458</h3>
+                <small id="garage-car-class">HERITAGE</small>
+                <div
+                  id="garage-stats"
+                  class="garage-stats"
+                  aria-label="Installed car performance"
+                ></div>
+              </div>
+              <div class="studio-column">
+                <div id="garage-preview" class="garage-preview">
+                  <span id="preview-label">YOUR INSTALLED BUILD</span
+                  ><small>DRAG TO ROTATE · PINCH / SCROLL TO ZOOM</small>
+                </div>
+              </div>
+              <div class="garage-tools">
+                <div class="paint-bench">
+                  <span>PAINT <small>FREE</small></span>
+                  <div id="paint-swatches"></div>
+                  <label title="Choose custom paint"
+                    >CUSTOM<input
+                      id="paint-custom"
+                      type="color"
+                      aria-label="Custom car paint"
+                  /></label>
+                </div>
+                <span class="garage-tools-label">CAMERA VIEW</span>
+                <div
+                  id="preview-angles"
+                  class="preview-angles"
+                  aria-label="Preview camera"
+                >
+                  <button data-angle="front">FRONT</button
+                  ><button data-angle="rear">REAR</button
+                  ><button data-angle="wheels">WHEELS</button
+                  ><button data-angle="cabin">CABIN</button
+                  ><button id="preview-fitted">FITTED ✓</button>
+                </div>
+              </div>
+            </section>
             <div class="build-brief">
               <h4>MAKE IT YOURS</h4>
               <p>
