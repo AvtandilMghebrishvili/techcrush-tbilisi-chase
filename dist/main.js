@@ -712,7 +712,9 @@ function updateHUD() {
   $("run-cash").textContent = `+${sim.runCash.toLocaleString()} CR`;
   const scoreText = Math.floor(sim.score).toString().padStart(6, "0");
   if ($("score").textContent !== scoreText) $("score").textContent = scoreText;
-  $("score-multiplier").textContent = "×" + sim.rewardRates.score.toFixed(2);
+  $("score-multiplier").textContent = sim.pursuitStarted
+    ? "×" + sim.rewardRates.score.toFixed(2)
+    : "FREE ROAM";
   scoreFeedbackUI.update(sim);
   $("progress").textContent = sim.checkpoint + " / 6";
   if (

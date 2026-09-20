@@ -114,6 +114,7 @@ test("actual near passes work at every heading without repeat, collision, follow
 test("near misses award on a real physics crossing and re-earn only after rewind", () => {
   const s = new ChaseSimulation();
   s.start();
+  s.activatePursuit("checkpoint");
   s.police = [];
   s.obstacles = [];
   s.trees = [];

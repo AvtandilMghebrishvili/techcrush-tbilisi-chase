@@ -200,6 +200,7 @@ test("simulation earns scaled points/cash and rewind restores all community coun
     s.police = [];
     s.traffic = [];
     s.trees = [];
+    s.activatePursuit("checkpoint");
     s.nextWaveAt = Infinity;
   }
   for (let i = 0; i < 120; i++)

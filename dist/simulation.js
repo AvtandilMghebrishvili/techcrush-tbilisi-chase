@@ -621,6 +621,7 @@ export class ChaseSimulation {
     if (this.pursuitStarted) return false;
     const p = this.player;
     this.pursuitStarted = true;
+    this.lastCheckpointTime = this.time;
     this.radioContact = {
       x: p.x,
       z: p.z,
@@ -986,13 +987,17 @@ export class ChaseSimulation {
             this.rewardRates.score,
         );
         if (!landed.flipped) this.runJumps++;
-        this.score += bonus;
-        this.stuntScore += bonus;
-        if (!landed.flipped) this.scoreFeedback("jump", bonus);
+        if (this.pursuitStarted) {
+          this.score += bonus;
+          this.stuntScore += bonus;
+          if (!landed.flipped) this.scoreFeedback("jump", bonus);
+        }
         this.events.push(
           landed.flipped
             ? "ROLLOVER — HOLD Q TO REWIND"
-            : `JUMP ${Math.round(landed.distance)} M  +${bonus}`,
+            : this.pursuitStarted
+              ? `JUMP ${Math.round(landed.distance)} M  +${bonus}`
+              : `JUMP ${Math.round(landed.distance)} M · FREE ROAM`,
         );
       }
     } else {
@@ -1033,7 +1038,7 @@ export class ChaseSimulation {
     );
     this.runDistance += travel;
     this.runTopSpeed = Math.max(this.runTopSpeed, Math.abs(p.speed) * 3.6);
-    this.score += travel * 1.8 * this.rewardRates.score;
+    if (pursuitActive) this.score += travel * 1.8 * this.rewardRates.score;
     for (const t of this.traffic) {
       if (t.waterAt != null) {
         if (this.advanceWater(t, dt)) {
@@ -1584,22 +1589,27 @@ export class ChaseSimulation {
       for (const cop of this.police)
         if (!cop.destroyed && cop.waterAt == null)
           closest = Math.min(closest, distance(cop, p));
-    for (const t of this.traffic) {
-      if (t.destroyed || t.waterAt != null) continue;
-      if (passedTraffic(p, t, positions.get(p), positions.get(t), this.time)) {
-        const points = Math.round(150 * this.rewardRates.score + 1e-8);
-        this.score += points;
-        this.scoreFeedback("near", points);
-        this.events.push(
-          `NEAR MISS  +${Math.round(150 * this.rewardRates.score)}`,
-        );
+    if (this.pursuitStarted)
+      for (const t of this.traffic) {
+        if (t.destroyed || t.waterAt != null) continue;
+        if (
+          passedTraffic(p, t, positions.get(p), positions.get(t), this.time)
+        ) {
+          const points = Math.round(150 * this.rewardRates.score + 1e-8);
+          this.score += points;
+          this.scoreFeedback("near", points);
+          this.events.push(
+            `NEAR MISS  +${Math.round(150 * this.rewardRates.score)}`,
+          );
+        }
       }
-    }
     if (p.isDrifting && p.impact < 3) {
       this.runDriftSeconds += dt;
-      const points = Math.abs(p.speed) * dt * 0.65 * this.rewardRates.score;
-      this.score += points;
-      this.driftScore += points;
+      if (this.pursuitStarted) {
+        const points = Math.abs(p.speed) * dt * 0.65 * this.rewardRates.score;
+        this.score += points;
+        this.driftScore += points;
+      }
     } else if (this.driftScore > 0) {
       if (this.driftScore > 10) {
         this.events.push("DRIFT  +" + Math.round(this.driftScore));

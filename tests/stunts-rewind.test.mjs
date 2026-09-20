@@ -22,6 +22,7 @@ function clean() {
 test("driving onto a real ramp launches, gains height, lands and keeps a living car upright", () => {
   const s = clean(),
     r = RAMPS[0];
+  s.activatePursuit("checkpoint");
   s.ramps = [r];
   Object.assign(s.player, {
     x: r.x - Math.sin(r.angle) * 14,

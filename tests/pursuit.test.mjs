@@ -123,6 +123,21 @@ test("hitting an ambient patrol activates the full pursuit before checkpoint one
   s.timeline.restore(s, 0);
   assert.equal(s.pursuitStarted, false);
 });
+test("free roam keeps run score at zero until pursuit begins", () => {
+  const s = new ChaseSimulation();
+  s.start();
+  s.obstacles = [];
+  s.trees = [];
+  s.traffic = [];
+  s.police = [];
+  for (let i = 0; i < 240; i++) s.update(1 / 120, { throttle: 1 });
+  assert.equal(s.pursuitStarted, false);
+  assert.equal(s.score, 0);
+  assert(s.runDistance > 0, "free roam still tracks exploration distance");
+  s.activatePursuit("collision");
+  for (let i = 0; i < 120; i++) s.update(1 / 120, { throttle: 1 });
+  assert(s.score > 0);
+});
 test("a blockade unit plans a road position ahead of the observed moving player", () => {
   const s = new ChaseSimulation();
   s.start();
