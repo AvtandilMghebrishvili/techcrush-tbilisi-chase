@@ -1013,8 +1013,18 @@
               <span id="shop-box-count">0 BOXES · 3 PARTS EACH</span>
             </div>
             <section class="artifact-market" aria-label="CITY WARS artifacts">
-              <article>
-                <span>TB</span>
+              <article class="artifact-card artifact-tbilisi">
+                <figure class="artifact-map" aria-hidden="true">
+                  <svg viewBox="0 0 180 72">
+                    <path d="M4 57 28 43 51 46 72 28 96 34 121 16 176 8" />
+                    <path d="M17 68 36 51 63 55 89 42 119 45 145 31 177 34" />
+                    <path
+                      d="M54 5 62 26 51 46 58 70M101 4 96 34 119 45 128 69"
+                    />
+                    <path class="river" d="M6 24c38 7 45-10 74-2s43-2 96-11" />
+                  </svg>
+                  <span>TB</span>
+                </figure>
                 <div>
                   <h3>TBILISI ARTIFACT</h3>
                   <small data-artifact-progress="tbilisi">0 / 5 FOUND</small>
@@ -1023,8 +1033,18 @@
                   REVEAL AREA · 1,000,000 CR
                 </button>
               </article>
-              <article>
-                <span>KU</span>
+              <article class="artifact-card artifact-kutaisi">
+                <figure class="artifact-map" aria-hidden="true">
+                  <svg viewBox="0 0 180 72">
+                    <path d="M5 15 37 22 58 13 82 29 111 23 139 39 176 35" />
+                    <path d="M3 57 31 46 60 52 83 40 113 49 143 43 178 59" />
+                    <path
+                      d="M28 4 37 22 31 46 44 70M91 4 82 29 83 40 75 70M150 5 139 39 143 43 160 69"
+                    />
+                    <path class="river" d="M60 1c-9 18 12 25 3 39s8 22 3 32" />
+                  </svg>
+                  <span>KU</span>
+                </figure>
                 <div>
                   <h3>KUTAISI ARTIFACT</h3>
                   <small data-artifact-progress="kutaisi">0 / 5 FOUND</small>
@@ -1033,8 +1053,21 @@
                   REVEAL AREA · 1,000,000 CR
                 </button>
               </article>
-              <article>
-                <span>BA</span>
+              <article class="artifact-card artifact-batumi">
+                <figure class="artifact-map" aria-hidden="true">
+                  <svg viewBox="0 0 180 72">
+                    <path d="M8 8 31 20 53 18 78 31 105 26 130 38 173 32" />
+                    <path d="M5 40 35 35 60 47 89 43 114 56 151 50 177 61" />
+                    <path
+                      d="M23 2 31 20 35 35 29 69M69 3 53 18 60 47 54 69M121 4 105 26 114 56 108 70"
+                    />
+                    <path
+                      class="coast"
+                      d="M171 1c-19 13-7 24-20 34s-1 23-17 37"
+                    />
+                  </svg>
+                  <span>BA</span>
+                </figure>
                 <div>
                   <h3>BATUMI ARTIFACT</h3>
                   <small data-artifact-progress="batumi">0 / 5 FOUND</small>
@@ -1046,7 +1079,9 @@
             </section>
             <section id="box-bench" class="box-bench">
               <article class="supply-card" style="--supply: #eac068">
-                <div class="supply-visual" aria-hidden="true">?</div>
+                <div class="supply-visual crate-visual" aria-hidden="true">
+                  <span>?</span>
+                </div>
                 <div>
                   <h3>MYSTERY BOX</h3>
                   <p>Every 5 city levels · 1,500–3,000 coins + 3 parts.</p>
@@ -1059,7 +1094,7 @@
                 </div>
               </article>
               <article class="supply-card" style="--supply: #bfadff">
-                <div class="supply-visual" aria-hidden="true">
+                <div class="supply-visual crate-visual" aria-hidden="true">
                   <img
                     src="./assets/grex/grex.webp"
                     width="64"
@@ -1086,7 +1121,9 @@
                 </div>
               </article>
               <article class="supply-card" style="--supply: #ffce73">
-                <div class="supply-visual" aria-hidden="true">✦</div>
+                <div class="supply-visual crate-visual" aria-hidden="true">
+                  <span>✦</span>
+                </div>
                 <div>
                   <h3>STREET BOX</h3>
                   <p>Earn a box by clearing a level.</p>
@@ -1098,7 +1135,9 @@
                 </div>
               </article>
               <article class="supply-card" style="--supply: #b4e7fa">
-                <div class="supply-visual" aria-hidden="true">◇</div>
+                <div class="supply-visual crate-visual" aria-hidden="true">
+                  <span>◇</span>
+                </div>
                 <div>
                   <h3>PLATINUM BOX</h3>
                   <p>Find hidden stunt boxes across the cities.</p>
@@ -1111,7 +1150,18 @@
                 </div>
               </article>
               <article class="supply-card" style="--supply: #fe688e">
-                <div class="supply-visual" aria-hidden="true">T</div>
+                <div
+                  class="supply-visual crate-visual techcrush-crate"
+                  aria-hidden="true"
+                >
+                  <img
+                    src="./assets/techcrush-wordmark.png"
+                    width="180"
+                    height="95"
+                    loading="lazy"
+                    alt=""
+                  />
+                </div>
                 <div>
                   <h3>TECHCRUSH BOX</h3>
                   <p>Earn one for every 10 banked patrol takedowns.</p>

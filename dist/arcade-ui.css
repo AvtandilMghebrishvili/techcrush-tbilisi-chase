@@ -536,6 +536,191 @@
   }
 }
 
+/* Paint chips keep their real factory colors above the shared button skin. */
+#workshop:not([data-shop="true"]) #paint-swatches button {
+  position: relative;
+  overflow: hidden;
+  border: 4px solid #0b1520;
+  background: var(--paint) !important;
+  box-shadow:
+    inset 0 1px 4px #ffffff7a,
+    inset 0 -4px 6px #0005,
+    0 0 0 1px #52667a;
+}
+
+#workshop:not([data-shop="true"]) #paint-swatches button::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fff6, transparent 38% 70%, #0004);
+  pointer-events: none;
+}
+
+#workshop:not([data-shop="true"]) #paint-swatches button[aria-pressed="true"] {
+  border-color: #f7fbff;
+  box-shadow:
+    inset 0 1px 4px #ffffff8c,
+    0 0 0 2px #172432,
+    0 0 0 4px var(--paint),
+    0 0 13px color-mix(in srgb, var(--paint) 60%, transparent);
+}
+
+/* Artifact search cards use lightweight route drawings from each city. */
+#workshop[data-shop="true"] .artifact-market article {
+  grid-template-columns: 124px minmax(0, 1fr);
+  min-height: 126px;
+  padding: 8px;
+  gap: 9px;
+  overflow: hidden;
+  border-color: #3d8d88;
+  background:
+    radial-gradient(circle at 18% 10%, #55eadf24, transparent 36%),
+    linear-gradient(145deg, #173c3d, #111d27 72%);
+}
+
+#workshop[data-shop="true"] .artifact-map {
+  position: relative;
+  width: 124px;
+  height: 70px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #4d7b82;
+  border-radius: 7px;
+  color: #8dded9;
+  background:
+    linear-gradient(#ffffff05 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff05 1px, transparent 1px), #0b1921;
+  background-size: 13px 13px;
+  box-shadow: inset 0 0 18px #0009;
+}
+
+#workshop[data-shop="true"] .artifact-map svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+#workshop[data-shop="true"] .artifact-map .river,
+#workshop[data-shop="true"] .artifact-map .coast {
+  stroke: #2f8eb1;
+  stroke-width: 7;
+  opacity: 0.62;
+}
+
+#workshop[data-shop="true"] .artifact-map > span {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 24px;
+  border: 1px solid #a2fff3;
+  border-radius: 5px;
+  color: #b4fff6;
+  background: #092029e8;
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow: 0 0 12px #65f6e655;
+}
+
+#workshop[data-shop="true"] .artifact-market h3 {
+  color: #e7fffb;
+  font-size: 11px;
+}
+
+#workshop[data-shop="true"] .artifact-market button {
+  min-height: 30px;
+}
+
+/* Product art: compact arcade crates, with the real TECHCRUSH mark on its box. */
+#workshop[data-shop="true"] .crate-visual {
+  position: relative;
+  isolation: isolate;
+  width: 108px;
+  height: 84px;
+  flex-basis: 84px;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#workshop[data-shop="true"] .crate-visual::before,
+#workshop[data-shop="true"] .crate-visual::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border: 2px solid color-mix(in srgb, var(--supply) 82%, #fff);
+  background:
+    linear-gradient(45deg, transparent 43%, #ffffff1b 44% 56%, transparent 57%),
+    linear-gradient(135deg, #314254, #111923 70%);
+  box-shadow:
+    inset 0 0 0 6px #0c141e,
+    0 5px 0 #05080c,
+    0 0 24px color-mix(in srgb, var(--supply) 30%, transparent);
+}
+
+#workshop[data-shop="true"] .crate-visual::before {
+  inset: 8px 4px 0;
+  border-radius: 9px;
+  transform: perspective(160px) rotateX(-3deg);
+}
+
+#workshop[data-shop="true"] .crate-visual::after {
+  left: 13px;
+  right: 13px;
+  top: 2px;
+  height: 13px;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #ffffff40, var(--supply));
+}
+
+#workshop[data-shop="true"] .crate-visual > span,
+#workshop[data-shop="true"] .crate-visual > img {
+  position: absolute;
+  z-index: 1;
+  left: 17px;
+  right: 17px;
+  top: 23px;
+  width: calc(100% - 34px) !important;
+  height: 46px !important;
+  object-fit: contain !important;
+  border-radius: 4px !important;
+}
+
+#workshop[data-shop="true"] .crate-visual > span {
+  display: grid;
+  place-items: center;
+  color: var(--supply);
+  font-size: 29px;
+  font-weight: 900;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--supply) 78%, transparent);
+}
+
+#workshop[data-shop="true"] .techcrush-crate > img {
+  left: 11px;
+  right: 11px;
+  width: calc(100% - 22px) !important;
+  background: #191c22;
+}
+
+@media (max-width: 800px) {
+  #workshop[data-shop="true"] .artifact-market article {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+
+  #workshop[data-shop="true"] .artifact-map {
+    width: 112px;
+  }
+}
+
 /* Driver setup dashboard: every major setting is visible and grouped by task. */
 #controls-dialog {
   width: min(980px, calc(100% - 28px));
