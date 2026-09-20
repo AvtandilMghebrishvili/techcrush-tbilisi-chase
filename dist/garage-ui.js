@@ -178,7 +178,8 @@ export class GarageUI {
   updatePreviewActivity() {
     if (
       $("workshop").open &&
-      (!this.compactMedia.matches || ["build", "boxes"].includes(this.tab))
+      this.tab !== "boxes" &&
+      (!this.compactMedia.matches || this.tab === "build")
     )
       this.preview?.start();
     else this.preview?.stop();

@@ -552,250 +552,190 @@
   }
 }
 
-/* Shop garage: the car remains the hero, while products sit on a compact
-   arcade shelf below it. Artifact clues form the final shelf row. */
-#workshop[data-shop="true"] .workshop-workspace {
-  display: grid;
+/* Garage follows the reference composition: one large car bay with the
+   upgrade inventory arranged as a low arcade shelf underneath. */
+#workshop:not([data-shop="true"]) .workshop-workspace {
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: minmax(205px, 0.8fr) minmax(0, 1.25fr);
+  grid-template-rows: minmax(235px, 0.9fr) minmax(0, 1.1fr);
   gap: 9px;
   overflow: hidden;
 }
 
-#workshop[data-shop="true"] .garage-showcase {
+#workshop:not([data-shop="true"]) .garage-showcase {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) 150px;
+  grid-template-columns: 175px minmax(0, 1fr) 165px;
   align-items: center;
   min-height: 0;
-  margin: 0;
   padding: 8px 12px;
-  overflow: hidden;
   background:
-    radial-gradient(ellipse at 54% 62%, #ffdc9950 0 4%, transparent 34%),
-    linear-gradient(180deg, transparent 0 70%, #777b7d 70% 71%, #23282c 71%),
+    radial-gradient(ellipse at 54% 62%, #ffdc9940 0 4%, transparent 34%),
+    linear-gradient(180deg, transparent 0 71%, #777b7d 71% 72%, #23282c 72%),
     repeating-linear-gradient(90deg, #1e2a34 0 54px, #151f28 54px 57px);
 }
 
-#workshop[data-shop="true"] .garage-showcase::before {
-  content: "TECHCRUSH  /  SUPPLY GARAGE";
+#workshop:not([data-shop="true"]) .garage-showcase::before {
+  content: "TECHCRUSH  /  PERFORMANCE GARAGE";
   left: 14px;
   right: auto;
-  color: #ffd57f;
-  border-color: #8b6b38;
+  color: #69eef1;
+  border-color: #3e858c;
 }
 
-#workshop[data-shop="true"] .garage-build {
+#workshop:not([data-shop="true"]) .garage-build {
   align-self: start;
-  padding-top: 40px;
+  padding: 42px 4px 0 2px;
 }
 
-#workshop[data-shop="true"] .studio-column {
-  min-height: 190px;
+#workshop:not([data-shop="true"]) .garage-build h3 {
+  font-size: 27px;
+}
+
+#workshop:not([data-shop="true"]) .studio-column {
   height: 100%;
+  min-height: 215px;
 }
 
-#workshop[data-shop="true"] .garage-preview {
-  min-height: 185px;
+#workshop:not([data-shop="true"]) .garage-preview {
+  min-height: 205px;
 }
 
-#workshop[data-shop="true"] .preview-angles {
-  position: absolute;
-  right: 14px;
-  bottom: 12px;
-  z-index: 3;
-  grid-template-columns: 1fr;
-  width: 128px;
+#workshop:not([data-shop="true"]) .preview-angles {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 2px 8px 7px;
 }
 
-#workshop[data-shop="true"] .preview-angles button:not(#preview-fitted) {
-  display: none;
+#workshop:not([data-shop="true"]) #preview-fitted {
+  grid-column: auto;
 }
 
-#workshop[data-shop="true"] #preview-fitted {
-  color: #8ff5ff;
-  border-color: #45cad4;
-}
-
-#workshop[data-shop="true"] .studio-note {
+#workshop:not([data-shop="true"]) .studio-note {
   align-self: end;
-  margin: 0 0 44px;
-  color: #aab8c5;
+  margin: 0 0 38px;
+  padding: 9px;
+  border: 1px solid #405162;
+  border-radius: 6px;
+  background: #0d151dcc;
   font-size: 9px;
-  line-height: 1.45;
 }
 
-#workshop[data-shop="true"] #boxes-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow: auto;
-  padding: 0 2px 4px;
+#workshop:not([data-shop="true"]) .workshop-panel {
+  padding: 0 2px 3px;
 }
 
-#workshop[data-shop="true"] #boxes-panel > .panel-title {
-  flex: 0 0 auto;
-  order: 0;
+#workshop:not([data-shop="true"]) #build-panel .garage-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-#workshop[data-shop="true"] .box-bench {
-  order: 1;
-  grid-template-columns: repeat(5, minmax(130px, 1fr));
-  gap: 7px;
+#workshop:not([data-shop="true"]) #build-panel .garage-stats > div {
+  min-height: 64px;
+  padding: 8px;
 }
 
-#workshop[data-shop="true"] .box-bench::before,
-#workshop[data-shop="true"] .artifact-market::before {
-  grid-column: 1 / -1;
-  color: #d5e2ed;
-  font:
-    900 9px/1 Barlow,
-    Arial,
-    sans-serif;
-  letter-spacing: 0.16em;
-}
-
-#workshop[data-shop="true"] .box-bench::before {
-  content: "SUPPLY BOXES  /  OPEN OR BUY";
-}
-
-#workshop[data-shop="true"] .artifact-market {
-  order: 2;
-  flex: 0 0 auto;
-  margin: 0;
-}
-
-#workshop[data-shop="true"] .artifact-market::before {
-  content: "CITY WARS  /  ARTIFACT SEARCH AREAS";
-}
-
-#workshop[data-shop="true"] #last-drop {
-  order: 3;
-  margin: 0;
-}
-
-#workshop[data-shop="true"] #boxes-panel > details {
-  order: 4;
-}
-
-#workshop[data-shop="true"] .supply-card {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-height: 178px;
-  padding: 7px;
-  border-width: 2px;
-}
-
-#workshop[data-shop="true"] .supply-visual {
-  width: 72px;
-  height: 58px;
-  min-height: 0;
-  flex-basis: auto;
-  flex-shrink: 0;
-  margin: 0 auto;
-  border-radius: 7px;
-  font-size: 29px;
-  line-height: 54px;
-  transform: perspective(140px) rotateX(-4deg);
-}
-
-#workshop[data-shop="true"] .supply-card > div:last-child {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 3px;
-  width: 100%;
+#workshop:not([data-shop="true"]) #parts-panel {
   overflow: hidden;
 }
 
-#workshop[data-shop="true"] .box-bench h3 {
-  min-height: 24px;
-  margin: 0;
-  font-size: 10px;
+#workshop:not([data-shop="true"]) .parts-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 126px minmax(180px, 1fr);
+  gap: 8px;
 }
 
-#workshop[data-shop="true"] .box-bench p,
-#workshop[data-shop="true"] .box-bench small {
-  display: none;
+#workshop:not([data-shop="true"]) .part-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(110px, 1fr);
+  grid-template-rows: 1fr;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1px 2px 5px;
 }
 
-#workshop[data-shop="true"] .box-bench button {
-  display: block;
-  width: 100%;
-  min-height: 27px;
-  margin: 0;
-  padding: 4px 5px;
-  font-size: 8px;
-}
-
-#workshop[data-shop="true"] .box-bench button:first-of-type {
-  margin-top: auto;
-}
-
-#workshop[data-shop="true"] .box-bench .buy-box {
-  margin-top: 3px;
-}
-
-#workshop[data-shop="true"] .artifact-market article {
-  position: relative;
-  min-height: 78px;
-  padding: 7px;
-  border-color: #9b7a35;
+#workshop:not([data-shop="true"]) .part-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 116px;
+  padding: 5px;
+  gap: 3px;
+  text-align: center;
+  border-width: 2px;
   background:
-    radial-gradient(circle at 15% 30%, #ffd43b29, transparent 30%),
-    linear-gradient(145deg, #263642, #131d27 72%);
+    radial-gradient(circle at 50% 28%, #ffffff12, transparent 43%),
+    linear-gradient(155deg, #263543, #121b25 72%);
 }
 
-#workshop[data-shop="true"] .artifact-market article > span {
-  border-color: #ffd43b;
-  color: #ffe58d;
-  background: radial-gradient(
-    circle,
-    transparent 0 28%,
-    #ffd43b 29% 34%,
-    transparent 35% 48%,
-    #ffd43b99 49% 53%,
-    #17242e 54%
-  );
-  box-shadow: 0 0 18px #ffd43b3d;
+#workshop:not([data-shop="true"]) .part-tile[aria-pressed="true"] {
+  border-color: var(--arcade-cyan);
+  background: linear-gradient(155deg, #25464a, #14232c 72%);
+  box-shadow:
+    inset 0 -3px #4adce1,
+    0 2px #05090d;
 }
 
-#workshop[data-shop="true"] .artifact-market button {
-  border-color: #e3b83e !important;
-  color: #1b1608 !important;
-  background: linear-gradient(180deg, #ffe37b, #c99627) !important;
+#workshop:not([data-shop="true"]) .tile-photo {
+  width: 65px;
+  flex: 0 0 65px;
+  margin: 0 auto;
+}
+
+#workshop:not([data-shop="true"]) .tile-copy {
+  width: 100%;
+  gap: 2px;
+}
+
+#workshop:not([data-shop="true"]) .tile-copy b {
+  font-size: 9px;
+}
+
+#workshop:not([data-shop="true"]) .tile-copy small {
+  font-size: 7px;
+}
+
+#workshop:not([data-shop="true"]) .tile-copy em {
+  font-size: 6px;
+}
+
+#workshop:not([data-shop="true"]) .part-inspector {
+  padding: 9px 12px;
 }
 
 @media (max-width: 800px) {
-  #workshop[data-shop="true"] .workshop-workspace {
+  #workshop:not([data-shop="true"]) .workshop-workspace {
     display: block;
     overflow: auto;
   }
-  #workshop[data-shop="true"] .garage-showcase {
-    display: grid;
-    grid-template-columns: 1fr;
-    min-height: 210px;
-    margin-bottom: 9px;
+  #workshop:not([data-shop="true"]) .garage-showcase {
+    display: flex;
+    min-height: 225px;
+    padding: 0;
   }
-  #workshop[data-shop="true"] .garage-build,
-  #workshop[data-shop="true"] .studio-note,
-  #workshop[data-shop="true"] .preview-angles {
+  #workshop:not([data-shop="true"]) .garage-build {
+    padding: 12px 12px 0;
+  }
+  #workshop:not([data-shop="true"]) .garage-build h3 {
+    font-size: 22px;
+  }
+  #workshop:not([data-shop="true"]) .studio-column,
+  #workshop:not([data-shop="true"]) .garage-preview {
+    min-height: 170px;
+  }
+  #workshop:not([data-shop="true"]) .studio-note {
     display: none;
   }
-  #workshop[data-shop="true"] .studio-column,
-  #workshop[data-shop="true"] .garage-preview {
-    min-height: 190px;
+  #workshop:not([data-shop="true"]) #build-panel .garage-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  #workshop[data-shop="true"] .box-bench {
-    grid-template-columns: repeat(2, minmax(130px, 1fr));
+  #workshop:not([data-shop="true"]) .parts-workspace {
+    display: block;
   }
-}
-
-@media (max-width: 500px) {
-  #workshop[data-shop="true"] .box-bench {
-    grid-template-columns: 1fr 1fr;
-  }
-  #workshop[data-shop="true"] .artifact-market {
-    grid-template-columns: 1fr;
+  #workshop:not([data-shop="true"]) .part-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 108px;
+    height: 122px;
+    margin-bottom: 8px;
   }
 }
