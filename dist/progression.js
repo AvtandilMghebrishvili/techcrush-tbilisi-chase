@@ -187,6 +187,16 @@ export const BOX_SHOP = {
   platinum: { name: "Platinum", field: "platinumBoxes", price: 22000 },
   creator: { name: "TECHCRUSH", field: "creatorBoxes", price: 35000 },
 };
+export const BOX_OPEN_LIMIT = 10;
+export const boxOpenCount = (selection, owned) =>
+  selection === "all" ? owned : Math.min(owned, Number(selection) || 1);
+const BOX_OPEN_ACTIONS = {
+  "open-box": "street",
+  "open-mystery-box": "mystery",
+  "open-special-box": "special",
+  "open-platinum-box": "platinum",
+  "open-creator-box": "creator",
+};
 export const ARTIFACT_PRICE = 1_000_000;
 export const artifactPrice = (owned = 0) =>
   ARTIFACT_PRICE *
@@ -384,6 +394,32 @@ export function rollBox(rng = Math.random) {
     return { part: part.id, tier };
   });
 }
+function rollSupplyBox(kind, rng) {
+  if (kind === "street") return { items: rollBox(rng), credits: 0 };
+  const box = MILESTONE_BOXES[kind];
+  const credits = box
+    ? box.cashMin + Math.floor(rng() * (box.cashMax - box.cashMin + 1))
+    : 0;
+  const items = Array.from({ length: 3 }, () => {
+    const part =
+      PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))].id;
+    let tier = kind === "creator" ? 5 + Math.min(3, Math.floor(rng() * 4)) : 5;
+    if (box) {
+      const roll = rng() * 100;
+      let threshold = 0;
+      tier = box.tiers.at(-1)[0];
+      for (const [grade, weight] of box.tiers) {
+        threshold += weight;
+        if (roll < threshold) {
+          tier = grade;
+          break;
+        }
+      }
+    }
+    return { part, tier };
+  });
+  return { items, credits };
+}
 export function applyProgressAction(
   profile,
   action,
@@ -552,74 +588,74 @@ export function applyProgressAction(
     const reward = CITY_CARS[action.map];
     if (!p.unlockedCars.includes(reward)) p.unlockedCars.push(reward);
     p.lastCarReward = { map: action.map, car: reward };
-  } else if (["open-mystery-box", "open-special-box"].includes(action.type)) {
-    const kind = action.type === "open-mystery-box" ? "mystery" : "special";
-    const box = MILESTONE_BOXES[kind];
-    if (p[box.field] < 1)
+  } else if (
+    action.type === "open-boxes" ||
+    Object.hasOwn(BOX_OPEN_ACTIONS, action.type)
+  ) {
+    const kind =
+      action.type === "open-boxes"
+        ? action.kind
+        : BOX_OPEN_ACTIONS[action.type];
+    if (!Object.hasOwn(BOX_SHOP, kind))
+      throw Error("Choose a valid supply box.");
+    const box = BOX_SHOP[kind],
+      owned = p[box.field] || 0;
+    if (action.type !== "open-boxes" && owned < 1) {
+      const message = MILESTONE_BOXES[kind]
+        ? "Reach level 5, 10, 15 and beyond in any city to earn milestone boxes."
+        : kind === "creator"
+          ? "Destroy 10 patrol cars to earn a TECHCRUSH box."
+          : kind === "platinum"
+            ? "Find a secret stunt box in Kutaisi first."
+            : "Complete a level to earn another box.";
+      throw Error(message);
+    }
+    const requested = action.type === "open-boxes" ? action.count : 1;
+    if (
+      requested !== "all" &&
+      (!Number.isInteger(requested) ||
+        requested < 1 ||
+        requested > BOX_OPEN_LIMIT)
+    )
+      throw Error("Choose 1–10 boxes, or ALL.");
+    const count = requested === "all" ? owned : requested;
+    if (!Number.isSafeInteger(count) || count < 1 || count > owned)
       throw Error(
-        "Reach level 5, 10, 15 and beyond in any city to earn milestone boxes.",
+        `You do not have enough ${box.name} boxes. Choose a smaller quantity.`,
       );
-    p[box.field]--;
-    const credits =
-      box.cashMin + Math.floor(rng() * (box.cashMax - box.cashMin + 1));
-    const items = Array.from({ length: 3 }, () => {
-      const part =
-        PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))].id;
-      const roll = rng() * 100;
-      let threshold = 0,
-        tier = box.tiers.at(-1)[0];
-      for (const [grade, weight] of box.tiers) {
-        threshold += weight;
-        if (roll < threshold) {
-          tier = grade;
-          break;
+    const grouped = new Map();
+    let items,
+      credits = 0;
+    // One save transaction: every box keeps its usual drop/cash odds. Grouping
+    // limits a large ALL result to the finite part/tier combinations.
+    for (let i = 0; i < count; i++) {
+      const drop = rollSupplyBox(kind, rng);
+      credits += drop.credits;
+      items = drop.items;
+      for (const reward of items) {
+        const key = partKey(reward.part, reward.tier);
+        p.inventory[key] = (p.inventory[key] || 0) + 1;
+        if (count > 1) {
+          if (!grouped.has(key)) grouped.set(key, { ...reward, quantity: 0 });
+          grouped.get(key).quantity++;
         }
       }
-      const key = partKey(part, tier);
-      p.inventory[key] = (p.inventory[key] || 0) + 1;
-      return { part, tier };
-    });
+    }
+    p[box.field] -= count;
     p.credits += credits;
-    p.lastBox = { id: action.id, items, kind, credits };
-  } else if (action.type === "open-creator-box") {
-    if (p.creatorBoxes < 1)
-      throw Error("Destroy 10 patrol cars to earn a TECHCRUSH box.");
-    p.creatorBoxes--;
-    const items = Array.from({ length: 3 }, () => ({
-      part: PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))]
-        .id,
-      tier: 5 + Math.min(3, Math.floor(rng() * 4)),
-    }));
-    for (const r of items) {
-      const k = partKey(r.part, r.tier);
-      p.inventory[k] = (p.inventory[k] || 0) + 1;
-    }
-    p.lastBox = { id: action.id, items, kind: "creator" };
-  } else if (action.type === "open-box") {
-    if (p.boxes < 1) throw Error("Complete a level to earn another box.");
-    p.boxes--;
-    const items = rollBox(rng);
-    for (const reward of items) {
-      const key = partKey(reward.part, reward.tier);
-      p.inventory[key] = (p.inventory[key] || 0) + 1;
-    }
-    p.lastBox = { id: action.id, items };
-  } else if (action.type === "open-platinum-box") {
-    if (p.platinumBoxes < 1)
-      throw Error("Find a secret stunt box in Kutaisi first.");
-    p.platinumBoxes--;
-    const items = Array.from({ length: 3 }, () => ({
-      part: PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))]
-        .id,
-      tier: 5,
-    }));
-    for (const reward of items) {
-      const key = partKey(reward.part, 5);
-      p.inventory[key] = (p.inventory[key] || 0) + 1;
-    }
-    p.lastBox = { id: action.id, items, kind: "platinum" };
+    p.lastBox = {
+      id: action.id,
+      items: count > 1 ? [...grouped.values()] : items,
+      ...(kind !== "street" ? { kind } : {}),
+      ...(MILESTONE_BOXES[kind] ? { credits } : {}),
+      ...(count > 1 ? { count } : {}),
+    };
   } else if (action.type === "claim-loot") {
     const drop = p.lastBox;
+    if (drop?.count > 1)
+      throw Error(
+        "Batch rewards are saved. Equip or sell them in your garage.",
+      );
     if (
       !drop ||
       drop.id !== action.boxId ||

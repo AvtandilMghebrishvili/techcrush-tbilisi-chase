@@ -3,6 +3,7 @@ import {
   totalBoxes,
   MILESTONE_BOXES,
   BOX_SHOP,
+  boxOpenCount,
   artifactPrice,
 } from "./progression.js";
 import {
@@ -51,6 +52,7 @@ export class GarageUI {
     this.onCar = onCar;
     this.car = store.profile.selectedCar;
     this.rolling = false;
+    this.openQuantity = "1";
     this.filter = "all";
     const tabs = [...document.querySelectorAll("[data-workshop-tab]")];
     for (const button of tabs)
@@ -134,6 +136,13 @@ export class GarageUI {
     $("open-box").onclick = () => this.openBox();
     $("open-platinum-box").onclick = () => this.openBox(true);
     $("open-creator-box").onclick = () => this.openBox("creator");
+    $("box-open-quantity").onclick = (event) => {
+      const button = event.target.closest("[data-open-quantity]");
+      if (!button || this.rolling || this.store.busy || this.store.pending)
+        return;
+      this.openQuantity = button.dataset.openQuantity;
+      this.render();
+    };
     for (const kind of Object.keys(BOX_SHOP))
       $("buy-" + kind + "-box").onclick = () => this.buyBox(kind);
     for (const button of document.querySelectorAll("[data-buy-artifact]"))
@@ -540,48 +549,41 @@ export class GarageUI {
       button.onclick = () =>
         this.inspect(button.dataset.inspect, Number(button.dataset.tier));
     refreshRewards(this.store);
-    for (const [kind, box] of Object.entries(MILESTONE_BOXES)) {
-      const button = $("open-" + kind + "-box");
-      button.textContent = `OPEN ${box.name.toUpperCase()} · ${p[box.field] || 0} ↗`;
-      button.disabled =
-        !p[box.field] ||
-        this.store.busy ||
-        !!this.store.pending ||
-        this.rolling;
+    const openingLocked =
+      this.store.busy || !!this.store.pending || this.rolling;
+    for (const button of document.querySelectorAll("[data-open-quantity]")) {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.openQuantity === this.openQuantity),
+      );
+      button.disabled = openingLocked;
     }
-    $("open-creator-box").textContent =
-      `TECHCRUSH · ${p.creatorBoxes || 0} BOXES ↗`;
-    $("open-creator-box").disabled =
-      !p.creatorBoxes ||
-      this.store.busy ||
-      !!this.store.pending ||
-      this.rolling;
-    $("open-box").disabled =
-      p.boxes < 1 || this.store.busy || !!this.store.pending || this.rolling;
-    $("open-platinum-box").disabled =
-      p.platinumBoxes < 1 ||
-      this.store.busy ||
-      !!this.store.pending ||
-      this.rolling;
-    $("open-platinum-box").textContent =
-      "PLATINUM · " +
-      p.platinumBoxes +
-      " BOX" +
-      (p.platinumBoxes === 1 ? "" : "ES") +
-      " ↗";
-    $("last-drop").textContent = p.lastBox
-      ? "Last drop: " +
-        (p.lastBox.credits
-          ? `+${p.lastBox.credits.toLocaleString()} coins · `
-          : "") +
-        p.lastBox.items
-          .map(
-            (r) =>
-              `${TIERS[r.tier].name} ${PARTS.find((x) => x.id === r.part).name}`,
-          )
-          .join(" · ")
-      : "One welcome box is waiting. Earn another by completing a level.";
-    $("open-box").textContent = `OPEN STREET BOX · ${p.boxes} ↗`;
+    for (const [kind, box] of Object.entries(BOX_SHOP)) {
+      const button = $(kind === "street" ? "open-box" : `open-${kind}-box`);
+      const owned = p[box.field] || 0;
+      const count = boxOpenCount(this.openQuantity, owned);
+      button.textContent = owned
+        ? `OPEN ${count.toLocaleString()} · ${owned.toLocaleString()} OWNED ↗`
+        : "NO BOXES TO OPEN";
+      button.disabled = !owned || openingLocked;
+      button.title = `Open ${count} ${box.name} ${count === 1 ? "box" : "boxes"} · ${count * 3} parts`;
+    }
+    $("last-drop").textContent =
+      p.lastBox?.count > 1
+        ? `Last opening: ${p.lastBox.count.toLocaleString()} boxes · ${(p.lastBox.count * 3).toLocaleString()} parts${p.lastBox.credits ? ` · +${p.lastBox.credits.toLocaleString()} CR` : ""} · SAVED IN GARAGE ✓`
+        : p.lastBox
+          ? "Last drop: " +
+            (p.lastBox.credits
+              ? `+${p.lastBox.credits.toLocaleString()} coins · `
+              : "") +
+            p.lastBox.items
+              .map(
+                (r) =>
+                  `${TIERS[r.tier].name} ${PARTS.find((x) => x.id === r.part).name}`,
+              )
+              .join(" · ")
+          : "One welcome box is waiting. Earn another by completing a level.";
+
     for (const [kind, box] of Object.entries(BOX_SHOP)) {
       const button = $("buy-" + kind + "-box");
       button.textContent = `BUY 1 · ${box.price.toLocaleString()} CR`;
@@ -638,7 +640,25 @@ export class GarageUI {
       $("workshop").querySelector(focus)?.focus({ preventScroll: true });
   }
   async openBox(platinum = false, existing = null) {
-    if (this.disposed || this.rolling) return;
+    if (
+      this.disposed ||
+      this.rolling ||
+      (!existing && (this.store.busy || this.store.pending))
+    )
+      return;
+    const kind =
+      typeof platinum === "string"
+        ? platinum
+        : platinum
+          ? "platinum"
+          : "street";
+    const count =
+      this.openQuantity === "all"
+        ? "all"
+        : boxOpenCount(
+            this.openQuantity,
+            this.store.profile[BOX_SHOP[kind].field] || 0,
+          );
     this.rolling = true;
     this.render();
     try {
@@ -646,13 +666,9 @@ export class GarageUI {
         ? this.store.profile
         : await this.run(() =>
             this.store.mutate({
-              type:
-                typeof platinum === "string" &&
-                ["creator", "mystery", "special"].includes(platinum)
-                  ? `open-${platinum}-box`
-                  : platinum
-                    ? "open-platinum-box"
-                    : "open-box",
+              type: "open-boxes",
+              kind,
+              count,
             }),
           );
       if (this.disposed) return;
@@ -674,11 +690,32 @@ export class GarageUI {
         profile.lastBox.kind,
       );
       const results = profile.lastBox.items;
+      const opened = profile.lastBox.count || 1;
+      $("loot-dialog").classList.toggle("batch-loot", opened > 1);
       $("loot-summary").textContent = "Opening your three rewards…";
       $("loot-coins").hidden = !profile.lastBox.credits;
       $("loot-coins").innerHTML = profile.lastBox.credits
         ? `${coinIcon}<b>+${profile.lastBox.credits.toLocaleString()}</b><span>COINS SAVED</span>`
         : "";
+      if (opened > 1) {
+        $("loot-title").textContent =
+          `${opened.toLocaleString()} BOXES OPENED.`;
+        $("loot-summary").textContent =
+          `${(opened * 3).toLocaleString()} parts saved in your garage. Matching parts are grouped together. Equip, sell or fuse them in Upgrades.`;
+        $("loot-slots").innerHTML = [...results]
+          .sort((a, b) => b.tier - a.tier || a.part.localeCompare(b.part))
+          .map((reward) => {
+            const part = PARTS.find((p) => p.id === reward.part);
+            return `<div class="loot-slot" style="--tier:${TIERS[reward.tier].color}">${partArtwork(part, "", reward.tier)}<strong>${vehiclePartName(part, this.car)}</strong><span>${TIERS[reward.tier].name}</span><b class="loot-quantity">×${reward.quantity.toLocaleString()}</b></div>`;
+          })
+          .join("");
+        $("loot-done").textContent = "ALL SAVED · BACK TO SHOP ↗";
+        $("loot-done").disabled = false;
+        $("loot-skip").hidden = true;
+        $("loot-dialog").showModal();
+        $("loot-slots").scrollTop = 0;
+        return;
+      }
       $("loot-slots").innerHTML = results
         .map(
           () =>
@@ -755,7 +792,7 @@ export class GarageUI {
   }
   renderLootChoices() {
     const box = this.store.profile.lastBox;
-    if (!box || box.id !== this.lootBoxId) return;
+    if (!box || box.count > 1 || box.id !== this.lootBoxId) return;
     const equipment = this.store.profile.cars[this.car];
     [...$("loot-slots").children].forEach((slot, index) => {
       slot.querySelector(".loot-choices")?.remove();
