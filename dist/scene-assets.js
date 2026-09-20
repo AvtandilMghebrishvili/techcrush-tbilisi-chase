@@ -5,7 +5,7 @@ import { fetchSportsAssets } from "./sports-car.js";
 
 // Start the selected city's downloads before CPU geometry construction/profile I/O.
 // No other city's models, persistent caches, speculative garage or audio downloads.
-export function prepareSceneAssets(mobile) {
+export function prepareSceneAssets(mobile, profile = {}) {
   const scope = new AssetScope(new THREE.LoadingManager());
   const loader = new THREE.TextureLoader(scope.manager);
   let completed = 0;
@@ -18,16 +18,20 @@ export function prepareSceneAssets(mobile) {
       );
       return value;
     });
+  scope.profile = profile;
+  const low = profile.lowAssets,
+    texture = (name) =>
+      low ? name.replace(/\.(png|jpg)$/i, "-low.webp") : name;
   scope.ready = Promise.all([
     ...[
-      "road-day.png",
-      "limestone.png",
+      texture("road-day.png"),
+      texture("limestone.png"),
       "techcrush-logo.jpg",
       "techcrush-wordmark.png",
-      "hills-diff.jpg",
-      "hills-nor_gl.jpg",
-      "robotics/robo-battle.webp",
-      "grex/grex.webp",
+      texture("hills-diff.jpg"),
+      texture("hills-nor_gl.jpg"),
+      low ? "robotics/robo-battle-low.webp" : "robotics/robo-battle.webp",
+      low ? "grex/grex-low.webp" : "grex/grex.webp",
     ].map((name) => track(scope.track(loader.loadAsync("./assets/" + name)))),
     track(fetchTreeModels(mobile, scope)),
     track(fetchSportsAssets(scope)),

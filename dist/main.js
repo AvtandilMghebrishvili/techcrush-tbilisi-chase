@@ -63,6 +63,7 @@ import { RAMPS } from "./stunts.js";
 import { SceneView } from "./view.js";
 import { compileScene } from "./compile-scene.js";
 import { prepareSceneAssets } from "./scene-assets.js";
+import { deviceProfile } from "./mobile-input.js";
 import {
   CARS,
   CAMERAS,
@@ -1224,9 +1225,11 @@ function registerTools() {
 }
 try {
   loadingProgress(3, "BUILDING THE CITY");
-  sceneAssets = prepareSceneAssets(
-    matchMedia("(any-pointer: coarse)").matches || navigator.maxTouchPoints > 0,
-  );
+  const coarseDevice =
+      matchMedia("(any-pointer: coarse)").matches ||
+      navigator.maxTouchPoints > 0,
+    hardwareProfile = deviceProfile(navigator, coarseDevice);
+  sceneAssets = prepareSceneAssets(coarseDevice, hardwareProfile);
   const profileReady = career.init();
   profileReady.catch(() => {});
   await new Promise(requestAnimationFrame);

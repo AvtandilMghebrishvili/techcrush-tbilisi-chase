@@ -181,20 +181,64 @@ export function mergeMobileInput(
     rewind: keyboard.rewind || touch.has("q"),
   };
 }
-export function renderBudget(mode, mobile, width, height, dpr = 1) {
-  const low = mode === "battery" || (mode === "auto" && mobile);
-  const pixels = low ? 800000 : 2400000;
+export function deviceProfile(source = {}, mobile = false) {
+  const memory = Number(source.deviceMemory) || 8,
+    cores = Number(source.hardwareConcurrency) || 8,
+    tier =
+      mobile || memory <= 4 || cores <= 4
+        ? "constrained"
+        : memory < 8 || cores <= 6
+          ? "balanced"
+          : "high";
+  return {
+    tier,
+    memory,
+    cores,
+    lowAssets: tier === "constrained",
+    drawDistanceScale:
+      tier === "constrained" ? 0.6 : tier === "balanced" ? 0.8 : 1,
+  };
+}
+export function renderBudget(
+  mode,
+  mobile,
+  width,
+  height,
+  dpr = 1,
+  profile = {},
+) {
+  const automaticTier = profile.tier || (mobile ? "constrained" : "high"),
+    tier =
+      mode === "battery"
+        ? "constrained"
+        : mode === "high"
+          ? "high"
+          : automaticTier,
+    low = tier === "constrained",
+    pixels = low ? 800000 : tier === "balanced" ? 1500000 : 2400000;
   return {
     low,
+    tier,
     pixelRatio: Math.min(
       dpr,
-      low ? 1.15 : 1.7,
+      low ? 1.1 : tier === "balanced" ? 1.4 : 1.7,
       Math.sqrt(pixels / Math.max(1, width * height)),
     ),
-    shadows: !low,
-    treeNear: low ? 0 : 105,
-    treeFar: low ? 230 : 420,
+    shadows: tier === "high",
+    treeNear: low ? 0 : tier === "balanced" ? 70 : 105,
+    treeFar: low ? 230 : tier === "balanced" ? 330 : 420,
+    drawDistanceScale:
+      tier === "constrained" ? 0.6 : tier === "balanced" ? 0.8 : 1,
+    cameraFar:
+      tier === "constrained" ? 2500 : tier === "balanced" ? 3400 : 4800,
   };
+}
+export function nextAdaptiveScale(current, averageFrame, mode = "auto") {
+  if (mode !== "auto" || !Number.isFinite(averageFrame)) return 1;
+  if (averageFrame > 1 / 40) return Math.max(0.72, current - 0.1);
+  if (averageFrame > 1 / 48) return Math.max(0.78, current - 0.05);
+  if (averageFrame < 1 / 57) return Math.min(1, current + 0.04);
+  return current;
 }
 export function portraitFov(base, aspect) {
   if (aspect >= 1) return base;

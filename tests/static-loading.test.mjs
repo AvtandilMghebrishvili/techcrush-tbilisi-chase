@@ -54,6 +54,7 @@ test("static batching retains transformed vertices and skips animated subtrees",
   assert.equal(moving.parent, root);
   assert.equal(child.parent, moving);
   const merged = root.children.find((o) => o.isMesh);
+  assert.equal(merged.userData.maxDrawDistance, 3000);
   root.updateMatrixWorld(true);
   const actual = merged.geometry.clone().applyMatrix4(merged.matrixWorld)
     .attributes.position.array;

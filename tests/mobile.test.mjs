@@ -6,6 +6,8 @@ import {
   PointerLedger,
   mergeMobileInput,
   renderBudget,
+  deviceProfile,
+  nextAdaptiveScale,
   wrapDegrees,
   portraitFov,
 } from "../dist/mobile-input.js";
@@ -158,6 +160,36 @@ test("phone quality bounds GPU pixels without changing desktop physics or high-d
   }
   assert.equal(renderBudget("high", true, 844, 390, 3).shadows, true);
   assert.equal(renderBudget("auto", false, 1920, 1080, 1).treeNear, 105);
+});
+test("automatic hardware tiers protect 4 GB devices while explicit high mode remains available", () => {
+  const constrained = deviceProfile({
+      deviceMemory: 4,
+      hardwareConcurrency: 8,
+    }),
+    balanced = deviceProfile({ deviceMemory: 8, hardwareConcurrency: 6 }),
+    fast = deviceProfile({ deviceMemory: 16, hardwareConcurrency: 12 });
+  assert.equal(constrained.tier, "constrained");
+  assert.equal(constrained.lowAssets, true);
+  assert.equal(balanced.tier, "balanced");
+  assert.equal(fast.tier, "high");
+  assert.equal(
+    renderBudget("auto", false, 1920, 1080, 2, constrained).shadows,
+    false,
+  );
+  assert.equal(
+    renderBudget("auto", false, 1920, 1080, 2, balanced).cameraFar,
+    3400,
+  );
+  assert.equal(
+    renderBudget("high", false, 1920, 1080, 2, constrained).tier,
+    "high",
+  );
+});
+test("automatic rendering sheds sustained frame pressure and recovers gradually", () => {
+  assert.equal(nextAdaptiveScale(1, 1 / 30), 0.9);
+  assert.equal(nextAdaptiveScale(0.75, 1 / 30), 0.72);
+  assert(Math.abs(nextAdaptiveScale(0.8, 1 / 60) - 0.84) < 1e-9);
+  assert.equal(nextAdaptiveScale(0.8, 1 / 30, "high"), 1);
 });
 test("portrait cameras widen the visible road without affecting landscape cameras", () => {
   assert.equal(portraitFov(56, 16 / 9), 56);

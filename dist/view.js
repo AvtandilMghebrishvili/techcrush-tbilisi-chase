@@ -13,7 +13,11 @@ import { batchStreetLamps } from "./lamp-batches.js";
 import { updateBridgeRails } from "./bridge-visuals.js";
 import { createWaterSplash, animateWaterSplash } from "./crash-effects.js";
 import * as THREE from "./vendor/three.module.js";
-import { renderBudget, portraitFov } from "./mobile-input.js";
+import {
+  renderBudget,
+  portraitFov,
+  nextAdaptiveScale,
+} from "./mobile-input.js";
 import { CityLighting, windowGlow } from "./city-lighting.js";
 import { updateVehicleDamage, prepareVehicleDamage } from "./vehicle-damage.js";
 import { EXPLOSION_LIFETIME, IMPACT_LIFETIME } from "./damage-state.js";
@@ -74,12 +78,14 @@ export class SceneView {
         JSON.parse(localStorage.getItem("techcrush-mobile") || "{}").quality ||
         "auto";
     } catch {}
+    this.hardwareProfile = assets?.profile || {};
     this.budget = renderBudget(
       this.quality,
       this.mobile,
       innerWidth,
       innerHeight,
       devicePixelRatio,
+      this.hardwareProfile,
     );
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color("#b4c1c8");
@@ -92,12 +98,19 @@ export class SceneView {
       powerPreference: "high-performance",
     });
     this.renderer.setPixelRatio(this.budget.pixelRatio);
+    this.adaptiveScale = 1;
+    this.frameSample = { elapsed: 0, frames: 0 };
     this.renderer.shadowMap.enabled = this.budget.shadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.94;
-    this.camera = new THREE.PerspectiveCamera(56, 1, 0.4, 4800);
+    this.camera = new THREE.PerspectiveCamera(
+      56,
+      1,
+      0.4,
+      this.budget.cameraFar,
+    );
     this.hemisphere = new THREE.HemisphereLight("#dce8f3", "#78776b", 0.75);
     this.scene.add(this.hemisphere);
     this.blastLight = new THREE.PointLight("#ff9736", 0, 19, 2);
@@ -160,8 +173,12 @@ export class SceneView {
           innerWidth,
           innerHeight,
           devicePixelRatio,
+          this.hardwareProfile,
         );
-        this.renderer.setPixelRatio(this.budget.pixelRatio);
+        this.renderer.setPixelRatio(
+          this.budget.pixelRatio * this.adaptiveScale,
+        );
+        this.camera.far = this.budget.cameraFar;
         this.camera.aspect = innerWidth / innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(innerWidth, innerHeight);
@@ -195,6 +212,8 @@ export class SceneView {
   }
   setQuality(mode) {
     this.quality = ["auto", "battery", "high"].includes(mode) ? mode : "auto";
+    this.adaptiveScale = 1;
+    this.frameSample = { elapsed: 0, frames: 0 };
     this.resize();
     this.renderer.shadowMap.enabled = this.budget.shadows;
     this.renderer.shadowMap.needsUpdate = true;
@@ -250,7 +269,10 @@ export class SceneView {
     for (const t of [road, facade]) {
       t.colorSpace = THREE.SRGBColorSpace;
       t.wrapS = t.wrapT = THREE.RepeatWrapping;
-      t.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+      t.anisotropy = Math.min(
+        this.budget.low ? 2 : this.budget.tier === "balanced" ? 4 : 8,
+        this.renderer.capabilities.getMaxAnisotropy(),
+      );
     }
     this.roadMaterial.map = road;
     this.roadMaterial.color.set("#a7aaa5");
@@ -270,7 +292,7 @@ export class SceneView {
     for (const t of [hill, hillNormal]) {
       t.wrapS = t.wrapT = THREE.RepeatWrapping;
       t.repeat.set(16, 14);
-      t.anisotropy = 4;
+      t.anisotropy = this.budget.low ? 2 : 4;
     }
     this.terrainMaterial.map = hill;
     this.terrainMaterial.normalMap = hillNormal;
@@ -491,6 +513,23 @@ export class SceneView {
     this.updateGate(0);
   }
   render(sim, dt, input) {
+    if (sim.phase === "running" && !document.hidden) {
+      this.frameSample.elapsed += dt;
+      this.frameSample.frames++;
+      if (this.frameSample.elapsed >= 3) {
+        const next = nextAdaptiveScale(
+          this.adaptiveScale,
+          this.frameSample.elapsed / this.frameSample.frames,
+          this.quality,
+        );
+        this.frameSample = { elapsed: 0, frames: 0 };
+        if (next !== this.adaptiveScale) {
+          this.adaptiveScale = next;
+          this.renderer.setPixelRatio(this.budget.pixelRatio * next);
+          this.staticCullFocus = null;
+        }
+      }
+    }
     updateBreakables(this, sim);
     updateSponsorBanners(this, sim);
     const ready = sim.phase === "ready";
@@ -506,7 +545,7 @@ export class SceneView {
         updateDistanceCulledStatic(
           this.distanceCulledStatic,
           focus,
-          this.budget.low,
+          this.budget.drawDistanceScale * (0.85 + this.adaptiveScale * 0.15),
         );
         this.staticCullFocus = { x: focus.x, z: focus.z };
       }

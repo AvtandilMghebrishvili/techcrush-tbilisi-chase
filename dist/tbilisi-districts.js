@@ -1064,9 +1064,11 @@ export function buildTbilisiDistricts(v) {
     const merged = mergeGeometries(geos);
     geos.forEach((g) => g.dispose());
     if (!merged) continue;
+    merged.computeBoundingSphere();
     const mesh = new THREE.Mesh(merged, material);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+    mesh.userData.maxDrawDistance = 3000;
     v.decor.add(mesh);
   }
 }

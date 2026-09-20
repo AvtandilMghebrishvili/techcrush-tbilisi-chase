@@ -181,23 +181,29 @@ export function batchStatic(group, tile = 320, options = {}) {
     m.position.set(batch.x, 0, batch.z);
     m.updateMatrix();
     m.matrixAutoUpdate = false;
-    if (options.maxDrawDistance) {
-      m.userData.maxDrawDistance = options.maxDrawDistance;
+    if (options.maxDrawDistance !== false) {
+      m.userData.maxDrawDistance = options.maxDrawDistance || 3000;
       m.userData.lowDrawDistanceScale = options.lowScale || 1;
     }
     group.add(m);
   }
 }
-export function updateDistanceCulledStatic(meshes, focus, low = false) {
+export function updateDistanceCulledStatic(meshes, focus, qualityScale = 1) {
   let visible = 0;
   for (const mesh of meshes) {
     const base = mesh.userData.maxDrawDistance;
     if (!base) continue;
-    const scale = low ? mesh.userData.lowDrawDistanceScale || 1 : 1;
+    const scale =
+      typeof qualityScale === "number"
+        ? qualityScale
+        : qualityScale
+          ? mesh.userData.lowDrawDistanceScale || 1
+          : 1;
     const radius = mesh.geometry.boundingSphere?.radius || 0;
     const limit = base * scale + radius;
-    const dx = mesh.position.x - focus.x;
-    const dz = mesh.position.z - focus.z;
+    const center = mesh.geometry.boundingSphere?.center,
+      dx = mesh.position.x + (center?.x || 0) - focus.x,
+      dz = mesh.position.z + (center?.z || 0) - focus.z;
     mesh.visible = dx * dx + dz * dz <= limit * limit;
     if (mesh.visible) visible++;
   }
