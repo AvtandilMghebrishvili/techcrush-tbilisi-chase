@@ -1891,3 +1891,251 @@
     animation: none;
   }
 }
+/* Quantity belongs to the OPEN action, leaving room for both shop actions. */
+#box-quantity-dialog {
+  width: min(480px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  box-sizing: border-box;
+  padding: 24px;
+  border: 2px solid #71999c;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #253642, #101c25);
+  color: #ecf8fa;
+  box-shadow: 0 16px 70px #000a;
+  overflow: auto;
+}
+#box-quantity-dialog::backdrop {
+  background: #030a12bd;
+}
+#box-quantity-dialog .eyebrow {
+  color: #92edce;
+  font-size: 11px;
+}
+#box-quantity-dialog h2 {
+  margin: 6px 0 10px;
+  font:
+    900 30px/1.1 "Barlow Condensed",
+    Barlow,
+    sans-serif;
+}
+#box-quantity-owned {
+  margin: 0 0 18px;
+  color: #b6cbd5;
+  font-size: 11px;
+}
+#box-open-quantity {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+#box-open-quantity button {
+  min-width: 0;
+  min-height: 64px;
+  margin: 0;
+  padding: 8px 4px;
+  border: 1px solid #6b8191;
+  border-radius: 7px;
+  color: #f2f9ff;
+  background: linear-gradient(#344a5a, #192b38);
+  font:
+    900 24px/1 Barlow,
+    sans-serif;
+}
+#box-open-quantity small {
+  display: block;
+  font:
+    700 9px/1.3 Barlow,
+    sans-serif;
+  margin-top: 6px;
+  letter-spacing: 0.6px;
+}
+#box-open-quantity button[aria-pressed="true"] {
+  color: #092d23;
+  border-color: #c6ffed;
+  background: linear-gradient(#a3ffe0, #5adeae);
+  box-shadow: 0 0 0 2px #6bf3c544;
+}
+#box-open-quantity button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+#box-quantity-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px 0 10px;
+  padding: 14px 8px;
+  border: 1px solid #426c63;
+  border-radius: 7px;
+  background: #0d2925;
+  font-size: 11px;
+}
+#box-quantity-summary strong {
+  color: #a2ffda;
+  font-size: 18px;
+}
+#box-quantity-dialog .box-quantity-note {
+  color: #b6cbd5;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+.box-quantity-actions {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 9px;
+}
+#box-quantity-dialog .box-quantity-actions button {
+  min-width: 0;
+  margin: 0;
+  height: 48px;
+  min-height: 46px;
+  padding: 8px;
+  border-radius: 7px;
+  font:
+    800 14px Barlow,
+    sans-serif;
+}
+#box-quantity-confirm {
+  color: #082b20;
+  border: 1px solid #baffdf;
+  background: linear-gradient(#a1ffdd, #5ae0ad);
+}
+#box-quantity-cancel {
+  color: #deedf7;
+  border: 1px solid #586f80;
+  background: #223443;
+}
+#box-quantity-dialog button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+#workshop[data-shop="true"] .box-bench .buy-box {
+  min-height: 47px;
+  padding: 6px 9px;
+}
+#workshop[data-shop="true"] .box-bench button {
+  min-width: 0;
+  max-width: 100%;
+}
+#workshop[data-shop="true"] .box-buy-label {
+  display: block;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+#workshop[data-shop="true"] .buy-box .box-price {
+  min-height: 0;
+  margin-top: 3px;
+  color: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+@media (min-width: 801px) {
+  #workshop[data-shop="true"] {
+    height: min(650px, calc(100dvh - 24px));
+    padding: 12px;
+    gap: 8px;
+  }
+  #workshop[data-shop="true"] .workshop-header {
+    min-height: 52px;
+    padding: 5px 10px;
+  }
+  #workshop[data-shop="true"] #workshop-title {
+    font-size: 29px;
+  }
+  #workshop[data-shop="true"] .workshop-workspace {
+    padding: 8px;
+  }
+  #workshop[data-shop="true"] .panel-title {
+    padding: 5px 9px;
+    margin-bottom: 8px;
+  }
+  #workshop[data-shop="true"] .artifact-market {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  #workshop[data-shop="true"] .artifact-market article {
+    min-height: 96px;
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 5px 8px;
+    padding: 6px;
+  }
+  #workshop[data-shop="true"] .artifact-map {
+    width: 100px;
+    height: 50px;
+  }
+  #workshop[data-shop="true"] .supply-card {
+    min-height: 0;
+    padding: 8px;
+    gap: 5px;
+  }
+  #workshop[data-shop="true"] .supply-visual {
+    width: 94px;
+    height: 68px;
+    flex-basis: 68px;
+    margin: 0 auto 3px;
+  }
+  #workshop[data-shop="true"] .box-bench h3 {
+    min-height: 20px;
+    margin-bottom: 3px;
+  }
+  #workshop[data-shop="true"] .box-bench p {
+    min-height: 30px;
+    margin-bottom: 3px;
+  }
+  #workshop[data-shop="true"] .box-bench small {
+    min-height: 27px;
+  }
+  #workshop[data-shop="true"] .box-bench .box-owned,
+  #workshop[data-shop="true"] .box-bench .box-price {
+    min-height: 0;
+  }
+  #workshop[data-shop="true"] .last-drop {
+    margin: 7px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  #workshop[data-shop="true"] .garage-backup {
+    padding-top: 5px;
+    margin-top: 5px;
+  }
+}
+@media (max-width: 480px) {
+  #box-quantity-dialog {
+    padding: 18px 14px;
+  }
+  #box-open-quantity {
+    gap: 5px;
+  }
+  #box-open-quantity button {
+    font-size: 21px;
+  }
+}
+@media (min-width: 801px) and (max-height: 700px) {
+  #workshop[open][data-shop="true"] {
+    padding: 8px;
+    gap: 6px;
+  }
+  #workshop[data-shop="true"] .workshop-header {
+    min-height: 46px;
+  }
+  #workshop[data-shop="true"] .artifact-market article {
+    min-height: 86px;
+  }
+  #workshop[data-shop="true"] .artifact-map {
+    height: 40px;
+  }
+  #workshop[data-shop="true"] .supply-visual {
+    height: 54px;
+    flex-basis: 54px;
+  }
+  #workshop[data-shop="true"] .last-drop {
+    margin: 4px 0;
+  }
+}

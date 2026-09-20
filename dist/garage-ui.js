@@ -53,6 +53,7 @@ export class GarageUI {
     this.car = store.profile.selectedCar;
     this.rolling = false;
     this.openQuantity = "1";
+    this.boxToOpen = null;
     this.filter = "all";
     const tabs = [...document.querySelectorAll("[data-workshop-tab]")];
     for (const button of tabs)
@@ -132,16 +133,34 @@ export class GarageUI {
       if (this.rolling) e.preventDefault();
     });
     for (const kind of Object.keys(MILESTONE_BOXES))
-      $("open-" + kind + "-box").onclick = () => this.openBox(kind);
-    $("open-box").onclick = () => this.openBox();
-    $("open-platinum-box").onclick = () => this.openBox(true);
-    $("open-creator-box").onclick = () => this.openBox("creator");
+      $("open-" + kind + "-box").onclick = () => this.chooseBoxQuantity(kind);
+    $("open-box").onclick = () => this.chooseBoxQuantity("street");
+    $("open-platinum-box").onclick = () => this.chooseBoxQuantity("platinum");
+    $("open-creator-box").onclick = () => this.chooseBoxQuantity("creator");
     $("box-open-quantity").onclick = (event) => {
       const button = event.target.closest("[data-open-quantity]");
-      if (!button || this.rolling || this.store.busy || this.store.pending)
+      if (
+        !button ||
+        button.disabled ||
+        !this.boxToOpen ||
+        this.rolling ||
+        this.store.busy ||
+        this.store.pending
+      )
         return;
       this.openQuantity = button.dataset.openQuantity;
-      this.render();
+      this.renderBoxQuantity();
+    };
+    $("box-quantity-cancel").onclick = () => $("box-quantity-dialog").close();
+    $("box-quantity-dialog").addEventListener("close", () => {
+      this.boxToOpen = null;
+    });
+    $("box-quantity-confirm").onclick = () => {
+      const kind = this.boxToOpen;
+      if (!kind || $("box-quantity-confirm").disabled) return;
+      this.boxToOpen = null;
+      $("box-quantity-dialog").close();
+      void this.openBox(kind);
     };
     for (const kind of Object.keys(BOX_SHOP))
       $("buy-" + kind + "-box").onclick = () => this.buyBox(kind);
@@ -551,21 +570,14 @@ export class GarageUI {
     refreshRewards(this.store);
     const openingLocked =
       this.store.busy || !!this.store.pending || this.rolling;
-    for (const button of document.querySelectorAll("[data-open-quantity]")) {
-      button.setAttribute(
-        "aria-pressed",
-        String(button.dataset.openQuantity === this.openQuantity),
-      );
-      button.disabled = openingLocked;
-    }
+    this.renderBoxQuantity();
     for (const [kind, box] of Object.entries(BOX_SHOP)) {
       const button = $(kind === "street" ? "open-box" : `open-${kind}-box`);
       const owned = p[box.field] || 0;
-      const count = boxOpenCount(this.openQuantity, owned);
       button.classList.add("box-open-action");
-      button.innerHTML = `<span class="box-open-label">OPEN <b>×${count.toLocaleString()}</b><span aria-hidden="true">↗</span></span><small class="box-owned">${owned.toLocaleString()} AVAILABLE</small>`;
+      button.innerHTML = `<span class="box-open-label">OPEN <span aria-hidden="true">↗</span></span><small class="box-owned">${owned.toLocaleString()} BOXES AVAILABLE</small>`;
       button.disabled = !owned || openingLocked;
-      button.title = `Open ${count} ${box.name} ${count === 1 ? "box" : "boxes"} · ${count * 3} parts`;
+      button.title = `Choose how many ${box.name} boxes to open · ${owned} available`;
       button.setAttribute("aria-label", button.title);
     }
     $("last-drop").textContent =
@@ -586,7 +598,11 @@ export class GarageUI {
 
     for (const [kind, box] of Object.entries(BOX_SHOP)) {
       const button = $("buy-" + kind + "-box");
-      button.textContent = `BUY 1 · ${box.price.toLocaleString()} CR`;
+      button.innerHTML = `<span class="box-buy-label">BUY ×1</span><small class="box-price">${box.price.toLocaleString()} CR</small>`;
+      button.setAttribute(
+        "aria-label",
+        `Buy 1 ${box.name} box for ${box.price.toLocaleString()} CR`,
+      );
       button.disabled =
         p.credits < box.price ||
         this.store.busy ||
@@ -638,6 +654,50 @@ export class GarageUI {
     }
     if (focus)
       $("workshop").querySelector(focus)?.focus({ preventScroll: true });
+  }
+  chooseBoxQuantity(kind) {
+    const box = BOX_SHOP[kind];
+    if (
+      this.disposed ||
+      !box ||
+      this.rolling ||
+      this.store.busy ||
+      this.store.pending ||
+      !this.store.profile[box.field]
+    )
+      return;
+    this.boxToOpen = kind;
+    this.renderBoxQuantity();
+    $("box-quantity-dialog").showModal();
+  }
+  renderBoxQuantity() {
+    const box = BOX_SHOP[this.boxToOpen];
+    if (!box) return;
+    const owned = this.store.profile[box.field] || 0;
+    const locked = this.rolling || this.store.busy || !!this.store.pending;
+    if (this.openQuantity !== "all" && Number(this.openQuantity) > owned)
+      this.openQuantity = "all";
+    const count = boxOpenCount(this.openQuantity, owned);
+    $("box-quantity-title").textContent = `${box.name.toUpperCase()} BOX`;
+    $("box-quantity-owned").textContent =
+      `${owned.toLocaleString()} BOXES AVAILABLE · 3 PARTS IN EACH BOX`;
+    for (const button of $("box-open-quantity").querySelectorAll("button")) {
+      const value = button.dataset.openQuantity;
+      button.setAttribute("aria-pressed", String(value === this.openQuantity));
+      button.disabled =
+        locked || !owned || (value !== "all" && Number(value) > owned);
+      button.setAttribute(
+        "aria-label",
+        value === "all"
+          ? `All ${owned} boxes`
+          : `${value} ${value === "1" ? "box" : "boxes"}`,
+      );
+    }
+    $("box-quantity-summary").innerHTML =
+      `<strong>${count.toLocaleString()} ${count === 1 ? "BOX" : "BOXES"}</strong><span>× 3 PARTS =</span><strong>${(count * 3).toLocaleString()} PARTS</strong>`;
+    $("box-quantity-confirm").textContent =
+      `OPEN ${count.toLocaleString()} ${count === 1 ? "BOX" : "BOXES"} ↗`;
+    $("box-quantity-confirm").disabled = locked || !count;
   }
   async openBox(platinum = false, existing = null) {
     if (
@@ -758,16 +818,15 @@ export class GarageUI {
                 ? results[i]
                 : {
                     part: PARTS[Math.floor(Math.random() * PARTS.length)].id,
-                    tier: MILESTONE_BOXES[platinum]
-                      ? MILESTONE_BOXES[platinum].tiers[
+                    tier: MILESTONE_BOXES[kind]
+                      ? MILESTONE_BOXES[kind].tiers[
                           Math.floor(
-                            Math.random() *
-                              MILESTONE_BOXES[platinum].tiers.length,
+                            Math.random() * MILESTONE_BOXES[kind].tiers.length,
                           )
                         ][0]
-                      : platinum === "creator"
+                      : kind === "creator"
                         ? 5 + Math.floor(Math.random() * 4)
-                        : platinum
+                        : kind === "platinum"
                           ? 5
                           : 1 + Math.floor(Math.random() * 4),
                   },

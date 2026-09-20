@@ -1122,23 +1122,6 @@
                 </button>
               </article>
             </section>
-            <div class="box-open-toolbar">
-              <strong>OPEN AT ONCE</strong>
-              <div
-                id="box-open-quantity"
-                role="group"
-                aria-label="Boxes to open at once"
-              >
-                <button data-open-quantity="1" aria-pressed="true">1</button>
-                <button data-open-quantity="3" aria-pressed="false">3</button>
-                <button data-open-quantity="5" aria-pressed="false">5</button>
-                <button data-open-quantity="10" aria-pressed="false">10</button>
-                <button data-open-quantity="all" aria-pressed="false">
-                  ALL
-                </button>
-              </div>
-              <small>ALL opens every owned box of the type you choose.</small>
-            </div>
             <section id="box-bench" class="box-bench">
               <article class="supply-card" style="--supply: #eac068">
                 <div class="supply-visual crate-visual" aria-hidden="true">
@@ -1262,6 +1245,46 @@
           ></p>
           <p id="save-error" role="status"></p>
           <button id="save-retry" class="secondary" hidden>RETRY SAVE</button>
+        </div>
+      </dialog>
+      <dialog
+        id="box-quantity-dialog"
+        aria-labelledby="box-quantity-title"
+        aria-describedby="box-quantity-owned"
+      >
+        <span class="eyebrow">HOW MANY BOXES?</span>
+        <h2 id="box-quantity-title">OPEN BOXES</h2>
+        <p id="box-quantity-owned"></p>
+        <div
+          id="box-open-quantity"
+          role="group"
+          aria-label="Boxes to open at once"
+        >
+          <button data-open-quantity="1" aria-pressed="true" autofocus>
+            1<small>BOX</small>
+          </button>
+          <button data-open-quantity="3" aria-pressed="false">
+            3<small>BOXES</small>
+          </button>
+          <button data-open-quantity="5" aria-pressed="false">
+            5<small>BOXES</small>
+          </button>
+          <button data-open-quantity="10" aria-pressed="false">
+            10<small>BOXES</small>
+          </button>
+          <button data-open-quantity="all" aria-pressed="false">
+            ALL<small>BOXES</small>
+          </button>
+        </div>
+        <p id="box-quantity-summary" aria-live="polite"></p>
+        <p class="box-quantity-note">
+          ALL opens every box of this type. Parts are saved in your garage.
+        </p>
+        <div class="box-quantity-actions">
+          <button id="box-quantity-cancel" class="secondary">CANCEL</button>
+          <button id="box-quantity-confirm" class="primary">
+            OPEN 1 BOX ↗
+          </button>
         </div>
       </dialog>
       <dialog id="loot-dialog" class="loot-dialog" aria-labelledby="loot-title">

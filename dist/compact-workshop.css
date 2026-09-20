@@ -1441,44 +1441,7 @@
     grid-template-columns: 1fr;
   }
 }
-/* Batch opening stays compact in the shop; rewards share one bounded summary. */
-#workshop .box-open-toolbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  margin: 10px 0;
-  padding: 8px 10px;
-  border: 1px solid #496273;
-  border-radius: 8px;
-  background: #14212b;
-}
-#workshop .box-open-toolbar > strong {
-  font-size: 11px;
-  color: #b4edeb;
-}
-#box-open-quantity {
-  display: flex;
-  gap: 5px;
-}
-#workshop #box-open-quantity button {
-  min-width: 38px;
-  min-height: 34px;
-  padding: 5px 9px;
-  margin: 0;
-  font-size: 12px;
-  border-radius: 5px;
-}
-#workshop #box-open-quantity button[aria-pressed="true"] {
-  color: #10251d;
-  background: #88e4b2;
-  border-color: #b5ffd8;
-  box-shadow: 0 0 0 1px #88e4b24d;
-}
-#workshop .box-open-toolbar > small {
-  font-size: 10px;
-  color: #bbcad2;
-}
+/* Batch rewards share one bounded summary. */
 #loot-dialog.batch-loot {
   width: min(760px, calc(100% - 24px));
   max-height: calc(100dvh - 24px);
@@ -1508,12 +1471,6 @@
   margin-top: 4px;
 }
 @media (max-width: 480px) {
-  #workshop .box-open-toolbar {
-    gap: 7px;
-  }
-  #workshop .box-open-toolbar > small {
-    flex-basis: 100%;
-  }
   #loot-dialog.batch-loot .loot-slots {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
