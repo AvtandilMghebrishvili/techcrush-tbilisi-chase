@@ -2,6 +2,7 @@ import {
   sqliteTable,
   text,
   integer,
+  real,
   index,
   primaryKey,
   uniqueIndex,
@@ -183,4 +184,23 @@ export const cityRankings = sqliteTable(
     index("city_score").on(t.map, t.bestScore),
     index("city_week").on(t.map, t.weekKey, t.weekScore),
   ],
+);
+export const ghostPresence = sqliteTable(
+  "ghost_presence",
+  {
+    keyHash: text("key_hash")
+      .primaryKey()
+      .references(() => garages.keyHash),
+    sessionId: text("session_id").notNull(),
+    map: text("map").notNull(),
+    car: text("car").notNull(),
+    x: real("x").notNull(),
+    y: real("y").notNull(),
+    z: real("z").notNull(),
+    angle: real("angle").notNull(),
+    pitch: real("pitch").notNull().default(0),
+    roll: real("roll").notNull().default(0),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (t) => [index("ghost_city_recency").on(t.map, t.updatedAt)],
 );

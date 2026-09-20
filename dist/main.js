@@ -47,6 +47,7 @@ import { MobileControls } from "./mobile-ui.js";
 import { LIGHTING_MODES } from "./city-lighting.js";
 import { radarPoint, routeDistance } from "./hud-math.js";
 import { ProfileClient } from "./profile-client.js";
+import { GhostPresence } from "./ghost-presence.js";
 import { GarageUI } from "./garage-ui.js";
 import { upgradedSpec } from "./progression.js";
 const career = new ProfileClient();
@@ -58,6 +59,7 @@ let eventUI,
   runId = null,
   settlement = null,
   transitioning = false;
+let ghostPresence;
 import { LANDMARKS } from "./district-data.js";
 import { RAMPS } from "./stunts.js";
 import { SceneView } from "./view.js";
@@ -115,6 +117,7 @@ function disposePage() {
   raceClock.setActive(false);
   results.stop();
   community?.stop();
+  ghostPresence?.dispose();
   eventUI?.dispose();
   mobile?.syncActivity(false);
   workshop?.dispose();
@@ -1081,6 +1084,8 @@ function frame(dt) {
     if (sim.time > toastUntil) $("toast").classList.remove("visible");
   }
   audioTick(dt);
+  ghostPresence?.tick(sim, view.player?.position.y);
+  view.setGhostPlayers(ghostPresence?.sample() || []);
   if (!blocked) view.render(sim, dt, input());
   uiTime += dt;
   const moving = ["running", "rewinding"].includes(sim.phase);
@@ -1251,6 +1256,7 @@ try {
     await new Promise(() => {});
   }
   view.setupGame(sim);
+  ghostPresence = new GhostPresence(career, ACTIVE_MAP);
   if (
     IS_RUSTAVI &&
     career.profile.previewAccess &&

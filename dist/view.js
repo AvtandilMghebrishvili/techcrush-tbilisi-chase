@@ -50,6 +50,7 @@ import {
 } from "./turbo-effects.js";
 import { START } from "./city-map.js";
 import { clearCameraPosition } from "./camera-clearance.js";
+import { GhostCars } from "./ghost-cars.js";
 import { animateDistricts } from "./tbilisi-districts.js";
 import { loadSportsAssets, sportsCar, animateWheels } from "./sports-car.js";
 import { makeCockpit, updateCockpit } from "./cockpit.js";
@@ -164,6 +165,7 @@ export class SceneView {
         START.z,
       );
       this.scene.add(this.player);
+      this.ghostCars = new GhostCars(this.scene);
       this.camera.position.set(START.x - 12, 5.2, START.z + 6);
       this.camera.lookAt(START.x + 9, 1.1, START.z - 7);
       this.resize = () => {
@@ -223,6 +225,9 @@ export class SceneView {
           m.needsUpdate = true;
     });
     if (this.trees) this.trees.nextUpdate = -1;
+  }
+  setGhostPlayers(ghosts) {
+    this.ghostCars?.update(ghosts);
   }
   box(w, h, d, mat, x, y, z, parent = this.scene) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);

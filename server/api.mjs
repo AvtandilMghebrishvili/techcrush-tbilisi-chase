@@ -2,6 +2,7 @@ import { EVENT_ID, eventProgress } from "../dist/event-rules.js";
 import { eventBoard } from "./event-board.mjs";
 import { readLeaderboard } from "./leaderboard.mjs";
 import { cityCommunity } from "../dist/map-selection.js";
+import { updateGhosts } from "./ghosts.mjs";
 import {
   newProfile,
   migrateProfile,
@@ -78,9 +79,12 @@ export async function handleApi(request, DB, options = {}) {
     }
   }
   if (
-    !["/api/profile", "/api/action", "/api/event/leaderboard"].includes(
-      url.pathname,
-    )
+    ![
+      "/api/profile",
+      "/api/action",
+      "/api/event/leaderboard",
+      "/api/ghosts",
+    ].includes(url.pathname)
   )
     return json({ error: "Not found" }, 404);
   const token = request.headers.get("authorization")?.replace(/^Bearer /, "");
@@ -105,6 +109,9 @@ export async function handleApi(request, DB, options = {}) {
       )
         .bind(hash, JSON.stringify(newProfile()), Date.now())
         .run();
+    } else if (url.pathname === "/api/ghosts") {
+      if (request.method !== "POST")
+        return json({ error: "Method not allowed" }, 405);
     } else if (
       !(url.pathname === "/api/profile" && request.method === "GET") &&
       !(url.pathname === "/api/action" && request.method === "POST")
@@ -123,6 +130,15 @@ export async function handleApi(request, DB, options = {}) {
         },
         404,
       );
+    if (url.pathname === "/api/ghosts") {
+      let body;
+      try {
+        body = await readBody(request);
+        return json(await updateGhosts(DB, hash, body, now));
+      } catch (error) {
+        return json({ error: error.message || "Invalid ghost update." }, 400);
+      }
+    }
     const publicId = row.public_id || crypto.randomUUID();
     let profile = migrateProfile(JSON.parse(row.profile)),
       version = row.version;
