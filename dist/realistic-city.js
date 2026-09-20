@@ -1,4 +1,5 @@
 import { buildExtraRooftops } from "./rooftop-visuals.js";
+import { BuildingLOD } from "./building-lod.js";
 import { facadeMaterial, batchStatic } from "./expansion-visuals.js";
 import {
   IS_KUTAISI,
@@ -239,8 +240,10 @@ export function buildRealisticCity(v) {
       }
     }
   }
+  v.buildingLOD = new BuildingLOD(v.decor);
   for (const b of BUILDINGS) {
     if (b.landmark) continue;
+    const buildingParent = v.buildingLOD.tile(b);
     const facade =
         b.tint === 0
           ? newFacades[Math.abs(Math.round(b.x + b.z)) % 3]
@@ -253,9 +256,10 @@ export function buildRealisticCity(v) {
         b.x,
         b.h / 2,
         b.z,
-        staticCity,
+        buildingParent,
       );
     m.rotation.y = b.angle;
+    m.userData.lodCore = true;
     for (const y of IS_KUTAISI
       ? [1, b.h * 0.5, b.h + 0.3]
       : [1, b.h * 0.25, b.h * 0.5, b.h * 0.75, b.h + 0.3]) {
@@ -267,7 +271,7 @@ export function buildRealisticCity(v) {
         b.x,
         y,
         b.z,
-        staticCity,
+        buildingParent,
       );
       cornice.rotation.y = b.angle;
     }
@@ -279,9 +283,10 @@ export function buildRealisticCity(v) {
       b.x,
       b.h + 0.9,
       b.z,
-      staticCity,
+      buildingParent,
     );
     cap.rotation.y = b.angle;
+    cap.userData.lodCore = true;
     if (IS_KUTAISI && b.tint !== 3) {
       const top = new THREE.Mesh(
         new THREE.ConeGeometry(1, 1, 4).rotateY(Math.PI / 4),
@@ -291,12 +296,15 @@ export function buildRealisticCity(v) {
       top.scale.set((b.w + 1) / Math.sqrt(2), 3.2, (b.d + 1) / Math.sqrt(2));
       top.position.set(b.x, b.h + 2.1, b.z);
       top.castShadow = top.receiveShadow = true;
-      staticCity.add(top);
+      top.userData.lodCore = true;
+      buildingParent.add(top);
     }
     // Light wells and chimneys give the roof a believable silhouette from high chase.
     if (b.h > 20)
-      v.box(2, 2.5, 2, concrete, b.x + 3, b.h + 2.1, b.z - 3, staticCity);
+      v.box(2, 2.5, 2, concrete, b.x + 3, b.h + 2.1, b.z - 3, buildingParent);
   }
+  v.buildingLOD.finish();
+  v.buildingLOD.update(START, v.budget?.buildingNear ?? 700);
   batchStatic(
     staticCity,
     320,

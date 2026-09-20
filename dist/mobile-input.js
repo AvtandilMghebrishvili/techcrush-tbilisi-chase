@@ -1,3 +1,4 @@
+import { QUALITY_PRESETS, qualityLevel } from "./graphics-quality.js";
 // Device axes follow W3C Device Orientation; game steering is -left / +right.
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const wrapDegrees = (v) => ((((v + 180) % 360) + 360) % 360) - 180;
@@ -207,30 +208,17 @@ export function renderBudget(
   dpr = 1,
   profile = {},
 ) {
-  const automaticTier = profile.tier || (mobile ? "constrained" : "high"),
-    tier =
-      mode === "battery"
-        ? "constrained"
-        : mode === "high"
-          ? "high"
-          : automaticTier,
-    low = tier === "constrained",
-    pixels = low ? 800000 : tier === "balanced" ? 1500000 : 2400000;
+  const level = qualityLevel(mode, profile, mobile),
+    preset = QUALITY_PRESETS[level];
   return {
-    low,
-    tier,
+    ...preset,
+    level,
+    low: level === "low",
     pixelRatio: Math.min(
       dpr,
-      low ? 1.1 : tier === "balanced" ? 1.4 : 1.7,
-      Math.sqrt(pixels / Math.max(1, width * height)),
+      preset.ratio,
+      Math.sqrt(preset.pixels / Math.max(1, width * height)),
     ),
-    shadows: tier === "high",
-    treeNear: low ? 0 : tier === "balanced" ? 70 : 105,
-    treeFar: low ? 230 : tier === "balanced" ? 330 : 420,
-    drawDistanceScale:
-      tier === "constrained" ? 0.6 : tier === "balanced" ? 0.8 : 1,
-    cameraFar:
-      tier === "constrained" ? 2500 : tier === "balanced" ? 3400 : 4800,
   };
 }
 export function nextAdaptiveScale(current, averageFrame, mode = "auto") {

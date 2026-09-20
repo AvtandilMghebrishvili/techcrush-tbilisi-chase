@@ -232,7 +232,7 @@ export class CityLighting {
     return this.mode;
   }
   update(sim) {
-    this.weather.update(sim, this.mode);
+    this.weather.update(sim, this.mode, this.view.budget?.rainScale ?? 1);
     if (!this.condition || this.conditionLevel !== sim.level) {
       this.conditionLevel = sim.level;
       this.condition = levelCondition(sim.level);
@@ -250,15 +250,20 @@ export class CityLighting {
       .lerp(this.duskSun, Math.sin(n * Math.PI))
       .lerp(this.nightSun, n * n);
     v.sun.intensity = THREE.MathUtils.lerp(2.3, 0.3, n);
-    v.hemisphere.intensity = THREE.MathUtils.lerp(0.75, 0.32, n);
+    v.hemisphere.intensity = THREE.MathUtils.lerp(
+      0.75,
+      v.budget?.low ? 0.46 : 0.32,
+      n,
+    );
     v.hemisphere.color.copy(this.dayAmbient).lerp(this.nightAmbient, n);
     v.scene.environmentIntensity = THREE.MathUtils.lerp(0.85, 0.16, n);
     v.scene.fog.color.copy(this.dayFog).lerp(this.nightFog, n);
     v.scene.fog.density = THREE.MathUtils.lerp(0.00052, 0.00072, n);
+    const buildingLights = v.budget?.buildingLights !== false;
     for (const m of v.buildingMaterials)
-      m.emissiveIntensity = state.lamps * 1.5;
+      m.emissiveIntensity = buildingLights ? state.lamps * 1.5 : 0;
     for (const m of v.nightWindowMaterials || [])
-      m.emissiveIntensity = state.lamps * 0.9;
+      m.emissiveIntensity = buildingLights ? state.lamps * 0.9 : 0;
     for (const m of v.streetLampMaterials || [])
       m.emissiveIntensity = 0.08 + state.lamps * 3;
     for (const lamp of this.lamps)
@@ -274,12 +279,15 @@ export class CityLighting {
       sim.time < this.refreshAt - 0.3 ||
       this.lastMode !== this.mode
     ) {
-      this.near = nearestLamps(this.lamps, sim.player, sim.poles);
+      const limit = v.budget?.lampEffects ?? LAMP_EFFECT_LIMIT;
+      this.near = limit
+        ? nearestLamps(this.lamps, sim.player, sim.poles, limit)
+        : [];
       this.refreshAt = sim.time + 0.15;
       this.lastMode = this.mode;
     }
     const live = this.near.filter((l) => !sim.poles?.[l.propId]?.broken);
-    const active = state.lamps > 0.001;
+    const active = state.lamps > 0.001 && live.length > 0;
     this.halos.visible = this.pools.visible = active;
     if (active) {
       this.halos.material.opacity = 0.9 * state.lamps;
@@ -300,6 +308,7 @@ export class CityLighting {
         this.pools.instanceMatrix.needsUpdate = true;
     }
     this.local.forEach((light, i) => {
+      light.visible = i < (v.budget?.localLights ?? LOCAL_LIGHT_LIMIT);
       const lamp = live[i],
         d = lamp
           ? Math.hypot(

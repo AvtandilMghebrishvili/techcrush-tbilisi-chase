@@ -1,6 +1,7 @@
 import { IS_BATUMI } from "./map-selection.js";
 import * as THREE from "./vendor/three.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { simpleTree } from "./simple-tree.js";
 export async function fetchTreeModels(mobile, scope) {
   const loader = new GLTFLoader(scope.manager);
   return IS_BATUMI
@@ -20,19 +21,51 @@ export async function loadTrees(v, models) {
   const materials = new Map(),
     groups = [];
   const wind = { value: 0 };
-  for (const [level, gltf] of [near, far].entries()) {
-    if (v.mobile && level === 0) continue;
-    gltf.scene.updateMatrixWorld(true);
-    const meshes = [];
-    gltf.scene.traverse((m) => {
-      if (m.isMesh) meshes.push(m);
-    });
-    for (const m of meshes) {
-      let material = materials.get(m.material.name);
-      if (!material) {
-        material = m.material;
-        material.roughness = 0.92;
-        material.side = THREE.DoubleSide;
+  v.trees = {
+    groups,
+    height,
+    wind,
+    materials,
+    lowAsset: models.length < 2 && !IS_BATUMI,
+    hasSimple: true,
+    nextUpdate: -1,
+  };
+  for (const [level, gltf] of [
+    near,
+    far,
+    simpleTree(height, IS_BATUMI),
+  ].entries()) {
+    if (v.trees.lowAsset && level === 0) continue;
+    addTreeModel(v, gltf, level);
+  }
+  const stumps = new THREE.InstancedMesh(
+    new THREE.CylinderGeometry(0.28, 0.4, 0.5, 10),
+    new THREE.MeshStandardMaterial({ color: "#6c6250", roughness: 1 }),
+    v.treePositions.length,
+  );
+  stumps.castShadow = true;
+  stumps.count = 0;
+  stumps.frustumCulled = false;
+  v.decor.add(stumps);
+  v.trees.stumps = stumps;
+  updateTrees(v, { x: 0, z: 0 }, 0, v.treePositions, true);
+}
+function addTreeModel(v, gltf, level) {
+  const { height, materials, groups, wind } = v.trees;
+  gltf.scene.updateMatrixWorld(true);
+  const bounds = new THREE.Box3().setFromObject(gltf.scene),
+    scale = height / Math.max(0.001, bounds.max.y - bounds.min.y);
+  const meshes = [];
+  gltf.scene.traverse((m) => {
+    if (m.isMesh) meshes.push(m);
+  });
+  for (const m of meshes) {
+    let material = materials.get(m.material.name);
+    if (!material) {
+      material = m.material;
+      material.roughness = 0.92;
+      material.side = THREE.DoubleSide;
+      if (level < 2)
         material.onBeforeCompile = (shader) => {
           shader.uniforms.treeTime = wind;
           shader.vertexShader =
@@ -45,42 +78,41 @@ export async function loadTrees(v, models) {
             transformed.z+=cos(treeTime*.9+instanceMatrix[3].z*.06)*crown*.012;`,
           );
         };
-        materials.set(material.name, material);
-      }
-      const geometry = m.geometry.clone().applyMatrix4(m.matrixWorld);
-      geometry.translate(0, -bounds.min.y, 0);
-      const batch = new THREE.InstancedMesh(
-        geometry,
-        material,
-        v.treePositions.length,
-      );
-      batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      batch.userData.leaves = material.name.includes("leaves");
-      batch.castShadow = level === 0;
-      batch.receiveShadow = true;
-      batch.frustumCulled = false;
-      v.decor.add(batch);
-      groups.push({ batch, level });
+      materials.set(material.name, material);
     }
+    const geometry = m.geometry.clone().applyMatrix4(m.matrixWorld);
+    geometry.translate(0, -bounds.min.y, 0).scale(scale, scale, scale);
+    const batch = new THREE.InstancedMesh(
+      geometry,
+      material,
+      v.treePositions.length,
+    );
+    batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    batch.userData.leaves = material.name.includes("leaves");
+    batch.castShadow = level === 0;
+    batch.receiveShadow = true;
+    batch.frustumCulled = false;
+    v.decor.add(batch);
+    groups.push({ batch, level });
   }
-  const stumps = new THREE.InstancedMesh(
-    new THREE.CylinderGeometry(0.28, 0.4, 0.5, 10),
-    new THREE.MeshStandardMaterial({ color: "#6c6250", roughness: 1 }),
-    v.treePositions.length,
-  );
-  stumps.castShadow = true;
-  stumps.count = 0;
-  stumps.frustumCulled = false;
-  v.decor.add(stumps);
-  v.trees = {
-    groups,
-    height,
-    wind,
-    stumps,
-    lowAsset: !!v.mobile,
-    nextUpdate: -1,
-  };
-  updateTrees(v, { x: 0, z: 0 }, 0, v.treePositions, true);
+}
+export async function ensureDetailedTrees(v) {
+  if (!v.trees?.lowAsset || v.budget.treeNear <= 0 || v.trees.detailPending)
+    return;
+  v.trees.detailPending = true;
+  try {
+    const model = await v.assetLoad.track(
+      new GLTFLoader(v.assetLoad.manager).loadAsync("./assets/tree-near.glb"),
+    );
+    if (v.disposed) return;
+    addTreeModel(v, model, 0);
+    v.trees.lowAsset = false;
+    v.trees.nextUpdate = -1;
+  } catch {
+    // Keep the existing far/simple trees visible if an optional detail download fails.
+  } finally {
+    if (v.trees) v.trees.detailPending = false;
+  }
 }
 export function updateTrees(
   v,
@@ -91,7 +123,7 @@ export function updateTrees(
 ) {
   if (!v.trees) return;
   const { groups, height, wind, stumps } = v.trees;
-  wind.value = time;
+  wind.value = v.budget?.simpleTrees ? 0 : time;
   if (time < (v.trees.lastTime || 0)) v.trees.nextUpdate = -1;
   v.trees.lastTime = time;
   if (v.trees.lastStates !== states) {
@@ -131,15 +163,24 @@ export function updateTrees(
   const { dummy, axis, fall, matrices, colors, levels } = work;
   const near = v.trees.lowAsset ? 0 : (v.budget?.treeNear ?? 105),
     far = v.budget?.treeFar ?? 420,
+    horizon = v.trees.hasSimple ? (v.budget?.treeHorizon ?? far) : far,
     nearSq = near * near,
-    farSq = far * far;
+    farSq = far * far,
+    horizonSq = horizon * horizon;
   let stumpCount = 0;
   for (let i = 0; i < states.length; i++) {
     const t = states[i],
       dx = t.x - p.x,
       dz = t.z - p.z,
       d = dx * dx + dz * dz;
-    levels[i] = d > farSq ? -1 : d <= nearSq ? (near ? 0 : -1) : 1;
+    levels[i] =
+      d > horizonSq
+        ? -1
+        : v.trees.hasSimple && (v.budget?.simpleTrees || d > farSq)
+          ? 2
+          : near > 0 && d <= nearSq
+            ? 0
+            : 1;
     if (t.broken) {
       const age = Math.max(0, time - t.fallenAt);
       if (age > 12) levels[i] = -1;
@@ -185,8 +226,16 @@ export function updateTrees(
       count++;
     }
     batch.count = count;
-    batch.instanceMatrix.needsUpdate = true;
-    if (batch.instanceColor) batch.instanceColor.needsUpdate = true;
+    if (count) {
+      batch.instanceMatrix.clearUpdateRanges();
+      batch.instanceMatrix.addUpdateRange(0, count * 16);
+      batch.instanceMatrix.needsUpdate = true;
+      if (batch.instanceColor) {
+        batch.instanceColor.clearUpdateRanges();
+        batch.instanceColor.addUpdateRange(0, count * 3);
+        batch.instanceColor.needsUpdate = true;
+      }
+    }
   }
   stumps.count = stumpCount;
   stumps.instanceMatrix.needsUpdate = true;

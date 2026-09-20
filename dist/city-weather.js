@@ -43,12 +43,16 @@ export class CityWeather {
     this.mesh.frustumCulled = false;
     scene.add(this.mesh);
   }
-  update(sim, mode = "auto") {
+  update(sim, mode = "auto", detail = 1) {
     const alpha = ["running", "rewinding", "paused"].includes(sim.phase)
       ? showerAt(sim.time, sim.level, mode)
       : 0;
     this.mesh.visible = alpha > 0;
     if (!alpha) return;
+    this.mesh.geometry.setDrawRange(
+      0,
+      Math.max(1, Math.round(RAIN_STREAKS * detail)) * 2,
+    );
     this.mesh.position.set(
       sim.player.x,
       Math.max(0, sim.player.y || 0),

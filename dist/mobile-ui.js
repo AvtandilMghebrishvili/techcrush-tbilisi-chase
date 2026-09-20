@@ -5,6 +5,7 @@ import {
   NitroBurst,
   ThumbSteering,
 } from "./mobile-input.js";
+import { normalizeQuality, QUALITY_HELP } from "./graphics-quality.js";
 const $ = (id) => document.getElementById(id);
 export class MobileControls {
   constructor({
@@ -54,8 +55,7 @@ export class MobileControls {
       12,
       Math.min(40, Number(this.settings.range) || 24),
     );
-    if (!["auto", "battery", "high"].includes(this.settings.quality))
-      this.settings.quality = "auto";
+    this.settings.quality = normalizeQuality(this.settings.quality);
     if (!["auto", "on"].includes(this.settings.controls))
       this.settings.controls = "auto";
     if (!["pad", "buttons"].includes(this.settings.touchSteering))
@@ -67,6 +67,8 @@ export class MobileControls {
     $("auto-gas").checked = !!this.settings.autoGas;
     $("touch-steering-mode").value = this.settings.touchSteering;
     $("graphics-quality").value = this.settings.quality;
+    $("graphics-quality-note").textContent =
+      QUALITY_HELP[this.settings.quality];
     $("touch-visibility").value = this.settings.controls;
     $("control-settings").onclick = () => this.open();
     $("mobile-setup").onclick = () => this.open();
@@ -104,8 +106,10 @@ export class MobileControls {
       this.save();
     };
     $("graphics-quality").onchange = (e) => {
-      this.settings.quality = e.target.value;
-      this.actions.quality(e.target.value);
+      this.settings.quality = normalizeQuality(e.target.value);
+      this.actions.quality(this.settings.quality);
+      $("graphics-quality-note").textContent =
+        QUALITY_HELP[this.settings.quality];
       this.save();
     };
     $("touch-visibility").onchange = (e) => {

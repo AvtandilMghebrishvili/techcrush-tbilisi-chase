@@ -2,6 +2,7 @@ import * as THREE from "./vendor/three.module.js";
 import { AssetScope } from "./resource-lifetime.js";
 import { fetchTreeModels } from "./trees.js";
 import { fetchSportsAssets } from "./sports-car.js";
+import { qualityLevel } from "./graphics-quality.js";
 
 // Start the selected city's downloads before CPU geometry construction/profile I/O.
 // No other city's models, persistent caches, speculative garage or audio downloads.
@@ -19,7 +20,13 @@ export function prepareSceneAssets(mobile, profile = {}) {
       return value;
     });
   scope.profile = profile;
-  const low = profile.lowAssets,
+  let selected = "auto";
+  try {
+    selected =
+      JSON.parse(localStorage.getItem("techcrush-mobile") || "{}").quality ||
+      "auto";
+  } catch {}
+  const low = qualityLevel(selected, profile, mobile) === "low",
     texture = (name) =>
       low ? name.replace(/\.(png|jpg)$/i, "-low.webp") : name;
   scope.ready = Promise.all([
@@ -33,7 +40,7 @@ export function prepareSceneAssets(mobile, profile = {}) {
       low ? "robotics/robo-battle-low.webp" : "robotics/robo-battle.webp",
       low ? "grex/grex-low.webp" : "grex/grex.webp",
     ].map((name) => track(scope.track(loader.loadAsync("./assets/" + name)))),
-    track(fetchTreeModels(mobile, scope)),
+    track(fetchTreeModels(low, scope)),
     track(fetchSportsAssets(scope)),
   ]).catch((error) => {
     scope.dispose();

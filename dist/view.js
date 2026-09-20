@@ -1,4 +1,6 @@
 import { updateSponsorBanners } from "./sponsor-banners.js";
+import { normalizeQuality } from "./graphics-quality.js";
+import { applySceneryQuality } from "./graphics-materials.js";
 import { applyGrex } from "./grex-visuals.js";
 import { applyCityBranding, updateCityBranding } from "./city-branding.js";
 import { prepareSceneAssets } from "./scene-assets.js";
@@ -39,7 +41,7 @@ import { paintColor } from "./customization.js";
 import { updateScenery } from "./scenery.js";
 import { buildRealisticCity } from "./realistic-city.js";
 import { calibrateRoadsideProps } from "./breakable-props.js";
-import { loadTrees, updateTrees } from "./trees.js";
+import { loadTrees, updateTrees, ensureDetailedTrees } from "./trees.js";
 import { makeSedan } from "./patrol-car.js";
 import {
   addTurboExhaust,
@@ -79,6 +81,7 @@ export class SceneView {
         JSON.parse(localStorage.getItem("techcrush-mobile") || "{}").quality ||
         "auto";
     } catch {}
+    this.quality = normalizeQuality(this.quality);
     this.hardwareProfile = assets?.profile || {};
     this.budget = renderBudget(
       this.quality,
@@ -120,7 +123,7 @@ export class SceneView {
     sun.position.set(START.x - 75, 145, START.z - 95);
     this.scene.add(sun.target);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.mapSize.set(this.budget.shadowSize, this.budget.shadowSize);
     Object.assign(sun.shadow.camera, {
       left: -85,
       right: 85,
@@ -198,7 +201,13 @@ export class SceneView {
     removeEventListener("resize", this.resize);
     // The render target owns its framebuffer as well as its PMREM texture.
     releaseResources(
-      [this.environmentTarget, this.scene],
+      [
+        this.environmentTarget,
+        this.scene,
+        ...Array.from(this.qualityMaterials?.values() || []).flatMap((value) =>
+          Object.values(value),
+        ),
+      ],
       this.assetLoad.released,
     );
     this.assetLoad.dispose();
@@ -213,18 +222,25 @@ export class SceneView {
         delete this[key];
   }
   setQuality(mode) {
-    this.quality = ["auto", "battery", "high"].includes(mode) ? mode : "auto";
+    this.quality = normalizeQuality(mode);
     this.adaptiveScale = 1;
     this.frameSample = { elapsed: 0, frames: 0 };
     this.resize();
     this.renderer.shadowMap.enabled = this.budget.shadows;
     this.renderer.shadowMap.needsUpdate = true;
-    this.scene.traverse((o) => {
-      if (o.isMesh)
-        for (const m of Array.isArray(o.material) ? o.material : [o.material])
-          m.needsUpdate = true;
-    });
+    if (this.sun.shadow.mapSize.x !== this.budget.shadowSize) {
+      this.sun.shadow.map?.dispose();
+      this.sun.shadow.map = null;
+      this.sun.shadow.mapSize.set(
+        this.budget.shadowSize,
+        this.budget.shadowSize,
+      );
+    }
+    this.staticCullFocus = null;
+    if (this.lighting) this.lighting.refreshAt = -1;
+    applySceneryQuality(this);
     if (this.trees) this.trees.nextUpdate = -1;
+    void ensureDetailedTrees(this);
   }
   setGhostPlayers(ghosts) {
     this.ghostCars?.update(ghosts);
@@ -323,6 +339,7 @@ export class SceneView {
       );
     };
     this.lighting = new CityLighting(this);
+    applySceneryQuality(this);
     progress(94, "CONNECTING YOUR GARAGE");
   }
   setupGame(sim) {
@@ -538,7 +555,7 @@ export class SceneView {
     updateBreakables(this, sim);
     updateSponsorBanners(this, sim);
     const ready = sim.phase === "ready";
-    if (this.distanceCulledStatic?.length) {
+    if (this.distanceCulledStatic?.length || this.buildingLOD) {
       const focus = ready ? this.camera.position : sim.player;
       if (
         !this.staticCullFocus ||
@@ -552,6 +569,7 @@ export class SceneView {
           focus,
           this.budget.drawDistanceScale * (0.85 + this.adaptiveScale * 0.15),
         );
+        this.buildingLOD?.update(focus, this.budget.buildingNear);
         this.staticCullFocus = { x: focus.x, z: focus.z };
       }
     }

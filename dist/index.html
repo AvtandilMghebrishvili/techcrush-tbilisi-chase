@@ -1507,12 +1507,29 @@
               </select></label
             >
             <label class="setting-select"
-              >Graphics<select id="graphics-quality">
-                <option value="auto">Auto · lighter on phones</option>
-                <option value="battery">Battery saver</option>
-                <option value="high">High detail</option>
+              >Graphics<select
+                id="graphics-quality"
+                aria-describedby="graphics-quality-note"
+              >
+                <option value="auto">Auto · ავტომატური</option>
+                <option value="low">Very low · ძალიან დაბალი</option>
+                <option value="medium">Medium · საშუალო</option>
+                <option value="high">Good · კარგი</option>
+                <option value="ultra">Maximum · მაქსიმალური</option>
               </select></label
             >
+            <p
+              id="graphics-quality-note"
+              class="setting-note"
+              role="status"
+              aria-live="polite"
+            ></p>
+            <p class="setting-note">
+              Detail, lights and resolution change immediately and save on this
+              device. Texture sharpness updates on the next city load. Distant
+              scenery uses simpler shapes; roads, collisions, rewards and
+              pursuit stay the same.
+            </p>
             <button id="mobile-fullscreen" class="secondary">
               FULLSCREEN / LANDSCAPE
             </button>
