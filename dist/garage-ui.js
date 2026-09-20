@@ -53,6 +53,8 @@ export class GarageUI {
     this.car = store.profile.selectedCar;
     this.rolling = false;
     this.openQuantity = "1";
+    this.buyQuantity = "1";
+    this.boxAction = "open";
     this.boxToOpen = null;
     this.filter = "all";
     const tabs = [...document.querySelectorAll("[data-workshop-tab]")];
@@ -148,7 +150,8 @@ export class GarageUI {
         this.store.pending
       )
         return;
-      this.openQuantity = button.dataset.openQuantity;
+      this[this.boxAction === "buy" ? "buyQuantity" : "openQuantity"] =
+        button.dataset.openQuantity;
       this.renderBoxQuantity();
     };
     $("box-quantity-cancel").onclick = () => $("box-quantity-dialog").close();
@@ -158,12 +161,15 @@ export class GarageUI {
     $("box-quantity-confirm").onclick = () => {
       const kind = this.boxToOpen;
       if (!kind || $("box-quantity-confirm").disabled) return;
+      const action = this.boxAction;
       this.boxToOpen = null;
       $("box-quantity-dialog").close();
-      void this.openBox(kind);
+      if (action === "buy") this.buyBox(kind, Number(this.buyQuantity));
+      else void this.openBox(kind);
     };
     for (const kind of Object.keys(BOX_SHOP))
-      $("buy-" + kind + "-box").onclick = () => this.buyBox(kind);
+      $("buy-" + kind + "-box").onclick = () =>
+        this.chooseBoxQuantity(kind, "buy");
     for (const button of document.querySelectorAll("[data-buy-artifact]"))
       button.onclick = () => this.buyArtifact(button.dataset.buyArtifact);
     $("loot-done").onclick = () => {
@@ -260,13 +266,13 @@ export class GarageUI {
       this.store.mutate({ type: "paint", car: this.car, color }),
     ).catch(() => {});
   }
-  buyBox(kind) {
+  buyBox(kind, count = 1) {
     const box = BOX_SHOP[kind];
     if (!box || this.store.busy || this.store.pending) return;
-    void this.run(() => this.store.mutate({ type: "buy-box", kind }))
+    void this.run(() => this.store.mutate({ type: "buy-box", kind, count }))
       .then(() => {
         $("upgrade-feedback").textContent =
-          `${box.name} Box purchased for ${box.price.toLocaleString()} CR. Open it in Supply Drops.`;
+          `${count} ${box.name} ${count === 1 ? "box" : "boxes"} purchased for ${(box.price * count).toLocaleString()} CR. Choose OPEN to collect your parts.`;
       })
       .catch(() => {});
   }
@@ -598,10 +604,10 @@ export class GarageUI {
 
     for (const [kind, box] of Object.entries(BOX_SHOP)) {
       const button = $("buy-" + kind + "-box");
-      button.innerHTML = `<span class="box-buy-label">BUY ×1</span><small class="box-price">${box.price.toLocaleString()} CR</small>`;
+      button.innerHTML = `<span class="box-buy-label">BUY <span aria-hidden="true">↗</span></span><small class="box-price">${box.price.toLocaleString()} CR / BOX</small>`;
       button.setAttribute(
         "aria-label",
-        `Buy 1 ${box.name} box for ${box.price.toLocaleString()} CR`,
+        `Choose how many ${box.name} boxes to buy · ${box.price.toLocaleString()} CR each`,
       );
       button.disabled =
         p.credits < box.price ||
@@ -655,7 +661,7 @@ export class GarageUI {
     if (focus)
       $("workshop").querySelector(focus)?.focus({ preventScroll: true });
   }
-  chooseBoxQuantity(kind) {
+  chooseBoxQuantity(kind, action = "open") {
     const box = BOX_SHOP[kind];
     if (
       this.disposed ||
@@ -663,10 +669,13 @@ export class GarageUI {
       this.rolling ||
       this.store.busy ||
       this.store.pending ||
-      !this.store.profile[box.field]
+      (action === "buy"
+        ? this.store.profile.credits < box.price
+        : !this.store.profile[box.field])
     )
       return;
     this.boxToOpen = kind;
+    this.boxAction = action;
     this.renderBoxQuantity();
     $("box-quantity-dialog").showModal();
   }
@@ -674,18 +683,26 @@ export class GarageUI {
     const box = BOX_SHOP[this.boxToOpen];
     if (!box) return;
     const owned = this.store.profile[box.field] || 0;
+    const buying = this.boxAction === "buy";
+    const available = buying
+      ? Math.floor(this.store.profile.credits / box.price)
+      : owned;
+    const selectionKey = buying ? "buyQuantity" : "openQuantity";
     const locked = this.rolling || this.store.busy || !!this.store.pending;
-    if (this.openQuantity !== "all" && Number(this.openQuantity) > owned)
-      this.openQuantity = "all";
-    const count = boxOpenCount(this.openQuantity, owned);
+    if (this[selectionKey] !== "all" && Number(this[selectionKey]) > available)
+      this[selectionKey] = buying ? "1" : "all";
+    const count = boxOpenCount(this[selectionKey], available);
+    $("box-quantity-dialog").dataset.action = this.boxAction;
     $("box-quantity-title").textContent = `${box.name.toUpperCase()} BOX`;
-    $("box-quantity-owned").textContent =
-      `${owned.toLocaleString()} BOXES AVAILABLE · 3 PARTS IN EACH BOX`;
+    $("box-quantity-owned").textContent = buying
+      ? `${this.store.profile.credits.toLocaleString()} CR AVAILABLE · ${box.price.toLocaleString()} CR / BOX`
+      : `${owned.toLocaleString()} BOXES AVAILABLE · 3 PARTS IN EACH BOX`;
     for (const button of $("box-open-quantity").querySelectorAll("button")) {
       const value = button.dataset.openQuantity;
-      button.setAttribute("aria-pressed", String(value === this.openQuantity));
+      button.hidden = buying && value === "all";
+      button.setAttribute("aria-pressed", String(value === this[selectionKey]));
       button.disabled =
-        locked || !owned || (value !== "all" && Number(value) > owned);
+        locked || !available || (value !== "all" && Number(value) > available);
       button.setAttribute(
         "aria-label",
         value === "all"
@@ -693,10 +710,15 @@ export class GarageUI {
           : `${value} ${value === "1" ? "box" : "boxes"}`,
       );
     }
-    $("box-quantity-summary").innerHTML =
-      `<strong>${count.toLocaleString()} ${count === 1 ? "BOX" : "BOXES"}</strong><span>× 3 PARTS =</span><strong>${(count * 3).toLocaleString()} PARTS</strong>`;
+    $("box-quantity-summary").innerHTML = buying
+      ? `<strong>${count.toLocaleString()} ${count === 1 ? "BOX" : "BOXES"}</strong><span>TOTAL</span><strong>${(count * box.price).toLocaleString()} CR</strong>`
+      : `<strong>${count.toLocaleString()} ${count === 1 ? "BOX" : "BOXES"}</strong><span>× 3 PARTS =</span><strong>${(count * 3).toLocaleString()} PARTS</strong>`;
+    $("box-quantity-dialog").querySelector(".box-quantity-note").textContent =
+      buying
+        ? `${count * 3} parts when opened. Boxes go to your inventory; open them whenever you want.`
+        : "ALL opens every box of this type. Parts are saved in your garage.";
     $("box-quantity-confirm").textContent =
-      `OPEN ${count.toLocaleString()} ${count === 1 ? "BOX" : "BOXES"} ↗`;
+      `${buying ? "BUY" : "OPEN"} ${count.toLocaleString()} ${count === 1 ? "BOX" : "BOXES"} ↗`;
     $("box-quantity-confirm").disabled = locked || !count;
   }
   async openBox(platinum = false, existing = null) {

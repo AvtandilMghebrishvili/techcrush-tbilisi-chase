@@ -23,11 +23,19 @@ const {ChaseSimulation}=await import('./dist/simulation.js');
 const {nearestRoad,routeBetween,START}=await import('./dist/city-map.js');
 const {EVENT_ID,ARTIFACT_BANNERS}=await import('./dist/event-rules.js');
 const {RELEASED_EVENT_SITES}=await import('./dist/released-event-sites.js');
+const {artifactSearchZones}=await import('./dist/quest-map.js');
 const v={decor:new THREE.Group(),box:()=>{}};
 buildSponsorBanners(v);calibrateRoadsideProps(v);
 const defs=v.breakableProps.map(e=>e.definition);
+const profile={events:{[EVENT_ID]:{artifacts:{['${city}']:[]},artifactHints:{['${city}']:ARTIFACT_BANNERS}}}};
+const zones=artifactSearchZones(profile,{propDefinitions:defs,runArtifacts:[]});
+assert.equal(zones.length,5,'Every purchased/granted location must be visible');
 for(const id of ARTIFACT_BANNERS){
  const anchor=defs.find(d=>d.bannerId===id&&d.bannerAnchor),fixed=RELEASED_EVENT_SITES['${city}'].find(d=>d.id===id),r=nearestRoad(anchor);
+ const zone=zones.find(z=>z.artifact.id===id);
+ assert.equal(zone.artifact.x,anchor.x);assert.equal(zone.artifact.z,anchor.z);
+ assert(Math.hypot(zone.x-anchor.x,zone.z-anchor.z)<zone.radius-10,'Real artifact outside paid search area');
+ assert(!artifactSearchZones(profile,{propDefinitions:defs,runArtifacts:[id]}).some(z=>z.artifact.id===id),'Collected hint must disappear');
  assert.equal(anchor.x,fixed.x);assert.equal(anchor.z,fixed.z);assert(routeBetween(START,r).length>1);
  for(const car of ['classic','gt','suv','creator']){
   const sim=new ChaseSimulation();sim.propDefinitions=defs;sim.start(car,{event:EVENT_ID,level:1});sim.police=[];sim.traffic=[];sim.nextWaveAt=Infinity;sim.checkpoints=[];

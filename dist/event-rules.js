@@ -11,14 +11,18 @@ export const ARTIFACT_SEARCH_RADIUS = 85;
 export const eventPhase = (now) =>
   now < EVENT_START ? "upcoming" : now < EVENT_END ? "live" : "ended";
 export const eventProgress = (p) => p?.events?.[EVENT_ID];
-export const activeArtifactHint = (p, map, runArtifacts = []) => {
+export const activeArtifactHints = (p, map, runArtifacts = []) => {
   const contest = eventProgress(p),
     found = new Set([
       ...(contest?.artifacts?.[map] || []),
       ...(runArtifacts || []),
     ]);
-  return (contest?.artifactHints?.[map] || []).find((id) => !found.has(id));
+  return [...new Set(contest?.artifactHints?.[map] || [])].filter(
+    (id) => ARTIFACT_BANNERS.includes(id) && !found.has(id),
+  );
 };
+export const activeArtifactHint = (p, map, runArtifacts = []) =>
+  activeArtifactHints(p, map, runArtifacts)[0];
 // Enrollment belongs to the saved profile, not a removable URL mode switch.
 export const enrolledEvent = (p, now) =>
   eventProgress(p) && now < EVENT_END ? EVENT_ID : undefined;

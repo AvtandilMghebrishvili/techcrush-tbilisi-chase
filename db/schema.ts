@@ -66,6 +66,16 @@ export const gameIds = sqliteTable("game_ids", {
   credentialHash: text("credential_hash").notNull().unique(),
   recoveryCode: text("recovery_code").notNull(),
 });
+// Owner-authorized corrections are scoped to one garage and recorded once.
+export const supportAdjustments = sqliteTable("support_adjustments", {
+  id: text("id").primaryKey(),
+  keyHash: text("key_hash")
+    .notNull()
+    .references(() => garages.keyHash),
+  caseId: text("case_id").notNull(),
+  receipt: text("receipt").notNull(),
+  appliedAt: integer("applied_at").notNull(),
+});
 export const gameIdAttempts = sqliteTable(
   "game_id_attempts",
   {

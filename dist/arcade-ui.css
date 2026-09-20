@@ -1949,6 +1949,20 @@
   margin-top: 6px;
   letter-spacing: 0.6px;
 }
+#box-open-quantity button[hidden] {
+  display: none;
+}
+#box-quantity-dialog[data-action="buy"] #box-open-quantity {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#box-quantity-dialog[data-action="buy"] #box-quantity-confirm,
+#box-quantity-dialog[data-action="buy"]
+  #box-open-quantity
+  button[aria-pressed="true"] {
+  color: #302309;
+  border-color: #ffe2a1;
+  background: linear-gradient(#ffe7ad, #e3b859);
+}
 #box-open-quantity button[aria-pressed="true"] {
   color: #092d23;
   border-color: #c6ffed;

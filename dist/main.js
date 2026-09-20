@@ -22,7 +22,7 @@ import {
   QUEST_PINS,
   mapAtlas,
   MAP_EXTENT,
-  artifactSearchZone,
+  artifactSearchZones,
 } from "./quest-map.js";
 import { ScoreFeedback } from "./score-feedback.js";
 import { ResultScreen } from "./result-screen.js";
@@ -906,13 +906,10 @@ function drawMap() {
     MAP_EXTENT * 2 * s,
     MAP_EXTENT * 2 * s,
   );
-  const artifactZone = artifactSearchZone(career.profile, sim);
-  if (artifactZone) {
-    const center = radarPoint(
-      ox - artifactZone.x * s,
-      oz - artifactZone.z * s,
-      108,
-    );
+  for (const artifactZone of artifactSearchZones(career.profile, sim)) {
+    // Clip the actual area at the radar edge; clamping its center would suggest
+    // that a distant artifact is beside the player.
+    const center = { x: ox - artifactZone.x * s, y: oz - artifactZone.z * s };
     c.save();
     c.strokeStyle = "#ffd43b";
     c.fillStyle = "rgba(255, 212, 59, 0.12)";

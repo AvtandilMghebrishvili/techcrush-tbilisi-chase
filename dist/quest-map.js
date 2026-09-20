@@ -28,7 +28,8 @@ import {
 import { mapClickPoint, routeDistance } from "./hud-math.js";
 import { LANDMARKS } from "./district-data.js";
 import { FACADE_BANNERS } from "./city-brand-sites.js";
-import { ARTIFACT_SEARCH_RADIUS, activeArtifactHint } from "./event-rules.js";
+import { ARTIFACT_SEARCH_RADIUS, activeArtifactHints } from "./event-rules.js";
+import { SPONSOR_SITES } from "./sponsor-sites.js";
 import { MAP_PLACES } from "./map-landmarks.js";
 export { MAP_PLACES };
 
@@ -60,20 +61,35 @@ export const mapPoint = (point, size = 900) => ({
   x: ((MAP_EXTENT - point.x) / (MAP_EXTENT * 2)) * size,
   y: ((MAP_EXTENT - point.z) / (MAP_EXTENT * 2)) * size,
 });
-export function artifactSearchZone(profile, sim) {
-  const id = activeArtifactHint(profile, ACTIVE_MAP, sim?.runArtifacts);
-  const artifact = FACADE_BANNERS.find((site) => site.id === id);
-  if (!artifact) return null;
-  // The artifact sits inside the area, away from its center, so the reveal is
-  // useful without becoming an exact waypoint.
-  const angle = ((id * 137 + ACTIVE_MAP.length * 53) * Math.PI) / 180,
-    offset = ARTIFACT_SEARCH_RADIUS * 0.48;
-  return {
-    artifact,
-    x: artifact.x + Math.cos(angle) * offset,
-    z: artifact.z + Math.sin(angle) * offset,
-    radius: ARTIFACT_SEARCH_RADIUS,
-  };
+export function artifactSearchZones(profile, sim) {
+  return activeArtifactHints(profile, ACTIVE_MAP, sim?.runArtifacts).flatMap(
+    (id) => {
+      // Use the same collectible anchors as the world and collision system. Facade
+      // advertising has unrelated IDs and must never determine a search area.
+      const site = SPONSOR_SITES.find((site) => site.id === id);
+      if (!site) return [];
+      const anchor = (sim?.poles || sim?.propDefinitions || []).find(
+        (prop) => prop.bannerAnchor && prop.bannerId === id,
+      );
+      const artifact = {
+        ...site,
+        x: anchor?.x ?? site.x,
+        z: anchor?.z ?? site.z,
+      };
+      // The artifact sits inside the area, away from its center, so the reveal is
+      // useful without becoming an exact waypoint.
+      const angle = ((id * 137 + ACTIVE_MAP.length * 53) * Math.PI) / 180,
+        offset = ARTIFACT_SEARCH_RADIUS * 0.48;
+      return [
+        {
+          artifact,
+          x: artifact.x + Math.cos(angle) * offset,
+          z: artifact.z + Math.sin(angle) * offset,
+          radius: ARTIFACT_SEARCH_RADIUS,
+        },
+      ];
+    },
+  );
 }
 
 // One small raster of static geography, shared by the radar and full map.
@@ -309,8 +325,7 @@ export class QuestMap {
     const sim = this.sim;
     const c = document.getElementById("quest-canvas").getContext("2d");
     c.drawImage(mapAtlas(), 0, 0, 900, 900);
-    const search = artifactSearchZone(this.profile(), sim);
-    if (search) {
+    for (const search of artifactSearchZones(this.profile(), sim)) {
       const center = mapPoint(search),
         radius = (search.radius / (MAP_EXTENT * 2)) * 900;
       c.save();

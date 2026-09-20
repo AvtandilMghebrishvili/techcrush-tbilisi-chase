@@ -188,6 +188,7 @@ export const BOX_SHOP = {
   creator: { name: "TECHCRUSH", field: "creatorBoxes", price: 35000 },
 };
 export const BOX_OPEN_LIMIT = 10;
+export const BOX_BUY_LIMIT = 10;
 export const boxOpenCount = (selection, owned) =>
   selection === "all" ? owned : Math.min(owned, Number(selection) || 1);
 const BOX_OPEN_ACTIONS = {
@@ -455,12 +456,19 @@ export function applyProgressAction(
     };
   } else if (action.type === "buy-box") {
     const box = BOX_SHOP[action.kind];
-    if (!box) throw Error("Choose a valid supply box.");
-    if (p.credits < box.price)
-      throw Error(`You need ${box.price.toLocaleString()} CR for this box.`);
-    p.credits -= box.price;
-    p[box.field] = (p[box.field] || 0) + 1;
-    p.lastPurchase = { kind: action.kind, price: box.price };
+    if (!Object.hasOwn(BOX_SHOP, action.kind))
+      throw Error("Choose a valid supply box.");
+    const count = action.count === undefined ? 1 : action.count;
+    if (!Number.isInteger(count) || count < 1 || count > BOX_BUY_LIMIT)
+      throw Error(`Choose between 1 and ${BOX_BUY_LIMIT} boxes.`);
+    const price = box.price * count;
+    if (p.credits < price)
+      throw Error(
+        `You need ${price.toLocaleString()} CR for ${count === 1 ? "this box" : "these boxes"}.`,
+      );
+    p.credits -= price;
+    p[box.field] = (p[box.field] || 0) + count;
+    p.lastPurchase = { kind: action.kind, price, count };
   } else if (action.type === "buy-artifact") {
     if (!Number.isFinite(context.now) || eventPhase(context.now) !== "live")
       throw Error("Artifacts are available while CITY WARS is live.");

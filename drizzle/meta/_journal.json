@@ -78,6 +78,13 @@
       "when": 1789934155778,
       "tag": "0010_wealthy_cyclops",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1789942817310,
+      "tag": "0011_minor_marrow",
+      "breakpoints": true
     }
   ]
 }
