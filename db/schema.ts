@@ -18,6 +18,7 @@ export const garages = sqliteTable(
     displayName: text("display_name").notNull().default(""),
     avatar: text("avatar").notNull().default("red"),
     listed: integer("listed").notNull().default(0),
+    privateMode: integer("private_mode").notNull().default(0),
     hasPlayed: integer("has_played").notNull().default(0),
     rankedRuns: integer("ranked_runs").notNull().default(0),
     rankLevel: integer("rank_level").notNull().default(1),

@@ -3,6 +3,7 @@ import { eventBoard } from "./event-board.mjs";
 import { readLeaderboard } from "./leaderboard.mjs";
 import { cityCommunity } from "../dist/map-selection.js";
 import { updateGhosts } from "./ghosts.mjs";
+import { isPrivateProfile } from "../dist/private-driver.js";
 import {
   newProfile,
   migrateProfile,
@@ -191,7 +192,7 @@ export async function handleApi(request, DB, options = {}) {
           -128,
         );
         const update = DB.prepare(
-          "UPDATE garages SET profile=?,version=version+1,updated_at=?,public_id=?,display_name=?,avatar=?,listed=?,ranked_runs=?,rank_level=?,rank_checkpoints=?,best_score=?,total_score=?,wins=?,badges=?,week_key=?,week_score=?,week_wins=?,rank_at=?,has_played=MAX(has_played,?) WHERE key_hash=? AND version=?",
+          "UPDATE garages SET profile=?,version=version+1,updated_at=?,public_id=?,display_name=?,avatar=?,listed=?,private_mode=?,ranked_runs=?,rank_level=?,rank_checkpoints=?,best_score=?,total_score=?,wins=?,badges=?,week_key=?,week_score=?,week_wins=?,rank_at=?,has_played=MAX(has_played,?) WHERE key_hash=? AND version=?",
         ).bind(
           JSON.stringify(profile),
           Date.now(),
@@ -199,6 +200,7 @@ export async function handleApi(request, DB, options = {}) {
           profile.driver.name,
           profile.driver.avatar,
           Number(profile.driver.listed && !!profile.driver.name),
+          Number(isPrivateProfile(profile)),
           profile.community.runs,
           profile.community.furthestLevel,
           profile.community.checkpoints,

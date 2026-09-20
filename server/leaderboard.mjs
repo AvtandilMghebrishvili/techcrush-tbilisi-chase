@@ -2,6 +2,7 @@ import { weekKey, driverTitle, ACHIEVEMENTS } from "../dist/community-rules.js";
 import { TIME_COURSE, TIME_COURSES } from "../dist/race-timing.js";
 import { CAR_IDS } from "../dist/progression.js";
 import { MAP_COURSES } from "../dist/map-selection.js";
+import { PRIVATE_DRIVER_NAME } from "../dist/private-driver.js";
 const SORTS = {
   progress:
     "rank_level DESC,rank_checkpoints DESC,best_score DESC,rank_at ASC,public_id ASC",
@@ -11,11 +12,11 @@ const SORTS = {
     "week_score DESC,week_wins DESC,rank_level DESC,rank_at ASC,public_id ASC",
 };
 const fields =
-  "public_id,display_name,avatar,rank_level,rank_checkpoints,best_score,total_score,wins,badges,week_score,week_wins";
+  "public_id,display_name,avatar,private_mode,rank_level,rank_checkpoints,best_score,total_score,wins,badges,week_score,week_wins";
 async function playerStats(DB) {
   // Covering index: never parse every garage profile on a leaderboard refresh.
   const row = await DB.prepare(
-    "SELECT COUNT(*) AS total FROM garages WHERE has_played=1",
+    "SELECT COUNT(*) AS total FROM garages WHERE has_played=1 AND private_mode=0",
   )
     .bind()
     .first();
@@ -31,9 +32,9 @@ function publicRow(row, rank) {
   } catch {}
   return {
     id: row.public_id,
-    name: row.display_name,
+    name: row.private_mode === 1 ? PRIVATE_DRIVER_NAME : row.display_name,
     avatar: row.avatar,
-    rank: Number(rank),
+    rank: rank == null ? null : Number(rank),
     level: row.rank_level,
     checkpoints: row.rank_checkpoints,
     bestScore: row.best_score,
@@ -43,6 +44,7 @@ function publicRow(row, rank) {
     weekScore: row.week_score,
     weekWins: row.week_wins,
     title: driverTitle({ furthestLevel: row.rank_level, wins: row.wins }),
+    private: row.private_mode === 1,
   };
 }
 export async function readLeaderboard(DB, url, hash, now = Date.now()) {
@@ -60,9 +62,9 @@ export async function readLeaderboard(DB, url, hash, now = Date.now()) {
   const table =
     map === "tbilisi"
       ? "garages"
-      : `(SELECT g.key_hash,g.public_id,g.display_name,g.avatar,g.listed,c.ranked_runs,c.rank_level,c.rank_checkpoints,c.best_score,c.total_score,c.wins,c.badges,c.week_key,c.week_score,c.week_wins,c.rank_at FROM garages g JOIN city_rankings c ON c.key_hash=g.key_hash WHERE c.map='${map}')`;
+      : `(SELECT g.key_hash,g.public_id,g.display_name,g.avatar,g.listed,g.private_mode,c.ranked_runs,c.rank_level,c.rank_checkpoints,c.best_score,c.total_score,c.wins,c.badges,c.week_key,c.week_score,c.week_wins,c.rank_at FROM garages g JOIN city_rankings c ON c.key_hash=g.key_hash WHERE c.map='${map}')`;
   const where =
-    "listed=1 AND ranked_runs>0" +
+    "listed=1 AND private_mode=0 AND ranked_runs>0" +
     (mode === "weekly" ? " AND week_key=? AND week_score>0" : "");
   const count = await DB.prepare(
     `SELECT COUNT(*) AS total FROM ${table} WHERE ${where}`,
@@ -84,6 +86,14 @@ export async function readLeaderboard(DB, url, hash, now = Date.now()) {
       .bind(...values, hash)
       .first();
     me = publicRow(mine, mine?.position);
+    if (!me) {
+      const privateMine = await DB.prepare(
+        `SELECT ${fields} FROM ${table} WHERE key_hash=? AND private_mode=1`,
+      )
+        .bind(hash)
+        .first();
+      me = publicRow(privateMine, null);
+    }
   }
   return {
     map,
@@ -122,7 +132,7 @@ async function readLevelTimes(DB, url, hash, now) {
   )
     throw Error("Invalid leaderboard time filter.");
   const where =
-    "g.listed=1 AND r.course=? AND r.level=?" +
+    "g.listed=1 AND g.private_mode=0 AND r.course=? AND r.level=?" +
     (car !== "all" ? " AND r.car=?" : "") +
     (build === "stock" ? " AND r.build_class='stock'" : "");
   const values = [course, level, ...(car === "all" ? [] : [car])];
@@ -153,11 +163,19 @@ async function readLevelTimes(DB, url, hash, now) {
         .bind(...values, hash)
         .first()
     : null;
+  const privateMine =
+    !mine && hash
+      ? await DB.prepare(
+          `SELECT r.*,g.public_id,g.display_name,g.avatar,g.private_mode,1 AS best,NULL AS position FROM level_records r JOIN garages g ON g.key_hash=r.key_hash WHERE r.key_hash=? AND r.course=? AND r.level=? AND g.private_mode=1${car !== "all" ? " AND r.car=?" : ""}${build === "stock" ? " AND r.build_class='stock'" : ""} ORDER BY r.duration_ms LIMIT 1`,
+        )
+          .bind(hash, course, level, ...(car === "all" ? [] : [car]))
+          .first()
+      : null;
   const publicTime = (r) =>
     r
       ? {
           id: r.public_id,
-          name: r.display_name,
+          name: r.private_mode === 1 ? PRIVATE_DRIVER_NAME : r.display_name,
           avatar: r.avatar,
           rank: Number(r.position),
           level: r.level,
@@ -166,6 +184,7 @@ async function readLevelTimes(DB, url, hash, now) {
           buildPoints: r.build_points,
           rewinds: r.rewinds,
           recordedAt: new Date(r.recorded_at).toISOString(),
+          private: r.private_mode === 1,
         }
       : null;
   return {
@@ -181,7 +200,7 @@ async function readLevelTimes(DB, url, hash, now) {
     course,
     courseLabel: map.toUpperCase() + " · COURSE " + course.split("-")[1],
     entries: rows.results.map(publicTime),
-    me: publicTime(mine),
+    me: publicTime(mine || privateMine),
     updatedAt: new Date(now).toISOString(),
   };
 }

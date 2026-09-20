@@ -363,10 +363,14 @@ export class CommunityUI {
       : "—";
     $("board-participants").textContent = num(data.total);
     $("board-my-position").textContent = data.me
-      ? "#" + num(data.me.rank)
+      ? data.me.private
+        ? "PRIVATE"
+        : "#" + num(data.me.rank)
       : "—";
     $("board-my-total").textContent = data.me
-      ? `out of ${num(data.total)} players`
+      ? data.me.private
+        ? "visible only to you"
+        : `out of ${num(data.total)} players`
       : "not ranked in this view";
 
     $("board-last-heading").textContent =
@@ -397,7 +401,9 @@ export class CommunityUI {
       : "NO RESULTS YET";
     const me = data.me;
     $("board-self").innerHTML = me
-      ? `<span>YOUR POSITION</span><strong>#${num(me.rank)}<small>OF ${num(data.total)} PLAYERS</small></strong><div><b>${esc(me.name)}</b><small>LEVEL ${me.level} · ${num(weekly ? me.weekScore : me.bestScore)} ${weekly ? "WEEK POINTS" : "BEST SCORE"}</small></div>`
+      ? me.private
+        ? `<span>PRIVATE DRIVER</span><strong>HIDDEN<small>VISIBLE ONLY TO YOU</small></strong><div><b>${esc(me.name)}</b><small>LEVEL ${me.level} · ${num(weekly ? me.weekScore : me.bestScore)} ${weekly ? "WEEK POINTS" : "BEST SCORE"}</small></div>`
+        : `<span>YOUR POSITION</span><strong>#${num(me.rank)}<small>OF ${num(data.total)} PLAYERS</small></strong><div><b>${esc(me.name)}</b><small>LEVEL ${me.level} · ${num(weekly ? me.weekScore : me.bestScore)} ${weekly ? "WEEK POINTS" : "BEST SCORE"}</small></div>`
       : `<span>${this.store.profile.driver.listed ? "READY TO PLACE" : "YOUR DRIVER"}</span><div><b>${esc(this.store.profile.driver.name || "Choose a name to join")}</b><small>${this.store.profile.driver.listed ? "Bank a chase to appear here." : this.store.profile.driver.name ? "Public visibility is off. Change it in My Driver." : "Open My Driver. No account needed."}</small></div>`;
   }
   renderTimes(data) {
@@ -421,7 +427,9 @@ export class CommunityUI {
       ? `${data.page + 1} / ${Math.ceil(data.total / 25)}`
       : "NO CLEAR TIMES YET";
     $("board-self").innerHTML = data.me
-      ? `<span>YOUR TIME</span><strong>#${num(data.me.rank)}<small>OF ${num(data.total)} PLAYERS</small></strong><div><b>${formatRaceTime(data.me.durationMs)} · LEVEL ${data.me.level}</b><small>${esc(build(data.me))}</small></div>`
+      ? data.me.private
+        ? `<span>PRIVATE TIME</span><strong>HIDDEN<small>VISIBLE ONLY TO YOU</small></strong><div><b>${formatRaceTime(data.me.durationMs)} · LEVEL ${data.me.level}</b><small>${esc(build(data.me))}</small></div>`
+        : `<span>YOUR TIME</span><strong>#${num(data.me.rank)}<small>OF ${num(data.total)} PLAYERS</small></strong><div><b>${formatRaceTime(data.me.durationMs)} · LEVEL ${data.me.level}</b><small>${esc(build(data.me))}</small></div>`
       : `<span>LEVEL ${data.level}</span><div><b>No matching time yet</b><small>Clear this level with a public driver profile to record a time.</small></div>`;
   }
 }

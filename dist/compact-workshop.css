@@ -621,6 +621,27 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px 12px;
 }
+#workshop .upgrade-impact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0 0 10px;
+}
+#workshop .upgrade-impact b {
+  width: 100%;
+  color: #dce8f5;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+#workshop .upgrade-impact span {
+  padding: 5px 7px;
+  border: 1px solid #3d876d;
+  border-radius: 999px;
+  background: #173d34;
+  color: #a9f2d2;
+  font-size: 9px;
+  line-height: 1.2;
+}
 #workshop .comparison-row {
   min-width: 0;
 }
@@ -795,6 +816,12 @@
   width: 100%;
   transform: none;
   white-space: normal;
+}
+#workshop .box-bench .buy-box {
+  margin-top: 4px;
+  background: #182536;
+  border-color: color-mix(in srgb, var(--supply) 48%, #526174);
+  color: #f3f7fb;
 }
 #workshop .last-drop {
   font-size: 10px;

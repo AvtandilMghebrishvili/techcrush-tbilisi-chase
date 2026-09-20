@@ -893,3 +893,22 @@
     scroll-behavior: auto !important;
   }
 }
+.event-private-score {
+  display: grid;
+  gap: 3px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border: 1px solid #62d8c788;
+  border-radius: 8px;
+  background: #123530;
+  color: #dffcf7;
+}
+.event-private-score b {
+  color: #77efdc;
+}
+.event-private-score span {
+  font-weight: 800;
+}
+.event-private-score small {
+  color: #a8c8c3;
+}

@@ -10,6 +10,7 @@ import {
   enrolledEvent,
   secretOpen,
 } from "./event-rules.js";
+import { PRIVATE_DRIVER_NAME, isPrivateDriverName } from "./private-driver.js";
 import { ACTIVE_MAP } from "./map-selection.js";
 import { EVENT_RULES_COPY } from "./event-copy.js";
 const $ = (id) => document.getElementById(id);
@@ -285,7 +286,11 @@ export class EventUI {
       open = secretOpen(p, this.store.serverNow());
     $("event-register").hidden = !!progress || phase === "ended";
     $("event-member").hidden = !progress;
-    $("event-member-name").textContent = progress?.handle || "";
+    $("event-member-name").textContent = progress?.handle
+      ? isPrivateDriverName(progress.handle)
+        ? PRIVATE_DRIVER_NAME
+        : progress.handle
+      : "";
     $("event-enter").disabled =
       !progress || phase === "upcoming" || this.store.busy;
     $("event-play-label").textContent = "PLAY";
@@ -465,10 +470,15 @@ export class EventUI {
       $("event-stat-runs").textContent = number(data.stats?.totalRuns);
       $("event-stat-clears").textContent = number(data.stats?.levelsCleared);
       $("event-board-summary").textContent =
-        `${names[data.map] || "CHALLENGE"} · ${number(data.total)} RACERS · ${number(data.stats?.cityRuns)} ROUNDS · ${number(data.stats?.cityLevelsCleared)} LEVEL CLEARS${data.mine ? " · YOU #" + data.mine.rank + " / " + data.total : ""}`;
-      $("event-board-table").innerHTML = data.entries.length
-        ? `<table><thead><tr><th>#</th><th>RACER</th><th>POINTS</th><th>LEVEL</th><th>ROUNDS</th></tr></thead><tbody>${data.entries.map((r) => `<tr class="${r.you ? "you " : ""}${r.rank <= 3 ? "podium podium-" + r.rank : ""}"><td class="event-rank">${r.rank <= 3 ? '<span class="event-rank-medal">' + r.rank + "</span>" : r.rank}</td><td class="event-racer"><b>${escape(r.name)}</b>${r.you ? "<small>YOU</small>" : ""}</td><td class="event-score">${number(r.score)}</td><td class="event-level"><strong>${r.level}</strong><small>REACHED</small></td><td class="event-runs">${number(r.runs)}</td></tr>`).join("")}</tbody></table>`
-        : "No banked runs yet. Take the first spot.";
+        `${names[data.map] || "CHALLENGE"} · ${number(data.total)} RACERS · ${number(data.stats?.cityRuns)} ROUNDS · ${number(data.stats?.cityLevelsCleared)} LEVEL CLEARS${data.mine ? (data.mine.private ? " · YOUR SCORE IS PRIVATE" : " · YOU #" + data.mine.rank + " / " + data.total) : ""}`;
+      const privateScore = data.mine?.private
+        ? `<div class="event-private-score"><b>PRIVATE · ${escape(data.mine.name)}</b><span>${number(data.mine.score)} POINTS · LEVEL ${data.mine.level} · ${number(data.mine.runs)} ROUNDS</span><small>Only you can see this result. It is excluded from official standings and totals.</small></div>`
+        : "";
+      $("event-board-table").innerHTML =
+        privateScore +
+        (data.entries.length
+          ? `<table><thead><tr><th>#</th><th>RACER</th><th>POINTS</th><th>LEVEL</th><th>ROUNDS</th></tr></thead><tbody>${data.entries.map((r) => `<tr class="${r.you ? "you " : ""}${r.rank <= 3 ? "podium podium-" + r.rank : ""}"><td class="event-rank">${r.rank <= 3 ? '<span class="event-rank-medal">' + r.rank + "</span>" : r.rank}</td><td class="event-racer"><b>${escape(r.name)}</b>${r.you ? "<small>YOU</small>" : ""}</td><td class="event-score">${number(r.score)}</td><td class="event-level"><strong>${r.level}</strong><small>REACHED</small></td><td class="event-runs">${number(r.runs)}</td></tr>`).join("")}</tbody></table>`
+          : "No banked runs yet. Take the first spot.");
     } catch (e) {
       if (generation === this.requestGeneration)
         $("event-board-table").textContent = e.message;

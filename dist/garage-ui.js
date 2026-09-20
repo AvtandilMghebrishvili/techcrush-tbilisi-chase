@@ -1,4 +1,9 @@
-import { carUnlocked, totalBoxes, MILESTONE_BOXES } from "./progression.js";
+import {
+  carUnlocked,
+  totalBoxes,
+  MILESTONE_BOXES,
+  BOX_SHOP,
+} from "./progression.js";
 import { carRequirement, refreshRewards, coinIcon } from "./reward-ui.js";
 import { ACTIVE_MAP, CITY_NAME, cityLevel } from "./map-selection.js";
 import { GaragePreview } from "./garage-preview.js";
@@ -122,6 +127,8 @@ export class GarageUI {
     $("open-box").onclick = () => this.openBox();
     $("open-platinum-box").onclick = () => this.openBox(true);
     $("open-creator-box").onclick = () => this.openBox("creator");
+    for (const kind of Object.keys(BOX_SHOP))
+      $("buy-" + kind + "-box").onclick = () => this.buyBox(kind);
     $("loot-done").onclick = () => {
       $("loot-dialog").close();
     };
@@ -209,6 +216,16 @@ export class GarageUI {
     void this.run(() =>
       this.store.mutate({ type: "paint", car: this.car, color }),
     ).catch(() => {});
+  }
+  buyBox(kind) {
+    const box = BOX_SHOP[kind];
+    if (!box || this.store.busy || this.store.pending) return;
+    void this.run(() => this.store.mutate({ type: "buy-box", kind }))
+      .then(() => {
+        $("upgrade-feedback").textContent =
+          `${box.name} Box purchased for ${box.price.toLocaleString()} CR. Open it in Supply Drops.`;
+      })
+      .catch(() => {});
   }
   inspect(part, tier) {
     this.selectedPart = part;
@@ -299,24 +316,33 @@ export class GarageUI {
       .join("");
     const buy =
       actual < 4
-        ? `<button data-inspector-buy ${busy || profile.credits < upgradeCost(next) ? "disabled" : ""}>BUY ${TIERS[next].name.toUpperCase()} <b>${upgradeCost(next).toLocaleString()} CR</b></button>`
+        ? `<button data-inspector-buy ${busy || profile.credits < upgradeCost(next) ? "disabled" : ""}>UPGRADE TO ${TIERS[next].name.toUpperCase()} <b>${upgradeCost(next).toLocaleString()} CR</b></button>`
         : "";
     const install =
       tier > actual && spare > 0
-        ? `<button data-inspector-install ${busy ? "disabled" : ""}>FIT ${TIERS[tier].name.toUpperCase()} <b>FREE ↑</b></button>`
+        ? `<button data-inspector-install ${busy ? "disabled" : ""}>EQUIP ${TIERS[tier].name.toUpperCase()} UPGRADE <b>FREE ↑</b></button>`
         : "";
     const sell =
       spare > 0
         ? `<button data-sell="${part.id}" data-tier="${tier}" ${busy ? "disabled" : ""}>SELL 1 SPARE <b>+${salvageValue(tier).toLocaleString()} CR</b></button>`
         : "";
     const fusion = actual
-      ? `<div class="fusion-panel"><strong><span>${TIERS[actual].name} ${"★".repeat(actualStars)}${"☆".repeat(5 - actualStars)}</span><span>+${Math.round(FUSION_BONUSES[actualStars] * 100)}%</span></strong>${fusionCost ? `<div class="fusion-next"><small>${copies}/${fusionCost} matching spares · next +${Math.round(FUSION_BONUSES[actualStars + 1] * 100)}% effect</small><progress max="${fusionCost}" value="${Math.min(fusionCost, copies)}"></progress></div><button data-fuse="${part.id}" ${busy || copies < fusionCost ? "disabled" : ""}>FUSE ${fusionCost} → ${"★".repeat(actualStars + 1)}</button>` : "<small>Five-star mastery complete</small>"}</div>`
+      ? `<div class="fusion-panel"><strong><span>EXTRA BOOST · ${TIERS[actual].name} ${"★".repeat(actualStars)}${"☆".repeat(5 - actualStars)}</span><span>+${Math.round(FUSION_BONUSES[actualStars] * 100)}%</span></strong>${fusionCost ? `<div class="fusion-next"><small>${copies}/${fusionCost} same parts · next boost +${Math.round(FUSION_BONUSES[actualStars + 1] * 100)}%</small><progress max="${fusionCost}" value="${Math.min(fusionCost, copies)}"></progress></div><button data-fuse="${part.id}" ${busy || copies < fusionCost ? "disabled" : ""}>BOOST WITH ${fusionCost} PARTS → ${"★".repeat(actualStars + 1)}</button>` : "<small>Maximum five-star boost reached</small>"}</div>`
       : "";
     const section = $("part-inspector");
     section.dataset.gradeCount = String(maxTier);
     section.style.setProperty("--tier", TIERS[tier].color);
     section.innerHTML = `<div class="inspector-heading"><div class="inspector-art">${partArtwork(part, "", tier)}</div><div class="inspector-copy"><small>${installed ? "FITTED ✓" : "UPGRADE PREVIEW"}</small><h3>${vehiclePartName(part, this.car)}</h3><span class="fitted-grade">Installed: ${TIERS[actual].name}${"+".repeat(actualStars)}</span><p>${part.effect}</p></div></div>
       <div class="quality-picker" role="group" aria-label="Preview quality and spare inventory">${grades}</div>
+      <div class="upgrade-impact"><b>WHAT GETS STRONGER</b>${upgradeBenefits(
+        carSpec(this.car),
+        equipment,
+        part,
+        tier,
+        stars,
+      )
+        .map((benefit) => `<span>↑ ${benefit}</span>`)
+        .join("")}</div>
       <div class="comparison-meters">${rows.map((r) => `<div class="comparison-row"><span>${r.label} ${r.lower ? "↓" : "↑"}</span><div class="comparison-numbers"><b>${r.before.toFixed(r.unit === "s" ? 2 : 1)}</b><span>→</span><strong data-after="${r.key}">${r.after.toFixed(r.unit === "s" ? 2 : 1)}</strong><small>${r.unit}</small></div><div class="meter" style="--from:${Math.min(100, (r.before / r.max) * 100)}%;--to:${Math.min(100, (r.after / r.max) * 100)}%"><i></i><b></b></div></div>`).join("")}</div>
       <small class="preview-disclaimer">${installed ? "Installed and saved." : `Comparing ${TIERS[tier].name} · ${spare} spare${spare === 1 ? "" : "s"}. Preview changes are not installed.`}</small>
       <div class="inspector-actions">${buy}${install}${sell}</div>
@@ -467,7 +493,7 @@ export class GarageUI {
             best,
             Math.min(this.car === "creator" ? 8 : 5, tier + 1),
           );
-        return `<button class="part-tile" data-part="${part.id}" data-inspect="${part.id}" data-tier="${previewTier}" aria-pressed="${part.id === this.selectedPart}" style="--tier:${TIERS[tier || 1].color}"><span class="tile-photo">${partArtwork(part, "", tier || 1)}</span><span class="tile-copy"><b>${vehiclePartName(part, this.car)}</b><small>${TIERS[tier].name}${"+".repeat(stars)}</small>${best > tier ? "<em>FREE UPGRADE ↑</em>" : ""}</span></button>`;
+        return `<button class="part-tile" data-part="${part.id}" data-inspect="${part.id}" data-tier="${previewTier}" aria-pressed="${part.id === this.selectedPart}" style="--tier:${TIERS[tier || 1].color}"><span class="tile-photo">${partArtwork(part, "", tier || 1)}</span><span class="tile-copy"><b>${vehiclePartName(part, this.car)}</b><small>${TIERS[tier].name}${"+".repeat(stars)} · ${part.effect}</small>${best > tier ? "<em>FREE UPGRADE READY ↑</em>" : ""}</span></button>`;
       })
       .join("");
     for (const button of $("part-grid").querySelectorAll("[data-inspect]"))
@@ -516,6 +542,15 @@ export class GarageUI {
           .join(" · ")
       : "One welcome box is waiting. Earn another by completing a level.";
     $("open-box").textContent = `OPEN STREET BOX · ${p.boxes} ↗`;
+    for (const [kind, box] of Object.entries(BOX_SHOP)) {
+      const button = $("buy-" + kind + "-box");
+      button.textContent = `BUY 1 · ${box.price.toLocaleString()} CR`;
+      button.disabled =
+        p.credits < box.price ||
+        this.store.busy ||
+        !!this.store.pending ||
+        this.rolling;
+    }
     if (this.artReady && $("workshop").open && this.tab === "parts") {
       this.preview?.hydrate($("part-grid"));
       this.preview?.hydrate($("part-inspector"));

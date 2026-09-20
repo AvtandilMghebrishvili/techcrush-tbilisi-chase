@@ -8,6 +8,7 @@ import {
 } from "./event-rules.js";
 import { TIME_COURSES } from "./race-timing.js";
 import { ticketRewardMultiplier } from "./car-bonuses.js";
+import { isPrivateDriverName } from "./private-driver.js";
 import {
   mapUnlocked,
   cityLevel,
@@ -176,6 +177,13 @@ export const MILESTONE_BOXES = {
       [5, 35],
     ],
   },
+};
+export const BOX_SHOP = {
+  street: { name: "Street", field: "boxes", price: 4000 },
+  mystery: { name: "Mystery", field: "mysteryBoxes", price: 10000 },
+  special: { name: "GREX Special", field: "specialBoxes", price: 16000 },
+  platinum: { name: "Platinum", field: "platinumBoxes", price: 22000 },
+  creator: { name: "TECHCRUSH", field: "creatorBoxes", price: 35000 },
 };
 export const totalBoxes = (p) =>
   p.boxes +
@@ -398,7 +406,19 @@ export function applyProgressAction(
     const name = normalizeName(action.name);
     if (!AVATARS.includes(action.avatar) || typeof action.listed !== "boolean")
       throw Error("Choose a valid driver profile.");
-    p.driver = { name, avatar: action.avatar, listed: action.listed };
+    p.driver = {
+      name,
+      avatar: action.avatar,
+      listed: isPrivateDriverName(name) ? false : action.listed,
+    };
+  } else if (action.type === "buy-box") {
+    const box = BOX_SHOP[action.kind];
+    if (!box) throw Error("Choose a valid supply box.");
+    if (p.credits < box.price)
+      throw Error(`You need ${box.price.toLocaleString()} CR for this box.`);
+    p.credits -= box.price;
+    p[box.field] = (p[box.field] || 0) + 1;
+    p.lastPurchase = { kind: action.kind, price: box.price };
   } else if (action.type === "begin-run") {
     if (!context.runId || !Number.isFinite(context.now))
       throw Error("Start your chase online.");
