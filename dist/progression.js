@@ -188,6 +188,9 @@ export const BOX_SHOP = {
   creator: { name: "TECHCRUSH", field: "creatorBoxes", price: 35000 },
 };
 export const ARTIFACT_PRICE = 1_000_000;
+export const artifactPrice = (owned = 0) =>
+  ARTIFACT_PRICE *
+  2 ** Math.max(0, Math.min(ARTIFACT_BANNERS.length - 1, owned));
 export const totalBoxes = (p) =>
   p.boxes +
   (p.platinumBoxes || 0) +
@@ -430,20 +433,37 @@ export function applyProgressAction(
     if (!HUNT_CITIES.includes(action.map))
       throw Error("Choose a valid artifact city.");
     const owned = contest.artifacts[action.map] || [];
+    contest.artifactHints ||= {};
+    const hints = (contest.artifactHints[action.map] ||= []);
+    const activeHint = hints.find((id) => !owned.includes(id));
+    if (activeHint != null)
+      throw Error(
+        "Find the artifact inside the active search area before revealing another.",
+      );
+    contest.artifactPurchases ||= {};
+    const purchases = Math.max(
+      0,
+      Math.min(
+        ARTIFACT_BANNERS.length - 1,
+        Math.floor(Number(contest.artifactPurchases[action.map]) || 0),
+      ),
+    );
     const artifact = ARTIFACT_BANNERS.find((id) => !owned.includes(id));
     if (artifact == null)
-      throw Error("You already own every artifact in this city.");
-    if (p.credits < ARTIFACT_PRICE)
+      throw Error("You already found every artifact in this city.");
+    const price = artifactPrice(purchases);
+    if (p.credits < price)
       throw Error(
-        `You need ${ARTIFACT_PRICE.toLocaleString()} CR for this artifact.`,
+        `You need ${price.toLocaleString()} CR to reveal this search area.`,
       );
-    p.credits -= ARTIFACT_PRICE;
-    contest.artifacts[action.map] = [...owned, artifact];
+    p.credits -= price;
+    contest.artifactHints[action.map] = [...new Set([...hints, artifact])];
+    contest.artifactPurchases[action.map] = purchases + 1;
     p.lastPurchase = {
-      kind: "artifact",
+      kind: "artifact-hint",
       map: action.map,
       artifact,
-      price: ARTIFACT_PRICE,
+      price,
     };
   } else if (action.type === "begin-run") {
     if (!context.runId || !Number.isFinite(context.now))

@@ -7,9 +7,18 @@ export const EVENT_END = Date.parse("2026-09-24T21:00:00+04:00");
 export const EVENT_SAVE_GRACE = 30000;
 export const HUNT_CITIES = ["tbilisi", "kutaisi", "batumi"];
 export const ARTIFACT_BANNERS = [0, 3, 6, 9, 12];
+export const ARTIFACT_SEARCH_RADIUS = 85;
 export const eventPhase = (now) =>
   now < EVENT_START ? "upcoming" : now < EVENT_END ? "live" : "ended";
 export const eventProgress = (p) => p?.events?.[EVENT_ID];
+export const activeArtifactHint = (p, map, runArtifacts = []) => {
+  const contest = eventProgress(p),
+    found = new Set([
+      ...(contest?.artifacts?.[map] || []),
+      ...(runArtifacts || []),
+    ]);
+  return (contest?.artifactHints?.[map] || []).find((id) => !found.has(id));
+};
 // Enrollment belongs to the saved profile, not a removable URL mode switch.
 export const enrolledEvent = (p, now) =>
   eventProgress(p) && now < EVENT_END ? EVENT_ID : undefined;
@@ -51,6 +60,8 @@ export function joinEvent(p, action, now) {
       handleKey: normalized,
       joinedAt: now,
       artifacts: Object.fromEntries(HUNT_CITIES.map((map) => [map, []])),
+      artifactHints: Object.fromEntries(HUNT_CITIES.map((map) => [map, []])),
+      artifactPurchases: Object.fromEntries(HUNT_CITIES.map((map) => [map, 0])),
       scores: {},
       subscription: "self-declared",
     };

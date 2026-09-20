@@ -11,6 +11,7 @@ import { RIVER_POLYGON } from "./district-data.js";
 import { SPECIAL_RAMPS, ROOFTOP_QUESTS } from "./world-sites.js";
 import { RAMPS } from "./stunts.js";
 import {
+  ACTIVE_MAP,
   CITY_NAME,
   IS_KUTAISI,
   IS_BATUMI,
@@ -27,6 +28,7 @@ import {
 import { mapClickPoint, routeDistance } from "./hud-math.js";
 import { LANDMARKS } from "./district-data.js";
 import { FACADE_BANNERS } from "./city-brand-sites.js";
+import { ARTIFACT_SEARCH_RADIUS, activeArtifactHint } from "./event-rules.js";
 import { MAP_PLACES } from "./map-landmarks.js";
 export { MAP_PLACES };
 
@@ -58,6 +60,21 @@ export const mapPoint = (point, size = 900) => ({
   x: ((MAP_EXTENT - point.x) / (MAP_EXTENT * 2)) * size,
   y: ((MAP_EXTENT - point.z) / (MAP_EXTENT * 2)) * size,
 });
+export function artifactSearchZone(profile, sim) {
+  const id = activeArtifactHint(profile, ACTIVE_MAP, sim?.runArtifacts);
+  const artifact = FACADE_BANNERS.find((site) => site.id === id);
+  if (!artifact) return null;
+  // The artifact sits inside the area, away from its center, so the reveal is
+  // useful without becoming an exact waypoint.
+  const angle = ((id * 137 + ACTIVE_MAP.length * 53) * Math.PI) / 180,
+    offset = ARTIFACT_SEARCH_RADIUS * 0.48;
+  return {
+    artifact,
+    x: artifact.x + Math.cos(angle) * offset,
+    z: artifact.z + Math.sin(angle) * offset,
+    radius: ARTIFACT_SEARCH_RADIUS,
+  };
+}
 
 // One small raster of static geography, shared by the radar and full map.
 // No timers, WebGL context or duplicate world geometry are allocated here.
@@ -292,6 +309,28 @@ export class QuestMap {
     const sim = this.sim;
     const c = document.getElementById("quest-canvas").getContext("2d");
     c.drawImage(mapAtlas(), 0, 0, 900, 900);
+    const search = artifactSearchZone(this.profile(), sim);
+    if (search) {
+      const center = mapPoint(search),
+        radius = (search.radius / (MAP_EXTENT * 2)) * 900;
+      c.save();
+      c.fillStyle = "rgba(255, 212, 59, 0.17)";
+      c.strokeStyle = "#ffd43b";
+      c.lineWidth = 5;
+      c.setLineDash([12, 8]);
+      c.shadowColor = "rgba(255, 212, 59, 0.7)";
+      c.shadowBlur = 12;
+      c.beginPath();
+      c.arc(center.x, center.y, radius, 0, Math.PI * 2);
+      c.fill();
+      c.stroke();
+      c.setLineDash([]);
+      c.shadowBlur = 0;
+      c.fillStyle = "#ffe98a";
+      c.font = "900 16px Arial";
+      c.fillText("ARTIFACT SEARCH AREA", center.x + radius + 8, center.y + 5);
+      c.restore();
+    }
     c.strokeStyle = "#73e6ed";
     c.lineWidth = 3;
     c.beginPath();

@@ -5,11 +5,17 @@ import {
   applyProgressAction,
   BOX_SHOP,
   ARTIFACT_PRICE,
+  artifactPrice,
 } from "../dist/progression.js";
 import { PRIVATE_DRIVER_NAME } from "../dist/private-driver.js";
 import { handleApi, keyHash } from "../server/api.mjs";
 import { openLocalDatabase } from "../server/local-db.mjs";
-import { EVENT_ID, EVENT_START } from "../dist/event-rules.js";
+import {
+  activeArtifactHint,
+  ARTIFACT_BANNERS,
+  EVENT_ID,
+  EVENT_START,
+} from "../dist/event-rules.js";
 
 test("credit shop prices every box above its maximum resale return", () => {
   let profile = newProfile();
@@ -35,7 +41,7 @@ test("credit shop prices every box above its maximum resale return", () => {
   );
 });
 
-test("the separate shop sells the next missing city artifact for one million credits", () => {
+test("artifact purchases reveal one persistent search area at a time and double in price", () => {
   const now = EVENT_START + 1000;
   let profile = applyProgressAction(
     newProfile(),
@@ -48,15 +54,56 @@ test("the separate shop sells the next missing city artifact for one million cre
     Math.random,
     { now },
   );
-  profile.credits = ARTIFACT_PRICE * 2;
+  profile.credits = artifactPrice(0) + artifactPrice(1) + 1;
   profile = applyProgressAction(
     profile,
     { type: "buy-artifact", map: "tbilisi" },
     Math.random,
     { now },
   );
-  assert.equal(profile.credits, ARTIFACT_PRICE);
+  assert.equal(
+    profile.credits,
+    artifactPrice(1) + 1,
+    "the first artifact costs one million",
+  );
+  assert.deepEqual(profile.events[EVENT_ID].artifacts.tbilisi, []);
+  assert.deepEqual(profile.events[EVENT_ID].artifactHints.tbilisi, [0]);
+  assert.equal(activeArtifactHint(profile, "tbilisi"), 0);
+  assert.equal(
+    activeArtifactHint(profile, "tbilisi", [0]),
+    undefined,
+    "the area disappears immediately after collection, before banking",
+  );
+  assert.throws(
+    () =>
+      applyProgressAction(
+        profile,
+        { type: "buy-artifact", map: "tbilisi" },
+        Math.random,
+        { now },
+      ),
+    /active search area/,
+  );
+  profile.events[EVENT_ID].artifacts.tbilisi.push(0);
+  assert.equal(activeArtifactHint(profile, "tbilisi"), undefined);
+  profile = applyProgressAction(
+    profile,
+    { type: "buy-artifact", map: "tbilisi" },
+    Math.random,
+    { now },
+  );
+  assert.equal(profile.credits, 1, "the second artifact costs two million");
   assert.deepEqual(profile.events[EVENT_ID].artifacts.tbilisi, [0]);
+  assert.deepEqual(
+    profile.events[EVENT_ID].artifactHints.tbilisi,
+    ARTIFACT_BANNERS.slice(0, 2),
+  );
+  assert.equal(activeArtifactHint(profile, "tbilisi"), ARTIFACT_BANNERS[1]);
+  assert.equal(profile.events[EVENT_ID].artifactPurchases.tbilisi, 2);
+  assert.deepEqual(
+    [0, 1, 2, 3, 4].map(artifactPrice),
+    [1_000_000, 2_000_000, 4_000_000, 8_000_000, 16_000_000],
+  );
 });
 
 test("reserved owner name is always private even when public is requested", () => {

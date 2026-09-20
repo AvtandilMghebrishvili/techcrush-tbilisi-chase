@@ -3,7 +3,7 @@ import {
   totalBoxes,
   MILESTONE_BOXES,
   BOX_SHOP,
-  ARTIFACT_PRICE,
+  artifactPrice,
 } from "./progression.js";
 import {
   ARTIFACT_BANNERS,
@@ -178,8 +178,7 @@ export class GarageUI {
   updatePreviewActivity() {
     if (
       $("workshop").open &&
-      this.tab !== "boxes" &&
-      (!this.compactMedia.matches || this.tab === "build")
+      (!this.compactMedia.matches || ["build", "boxes"].includes(this.tab))
     )
       this.preview?.start();
     else this.preview?.stop();
@@ -249,9 +248,10 @@ export class GarageUI {
     if (!HUNT_CITIES.includes(map) || this.store.busy || this.store.pending)
       return;
     void this.run(() => this.store.mutate({ type: "buy-artifact", map }))
-      .then(() => {
+      .then((profile) => {
+        const price = profile.lastPurchase?.price || artifactPrice(0);
         $("upgrade-feedback").textContent =
-          `${map.toUpperCase()} artifact purchased for ${ARTIFACT_PRICE.toLocaleString()} CR.`;
+          `${map.toUpperCase()} search area revealed for ${price.toLocaleString()} CR. Open the city map and search inside the yellow zone.`;
       })
       .catch(() => {});
   }
@@ -583,29 +583,41 @@ export class GarageUI {
     const contest = eventProgress(p),
       artifactsLive = eventPhase(this.store.serverNow()) === "live";
     for (const map of HUNT_CITIES) {
-      const found = contest?.artifacts?.[map]?.length || 0,
+      const collected = contest?.artifacts?.[map] || [],
+        found = collected.length,
+        activeHint = (contest?.artifactHints?.[map] || []).find(
+          (id) => !collected.includes(id),
+        ),
+        purchases = contest?.artifactPurchases?.[map] || 0,
+        price = artifactPrice(purchases),
         progress = document.querySelector(`[data-artifact-progress="${map}"]`),
         button = document.querySelector(`[data-buy-artifact="${map}"]`);
-      progress.textContent = `${found} / ${ARTIFACT_BANNERS.length} FOUND`;
+      progress.textContent = `${found} / ${ARTIFACT_BANNERS.length} FOUND${activeHint != null ? " · YELLOW AREA ACTIVE" : ""}`;
       button.textContent =
         found >= ARTIFACT_BANNERS.length
           ? "ALL 5 COLLECTED ✓"
-          : `BUY NEXT · ${ARTIFACT_PRICE.toLocaleString()} CR`;
+          : activeHint != null
+            ? "SEARCH AREA ACTIVE · OPEN MAP"
+            : `REVEAL AREA · ${price.toLocaleString()} CR`;
       button.disabled =
         !contest ||
         !artifactsLive ||
         found >= ARTIFACT_BANNERS.length ||
-        p.credits < ARTIFACT_PRICE ||
+        activeHint != null ||
+        p.credits < price ||
         this.store.busy ||
         !!this.store.pending ||
         this.rolling;
-      button.title = !artifactsLive
-        ? "CITY WARS artifact sales are closed"
-        : !contest
-          ? "Join CITY WARS first"
-          : p.credits < ARTIFACT_PRICE
-            ? `Need ${ARTIFACT_PRICE.toLocaleString()} CR`
-            : "Buy the next missing artifact in this city";
+      button.title =
+        activeHint != null
+          ? "Find the artifact inside the yellow area before revealing another"
+          : !artifactsLive
+            ? "CITY WARS artifact sales are closed"
+            : !contest
+              ? "Join CITY WARS first"
+              : p.credits < price
+                ? `Need ${price.toLocaleString()} CR`
+                : "Reveal a yellow search area for the next missing artifact";
     }
     if (this.artReady && $("workshop").open && this.tab === "parts") {
       this.preview?.hydrate($("part-grid"));

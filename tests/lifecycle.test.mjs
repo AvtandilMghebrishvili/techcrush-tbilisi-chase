@@ -167,6 +167,18 @@ test("muting, menus and background suspend audio DSP; terminal audio stops after
   assert.equal(a.voices.size, 0);
   assert(c.nodes.every((n) => n.disconnected));
 });
+test("preparing a run wakes a context that was suspended in the menu", async () => {
+  const a = new ChaseAudio(),
+    c = audioContext();
+  a.context = c;
+  a.muted = false;
+  a.phase = "ready";
+  a.syncContext();
+  assert.equal(c.state, "suspended");
+  await a.prepareRun();
+  assert.equal(a.phase, "running");
+  assert.equal(c.state, "running");
+});
 test("permanent audio teardown closes the context and cannot reopen it", async () => {
   const a = new ChaseAudio(),
     c = audioContext();

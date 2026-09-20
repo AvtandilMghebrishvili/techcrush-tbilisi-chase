@@ -44,6 +44,13 @@ export class ChaseAudio {
     this.syncContext();
     return true;
   }
+  prepareRun() {
+    // The browser gesture that starts a race must also wake the effects graph.
+    // Mark the intended phase before unlock() reaches its first await so a
+    // still-pending menu suspension cannot leave engine and impact audio asleep.
+    this.phase = "running";
+    return this.unlock();
+  }
   setForeground(value) {
     this.foreground = value;
     if (!value) this.stopEffects();

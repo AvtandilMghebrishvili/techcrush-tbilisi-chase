@@ -1,0 +1,801 @@
+/* TECHCRUSH arcade interface pass.
+   Pure CSS surfaces keep the redesign light: no extra textures, images or render loops. */
+:root {
+  --arcade-ink: #070c12;
+  --arcade-panel: #141d28;
+  --arcade-panel-2: #1c2835;
+  --arcade-steel: #536273;
+  --arcade-cyan: #65eff2;
+  --arcade-gold: #ffc95b;
+  --arcade-red: #f4405f;
+  --arcade-green: #8de1a4;
+  --arcade-cream: #fff2cf;
+}
+
+/* Shared controls: thick, readable and tactile without image assets. */
+#game > header .icon-button,
+#intro button,
+#workshop button,
+#workshop select,
+.modal button,
+#community-dialog button,
+#quest-map button {
+  border-width: 1px;
+  border-color: #607183;
+  background-image: linear-gradient(180deg, #263546, #16212e 66%, #101821);
+  box-shadow:
+    inset 0 1px 0 #ffffff21,
+    inset 0 -3px 0 #05090e66,
+    0 2px 0 #05090e;
+  text-shadow: 0 1px 1px #000;
+}
+
+#game > header .icon-button:hover:not(:disabled),
+#intro button:hover:not(:disabled),
+#workshop button:hover:not(:disabled) {
+  border-color: #9fb3c7;
+  filter: brightness(1.09);
+}
+
+#game > header {
+  border-bottom: 1px solid #61708066;
+  background:
+    linear-gradient(90deg, #05090ef0, #111a25e8 48%, #05090ef0),
+    repeating-linear-gradient(100deg, #ffffff03 0 1px, transparent 1px 16px);
+  box-shadow: 0 5px 18px #0008;
+}
+
+#game > header .icon-button {
+  border-radius: 7px;
+}
+
+/* Main menu: compact arcade cabinet cards with clearer action hierarchy. */
+#intro {
+  border: 2px solid #596879;
+  border-radius: 13px;
+  background:
+    linear-gradient(155deg, #1c2936f7, #0a111af9 68%),
+    repeating-linear-gradient(115deg, #ffffff05 0 1px, transparent 1px 18px);
+  box-shadow:
+    inset 0 0 0 2px #080d14,
+    inset 0 1px 0 #ffffff29,
+    0 18px 55px #000b;
+}
+
+#intro::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid #ffffff0a;
+  border-radius: 7px;
+  pointer-events: none;
+}
+
+#intro h1 {
+  color: var(--arcade-cream);
+  text-shadow:
+    0 3px 0 #030609,
+    0 0 24px #ff3f5b24;
+}
+
+#intro .menu-section-heading h2 span,
+#intro h1 em {
+  color: var(--arcade-red);
+}
+
+#intro .map-slots > button,
+#intro #garage button[data-car] {
+  border: 1px solid #526276;
+  border-radius: 7px;
+  background:
+    linear-gradient(150deg, #2a3949, #121c28 72%),
+    repeating-linear-gradient(0deg, #ffffff03 0 1px, transparent 1px 10px);
+  box-shadow:
+    inset 0 0 0 1px #0b1119,
+    inset 0 1px 0 #ffffff18,
+    0 3px 0 #060a10;
+}
+
+#intro .map-slots > button.active-map,
+#intro #garage button[data-car][aria-pressed="true"] {
+  border-color: #f76b7d;
+  background: linear-gradient(150deg, #52313c, #172433 72%);
+  box-shadow:
+    inset 0 -3px 0 var(--arcade-red),
+    inset 0 1px 0 #ffffff1f,
+    0 3px 0 #05090e;
+}
+
+#intro .intro-actions {
+  gap: 7px !important;
+}
+
+#intro .intro-actions button {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid #657486 !important;
+  border-radius: 7px !important;
+  color: #f4f7fb;
+  background: linear-gradient(180deg, #344456, #1a2735 65%, #101822) !important;
+  box-shadow:
+    inset 0 1px 0 #ffffff35,
+    inset 0 -4px 0 #080d14,
+    0 3px 0 #05080c !important;
+}
+
+#intro .intro-actions button::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid #ffffff0b;
+  pointer-events: none;
+}
+
+#intro .intro-actions #start {
+  color: #fff;
+  border-color: #ff5b73 !important;
+  background: linear-gradient(180deg, #fa4764, #bc233f 68%, #741529) !important;
+}
+
+#intro .intro-actions #workshop-open {
+  color: #9af7ff;
+  border-color: #50d7df !important;
+}
+
+#intro .intro-actions #shop-open {
+  color: #ffe09a;
+  border-color: #d5a34b !important;
+  background: linear-gradient(180deg, #59472b, #2c281e 68%, #171712) !important;
+}
+
+#intro .intro-actions #leaderboard-menu {
+  color: #dbe8f8;
+  border-color: #7796b7 !important;
+}
+
+/* Garage shell: steel frame, workshop wall and lit concrete floor. */
+#workshop {
+  width: min(1180px, calc(100% - 28px));
+  height: min(720px, calc(100dvh - 28px));
+  padding: 14px;
+  border: 3px solid #4f5d6c;
+  border-radius: 12px;
+  background:
+    linear-gradient(145deg, #1b2632f9, #090f16fc 75%),
+    repeating-linear-gradient(115deg, #ffffff04 0 1px, transparent 1px 20px);
+  box-shadow:
+    inset 0 0 0 2px #080d13,
+    inset 0 1px 0 #ffffff26,
+    0 22px 70px #000d;
+}
+
+#workshop::backdrop {
+  background: #02060bcf;
+  backdrop-filter: blur(3px);
+}
+
+#workshop .workshop-header {
+  min-height: 56px;
+  padding: 7px 10px 11px;
+  border: 1px solid #4e5d6c;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, #273746, #121b25),
+    repeating-linear-gradient(90deg, #ffffff05 0 1px, transparent 1px 22px);
+  box-shadow: inset 0 -3px 0 #080d13;
+}
+
+#workshop .workshop-header h2 {
+  color: var(--arcade-cream);
+  text-shadow: 0 2px 0 #000;
+}
+
+#workshop .garage-wallet {
+  border: 2px solid #ad8035;
+  background: linear-gradient(180deg, #44351f, #211c14);
+  box-shadow:
+    inset 0 1px 0 #ffe5a33b,
+    0 2px 0 #070a0e;
+}
+
+#workshop .workshop-nav {
+  padding: 5px;
+  border: 1px solid #485766;
+  border-radius: 8px;
+  background: #070d14;
+  box-shadow: inset 0 0 0 1px #111c28;
+}
+
+#workshop .workshop-nav button {
+  border-radius: 5px;
+}
+
+#workshop .workshop-nav button[aria-selected="true"] {
+  color: #fff;
+  border-color: #ed5873;
+  background: linear-gradient(180deg, #583040, #2e202c);
+  box-shadow:
+    inset 0 -3px var(--arcade-red),
+    inset 0 1px #ffffff1c;
+}
+
+#workshop .workshop-workspace {
+  grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.55fr);
+  gap: 12px;
+}
+
+#workshop .garage-showcase {
+  position: relative;
+  border: 2px solid #526172;
+  border-radius: 9px;
+  background:
+    radial-gradient(ellipse at 50% 66%, #d6e5ee22 0 16%, transparent 48%),
+    linear-gradient(
+      180deg,
+      transparent 0 58%,
+      #5b6267 58% 59%,
+      #20272c 59% 100%
+    ),
+    repeating-linear-gradient(90deg, #202c36 0 38px, #18232d 38px 40px);
+  box-shadow:
+    inset 0 0 35px #0008,
+    0 3px 0 #05090d;
+}
+
+#workshop .garage-showcase::before {
+  content: "GARAGE  /  BAY 01";
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 2;
+  padding: 5px 8px;
+  color: #8c9aa8;
+  border: 1px solid #495663;
+  background: #0c1219cc;
+  font:
+    700 8px/1 Barlow,
+    Arial,
+    sans-serif;
+  letter-spacing: 0.12em;
+}
+
+#workshop .garage-preview {
+  min-height: 240px;
+}
+
+#workshop .garage-build h3 {
+  color: #fff3cf;
+  text-shadow: 0 2px 0 #000;
+}
+
+#workshop .preview-angles button,
+#workshop .part-filters button,
+#workshop .quality-picker button {
+  border-radius: 5px;
+}
+
+#workshop .garage-stats > div,
+#workshop .paint-bench,
+#workshop .build-brief,
+#workshop .part-inspector,
+#workshop .part-tile {
+  border: 1px solid #4d5c6c;
+  border-radius: 7px;
+  background:
+    linear-gradient(145deg, #233140, #131d28),
+    repeating-linear-gradient(100deg, #ffffff03 0 1px, transparent 1px 14px);
+  box-shadow:
+    inset 0 1px 0 #ffffff12,
+    0 2px 0 #080c11;
+}
+
+#workshop .garage-stats > div {
+  border-top: 3px solid #5b758d;
+}
+
+#workshop .workshop-jump,
+#workshop .inspector-actions [data-inspector-install],
+#workshop .buy-box,
+#workshop .artifact-market button {
+  border: 2px solid #57d5b1 !important;
+  color: #eafff7 !important;
+  background: linear-gradient(180deg, #28745f, #154737 68%, #0c2e24) !important;
+  box-shadow:
+    inset 0 1px #ffffff2b,
+    inset 0 -3px #071711,
+    0 2px #05080b !important;
+}
+
+/* Shop: a marquee header and a quick-scan shelf of distinct products. */
+#workshop[data-shop="true"] {
+  width: min(1240px, calc(100% - 28px));
+  background:
+    linear-gradient(180deg, #222d39f9, #0d141dfc),
+    repeating-linear-gradient(90deg, #ffffff04 0 1px, transparent 1px 26px);
+}
+
+#workshop[data-shop="true"] .workshop-header {
+  justify-content: center;
+  border-color: #9c6f31;
+  background:
+    linear-gradient(180deg, #553d22, #261f17),
+    repeating-linear-gradient(90deg, #ffffff06 0 2px, transparent 2px 22px);
+}
+
+#workshop[data-shop="true"] .workshop-brand {
+  text-align: center;
+}
+
+#workshop[data-shop="true"] #workshop-title {
+  color: var(--arcade-gold);
+  font-size: 34px;
+  letter-spacing: 0.06em;
+}
+
+#workshop[data-shop="true"] .garage-wallet {
+  position: absolute;
+  right: 60px;
+}
+
+#workshop[data-shop="true"] #workshop-close {
+  position: absolute;
+  right: 20px;
+}
+
+#workshop[data-shop="true"] .workshop-workspace {
+  min-height: 0;
+  border: 1px solid #4e5c69;
+  border-radius: 9px;
+  padding: 12px;
+  background:
+    radial-gradient(circle at 50% 0, #53657627, transparent 44%),
+    linear-gradient(180deg, #16212d, #0a1119);
+  box-shadow: inset 0 0 30px #0007;
+}
+
+#workshop[data-shop="true"] .panel-title {
+  padding: 8px 10px;
+  border: 1px solid #425264;
+  border-left: 4px solid var(--arcade-gold);
+  border-radius: 6px;
+  background: #111a24;
+}
+
+#workshop[data-shop="true"] .panel-title h3 {
+  color: #fff0c3;
+  font-size: 14px;
+}
+
+#workshop[data-shop="true"] .artifact-market {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+#workshop[data-shop="true"] .artifact-market article {
+  min-height: 92px;
+  border: 2px solid #447876;
+  border-radius: 7px;
+  background: linear-gradient(145deg, #1d4a49, #14232d 72%);
+  box-shadow:
+    inset 0 1px #ffffff20,
+    0 3px #060a0f;
+}
+
+#workshop[data-shop="true"] .artifact-market article > span {
+  border-width: 2px;
+  box-shadow: 0 0 16px #65f6e633;
+}
+
+#workshop[data-shop="true"] .box-bench {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
+}
+
+#workshop[data-shop="true"] .supply-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+  min-height: 260px;
+  padding: 9px;
+  border: 2px solid color-mix(in srgb, var(--supply) 56%, #374657);
+  border-radius: 8px;
+  background:
+    radial-gradient(
+      circle at 50% 28%,
+      color-mix(in srgb, var(--supply) 20%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(155deg, #2a3847, #121b25 72%);
+  box-shadow:
+    inset 0 1px #ffffff26,
+    inset 0 -4px #070b10,
+    0 3px #05090d;
+}
+
+#workshop[data-shop="true"] .supply-visual {
+  width: 92px;
+  height: 82px;
+  margin: 2px auto 3px;
+  flex: 0 0 82px;
+  transform: none;
+  border: 2px solid var(--supply);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #ffffff1f, #060b12);
+  box-shadow:
+    inset 0 0 0 6px #0d151f,
+    0 4px 0 #05080c,
+    0 0 24px color-mix(in srgb, var(--supply) 18%, transparent);
+}
+
+#workshop[data-shop="true"] .supply-card > div:last-child {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  text-align: center;
+}
+
+#workshop[data-shop="true"] .box-bench h3 {
+  min-height: 30px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+#workshop[data-shop="true"] .box-bench p {
+  min-height: 44px;
+  color: #e3eaf3;
+  font-size: 10px;
+}
+
+#workshop[data-shop="true"] .box-bench small {
+  min-height: 38px;
+  color: #9fb0c2;
+  font-size: 8px;
+}
+
+#workshop[data-shop="true"] .box-bench button {
+  margin-top: auto;
+  min-height: 34px;
+  border-radius: 5px;
+}
+
+#workshop[data-shop="true"] .box-bench .buy-box {
+  margin-top: 5px;
+  border-color: color-mix(in srgb, var(--supply) 75%, #fff) !important;
+  color: #111 !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--supply) 76%, #fff),
+    color-mix(in srgb, var(--supply) 70%, #5b4b20)
+  ) !important;
+  text-shadow: 0 1px #ffffff66;
+}
+
+/* HUD polish: same language, no extra visual noise over the road. */
+.score-panel,
+.pursuit-panel,
+.speed-panel {
+  border-width: 2px;
+  border-color: #506173;
+  border-radius: 9px;
+  background:
+    linear-gradient(150deg, #1d2a38ed, #0d151fee),
+    repeating-linear-gradient(100deg, #ffffff03 0 1px, transparent 1px 16px);
+  box-shadow:
+    inset 0 1px #ffffff17,
+    inset 0 -3px #05080c66,
+    0 4px 14px #0007;
+}
+
+@media (max-width: 1040px) {
+  #workshop .workshop-workspace {
+    grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1.4fr);
+  }
+}
+
+@media (max-width: 800px) {
+  #workshop {
+    width: calc(100% - 14px);
+    height: calc(100dvh - 14px);
+    padding: 9px;
+  }
+  #workshop .workshop-header {
+    min-height: 50px;
+    padding: 5px 7px 9px;
+  }
+  #workshop .garage-preview {
+    min-height: 150px;
+  }
+  #workshop[data-shop="true"] .garage-wallet {
+    position: static;
+    margin-left: auto;
+  }
+  #workshop[data-shop="true"] #workshop-close {
+    position: static;
+  }
+  #workshop[data-shop="true"] .workshop-brand {
+    text-align: left;
+  }
+  #workshop[data-shop="true"] #workshop-title {
+    font-size: 26px;
+  }
+  #workshop[data-shop="true"] .workshop-workspace {
+    padding: 8px;
+  }
+  #workshop[data-shop="true"] .artifact-market {
+    grid-template-columns: 1fr;
+  }
+  #workshop[data-shop="true"] .box-bench {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #workshop[data-shop="true"] .supply-card {
+    min-height: 245px;
+  }
+}
+
+@media (max-width: 500px) {
+  #workshop[data-shop="true"] .box-bench {
+    grid-template-columns: 1fr;
+  }
+  #workshop[data-shop="true"] .supply-card {
+    min-height: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #intro *,
+  #workshop * {
+    transition: none !important;
+  }
+}
+
+/* Shop garage: the car remains the hero, while products sit on a compact
+   arcade shelf below it. Artifact clues form the final shelf row. */
+#workshop[data-shop="true"] .workshop-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(205px, 0.8fr) minmax(0, 1.25fr);
+  gap: 9px;
+  overflow: hidden;
+}
+
+#workshop[data-shop="true"] .garage-showcase {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr) 150px;
+  align-items: center;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 12px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 54% 62%, #ffdc9950 0 4%, transparent 34%),
+    linear-gradient(180deg, transparent 0 70%, #777b7d 70% 71%, #23282c 71%),
+    repeating-linear-gradient(90deg, #1e2a34 0 54px, #151f28 54px 57px);
+}
+
+#workshop[data-shop="true"] .garage-showcase::before {
+  content: "TECHCRUSH  /  SUPPLY GARAGE";
+  left: 14px;
+  right: auto;
+  color: #ffd57f;
+  border-color: #8b6b38;
+}
+
+#workshop[data-shop="true"] .garage-build {
+  align-self: start;
+  padding-top: 40px;
+}
+
+#workshop[data-shop="true"] .studio-column {
+  min-height: 190px;
+  height: 100%;
+}
+
+#workshop[data-shop="true"] .garage-preview {
+  min-height: 185px;
+}
+
+#workshop[data-shop="true"] .preview-angles {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  z-index: 3;
+  grid-template-columns: 1fr;
+  width: 128px;
+}
+
+#workshop[data-shop="true"] .preview-angles button:not(#preview-fitted) {
+  display: none;
+}
+
+#workshop[data-shop="true"] #preview-fitted {
+  color: #8ff5ff;
+  border-color: #45cad4;
+}
+
+#workshop[data-shop="true"] .studio-note {
+  align-self: end;
+  margin: 0 0 44px;
+  color: #aab8c5;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+#workshop[data-shop="true"] #boxes-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+  padding: 0 2px 4px;
+}
+
+#workshop[data-shop="true"] #boxes-panel > .panel-title {
+  flex: 0 0 auto;
+  order: 0;
+}
+
+#workshop[data-shop="true"] .box-bench {
+  order: 1;
+  grid-template-columns: repeat(5, minmax(130px, 1fr));
+  gap: 7px;
+}
+
+#workshop[data-shop="true"] .box-bench::before,
+#workshop[data-shop="true"] .artifact-market::before {
+  grid-column: 1 / -1;
+  color: #d5e2ed;
+  font:
+    900 9px/1 Barlow,
+    Arial,
+    sans-serif;
+  letter-spacing: 0.16em;
+}
+
+#workshop[data-shop="true"] .box-bench::before {
+  content: "SUPPLY BOXES  /  OPEN OR BUY";
+}
+
+#workshop[data-shop="true"] .artifact-market {
+  order: 2;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+#workshop[data-shop="true"] .artifact-market::before {
+  content: "CITY WARS  /  ARTIFACT SEARCH AREAS";
+}
+
+#workshop[data-shop="true"] #last-drop {
+  order: 3;
+  margin: 0;
+}
+
+#workshop[data-shop="true"] #boxes-panel > details {
+  order: 4;
+}
+
+#workshop[data-shop="true"] .supply-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 178px;
+  padding: 7px;
+  border-width: 2px;
+}
+
+#workshop[data-shop="true"] .supply-visual {
+  width: 72px;
+  height: 58px;
+  min-height: 0;
+  flex-basis: auto;
+  flex-shrink: 0;
+  margin: 0 auto;
+  border-radius: 7px;
+  font-size: 29px;
+  line-height: 54px;
+  transform: perspective(140px) rotateX(-4deg);
+}
+
+#workshop[data-shop="true"] .supply-card > div:last-child {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  overflow: hidden;
+}
+
+#workshop[data-shop="true"] .box-bench h3 {
+  min-height: 24px;
+  margin: 0;
+  font-size: 10px;
+}
+
+#workshop[data-shop="true"] .box-bench p,
+#workshop[data-shop="true"] .box-bench small {
+  display: none;
+}
+
+#workshop[data-shop="true"] .box-bench button {
+  display: block;
+  width: 100%;
+  min-height: 27px;
+  margin: 0;
+  padding: 4px 5px;
+  font-size: 8px;
+}
+
+#workshop[data-shop="true"] .box-bench button:first-of-type {
+  margin-top: auto;
+}
+
+#workshop[data-shop="true"] .box-bench .buy-box {
+  margin-top: 3px;
+}
+
+#workshop[data-shop="true"] .artifact-market article {
+  position: relative;
+  min-height: 78px;
+  padding: 7px;
+  border-color: #9b7a35;
+  background:
+    radial-gradient(circle at 15% 30%, #ffd43b29, transparent 30%),
+    linear-gradient(145deg, #263642, #131d27 72%);
+}
+
+#workshop[data-shop="true"] .artifact-market article > span {
+  border-color: #ffd43b;
+  color: #ffe58d;
+  background: radial-gradient(
+    circle,
+    transparent 0 28%,
+    #ffd43b 29% 34%,
+    transparent 35% 48%,
+    #ffd43b99 49% 53%,
+    #17242e 54%
+  );
+  box-shadow: 0 0 18px #ffd43b3d;
+}
+
+#workshop[data-shop="true"] .artifact-market button {
+  border-color: #e3b83e !important;
+  color: #1b1608 !important;
+  background: linear-gradient(180deg, #ffe37b, #c99627) !important;
+}
+
+@media (max-width: 800px) {
+  #workshop[data-shop="true"] .workshop-workspace {
+    display: block;
+    overflow: auto;
+  }
+  #workshop[data-shop="true"] .garage-showcase {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 210px;
+    margin-bottom: 9px;
+  }
+  #workshop[data-shop="true"] .garage-build,
+  #workshop[data-shop="true"] .studio-note,
+  #workshop[data-shop="true"] .preview-angles {
+    display: none;
+  }
+  #workshop[data-shop="true"] .studio-column,
+  #workshop[data-shop="true"] .garage-preview {
+    min-height: 190px;
+  }
+  #workshop[data-shop="true"] .box-bench {
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+  }
+}
+
+@media (max-width: 500px) {
+  #workshop[data-shop="true"] .box-bench {
+    grid-template-columns: 1fr 1fr;
+  }
+  #workshop[data-shop="true"] .artifact-market {
+    grid-template-columns: 1fr;
+  }
+}

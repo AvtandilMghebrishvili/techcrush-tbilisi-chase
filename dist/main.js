@@ -17,7 +17,13 @@ import {
 } from "./reward-ui.js";
 import { carUnlocked, totalTakedowns } from "./progression.js";
 import { drivingFeel, setupDrivingFeel } from "./driving-feel.js";
-import { QuestMap, QUEST_PINS, mapAtlas, MAP_EXTENT } from "./quest-map.js";
+import {
+  QuestMap,
+  QUEST_PINS,
+  mapAtlas,
+  MAP_EXTENT,
+  artifactSearchZone,
+} from "./quest-map.js";
 import { ScoreFeedback } from "./score-feedback.js";
 import { ResultScreen } from "./result-screen.js";
 import {
@@ -169,11 +175,14 @@ $("music-reset").onclick = () => {
   } catch {}
   refreshActivity();
 };
-const unlockMusic = () => {
+const unlockAudio = () => {
   music.unlock();
+  // Decode effect samples on the first gesture, then let ChaseAudio suspend
+  // itself while the menu is open. Starting the race resumes this same graph.
+  if (!muted) void soundscape.unlock().catch(() => {});
 };
-addEventListener("pointerdown", unlockMusic, { once: true });
-addEventListener("keydown", unlockMusic, { once: true });
+addEventListener("pointerdown", unlockAudio, { once: true });
+addEventListener("keydown", unlockAudio, { once: true });
 
 const loop = new FrameLoop(frame);
 const wake = () => loop.invalidate();
@@ -505,7 +514,7 @@ async function start() {
   if (disposed || transitioning || dialogOpen()) return;
   if (community && !community.ensureDriver(start)) return;
   // Unlock the existing audio context while a tap still has user activation.
-  if (!muted) void soundscape.unlock().catch(() => {});
+  if (!muted) void soundscape.prepareRun().catch(() => {});
   transitioning = true;
   keys.clear();
   mobile?.reset();
@@ -897,6 +906,30 @@ function drawMap() {
     MAP_EXTENT * 2 * s,
     MAP_EXTENT * 2 * s,
   );
+  const artifactZone = artifactSearchZone(career.profile, sim);
+  if (artifactZone) {
+    const center = radarPoint(
+      ox - artifactZone.x * s,
+      oz - artifactZone.z * s,
+      108,
+    );
+    c.save();
+    c.strokeStyle = "#ffd43b";
+    c.fillStyle = "rgba(255, 212, 59, 0.12)";
+    c.lineWidth = 2;
+    c.setLineDash([4, 3]);
+    c.beginPath();
+    c.arc(
+      center.x,
+      center.y,
+      Math.max(8, artifactZone.radius * s),
+      0,
+      Math.PI * 2,
+    );
+    c.fill();
+    c.stroke();
+    c.restore();
+  }
   for (const target of sim.cashBannerTargets || [])
     if (!target.broken) {
       const marker = radarPoint(ox - target.x * s, oz - target.z * s);
