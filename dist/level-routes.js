@@ -8,6 +8,8 @@ import {
 import { levelHash } from "./level-conditions.js";
 import { onAsphalt } from "./road-clearance.js";
 import { BRIDGE_BARRIERS } from "./bridge-data.js";
+import { ACTIVE_MAP } from "./map-selection.js";
+import { RELEASED_EVENT_SITES } from "./released-event-sites.js";
 const obstacles = [...BUILDINGS, ...BRIDGE_BARRIERS];
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const clear = (p) => {
@@ -35,6 +37,25 @@ const candidates = ROADS.filter((r) => r.width >= 16 && r.length >= 65)
     })),
   )
   .filter(clear);
+// CITY WARS gates may use a slightly narrower street so every released
+// artifact gets a safe checkpoint on its approach.
+const artifactCandidates = ROADS.filter((r) => r.width >= 14 && r.length >= 30)
+  .flatMap((r) =>
+    [0.15, 0.3, 0.5, 0.7, 0.85].map((t) => ({
+      x: r.start.x + (r.end.x - r.start.x) * t,
+      z: r.start.z + (r.end.z - r.start.z) * t,
+      angle: r.angle,
+      name: r.name,
+      roadId: r.id,
+    })),
+  )
+  .filter(clear);
+const artifactGates = (RELEASED_EVENT_SITES[ACTIVE_MAP] || []).map(
+  (artifact) =>
+    [...artifactCandidates].sort(
+      (a, b) => distance(a, artifact) - distance(b, artifact),
+    )[0],
+);
 const pools = CHECKPOINTS.map((centre) =>
   candidates
     .filter((p) => distance(p, centre) < 330 && distance(p, START) > 90)
@@ -43,10 +64,11 @@ const pools = CHECKPOINTS.map((centre) =>
 );
 const cache = new Map();
 // Each district supplies multiple legal gates. Both positions and visiting order vary by level.
-export function checkpointsForLevel(level = 1) {
+export function checkpointsForLevel(level = 1, event = false) {
   level = Math.max(1, Math.floor(level));
-  if (cache.has(level)) return cache.get(level).map((p) => ({ ...p }));
-  if (level === 1) return CHECKPOINTS.map((p) => ({ ...p }));
+  const cacheKey = `${level}:${event ? 1 : 0}`;
+  if (cache.has(cacheKey)) return cache.get(cacheKey).map((p) => ({ ...p }));
+  if (level === 1 && !event) return CHECKPOINTS.map((p) => ({ ...p }));
   const selected = [];
   for (let i = 0; i < 6; i++) {
     const pool = pools[i];
@@ -60,6 +82,10 @@ export function checkpointsForLevel(level = 1) {
       CHECKPOINTS[i];
     selected.push({ ...choice });
   }
+  if (event && artifactGates.length) {
+    const target = artifactGates[(level - 1) % artifactGates.length];
+    if (target) selected[(level - 1) % selected.length] = { ...target };
+  }
   const order = [0, 1, 2, 3, 4, 5];
   for (let i = 5; i > 0; i--) {
     const j = Math.floor(levelHash(level * 193 + i) * (i + 1));
@@ -67,6 +93,6 @@ export function checkpointsForLevel(level = 1) {
   }
   const result = order.map((i) => selected[i]);
   if (cache.size >= 32) cache.delete(cache.keys().next().value);
-  cache.set(level, result);
+  cache.set(cacheKey, result);
   return result.map((p) => ({ ...p }));
 }

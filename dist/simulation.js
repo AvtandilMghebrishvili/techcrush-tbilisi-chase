@@ -350,7 +350,10 @@ export class ChaseSimulation {
     this.player.carId = this.selectedCar || "gt";
     this.level = Math.max(1, Math.floor(this.runOptions?.level || 1));
     this.rewardRates = levelRewards(this.level, this.player.carId);
-    this.checkpoints = checkpointsForLevel(this.level);
+    this.checkpoints = checkpointsForLevel(
+      this.level,
+      !!this.runOptions?.event,
+    );
     this.helicopter = createAirSupport(this.player, this.level);
     this.player.equipment = structuredClone(this.runOptions?.equipment || {});
     this.player.performance = upgradedSpec(

@@ -4,7 +4,7 @@ import {
   separatePowerupPins,
 } from "./powerup-map.js";
 import { EventUI } from "./event-ui.js";
-import { eventProgress } from "./event-rules.js";
+import { eventPhase, eventProgress } from "./event-rules.js";
 import { MapSettings, mapPreferences } from "./map-settings.js";
 import { radarScale } from "./map-preferences.js";
 import { BackgroundMusic } from "./background-music.js";
@@ -101,6 +101,9 @@ const pageLifetime = new AbortController();
 let disposed = false,
   dialogs,
   sceneAssets;
+let savedCheckpoint = 0,
+  checkpointSave = Promise.resolve(),
+  pageFocused = true;
 function disposePage() {
   if (disposed) return;
   disposed = true;
@@ -183,15 +186,16 @@ function dialogOpen() {
 }
 function refreshActivity() {
   if (disposed || !sim) return;
+  const foreground = pageFocused && !document.hidden;
   raceClock.setActive(
-    !document.hidden &&
+    foreground &&
       !dialogOpen() &&
       ["running", "rewinding"].includes(sim?.phase),
   );
-  loop.setEnabled(!document.hidden);
-  soundscape.setForeground(!document.hidden && !dialogOpen());
+  loop.setEnabled(foreground);
+  soundscape.setForeground(foreground && !dialogOpen());
   music.sync(
-    !document.hidden &&
+    foreground &&
       !dialogOpen() &&
       ["ready", "running"].includes(sim?.phase),
     !muted,
@@ -199,7 +203,7 @@ function refreshActivity() {
   mobile?.syncActivity();
   document.body.classList.toggle(
     "idle",
-    document.hidden ||
+    !foreground ||
       dialogOpen() ||
       !["running", "rewinding"].includes(sim.phase),
   );
@@ -385,6 +389,7 @@ async function bankRun() {
   if (!runId) return;
   const id = runId;
   settlement = (async () => {
+    await checkpointSave.catch(() => {});
     if (career.pending) await career.retry();
     if (!career.profile.settled.includes(id))
       await career.mutate({
@@ -536,6 +541,7 @@ async function start() {
     sim.navQuest = $("route-selector").value || null;
     sim.waypoint = null;
     runId = career.profile.activeRun.id;
+    savedCheckpoint = career.profile.activeRun.savedCheckpoint || 0;
     view.startGame(sim);
     raceClock.reset();
     $("intro").hidden = true;
@@ -711,6 +717,28 @@ function updateHUD() {
   $("score-multiplier").textContent = "×" + sim.rewardRates.score.toFixed(2);
   scoreFeedbackUI.update(sim);
   $("progress").textContent = sim.checkpoint + " / 6";
+  if (
+    runId &&
+    sim.checkpoint > savedCheckpoint &&
+    career.profile.activeRun?.id === runId
+  ) {
+    const checkpoint = sim.checkpoint,
+      activeRun = runId;
+    savedCheckpoint = checkpoint;
+    checkpointSave = checkpointSave
+      .catch(() => {})
+      .then(() =>
+        career.mutate({
+          type: "checkpoint-progress",
+          runId: activeRun,
+          checkpoint,
+        }),
+      )
+      .catch(() => {
+        // The final run bank contains the same count, so a temporary save
+        // failure never interrupts driving or loses the final result.
+      });
+  }
   const dotsKey = sim.checkpoints.length + ":" + sim.checkpoint;
   if (dotsKey !== lastDotsKey) {
     $("dots").innerHTML = sim.checkpoints
@@ -1286,6 +1314,7 @@ try {
       else return start();
     },
     refresh: refreshActivity,
+    regularBoard: () => community.open("board"),
     cities: () => {
       refreshCityMenu();
       community.syncCities();
@@ -1310,13 +1339,19 @@ try {
       }
     },
   });
+  const openPrimaryLeaderboard = () => {
+    if (eventPhase(career.serverNow()) !== "ended") eventUI.open();
+    else community.open("board");
+  };
+  $("leaderboard-open").onclick = openPrimaryLeaderboard;
+  $("leaderboard-menu").onclick = openPrimaryLeaderboard;
   $("leaderboard-open").disabled = false;
   $("community-dialog").addEventListener("close", () => {
     if (sim.phase === "won" && results.record && !$("modal").hidden)
       results.saved(results.record);
   });
   $("result-community").onclick = async () => {
-    if (await leaveRun(false)) community.open("board");
+    if (await leaveRun(false)) openPrimaryLeaderboard();
   };
   $("control-settings").disabled = false;
   $("mobile-setup").disabled = false;
@@ -1388,16 +1423,23 @@ try {
     wake();
   });
   addEventListener("blur", () => {
+    pageFocused = false;
     keys.clear();
     if (sim.timeline.active) sim.timeline.release(sim);
-    if (sim.phase === "running") pause();
+    mobile?.clear();
+    refreshActivity();
+  });
+  addEventListener("focus", () => {
+    pageFocused = true;
+    accumulator = 0;
+    refreshActivity();
   });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && sim.timeline.active) {
       keys.clear();
       sim.timeline.release(sim);
     }
-    if (document.hidden && sim.phase === "running") pause();
+    if (!document.hidden && document.hasFocus()) pageFocused = true;
     refreshActivity();
   });
   addEventListener("resize", wake);

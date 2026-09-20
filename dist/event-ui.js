@@ -85,7 +85,7 @@ export class EventUI {
       <div class="event-bottom"><section><form id="event-register"><label for="event-handle">YOUR UNIQUE EVENT USERNAME</label><div class="event-inline"><input id="event-handle" name="handle" minlength="3" maxlength="20" required autocomplete="nickname" placeholder="Choose your racer name"><button>JOIN EVENT ↗</button></div><p class="event-join-note">Joining keeps your profile in CITY WARS until 24 SEP, 21:00. Every new chase counts automatically.</p><label class="event-check"><input type="checkbox" id="event-subscribe" required> I subscribe to TECHCRUSH on YouTube.</label><label class="event-check"><input type="checkbox" id="event-rules" required> I accept the rules and public display of my event name and scores.</label><a id="event-channel" hidden target="_blank" rel="noopener">OPEN TECHCRUSH ON YOUTUBE ↗</a></form>
       <div id="event-member" hidden><small>REGISTERED RACER</small><b id="event-member-name"></b><p id="event-member-status" role="status"></p><p id="event-member-help"></p><div class="event-member-actions"><button type="button" id="event-enter"><span class="event-play-icon" aria-hidden="true">▶</span><span class="event-play-copy"><strong id="event-play-label">PLAY</strong><span id="event-play-context"></span></span><span class="event-play-arrow" aria-hidden="true">↗</span></button><button type="button" id="event-secret" hidden>ENTER CHALLENGE ↗</button></div></div>
       <p id="event-entry-status" role="status"></p><p id="event-message" role="status"></p></section>
-      <section class="event-board"><div class="event-board-head"><h3>EVENT STANDINGS</h3><button type="button" id="event-refresh" aria-label="Refresh standings">↻</button></div><nav id="event-board-tabs" aria-label="City ranking"></nav><p id="event-board-stats"></p><div id="event-board-table" role="status"></div></section></div>${EVENT_RULES_COPY}`;
+      <section class="event-board"><div class="event-board-head"><h3>EVENT STANDINGS</h3><div><button type="button" id="event-regular-board">REGULAR RANKS</button><button type="button" id="event-refresh" aria-label="Refresh standings">↻</button></div></div><p id="event-board-callout"></p><nav id="event-board-tabs" aria-label="City ranking"></nav><p id="event-board-stats"></p><div id="event-board-table" role="status"></div></section></div>${EVENT_RULES_COPY}`;
     document.body.append(dialog);
     const notice = document.createElement("aside");
     notice.id = "event-notice";
@@ -146,6 +146,10 @@ export class EventUI {
       }
     };
     $("event-refresh").onclick = () => this.board();
+    $("event-regular-board").onclick = () => {
+      dialog.close();
+      this.actions.regularBoard?.();
+    };
     document.addEventListener(
       "visibilitychange",
       () => {
@@ -301,6 +305,13 @@ export class EventUI {
       phase === "upcoming"
         ? "Joining opens on 20 September at 15:00 (Tbilisi time). This button will activate automatically."
         : "";
+    $("event-board-callout").textContent = progress
+      ? "Your CITY WARS points from every banked chase are added to these standings."
+      : phase === "live"
+        ? "Join CITY WARS, start a chase and bank your score to enter the event ranking."
+        : phase === "upcoming"
+          ? "The event leaderboard activates when CITY WARS starts."
+          : "Final CITY WARS standings are archived here.";
     $("event-secret").hidden = !open || ACTIVE_MAP === "rustavi";
     $("event-secret").textContent = this.challengeRevealed
       ? "ENTER RUSTAVI ↗"

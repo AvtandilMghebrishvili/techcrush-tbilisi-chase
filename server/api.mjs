@@ -273,14 +273,22 @@ export async function handleApi(request, DB, options = {}) {
           );
         }
 
-        if (body.action.type === "settle" && settledMap !== "tbilisi") {
-          const c = profile.maps[settledMap].community;
+        const rankingMap =
+          body.action.type === "checkpoint-progress"
+            ? profile.activeRun?.map
+            : settledMap;
+        if (
+          ["settle", "checkpoint-progress"].includes(body.action.type) &&
+          rankingMap &&
+          rankingMap !== "tbilisi"
+        ) {
+          const c = profile.maps[rankingMap].community;
           statements.push(
             DB.prepare(
               "INSERT INTO city_rankings(key_hash,map,ranked_runs,rank_level,rank_checkpoints,best_score,total_score,wins,badges,week_key,week_score,week_wins,rank_at) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM garages WHERE key_hash=? AND version=? AND json_extract(profile,'$.operations[#-1]')=?) ON CONFLICT(key_hash,map) DO UPDATE SET ranked_runs=excluded.ranked_runs,rank_level=excluded.rank_level,rank_checkpoints=excluded.rank_checkpoints,best_score=excluded.best_score,total_score=excluded.total_score,wins=excluded.wins,badges=excluded.badges,week_key=excluded.week_key,week_score=excluded.week_score,week_wins=excluded.week_wins,rank_at=excluded.rank_at",
             ).bind(
               hash,
-              settledMap,
+              rankingMap,
               c.runs,
               c.furthestLevel,
               c.checkpoints,

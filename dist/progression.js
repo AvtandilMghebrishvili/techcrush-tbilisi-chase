@@ -432,6 +432,30 @@ export function applyProgressAction(
         : {}),
     };
     stampEventRun(p, action, p.activeRun, context.now);
+  } else if (action.type === "checkpoint-progress") {
+    const checkpoint = Number(action.checkpoint),
+      ticket = p.activeRun;
+    if (
+      !ticket ||
+      typeof action.runId !== "string" ||
+      action.runId !== ticket.id ||
+      !Number.isInteger(checkpoint) ||
+      checkpoint < 1 ||
+      checkpoint > 6 ||
+      checkpoint < (ticket.savedCheckpoint || 0) ||
+      !Number.isFinite(context.now) ||
+      context.now - ticket.startedAt < checkpoint * 250
+    )
+      throw Error("Checkpoint progress could not be verified.");
+    ticket.savedCheckpoint = checkpoint;
+    const community = cityCommunity(p, ticket.map);
+    if (ticket.level > community.furthestLevel) {
+      community.furthestLevel = ticket.level;
+      community.checkpoints = checkpoint;
+    } else if (ticket.level === community.furthestLevel) {
+      community.checkpoints = Math.max(community.checkpoints, checkpoint);
+    }
+    community.rankAt = context.now;
   } else if (action.type === "select") {
     if (!CAR_IDS.includes(action.car)) throw Error("Unknown car");
     p.selectedCar = car;
