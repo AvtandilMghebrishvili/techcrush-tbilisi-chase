@@ -562,11 +562,11 @@ export class GarageUI {
       const button = $(kind === "street" ? "open-box" : `open-${kind}-box`);
       const owned = p[box.field] || 0;
       const count = boxOpenCount(this.openQuantity, owned);
-      button.textContent = owned
-        ? `OPEN ${count.toLocaleString()} · ${owned.toLocaleString()} OWNED ↗`
-        : "NO BOXES TO OPEN";
+      button.classList.add("box-open-action");
+      button.innerHTML = `<span class="box-open-label">OPEN <b>×${count.toLocaleString()}</b><span aria-hidden="true">↗</span></span><small class="box-owned">${owned.toLocaleString()} AVAILABLE</small>`;
       button.disabled = !owned || openingLocked;
       button.title = `Open ${count} ${box.name} ${count === 1 ? "box" : "boxes"} · ${count * 3} parts`;
+      button.setAttribute("aria-label", button.title);
     }
     $("last-drop").textContent =
       p.lastBox?.count > 1

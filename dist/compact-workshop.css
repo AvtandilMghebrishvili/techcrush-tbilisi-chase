@@ -1518,13 +1518,48 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-#workshop .box-bench [id^="open-"]:not(:disabled) {
-  color: #e1fff0;
-  background: linear-gradient(#285c48, #18382c);
-  border-color: #76c5a1;
+#workshop[data-shop="true"] .box-bench button.box-open-action {
+  min-height: 47px;
+  padding: 6px 9px;
+  color: #062b20;
+  background: linear-gradient(#9bffe0, #5de2b1);
+  border: 1px solid #bdffed;
+  box-shadow:
+    inset 0 1px 0 #ffffff99,
+    0 3px 0 #184e3d;
   text-shadow: none;
 }
-#workshop .box-bench [id^="open-"]:disabled {
-  color: #aab8c3;
-  text-shadow: none;
+#workshop[data-shop="true"] .box-open-action .box-open-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+#workshop[data-shop="true"] .box-open-action .box-open-label b {
+  font: inherit;
+}
+#workshop[data-shop="true"] .box-open-action .box-owned {
+  display: block;
+  min-height: 0;
+  color: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.7px;
+  margin-top: 3px;
+}
+#workshop[data-shop="true"]
+  .box-bench
+  button.box-open-action:hover:not(:disabled) {
+  background: linear-gradient(#c1ffec, #85f3cc);
+}
+#workshop[data-shop="true"] .box-bench button.box-open-action:disabled {
+  color: #aab7c1;
+  background: #26343c;
+  border-color: #52616c;
+  box-shadow: none;
 }
