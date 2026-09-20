@@ -147,19 +147,17 @@ test("rewind restores broken trees and patrol identities without interpolating a
   assert.equal(s.police[0].id, cop.id);
   assert.equal(s.trees[0].broken, false);
 });
-test("time-based reinforcements wait for checkpoint one and stop at twelve cars", () => {
+test("time-based reinforcements start with the chase and stop at twelve cars", () => {
   const s = new ChaseSimulation();
   s.start();
   s.time = 35;
   s.update(1 / 120, {});
-  assert.equal(s.police.length, 4);
-  assert.equal(s.heatLevel, 1);
-  s.checkpoint = 1;
-  s.update(1 / 120, {});
-  s.time = s.nextWaveAt + 0.01;
-  s.update(1 / 120, {});
   assert.equal(s.police.length, 5);
   assert.equal(s.heatLevel, 2);
+  s.time = s.nextWaveAt + 0.01;
+  s.update(1 / 120, {});
+  assert.equal(s.police.length, 6);
+  assert.equal(s.heatLevel, 3);
   for (let i = 0; i < 20; i++) {
     s.time = s.nextWaveAt + 0.01;
     s.update(1 / 120, {});

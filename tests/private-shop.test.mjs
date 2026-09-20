@@ -4,11 +4,12 @@ import {
   newProfile,
   applyProgressAction,
   BOX_SHOP,
+  ARTIFACT_PRICE,
 } from "../dist/progression.js";
 import { PRIVATE_DRIVER_NAME } from "../dist/private-driver.js";
 import { handleApi, keyHash } from "../server/api.mjs";
 import { openLocalDatabase } from "../server/local-db.mjs";
-import { EVENT_ID } from "../dist/event-rules.js";
+import { EVENT_ID, EVENT_START } from "../dist/event-rules.js";
 
 test("credit shop prices every box above its maximum resale return", () => {
   let profile = newProfile();
@@ -34,6 +35,30 @@ test("credit shop prices every box above its maximum resale return", () => {
   );
 });
 
+test("the separate shop sells the next missing city artifact for one million credits", () => {
+  const now = EVENT_START + 1000;
+  let profile = applyProgressAction(
+    newProfile(),
+    {
+      type: "join-event",
+      handle: "SHOP_TESTER",
+      acceptRules: true,
+      subscribeAcknowledged: true,
+    },
+    Math.random,
+    { now },
+  );
+  profile.credits = ARTIFACT_PRICE * 2;
+  profile = applyProgressAction(
+    profile,
+    { type: "buy-artifact", map: "tbilisi" },
+    Math.random,
+    { now },
+  );
+  assert.equal(profile.credits, ARTIFACT_PRICE);
+  assert.deepEqual(profile.events[EVENT_ID].artifacts.tbilisi, [0]);
+});
+
 test("reserved owner name is always private even when public is requested", () => {
   const profile = applyProgressAction(newProfile(), {
     type: "driver",
@@ -43,6 +68,64 @@ test("reserved owner name is always private even when public is requested", () =
   });
   assert.equal(profile.driver.name, PRIVATE_DRIVER_NAME);
   assert.equal(profile.driver.listed, false);
+});
+
+test("ghost presence returns a nickname label without exposing private names", async () => {
+  const db = openLocalDatabase(":memory:"),
+    one = "c".repeat(64),
+    two = "d".repeat(64),
+    oneHash = await keyHash(one);
+  for (const token of [one, two])
+    await handleApi(
+      new Request("https://game.test/api/profile", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      db,
+    );
+  await db
+    .prepare(
+      "UPDATE garages SET display_name='GHOST_ONE',private_mode=0 WHERE key_hash=?",
+    )
+    .bind(oneHash)
+    .run();
+  const pose = (session, x) => ({
+    session,
+    map: "tbilisi",
+    car: "gt",
+    x,
+    y: 0,
+    z: 0,
+    angle: 0,
+    pitch: 0,
+    roll: 0,
+  });
+  await handleApi(
+    new Request("https://game.test/api/ghosts", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${one}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(pose("11111111-1111-4111-8111-111111111111", 0)),
+    }),
+    db,
+  );
+  const response = await (
+    await handleApi(
+      new Request("https://game.test/api/ghosts", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${two}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(pose("22222222-2222-4222-8222-222222222222", 2)),
+      }),
+      db,
+    )
+  ).json();
+  assert.equal(response.ghosts[0].name, "GHOST_ONE");
+  db.close();
 });
 
 test("private driver sees their event score while public standings and totals exclude it", async () => {

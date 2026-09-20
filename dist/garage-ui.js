@@ -3,7 +3,14 @@ import {
   totalBoxes,
   MILESTONE_BOXES,
   BOX_SHOP,
+  ARTIFACT_PRICE,
 } from "./progression.js";
+import {
+  ARTIFACT_BANNERS,
+  HUNT_CITIES,
+  eventPhase,
+  eventProgress,
+} from "./event-rules.js";
 import { carRequirement, refreshRewards, coinIcon } from "./reward-ui.js";
 import { ACTIVE_MAP, CITY_NAME, cityLevel } from "./map-selection.js";
 import { GaragePreview } from "./garage-preview.js";
@@ -129,6 +136,8 @@ export class GarageUI {
     $("open-creator-box").onclick = () => this.openBox("creator");
     for (const kind of Object.keys(BOX_SHOP))
       $("buy-" + kind + "-box").onclick = () => this.buyBox(kind);
+    for (const button of document.querySelectorAll("[data-buy-artifact]"))
+      button.onclick = () => this.buyArtifact(button.dataset.buyArtifact);
     $("loot-done").onclick = () => {
       $("loot-dialog").close();
     };
@@ -146,8 +155,9 @@ export class GarageUI {
     this.render();
     if (store.lastError) $("save-error").textContent = store.lastError;
   }
-  open() {
+  open(tab = "build") {
     if (this.disposed) return;
+    this.switchTab(tab);
     $("workshop").showModal();
     try {
       this.preview ||= new GaragePreview($("garage-preview"), this.view);
@@ -168,6 +178,7 @@ export class GarageUI {
   updatePreviewActivity() {
     if (
       $("workshop").open &&
+      this.tab !== "boxes" &&
       (!this.compactMedia.matches || this.tab === "build")
     )
       this.preview?.start();
@@ -179,12 +190,19 @@ export class GarageUI {
     this.tab = tab;
     if (tab !== "parts") this.inspection = null;
     $("workshop").dataset.tab = tab;
+    $("workshop").dataset.shop = String(tab === "boxes");
+    $("workshop-eyebrow").textContent =
+      tab === "boxes" ? "TECHCRUSH / SHOP" : "TECHCRUSH / WORKSHOP";
+    $("workshop-title").innerHTML =
+      tab === "boxes" ? "BOX SHOP<span>.</span>" : "YOUR GARAGE<span>.</span>";
     for (const button of document.querySelectorAll("[data-workshop-tab]")) {
       const active = button.dataset.workshopTab === tab;
       button.setAttribute("aria-selected", String(active));
       button.tabIndex = active ? 0 : -1;
       $(button.getAttribute("aria-controls")).hidden = !active;
     }
+    for (const panel of ["build", "parts", "boxes"])
+      $(panel + "-panel").hidden = panel !== tab;
     this.render();
     this.updatePreviewActivity();
   }
@@ -224,6 +242,16 @@ export class GarageUI {
       .then(() => {
         $("upgrade-feedback").textContent =
           `${box.name} Box purchased for ${box.price.toLocaleString()} CR. Open it in Supply Drops.`;
+      })
+      .catch(() => {});
+  }
+  buyArtifact(map) {
+    if (!HUNT_CITIES.includes(map) || this.store.busy || this.store.pending)
+      return;
+    void this.run(() => this.store.mutate({ type: "buy-artifact", map }))
+      .then(() => {
+        $("upgrade-feedback").textContent =
+          `${map.toUpperCase()} artifact purchased for ${ARTIFACT_PRICE.toLocaleString()} CR.`;
       })
       .catch(() => {});
   }
@@ -396,7 +424,8 @@ export class GarageUI {
     $("garage-level").textContent =
       `LEVEL ${String(cityLevel(p)).padStart(2, "0")}`;
     $("garage-credits").textContent = p.credits.toLocaleString() + " CR";
-    $("garage-boxes").textContent = String(totalBoxes(p));
+    $("shop-box-count").textContent =
+      `${totalBoxes(p)} BOX${totalBoxes(p) === 1 ? "" : "ES"} · 3 PARTS EACH`;
     $("garage-save-state").textContent = this.store.busy
       ? "Saving…"
       : this.store.pending
@@ -550,6 +579,33 @@ export class GarageUI {
         this.store.busy ||
         !!this.store.pending ||
         this.rolling;
+    }
+    const contest = eventProgress(p),
+      artifactsLive = eventPhase(this.store.serverNow()) === "live";
+    for (const map of HUNT_CITIES) {
+      const found = contest?.artifacts?.[map]?.length || 0,
+        progress = document.querySelector(`[data-artifact-progress="${map}"]`),
+        button = document.querySelector(`[data-buy-artifact="${map}"]`);
+      progress.textContent = `${found} / ${ARTIFACT_BANNERS.length} FOUND`;
+      button.textContent =
+        found >= ARTIFACT_BANNERS.length
+          ? "ALL 5 COLLECTED ✓"
+          : `BUY NEXT · ${ARTIFACT_PRICE.toLocaleString()} CR`;
+      button.disabled =
+        !contest ||
+        !artifactsLive ||
+        found >= ARTIFACT_BANNERS.length ||
+        p.credits < ARTIFACT_PRICE ||
+        this.store.busy ||
+        !!this.store.pending ||
+        this.rolling;
+      button.title = !artifactsLive
+        ? "CITY WARS artifact sales are closed"
+        : !contest
+          ? "Join CITY WARS first"
+          : p.credits < ARTIFACT_PRICE
+            ? `Need ${ARTIFACT_PRICE.toLocaleString()} CR`
+            : "Buy the next missing artifact in this city";
     }
     if (this.artReady && $("workshop").open && this.tab === "parts") {
       this.preview?.hydrate($("part-grid"));

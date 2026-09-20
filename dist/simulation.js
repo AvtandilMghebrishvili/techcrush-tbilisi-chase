@@ -648,8 +648,8 @@ export class ChaseSimulation {
     this.selectedCar = carSpec(carId).id;
     this.reset();
     this.phase = "running";
+    this.activatePursuit("start");
     this.timeline.capture(this);
-    this.events.push("PATROLS ROAMING — REACH THE FIRST CHECKPOINT");
   }
   emitSound(kind, source, impact, key, broken = false) {
     if (

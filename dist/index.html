@@ -260,6 +260,9 @@
             <button id="workshop-open" class="secondary workshop-link" disabled>
               GARAGE
             </button>
+            <button id="shop-open" class="secondary shop-link" disabled>
+              SHOP <small>BOXES · ARTIFACTS</small>
+            </button>
             <button
               id="leaderboard-menu"
               class="secondary leaderboard-link"
@@ -821,7 +824,9 @@
       >
         <header class="workshop-header">
           <div class="workshop-brand">
-            <span class="eyebrow">TECHCRUSH / WORKSHOP</span>
+            <span class="eyebrow" id="workshop-eyebrow"
+              >TECHCRUSH / WORKSHOP</span
+            >
             <h2 id="workshop-title">YOUR GARAGE<span>.</span></h2>
           </div>
           <div class="garage-wallet">
@@ -869,16 +874,6 @@
             tabindex="-1"
           >
             02 <span>UPGRADES</span>
-          </button>
-          <button
-            id="tab-boxes"
-            role="tab"
-            data-workshop-tab="boxes"
-            aria-controls="boxes-panel"
-            aria-selected="false"
-            tabindex="-1"
-          >
-            03 <span>BOXES</span><small id="garage-boxes">0</small>
           </button>
         </nav>
         <div class="workshop-workspace">
@@ -1008,13 +1003,45 @@
             id="boxes-panel"
             class="workshop-panel"
             role="tabpanel"
-            aria-labelledby="tab-boxes"
+            aria-label="Shop"
             hidden
           >
             <div class="panel-title">
-              <h3>YOUR SUPPLY DROPS</h3>
-              <span>3 PARTS / BOX</span>
+              <h3>BOXES & ARTIFACTS</h3>
+              <span id="shop-box-count">0 BOXES · 3 PARTS EACH</span>
             </div>
+            <section class="artifact-market" aria-label="CITY WARS artifacts">
+              <article>
+                <span>TB</span>
+                <div>
+                  <h3>TBILISI ARTIFACT</h3>
+                  <small data-artifact-progress="tbilisi">0 / 5 FOUND</small>
+                </div>
+                <button data-buy-artifact="tbilisi">
+                  BUY NEXT · 1,000,000 CR
+                </button>
+              </article>
+              <article>
+                <span>KU</span>
+                <div>
+                  <h3>KUTAISI ARTIFACT</h3>
+                  <small data-artifact-progress="kutaisi">0 / 5 FOUND</small>
+                </div>
+                <button data-buy-artifact="kutaisi">
+                  BUY NEXT · 1,000,000 CR
+                </button>
+              </article>
+              <article>
+                <span>BA</span>
+                <div>
+                  <h3>BATUMI ARTIFACT</h3>
+                  <small data-artifact-progress="batumi">0 / 5 FOUND</small>
+                </div>
+                <button data-buy-artifact="batumi">
+                  BUY NEXT · 1,000,000 CR
+                </button>
+              </article>
+            </section>
             <section id="box-bench" class="box-bench">
               <article class="supply-card" style="--supply: #eac068">
                 <div class="supply-visual" aria-hidden="true">?</div>

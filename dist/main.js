@@ -642,8 +642,7 @@ function finish() {
           bonusButton.className = "primary";
           bonusButton.textContent = "OPEN BONUS BOXES ↗";
           bonusButton.onclick = () => {
-            workshop.open();
-            workshop.switchTab("boxes");
+            workshop.open("boxes");
           };
           $("result-reward").append(bonusButton);
         }
@@ -1395,7 +1394,12 @@ try {
   $("workshop-open").disabled = false;
   $("workshop-open").onclick = () => {
     workshop.car = selectedCar;
-    workshop.open();
+    workshop.open("build");
+  };
+  $("shop-open").disabled = false;
+  $("shop-open").onclick = () => {
+    workshop.car = selectedCar;
+    workshop.open("boxes");
   };
   $("start").onclick = primaryPlay;
   $("camera-toggle").onclick = () => switchCamera();

@@ -23,7 +23,11 @@ export class GaragePreview {
       this.tick();
       return false;
     });
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
     this.renderer.setPixelRatio(
       Math.min(devicePixelRatio, source.budget?.low ? 1 : 1.5),
     );

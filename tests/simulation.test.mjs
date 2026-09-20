@@ -110,19 +110,16 @@ test("police route around blocks instead of driving through them", () => {
   }
   assert(distance(previous, b) < 0.01);
 });
-test("patrols roam until checkpoint one, then pursuers close the gap", () => {
+test("patrols pursue immediately and close the gap before checkpoint one", () => {
   const s = new ChaseSimulation();
   s.start();
   s.traffic = [];
   s.obstacles = [];
-  for (let i = 0; i < 600; i++) s.update(1 / 120, {});
-  assert.equal(Boolean(s.helicopter?.tracking), false);
-  assert.equal(s.radioContact, null);
-  assert.equal(s.bust, 0);
   const chaseStart = distance(s.player, s.police[0]);
-  s.checkpoint = 1;
-  s.radioContact = { ...s.player, time: s.time };
-  for (let i = 0; i < 600; i++) s.update(1 / 120, {});
+  for (let i = 0; i < 360; i++) s.update(1 / 120, {});
+  assert.equal(s.pursuitStarted, true);
+  assert(s.radioContact);
+  assert.equal(s.checkpoint, 0);
   assert(distance(s.player, s.police[0]) < chaseStart * 0.6);
 });
 test("checkpoints only award in order, repairs cap at 100, reinforcements arrive", () => {

@@ -104,7 +104,7 @@ test("pursuit starts with four units, adds checkpoint reinforcements, and retain
   assert.equal(s.police.length, 7);
   assert.equal(s.police.filter((c) => c.role === "blockade").length, 2);
 });
-test("hitting an ambient patrol activates the full pursuit before checkpoint one", () => {
+test("the full pursuit is active before checkpoint one and survives rewind", () => {
   const s = new ChaseSimulation();
   s.start();
   s.obstacles = [];
@@ -117,13 +117,13 @@ test("hitting an ambient patrol activates the full pursuit before checkpoint one
   s.update(1 / 120, {});
   assert.equal(s.checkpoint, 0);
   assert.equal(s.pursuitStarted, true);
-  assert.equal(s.radioContact.x, s.player.x);
+  assert(Number.isFinite(s.radioContact.x));
   assert(s.nextWaveAt > s.time);
-  assert.match(s.events.join(" "), /PATROL HIT/);
+  assert.match(s.events.join(" "), /PURSUIT ENGAGED/);
   s.timeline.restore(s, 0);
-  assert.equal(s.pursuitStarted, false);
+  assert.equal(s.pursuitStarted, true);
 });
-test("free roam keeps run score at zero until pursuit begins", () => {
+test("run score starts immediately with the pursuit", () => {
   const s = new ChaseSimulation();
   s.start();
   s.obstacles = [];
@@ -131,11 +131,8 @@ test("free roam keeps run score at zero until pursuit begins", () => {
   s.traffic = [];
   s.police = [];
   for (let i = 0; i < 240; i++) s.update(1 / 120, { throttle: 1 });
-  assert.equal(s.pursuitStarted, false);
-  assert.equal(s.score, 0);
-  assert(s.runDistance > 0, "free roam still tracks exploration distance");
-  s.activatePursuit("collision");
-  for (let i = 0; i < 120; i++) s.update(1 / 120, { throttle: 1 });
+  assert.equal(s.pursuitStarted, true);
+  assert(s.runDistance > 0);
   assert(s.score > 0);
 });
 test("a blockade unit plans a road position ahead of the observed moving player", () => {

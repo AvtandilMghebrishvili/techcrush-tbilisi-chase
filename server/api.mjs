@@ -1,4 +1,4 @@
-import { EVENT_ID, eventProgress } from "../dist/event-rules.js";
+import { EVENT_ID, eventProgress, huntComplete } from "../dist/event-rules.js";
 import { eventBoard } from "./event-board.mjs";
 import { readLeaderboard } from "./leaderboard.mjs";
 import { cityCommunity } from "../dist/map-selection.js";
@@ -245,6 +245,12 @@ export async function handleApi(request, DB, options = {}) {
               version + 1,
               body.id,
             ),
+          );
+        if (body.action.type === "buy-artifact" && huntComplete(profile))
+          statements.push(
+            DB.prepare(
+              `UPDATE event_entries SET unlocked_at=COALESCE(unlocked_at,?) WHERE event_id=? AND key_hash=? AND ${guard}`,
+            ).bind(now, EVENT_ID, hash, hash, version + 1, body.id),
           );
         if (
           body.action.type === "settle" &&

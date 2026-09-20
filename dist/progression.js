@@ -1,5 +1,7 @@
 import {
   EVENT_ID,
+  ARTIFACT_BANNERS,
+  HUNT_CITIES,
   eventPhase,
   eventProgress,
   joinEvent,
@@ -185,6 +187,7 @@ export const BOX_SHOP = {
   platinum: { name: "Platinum", field: "platinumBoxes", price: 22000 },
   creator: { name: "TECHCRUSH", field: "creatorBoxes", price: 35000 },
 };
+export const ARTIFACT_PRICE = 1_000_000;
 export const totalBoxes = (p) =>
   p.boxes +
   (p.platinumBoxes || 0) +
@@ -419,6 +422,29 @@ export function applyProgressAction(
     p.credits -= box.price;
     p[box.field] = (p[box.field] || 0) + 1;
     p.lastPurchase = { kind: action.kind, price: box.price };
+  } else if (action.type === "buy-artifact") {
+    if (!Number.isFinite(context.now) || eventPhase(context.now) !== "live")
+      throw Error("Artifacts are available while CITY WARS is live.");
+    const contest = eventProgress(p);
+    if (!contest) throw Error("Join CITY WARS before buying an artifact.");
+    if (!HUNT_CITIES.includes(action.map))
+      throw Error("Choose a valid artifact city.");
+    const owned = contest.artifacts[action.map] || [];
+    const artifact = ARTIFACT_BANNERS.find((id) => !owned.includes(id));
+    if (artifact == null)
+      throw Error("You already own every artifact in this city.");
+    if (p.credits < ARTIFACT_PRICE)
+      throw Error(
+        `You need ${ARTIFACT_PRICE.toLocaleString()} CR for this artifact.`,
+      );
+    p.credits -= ARTIFACT_PRICE;
+    contest.artifacts[action.map] = [...owned, artifact];
+    p.lastPurchase = {
+      kind: "artifact",
+      map: action.map,
+      artifact,
+      price: ARTIFACT_PRICE,
+    };
   } else if (action.type === "begin-run") {
     if (!context.runId || !Number.isFinite(context.now))
       throw Error("Start your chase online.");

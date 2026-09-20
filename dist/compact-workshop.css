@@ -1347,3 +1347,97 @@
 .loot-coins span {
   font-size: 10px;
 }
+
+/* The store has its own menu entry while reusing the already-loaded garage
+   shell and save connection, so opening it adds no second 3D renderer. */
+#intro .intro-actions {
+  grid-template-columns: 1.18fr 0.72fr 0.78fr 1.05fr !important;
+}
+#intro .shop-link {
+  color: #8ff7e7;
+  border-color: #42dec066;
+  background: linear-gradient(145deg, #123039, #172334);
+  flex-direction: column;
+  gap: 2px !important;
+}
+#intro .shop-link small {
+  font-size: 7px;
+  color: #9ecbc5;
+}
+#workshop[data-shop="true"] .workshop-toolbar,
+#workshop[data-shop="true"] .workshop-nav,
+#workshop[data-shop="true"] .garage-showcase {
+  display: none;
+}
+#workshop[data-shop="true"] .workshop-workspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+#workshop[data-shop="true"] #boxes-panel {
+  grid-column: 1;
+}
+#workshop[data-shop="true"] .box-bench {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.artifact-market {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 9px;
+}
+.artifact-market article {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 7px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #55eadf42;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #142b33, #131e2c);
+}
+.artifact-market article > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #65f6e6;
+  border-radius: 8px;
+  color: #90fff0;
+  font-weight: 900;
+}
+.artifact-market h3 {
+  margin: 0;
+  font-size: 10px;
+}
+.artifact-market small {
+  color: #9db5c3;
+  font-size: 8px;
+}
+.artifact-market button {
+  grid-column: 1 / -1;
+  min-height: 31px;
+  color: #071a1b;
+  border-color: #62efdc;
+  background: #62efdc;
+  font-size: 9px;
+  font-weight: 900;
+}
+.artifact-market button:disabled {
+  color: #7f919d;
+  border-color: #52606c;
+  background: #1b2733;
+}
+@media (max-width: 800px) {
+  #intro .intro-actions {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  #intro .intro-actions #start,
+  #intro .intro-actions .leaderboard-link {
+    grid-column: span 2 !important;
+  }
+  .artifact-market {
+    grid-template-columns: 1fr;
+  }
+  #workshop[data-shop="true"] .box-bench {
+    grid-template-columns: 1fr;
+  }
+}

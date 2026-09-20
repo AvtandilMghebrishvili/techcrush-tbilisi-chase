@@ -55,6 +55,7 @@ test("ghost presence shares only nearby same-city car poses", async () => {
     "angle",
     "car",
     "id",
+    "name",
     "pitch",
     "roll",
     "x",

@@ -60,7 +60,7 @@ export async function updateGhosts(DB, keyHash, body, now) {
     .bind(now - 60000)
     .run();
   const result = await DB.prepare(
-    "SELECT session_id AS id,car,x,y,z,angle,pitch,roll FROM ghost_presence WHERE map=? AND key_hash<>? AND updated_at>=? AND ((x-?)*(x-?)+(z-?)*(z-?))<=? ORDER BY ((x-?)*(x-?)+(z-?)*(z-?)) ASC, updated_at DESC LIMIT 12",
+    "SELECT p.session_id AS id,p.car,p.x,p.y,p.z,p.angle,p.pitch,p.roll,CASE WHEN g.private_mode=1 THEN 'PRIVATE DRIVER' WHEN length(trim(g.display_name))>=3 THEN trim(g.display_name) ELSE 'DRIVER' END AS name FROM ghost_presence p JOIN garages g ON g.key_hash=p.key_hash WHERE p.map=? AND p.key_hash<>? AND p.updated_at>=? AND ((p.x-?)*(p.x-?)+(p.z-?)*(p.z-?))<=? ORDER BY ((p.x-?)*(p.x-?)+(p.z-?)*(p.z-?)) ASC, p.updated_at DESC LIMIT 12",
   )
     .bind(
       ghost.map,

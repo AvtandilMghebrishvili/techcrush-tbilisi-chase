@@ -16,6 +16,28 @@ function makeBatch(geometry, material, count) {
   return mesh;
 }
 
+function labelTexture(name) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "rgba(6, 17, 27, .82)";
+  ctx.fillRect(2, 5, 252, 54);
+  ctx.strokeStyle = "#79eaff";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(3.5, 6.5, 249, 51);
+  ctx.font = "700 24px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#f4fdff";
+  ctx.fillText(String(name || "DRIVER").slice(0, 20), 128, 33, 232);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+  return texture;
+}
+
 export class GhostCars {
   constructor(scene) {
     const material = new THREE.MeshBasicMaterial({
@@ -38,7 +60,21 @@ export class GhostCars {
       dark,
       MAX_GHOSTS * 4,
     );
-    this.group.add(this.body, this.cabin, this.wheels);
+    this.labels = Array.from({ length: MAX_GHOSTS }, () => {
+      const sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          transparent: true,
+          depthWrite: false,
+          depthTest: false,
+          toneMapped: false,
+        }),
+      );
+      sprite.visible = false;
+      sprite.renderOrder = 10;
+      sprite.scale.set(8, 2, 1);
+      return sprite;
+    });
+    this.group.add(this.body, this.cabin, this.wheels, ...this.labels);
     scene.add(this.group);
   }
   update(ghosts = []) {
@@ -55,6 +91,17 @@ export class GhostCars {
       root.rotation.set(ghost.pitch || 0, ghost.angle, ghost.roll || 0);
       root.scale.set(1, 1, 1);
       root.updateMatrix();
+
+      const label = this.labels[index],
+        name = String(ghost.name || "DRIVER").slice(0, 20);
+      if (label.userData.name !== name) {
+        label.material.map?.dispose();
+        label.material.map = labelTexture(name);
+        label.material.needsUpdate = true;
+        label.userData.name = name;
+      }
+      label.position.set(ghost.x, ghost.y + 2.5, ghost.z);
+      label.visible = true;
 
       part.position.set(0, 0.62, 0);
       part.rotation.set(0, 0, 0);
@@ -81,6 +128,8 @@ export class GhostCars {
     });
     this.body.count = this.cabin.count = list.length;
     this.wheels.count = wheelIndex;
+    for (let i = list.length; i < this.labels.length; i++)
+      this.labels[i].visible = false;
     this.body.instanceMatrix.needsUpdate = true;
     this.cabin.instanceMatrix.needsUpdate = true;
     this.wheels.instanceMatrix.needsUpdate = true;

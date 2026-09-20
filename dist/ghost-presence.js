@@ -70,6 +70,7 @@ export class GhostPresence {
     return {
       id: remote.to.id,
       car: remote.to.car,
+      name: String(remote.to.name || "DRIVER").slice(0, 20),
       x: mix(Number(remote.from.x), Number(remote.to.x), t),
       y: mix(Number(remote.from.y), Number(remote.to.y), t),
       z: mix(Number(remote.from.z), Number(remote.to.z), t),
