@@ -240,7 +240,7 @@
           <div class="community-entry">
             <button id="driver-open" type="button">
               <span id="driver-name-label">CHOOSE YOUR DRIVER NAME</span
-              ><small>PROFILE + ACHIEVEMENTS ↗</small></button
+              ><small>PROFILE · GAME ID ↗</small></button
             ><span id="menu-multiplier"></span>
           </div>
         </div>
@@ -766,8 +766,8 @@
             <div>
               <h3 id="driver-heading">Make a name in Tbilisi.</h3>
               <p>
-                No account or password. Your driver stays with this browser's
-                saved garage.
+                Change your name here. Use your private Game ID to continue with
+                the same progress in another browser.
               </p>
             </div>
           </div>
@@ -784,8 +784,9 @@
               required
               aria-describedby="driver-name-help"
             /><small id="driver-name-help"
-              >2–20 letters or numbers. Names can repeat; your driver tag
-              identifies you.</small
+              >2–20 letters or numbers. Renaming keeps your progress and rank.
+              Your CITY WARS competition name stays fixed until the event
+              ends.</small
             >
             <fieldset class="driver-colors">
               <legend>YOUR COLOR</legend>
@@ -804,6 +805,51 @@
               </button>
             </div>
           </form>
+          <section class="game-id-panel" aria-labelledby="game-id-title">
+            <div class="game-id-heading">
+              <h3 id="game-id-title">YOUR PRIVATE GAME ID</h3>
+              <span>ONLY YOU CAN SEE THIS</span>
+            </div>
+            <div class="game-id-value">
+              <input
+                id="game-id-value"
+                readonly
+                aria-label="Your private Game ID"
+                autocomplete="off"
+                spellcheck="false"
+              /><button id="game-id-copy" type="button" class="secondary">
+                COPY ID
+              </button>
+            </div>
+            <p>
+              Keep this ID private — it opens your saved cars, coins and
+              progress. Save it before switching profiles. The code stays the
+              same when you rename; your previous ID still works.
+            </p>
+            <form id="game-id-form">
+              <label for="game-id-input"
+                >CONTINUE WITH A GAME ID / სხვა ბრაუზერიდან გაგრძელება</label
+              >
+              <div class="game-id-value">
+                <input
+                  id="game-id-input"
+                  type="text"
+                  maxlength="80"
+                  placeholder="NICKNAME · your private code"
+                  autocomplete="off"
+                  spellcheck="false"
+                  required
+                /><button id="game-id-restore" type="submit" class="primary">
+                  OPEN PROFILE →
+                </button>
+              </div>
+              <small
+                >This browser switches to that saved profile. Profiles and
+                scores are never merged.</small
+              >
+            </form>
+            <p id="game-id-status" role="status" aria-live="polite"></p>
+          </section>
           <div id="driver-career" class="driver-career"></div>
           <div id="driver-challenges" class="driver-challenges"></div>
           <div class="achievement-heading">
@@ -812,9 +858,9 @@
           </div>
           <div id="driver-achievements" class="driver-achievements"></div>
           <p class="community-note">
-            Keep your progress across devices with Garage → Back up private
-            garage key / Restore garage. Keep that key private. Turning off
-            public visibility removes your row without deleting your garage.
+            Your Game ID is private and never appears on the leaderboard.
+            Turning off public visibility hides your results without deleting
+            your garage.
           </p>
         </section>
       </dialog>
@@ -1314,6 +1360,9 @@
           </button>
         </div>
         <p class="setup-lead">Your chase. Your controls.</p>
+        <button id="setup-profile" type="button" class="secondary">
+          MY PROFILE · NAME &amp; GAME ID ↗
+        </button>
         <div class="keyboard-guide" aria-label="Keyboard controls">
           <span><kbd>WASD</kbd> Drive</span><span><kbd>SPACE</kbd> Drift</span>
           <span><kbd>SHIFT</kbd> Nitro</span><span><kbd>Q</kbd> Rewind</span>

@@ -71,6 +71,13 @@
       "when": 1789922958415,
       "tag": "0009_eminent_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1789934155778,
+      "tag": "0010_wealthy_cyclops",
+      "breakpoints": true
     }
   ]
 }

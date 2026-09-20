@@ -5,6 +5,14 @@ import { cityCommunity } from "../dist/map-selection.js";
 import { updateGhosts } from "./ghosts.mjs";
 import { isPrivateProfile } from "../dist/private-driver.js";
 import {
+  resolveGarageHash,
+  ensureGameCode,
+  formatGameId,
+  allowGameIdAttempt,
+  restoreGameId,
+} from "./game-id.mjs";
+export { keyHash } from "./game-id.mjs";
+import {
   newProfile,
   migrateProfile,
   applyProgressAction,
@@ -19,15 +27,6 @@ const json = (value, status = 200) =>
     },
   });
 const random = () => crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
-export async function keyHash(token) {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(token),
-  );
-  return Array.from(new Uint8Array(digest), (b) =>
-    b.toString(16).padStart(2, "0"),
-  ).join("");
-}
 async function readBody(request) {
   if (Number(request.headers.get("content-length") || 0) > 8192)
     throw Error("Request too large.");
@@ -56,6 +55,38 @@ export async function handleApi(request, DB, options = {}) {
       503,
     );
   const url = new URL(request.url);
+  if (url.pathname === "/api/game-id/restore") {
+    if (request.method !== "POST")
+      return json({ error: "Method not allowed" }, 405);
+    try {
+      if (!(await allowGameIdAttempt(DB, options.clientIP, now)))
+        return json(
+          { error: "Too many Game ID attempts. Please wait 10 minutes." },
+          429,
+        );
+      let body;
+      try {
+        body = await readBody(request);
+      } catch {
+        return json({ error: "Enter a valid Game ID." }, 400);
+      }
+      const restoredToken = await restoreGameId(DB, body?.gameId);
+      if (!restoredToken)
+        return json(
+          { error: "Game ID not found. Check every group and try again." },
+          404,
+        );
+      return json({ token: restoredToken });
+    } catch {
+      return json(
+        {
+          error:
+            "Profile sign-in is temporarily unavailable. Your current profile is unchanged.",
+        },
+        503,
+      );
+    }
+  }
   if (url.pathname === "/api/leaderboard") {
     if (request.method !== "GET")
       return json({ error: "Method not allowed" }, 405);
@@ -64,7 +95,7 @@ export async function handleApi(request, DB, options = {}) {
       ?.replace(/^Bearer /, "");
     try {
       const hash = /^[a-f0-9]{64}$/.test(optionalToken || "")
-        ? await keyHash(optionalToken)
+        ? await resolveGarageHash(DB, optionalToken)
         : null;
       return json(await readLeaderboard(DB, url, hash));
     } catch (error) {
@@ -91,8 +122,8 @@ export async function handleApi(request, DB, options = {}) {
   const token = request.headers.get("authorization")?.replace(/^Bearer /, "");
   if (!token || !/^[a-f0-9]{64}$/.test(token))
     return json({ error: "Missing or invalid garage key." }, 401);
-  const hash = await keyHash(token);
   try {
+    const hash = await resolveGarageHash(DB, token);
     if (url.pathname === "/api/event/leaderboard") {
       if (request.method !== "GET")
         return json({ error: "Method not allowed" }, 405);
@@ -141,6 +172,7 @@ export async function handleApi(request, DB, options = {}) {
       }
     }
     const publicId = row.public_id || crypto.randomUUID();
+    const gameCode = await ensureGameCode(DB, hash);
     let profile = migrateProfile(JSON.parse(row.profile)),
       version = row.version;
     if (url.pathname === "/api/action") {
@@ -394,6 +426,10 @@ export async function handleApi(request, DB, options = {}) {
       version,
       driver: hash.slice(0, 6).toUpperCase(),
       publicId: row.public_id || (version !== row.version ? publicId : null),
+      gameId: formatGameId(
+        gameCode,
+        profile.driver.name || eventProgress(profile)?.handle,
+      ),
     });
   } catch (error) {
     if (

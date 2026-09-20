@@ -7,7 +7,9 @@ export default {
     if (new URL(request.url).pathname.startsWith("/result/"))
       return resultPage(request, env.DB);
     if (new URL(request.url).pathname.startsWith("/api/"))
-      return handleApi(request, env.DB);
+      return handleApi(request, env.DB, {
+        clientIP: request.headers.get("CF-Connecting-IP"),
+      });
     if (env.ASSETS) {
       let assetRequest = request;
       const assetUrl = new URL(request.url);

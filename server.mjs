@@ -67,12 +67,15 @@ http
             ...(body.length ? { body } : {}),
           }),
           DB,
-          ownerAccess
-            ? {
-                preview: true,
-                now: () => previewNow + Date.now() - previewEpoch,
-              }
-            : {},
+          {
+            clientIP: req.socket.remoteAddress,
+            ...(ownerAccess
+              ? {
+                  preview: true,
+                  now: () => previewNow + Date.now() - previewEpoch,
+                }
+              : {}),
+          },
         );
         res.writeHead(response.status, Object.fromEntries(response.headers));
         res.end(Buffer.from(await response.arrayBuffer()));

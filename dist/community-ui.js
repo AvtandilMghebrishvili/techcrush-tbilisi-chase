@@ -79,13 +79,22 @@ export class CommunityUI {
         this.load();
       };
     $("driver-open").onclick = () => this.open("profile");
+    $("setup-profile").onclick = () => {
+      $("controls-dialog").close();
+      this.open("profile");
+    };
+    $("game-id-copy").onclick = () => this.copyGameId();
+    $("game-id-form").onsubmit = (event) => {
+      event.preventDefault();
+      void this.restoreGameId();
+    };
     $("community-close").onclick = () => dialog.close();
     dialog.addEventListener("close", () => {
       this.stop();
       this.race = null;
     });
     dialog.addEventListener("cancel", (e) => {
-      if (this.store.busy) e.preventDefault();
+      if (this.store.busy || this.restoring) e.preventDefault();
     });
     document
       .querySelectorAll("[data-community-tab]")
@@ -181,6 +190,7 @@ export class CommunityUI {
       $("driver-public").checked = d.name ? d.listed : true;
       $("driver-guest").hidden = !this.race;
       $("driver-status").textContent = "";
+      $("game-id-status").textContent = "";
       this.paintAvatar();
       this.changed();
       if (this.race) $("driver-name").focus({ preventScroll: true });
@@ -229,6 +239,43 @@ export class CommunityUI {
       $("driver-status").textContent = e.message;
     }
   }
+  async copyGameId() {
+    if (!this.store.gameId) return;
+    try {
+      await navigator.clipboard.writeText(this.store.gameId);
+      $("game-id-status").textContent =
+        "Game ID copied. Keep it somewhere private.";
+    } catch {
+      $("game-id-value").focus();
+      $("game-id-value").select();
+      $("game-id-status").textContent =
+        "Your ID is selected. Copy it and keep it private.";
+    }
+  }
+  async restoreGameId() {
+    if (this.restoring || this.store.busy) return;
+    this.restoring = true;
+    this.changed();
+    $("game-id-status").textContent =
+      "Saving your current run and opening the profile…";
+    try {
+      if (this.store.pending) await this.store.retry();
+      await this.store.restoreGameId(
+        $("game-id-input").value,
+        this.actions.beforeRestore,
+      );
+      this.race = null;
+      $("game-id-input").value = "";
+      $("game-id-status").textContent =
+        "Profile restored. Loading your saved progress…";
+      this.actions.restored?.();
+    } catch (error) {
+      $("game-id-status").textContent = error.message;
+    } finally {
+      this.restoring = false;
+      this.changed();
+    }
+  }
   syncCities() {
     const select = $("board-map");
     if (
@@ -248,11 +295,15 @@ export class CommunityUI {
     $("driver-name-label").textContent = d.name || "CHOOSE YOUR DRIVER NAME";
     $("menu-multiplier").textContent =
       `LVL ${cityLevel(p)}\n${rates.score.toFixed(2)}× SCORE · ${rates.cash.toFixed(2)}× CR`;
-    $("community-close").disabled = this.store.busy;
+    const busy = this.store.busy || this.restoring;
+    $("community-close").disabled = busy;
     if (!$("community-dialog").open || this.tab !== "profile") return;
-    $("driver-save").disabled = this.store.busy;
-    $("community-close").disabled = this.store.busy;
-    $("driver-guest").disabled = this.store.busy;
+    $("driver-save").disabled = busy;
+    $("driver-guest").disabled = busy;
+    $("game-id-copy").disabled = busy || !this.store.gameId;
+    $("game-id-restore").disabled = busy;
+    $("game-id-input").disabled = busy;
+    $("game-id-value").value = this.store.gameId || "Loading your Game ID…";
     $("driver-save").textContent = this.store.busy
       ? "SAVING…"
       : this.race

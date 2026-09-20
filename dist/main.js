@@ -1338,12 +1338,30 @@ try {
     },
   });
   community = new CommunityUI(career, {
+    beforeRestore: async () => {
+      if (!(await leaveRun(false)))
+        throw Error(
+          "Save the current run before switching profiles. Please retry.",
+        );
+    },
+    restored: () => location.reload(),
     pause: () => {
       if (["running", "rewinding"].includes(sim.phase)) pause();
       keys.clear();
       mobile?.clear();
     },
   });
+  addEventListener(
+    "storage",
+    (event) => {
+      if (
+        event.key === "techcrush-garage-key-v1" &&
+        event.newValue !== career.token
+      )
+        location.reload();
+    },
+    { signal: pageLifetime.signal },
+  );
   const refreshCityMenu = cityMenu(career, () => leaveRun(false));
   const syncPrimaryPlay = () => {
     if ($("start").getAttribute("aria-busy") === "true") return;

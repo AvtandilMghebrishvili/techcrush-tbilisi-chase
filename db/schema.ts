@@ -59,6 +59,22 @@ export const garages = sqliteTable(
     ),
   ],
 );
+export const gameIds = sqliteTable("game_ids", {
+  keyHash: text("key_hash")
+    .primaryKey()
+    .references(() => garages.keyHash),
+  credentialHash: text("credential_hash").notNull().unique(),
+  recoveryCode: text("recovery_code").notNull(),
+});
+export const gameIdAttempts = sqliteTable(
+  "game_id_attempts",
+  {
+    bucket: text("bucket").primaryKey(),
+    attempts: integer("attempts").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+  },
+  (t) => [index("game_id_attempt_expiry").on(t.expiresAt)],
+);
 export const levelRecords = sqliteTable(
   "level_records",
   {
