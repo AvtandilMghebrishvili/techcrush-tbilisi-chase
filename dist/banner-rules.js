@@ -1,7 +1,7 @@
 // Shared reward limits: optional counters keep pre-2.1 clients compatible.
 import { EVENT_ID, ARTIFACT_BANNERS, HUNT_CITIES } from "./event-rules.js";
 import { ACTIVE_MAP } from "./map-selection.js";
-import { carRewardMultiplier } from "./car-bonuses.js";
+import { carCashMultiplier } from "./car-bonuses.js";
 export const BANNER_COUNT = 48;
 export const CASH_BANNER_COUNT = 3;
 export const CASH_BANNER_REWARD = 4000;
@@ -25,7 +25,7 @@ export const patrolCollisionDamage = (impact, kind) =>
     Math.max(0, impact) * (kind === "tank" ? 0.7 : 0.5),
   );
 export function breakReward(sim, prop) {
-  const bonus = carRewardMultiplier(sim.player?.carId);
+  const bonus = carCashMultiplier(sim.player?.carId);
   if (
     sim.runOptions?.event === EVENT_ID &&
     HUNT_CITIES.includes(ACTIVE_MAP) &&

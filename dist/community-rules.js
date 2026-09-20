@@ -6,7 +6,11 @@ import {
   DECOR_REWARD_LIMIT,
 } from "./banner-rules.js";
 import { TIME_COURSES } from "./race-timing.js";
-import { carRewardMultiplier, ticketRewardMultiplier } from "./car-bonuses.js";
+import {
+  carRewardMultiplier,
+  carCashMultiplier,
+  ticketRewardMultiplier,
+} from "./car-bonuses.js";
 export const STUNT_REWARDS = {
   ...Object.fromEntries(
     Object.entries(EXTRA_ROOFTOP_LAYOUTS).flatMap(([map, sites]) =>
@@ -53,11 +57,11 @@ export function levelRewards(level = 1, car) {
   const bonus = carRewardMultiplier(car);
   return {
     score: (1 + (n - 1) * 0.15) * bonus,
-    cash: (1 + (n - 1) * 0.1) * bonus,
+    cash: (1 + (n - 1) * 0.1) * carCashMultiplier(car),
   };
 }
 export const creditAward = (base, level, car) =>
-  Math.round(base * levelRewards(level).cash) * carRewardMultiplier(car);
+  Math.round(base * levelRewards(level).cash) * carCashMultiplier(car);
 export const clearReward = (level) => creditAward(1800 + level * 250, level);
 export function weekKey(now = Date.now()) {
   const d = new Date(now);
@@ -193,7 +197,7 @@ export function validateRun(metrics, ticket, result, now = Date.now()) {
     distance: 4e6,
     driftSeconds: 21600,
     jumps: 5000,
-    topSpeed: 650,
+    topSpeed: 190 * 3.6,
   };
   for (const [key, max] of Object.entries(limits)) {
     const value = metrics[key];

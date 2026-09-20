@@ -10,6 +10,7 @@ import {
 
 import { MODEL_SHAPES } from "./vehicle-designs.js";
 import { makeCyberPickup } from "./cyber-pickup.js";
+import { makeBatmobile } from "./batmobile.js";
 export { MODEL_SHAPES };
 export function bodySurface(shape, rounded = true) {
   const curve = new THREE.CatmullRomCurve3(
@@ -51,6 +52,7 @@ export function bodySurface(shape, rounded = true) {
   return { sections, section, top, side };
 }
 export function makeOriginalSportsCar(id, color, equipment = {}) {
+  if (id === "batmobile") return makeBatmobile(color, equipment);
   if (id === "creator") return makeCyberPickup(color, equipment);
   const shape = MODEL_SHAPES[id] || MODEL_SHAPES.gt,
     group = new THREE.Group(),

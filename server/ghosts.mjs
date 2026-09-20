@@ -8,6 +8,7 @@ const CARS = new Set([
   "rioni",
   "coast",
   "creator",
+  "batmobile",
 ]);
 const number = (value, min, max) => {
   const parsed = Number(value);

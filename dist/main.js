@@ -542,6 +542,7 @@ async function start() {
       equipment: career.profile.cars[selectedCar],
       completedQuests: career.profile.quests?.completed || [],
       bankedTakedowns: totalTakedowns(career.profile),
+      batTakedowns: career.profile.batTakedowns || 0,
       runId: career.profile.activeRun.id,
       event: career.profile.activeRun.event,
       collectedArtifacts:

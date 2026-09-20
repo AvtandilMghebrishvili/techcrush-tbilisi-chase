@@ -1891,6 +1891,64 @@
     animation: none;
   }
 }
+.bat-reward-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 10px;
+  border: 1px solid #b3934d;
+  border-radius: 7px;
+  background: linear-gradient(110deg, #2d2c23, #121d27);
+  min-height: 56px;
+}
+.bat-reward-box img {
+  width: 64px;
+  height: 50px;
+  object-fit: contain;
+}
+.bat-reward-box h3 {
+  margin: 0;
+  color: #f6cd76;
+  font-size: 16px;
+}
+.bat-reward-box p {
+  margin: 3px 0 0;
+  font-size: 10px;
+  color: #c4ccd0;
+}
+.bat-reward-box > div {
+  flex: 1;
+}
+.bat-reward-box button {
+  min-width: 145px;
+  min-height: 42px;
+  margin: 0;
+}
+#workshop[data-shop="true"] .bat-reward-box button {
+  color: #092a20;
+  border: 1px solid #a6ffdb;
+  background: linear-gradient(#afffe0, #59d6a4);
+}
+#workshop[data-shop="true"] .bat-reward-box button:disabled {
+  opacity: 0.45;
+}
+.bat-reward-box .box-open-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 900;
+}
+.bat-reward-box .box-owned {
+  display: block;
+  font-size: 9px;
+}
+@media (max-width: 800px) {
+  .bat-reward-box {
+    flex-wrap: wrap;
+  }
+  .bat-reward-box button {
+    width: 100%;
+  }
+}
 /* Quantity belongs to the OPEN action, leaving room for both shop actions. */
 #box-quantity-dialog {
   width: min(480px, calc(100% - 24px));
@@ -2050,8 +2108,18 @@
   line-height: 1.2;
 }
 @media (min-width: 801px) {
+  body.mobile-controls
+    #workshop:not([data-shop="true"])
+    #paint-swatches
+    button {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    flex-basis: 24px;
+  }
   #workshop[data-shop="true"] {
-    height: min(650px, calc(100dvh - 24px));
+    height: min(720px, calc(100dvh - 24px));
     padding: 12px;
     gap: 8px;
   }
@@ -2094,6 +2162,11 @@
     flex-basis: 68px;
     margin: 0 auto 3px;
   }
+  #workshop[data-shop="true"] .crate-visual > span,
+  #workshop[data-shop="true"] .crate-visual > img {
+    top: 20px;
+    height: calc(100% - 26px) !important;
+  }
   #workshop[data-shop="true"] .box-bench h3 {
     min-height: 20px;
     margin-bottom: 3px;
@@ -2132,6 +2205,18 @@
   }
 }
 @media (min-width: 801px) and (max-height: 700px) {
+  #workshop[data-shop="true"]:has(
+      #upgrade-feedback:not(:empty),
+      #save-error:not(:empty)
+    )
+    .last-drop,
+  #workshop[data-shop="true"]:has(
+      #upgrade-feedback:not(:empty),
+      #save-error:not(:empty)
+    )
+    .garage-backup {
+    display: none;
+  }
   #workshop[open][data-shop="true"] {
     padding: 8px;
     gap: 6px;
@@ -2151,5 +2236,23 @@
   }
   #workshop[data-shop="true"] .last-drop {
     margin: 4px 0;
+  }
+  #workshop[data-shop="true"] .supply-card {
+    padding: 6px;
+    gap: 3px;
+  }
+  #workshop[data-shop="true"] .box-bench p {
+    min-height: 26px;
+    font-size: 10px;
+  }
+  #workshop[data-shop="true"] .box-bench small {
+    min-height: 22px;
+  }
+  #workshop[data-shop="true"] .bat-reward-box {
+    min-height: 42px;
+    padding: 3px 8px;
+  }
+  #workshop[data-shop="true"] .bat-reward-box img {
+    height: 40px;
   }
 }

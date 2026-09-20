@@ -3,7 +3,7 @@ export function addTurboExhaust(car) {
   const root = new THREE.Group();
   root.visible = false;
   const material = new THREE.MeshBasicMaterial({
-    color: "#57caff",
+    color: car.userData.shape === "batmobile" ? "#ffb73c" : "#57caff",
     transparent: true,
     opacity: 0.8,
     depthWrite: false,

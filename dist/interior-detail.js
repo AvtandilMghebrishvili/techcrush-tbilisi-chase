@@ -47,6 +47,12 @@ Object.assign(CABIN_STYLES, {
     analog: false,
     trim: "#172f48",
   },
+  batmobile: {
+    accent: "#efbf58",
+    name: "BAT / TURBINE",
+    analog: false,
+    trim: "#252a31",
+  },
   creator: {
     accent: "#ff3158",
     name: "TECHCRUSH / ELECTRIC AWD",

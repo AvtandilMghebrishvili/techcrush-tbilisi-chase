@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   newProfile,
   applyProgressAction,
-  BOX_SHOP,
+  BOX_TYPES,
   PARTS,
   TIERS,
   boxOpenCount,
@@ -18,7 +18,7 @@ const seeded = () => {
 };
 const units = (items) =>
   items.reduce((sum, item) => sum + (item.quantity || 1), 0);
-for (const [kind, box] of Object.entries(BOX_SHOP)) {
+for (const [kind, box] of Object.entries(BOX_TYPES)) {
   test(`${kind}: batch openings preserve the exact independent single-box drops and wallet`, () => {
     for (const requested of [1, 3, 10, "all"]) {
       const profile = newProfile();

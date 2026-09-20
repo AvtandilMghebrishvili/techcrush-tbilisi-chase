@@ -134,7 +134,7 @@ test("existing garages gain the original car without losing credits or installed
   const p = migrateProfile(old);
   assert.equal(p.schema, 6);
   assert.deepEqual(p.cars.classic, {});
-  const { classic, falcon, rioni, coast, creator, ...cars } = p.cars;
+  const { classic, falcon, rioni, coast, creator, batmobile, ...cars } = p.cars;
   assert.deepEqual(cars, old.cars);
   for (const key of [
     "credits",

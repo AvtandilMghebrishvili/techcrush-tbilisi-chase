@@ -108,7 +108,7 @@ test("creator drops can repeat, advanced tiers are exclusive and fused performan
         part: "weight",
         tier: 8,
       }),
-    /YouTuber/,
+    /TECHCRUSH Cyber and Batmobile/,
   );
   p = applyProgressAction(p, {
     type: "equip",
@@ -121,14 +121,14 @@ test("creator drops can repeat, advanced tiers are exclusive and fused performan
     applyProgressAction(p, { type: "upgrade", car: "creator", part: "weight" }),
   );
   for (const id of CAR_IDS) {
-    const tier = id === "creator" ? 8 : 5,
+    const tier = ["creator", "batmobile"].includes(id) ? 8 : 5,
       eq = Object.fromEntries(PARTS.map((x) => [x.id, tier]));
     eq.stars = Object.fromEntries(PARTS.map((x) => [x.id, 5]));
     const s = upgradedSpec(carSpec(id), eq);
     assert(s.topSpeed + s.boostSpeed <= 190);
-    assert(s.damageScale >= 0.12);
+    assert(s.damageScale >= (id === "batmobile" ? 0.12 * 0.7 : 0.12));
     assert(s.nitroDrain >= 6);
-    assert(s.landingScale >= 0.1);
+    assert(s.landingScale >= (id === "batmobile" ? 0.1 * 0.7 : 0.1));
   }
   assert.deepEqual(
     pursuitTuning(9, 82, "batumi"),

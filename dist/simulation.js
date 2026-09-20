@@ -12,7 +12,11 @@ import {
 } from "./map-selection.js";
 import { buildingContact } from "./building-contact.js";
 import { levelRewards, creditAward, STUNT_REWARDS } from "./community-rules.js";
-import { carRewardMultiplier } from "./car-bonuses.js";
+import {
+  carCashMultiplier,
+  policeDamageMultiplier,
+  BAT_PATROL_CASH,
+} from "./car-bonuses.js";
 import { TREES } from "./world-props.js";
 import { BRIDGE_BARRIERS } from "./bridge-data.js";
 import { nearbyObstacles } from "./spatial-index.js";
@@ -693,7 +697,12 @@ export class ChaseSimulation {
   }
   damagePolice(cop, impact, credit = true) {
     if (cop.destroyed || cop.hitCooldown > 0 || impact < 5) return false;
-    cop.health = Math.max(0, cop.health - clamp(impact * 1.5, 22, 44));
+    cop.health = Math.max(
+      0,
+      cop.health -
+        clamp(impact * 1.5, 22, 44) *
+          (credit ? policeDamageMultiplier(this.player.carId) : 1),
+    );
     cop.hitCooldown = 0.9;
     this.events.push("PATROL HIT");
     if (cop.health > 0) return false;
@@ -703,6 +712,15 @@ export class ChaseSimulation {
     cop.respawnAt = this.time + 5;
     if (credit) {
       this.takedowns++;
+      if (this.player.carId === "batmobile") {
+        const total = (this.runOptions.batTakedowns || 0) + this.takedowns;
+        if (total % 5 === 0) {
+          this.runCash += BAT_PATROL_CASH;
+          this.scoreFeedback("patrol", 0, BAT_PATROL_CASH);
+          this.events.push("BAT BONUS · +5,000 CR + RANDOM BOX · BANK TO SAVE");
+        }
+        if (total % 10 === 0) this.events.push("BAT BOX EARNED · BANK TO SAVE");
+      }
       if (((this.runOptions.bankedTakedowns || 0) + this.takedowns) % 10 === 0)
         this.events.push("TECHCRUSH BOX EARNED · BANK YOUR RUN TO KEEP IT");
       const points = Math.round(750 * this.rewardRates.score + 1e-8),
@@ -1546,7 +1564,7 @@ export class ChaseSimulation {
         ) {
           this.runQuests.push(id);
           this.navQuest = null;
-          const credits = STUNT_REWARDS[id].cash * carRewardMultiplier(p.carId);
+          const credits = STUNT_REWARDS[id].cash * carCashMultiplier(p.carId);
           this.events.push(
             text.replace(/[\d,]+ CR/, credits.toLocaleString() + " CR") +
               " · BANK IN GARAGE",

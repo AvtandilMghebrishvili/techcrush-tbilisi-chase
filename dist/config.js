@@ -144,6 +144,23 @@ export const CARS = [
     armorRating: 4,
   },
 ];
+CARS.push({
+  id: "batmobile",
+  name: "Batmobile",
+  type: "3× SCORE · 5× COINS · AIR TURBO",
+  color: "#1e2831",
+  topSpeed: 84,
+  acceleration: 38,
+  width: 2.55,
+  length: 5.6,
+  handling: 1.08,
+  damageScale: 0.62 * 0.7,
+  description:
+    "Any city LVL 25 · 3× score · 5× coins · 30% less damage than Cyber · 40% stronger police hits · airborne turbo",
+  speedRating: 5,
+  gripRating: 5,
+  armorRating: 5,
+});
 export function carSpec(id) {
   return CARS.find((c) => c.id === id) || CARS.find((c) => c.id === "gt");
 }

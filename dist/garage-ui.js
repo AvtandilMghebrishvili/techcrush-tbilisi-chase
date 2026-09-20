@@ -3,6 +3,7 @@ import {
   totalBoxes,
   MILESTONE_BOXES,
   BOX_SHOP,
+  BOX_TYPES,
   boxOpenCount,
   artifactPrice,
 } from "./progression.js";
@@ -40,6 +41,7 @@ import {
   partCategory,
   upgradeBenefits,
 } from "./garage-presentation.js";
+import { isEliteCar } from "./car-bonuses.js";
 const $ = (id) => document.getElementById(id);
 export class GarageUI {
   constructor(store, onCar, view) {
@@ -138,6 +140,7 @@ export class GarageUI {
       $("open-" + kind + "-box").onclick = () => this.chooseBoxQuantity(kind);
     $("open-box").onclick = () => this.chooseBoxQuantity("street");
     $("open-platinum-box").onclick = () => this.chooseBoxQuantity("platinum");
+    $("open-bat-box").onclick = () => this.chooseBoxQuantity("bat");
     $("open-creator-box").onclick = () => this.chooseBoxQuantity("creator");
     $("box-open-quantity").onclick = (event) => {
       const button = event.target.closest("[data-open-quantity]");
@@ -360,7 +363,7 @@ export class GarageUI {
     const profile = this.store.profile,
       fitted = profile.cars[this.car],
       actual = fitted[part.id] || 0,
-      maxTier = this.car === "creator" ? 8 : 5,
+      maxTier = isEliteCar(this.car) ? 8 : 5,
       next = Math.min(maxTier, actual + 1),
       busy = this.store.busy || this.store.pending,
       rows = comparisonRows(carSpec(this.car), equipment, part, tier, stars),
@@ -416,7 +419,7 @@ export class GarageUI {
       <div class="comparison-meters">${rows.map((r) => `<div class="comparison-row"><span>${r.label} ${r.lower ? "↓" : "↑"}</span><div class="comparison-numbers"><b>${r.before.toFixed(r.unit === "s" ? 2 : 1)}</b><span>→</span><strong data-after="${r.key}">${r.after.toFixed(r.unit === "s" ? 2 : 1)}</strong><small>${r.unit}</small></div><div class="meter" style="--from:${Math.min(100, (r.before / r.max) * 100)}%;--to:${Math.min(100, (r.after / r.max) * 100)}%"><i></i><b></b></div></div>`).join("")}</div>
       <small class="preview-disclaimer">${installed ? "Installed and saved." : `Comparing ${TIERS[tier].name} · ${spare} spare${spare === 1 ? "" : "s"}. Preview changes are not installed.`}</small>
       ${sell ? `<div class="inspector-actions secondary-actions">${sell}</div>` : ""}
-      ${!buy && !install ? `<small class="grade-source">${actual >= maxTier ? "Top grade fitted. Collect duplicates to fuse." : this.car === "creator" ? "Higher grades drop from TECHCRUSH boxes." : "Find Platinum in city stunt boxes."}</small>` : ""}
+      ${!buy && !install ? `<small class="grade-source">${actual >= maxTier ? "Top grade fitted. Collect duplicates to fuse." : isEliteCar(this.car) ? "Higher grades drop from TECHCRUSH and BAT boxes." : "Find Platinum in city stunt boxes."}</small>` : ""}
       ${fusion}<details class="part-explanation"><summary>WHAT CHANGES?</summary><p>${vehiclePartDetails(part, this.car)}</p><p>Fusion bonuses belong to this car. Spare counts appear under each grade.</p></details>`;
     const mutate = (type, extra = {}) =>
       void this.run(() =>
@@ -539,7 +542,7 @@ export class GarageUI {
       inspected,
       this.inspection?.tier ??
         Math.min(
-          this.car === "creator" ? 8 : 5,
+          isEliteCar(this.car) ? 8 : 5,
           (p.cars[this.car][inspected.id] || 0) + 1,
         ),
     );
@@ -556,8 +559,8 @@ export class GarageUI {
       .map((part) => {
         const tier = p.cars[this.car][part.id] || 0,
           stars = partStars(p.cars[this.car], part.id),
-          maxTier = this.car === "creator" ? 8 : 5;
-        const owned = TIERS.slice(1, this.car === "creator" ? 9 : 6)
+          maxTier = isEliteCar(this.car) ? 8 : 5;
+        const owned = TIERS.slice(1, isEliteCar(this.car) ? 9 : 6)
           .map((_, i) => i + 1)
           .filter((t) => (p.inventory[partKey(part.id, t)] || 0) > 0);
         const best = Math.max(0, ...owned),
@@ -577,7 +580,7 @@ export class GarageUI {
     const openingLocked =
       this.store.busy || !!this.store.pending || this.rolling;
     this.renderBoxQuantity();
-    for (const [kind, box] of Object.entries(BOX_SHOP)) {
+    for (const [kind, box] of Object.entries(BOX_TYPES)) {
       const button = $(kind === "street" ? "open-box" : `open-${kind}-box`);
       const owned = p[box.field] || 0;
       button.classList.add("box-open-action");
@@ -662,10 +665,11 @@ export class GarageUI {
       $("workshop").querySelector(focus)?.focus({ preventScroll: true });
   }
   chooseBoxQuantity(kind, action = "open") {
-    const box = BOX_SHOP[kind];
+    const box = BOX_TYPES[kind];
     if (
       this.disposed ||
       !box ||
+      (action === "buy" && !Object.hasOwn(BOX_SHOP, kind)) ||
       this.rolling ||
       this.store.busy ||
       this.store.pending ||
@@ -680,7 +684,7 @@ export class GarageUI {
     $("box-quantity-dialog").showModal();
   }
   renderBoxQuantity() {
-    const box = BOX_SHOP[this.boxToOpen];
+    const box = BOX_TYPES[this.boxToOpen];
     if (!box) return;
     const owned = this.store.profile[box.field] || 0;
     const buying = this.boxAction === "buy";
@@ -739,7 +743,7 @@ export class GarageUI {
         ? "all"
         : boxOpenCount(
             this.openQuantity,
-            this.store.profile[BOX_SHOP[kind].field] || 0,
+            this.store.profile[BOX_TYPES[kind].field] || 0,
           );
     this.rolling = true;
     this.render();
@@ -754,6 +758,8 @@ export class GarageUI {
             }),
           );
       if (this.disposed) return;
+      if (profile.lastBox.kind === "bat" && carUnlocked(profile, "batmobile"))
+        this.car = "batmobile";
       if (profile.lastBox.kind === "creator" && carUnlocked(profile, "creator"))
         this.car = "creator";
       this.lootBoxId = profile.lastBox.id;
@@ -764,7 +770,9 @@ export class GarageUI {
         ? "LEVEL CLEAR. YOUR REWARDS."
         : MILESTONE_BOXES[profile.lastBox.kind]
           ? `${MILESTONE_BOXES[profile.lastBox.kind].name.toUpperCase()} BONUS DROP.`
-          : "PARTS INCOMING.";
+          : profile.lastBox.kind === "bat"
+            ? "BAT BOX · ELITE PARTS."
+            : "PARTS INCOMING.";
       $("loot-done").textContent = existing
         ? "CONTINUE TO RESULTS ↗"
         : "KEEP REMAINING · BACK TO GARAGE ↗";
@@ -846,7 +854,7 @@ export class GarageUI {
                             Math.random() * MILESTONE_BOXES[kind].tiers.length,
                           )
                         ][0]
-                      : kind === "creator"
+                      : kind === "creator" || kind === "bat"
                         ? 5 + Math.floor(Math.random() * 4)
                         : kind === "platinum"
                           ? 5
@@ -881,7 +889,7 @@ export class GarageUI {
       const stronger =
         carUnlocked(this.store.profile, this.car) &&
         reward.tier > (equipment[reward.part] || 0) &&
-        (reward.tier <= 5 || this.car === "creator");
+        (reward.tier <= 5 || isEliteCar(this.car));
       const owned =
         this.store.profile.inventory[partKey(reward.part, reward.tier)] || 0;
       const disabled = this.store.busy || this.store.pending || !owned;

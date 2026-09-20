@@ -53,7 +53,16 @@ test("all bodies fit their simulation class, preserve wheel support, and replace
       car.updateMatrixWorld(true);
       for (const w of car.userData.wheels) {
         const p = w.getWorldPosition(new THREE.Vector3());
-        assert(Math.abs(p.y - (id === "creator" ? 0.43 : 0.36)) < 1e-6);
+        assert(
+          Math.abs(
+            p.y -
+              (id === "batmobile"
+                ? (p.z < 0 ? 0.77 : 0.65) * 0.76
+                : id === "creator"
+                  ? 0.43
+                  : 0.36),
+          ) < 1e-6,
+        );
         assert.equal(
           w.parent.getObjectByName("brake-caliper").parent,
           w.parent,
@@ -90,7 +99,10 @@ test("classes have distinct canopies and Cyber is an electric pickup with bounde
   assert.equal(carSpec("creator").topSpeed, carSpec("coast").topSpeed * 1.05);
   for (const car of CARS) {
     const eq = Object.fromEntries(
-      PARTS.map((p) => [p.id, car.id === "creator" ? 8 : 5]),
+      PARTS.map((p) => [
+        p.id,
+        ["creator", "batmobile"].includes(car.id) ? 8 : 5,
+      ]),
     );
     eq.stars = Object.fromEntries(PARTS.map((p) => [p.id, 5]));
     const s = upgradedSpec(car, eq);

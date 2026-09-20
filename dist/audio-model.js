@@ -70,6 +70,13 @@ Object.assign(ENGINE_VOICES, {
     pitch: 1.1,
     redline: 9100,
   },
+  batmobile: {
+    ...ENGINE_VOICES.rally,
+    name: "Bat turbine",
+    pitch: 0.72,
+    body: 160,
+    brightness: 3200,
+  },
   creator: {
     name: "Electric AWD",
     electric: true,

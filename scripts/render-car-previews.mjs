@@ -10,8 +10,8 @@ const root = path.resolve("dist"),
   out = path.join(root, "assets/car-previews");
 await mkdir(out, { recursive: true });
 const html = `<!doctype html><style>body{margin:0;background:transparent}#studio{width:512px;height:288px}</style><div id="studio"></div><script type="importmap">{"imports":{"three":"/vendor/three.module.js","three/addons/":"/vendor/addons/"}}</script><script type="module">
-import * as T from '/vendor/three.module.js';import {GaragePreview} from '/garage-preview.js';import {loadSportsAssets} from '/sports-car.js';
-const source={renderer:new T.WebGLRenderer(),scene:new T.Scene(),budget:{low:true},box(w,h,d,mat,x,y,z,parent){const m=new T.Mesh(new T.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);parent.add(m);return m;}};
+import * as T from '/vendor/three.module.js';import {GaragePreview} from '/garage-preview.js';import {loadSportsAssets} from '/sports-car.js';import {AssetScope} from '/resource-lifetime.js';
+const source={assetLoad:new AssetScope(),renderer:new T.WebGLRenderer(),scene:new T.Scene(),budget:{low:true},box(w,h,d,mat,x,y,z,parent){const m=new T.Mesh(new T.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);parent.add(m);return m;}};
 await loadSportsAssets(source);const studio=new GaragePreview(document.querySelector('#studio'),source);studio.renderer.setPixelRatio(1);studio.renderer.setSize(512,288);studio.camera.aspect=512/288;studio.yaw=.68;studio.pitch=.25;studio.zoom=8.3;studio.active=true;
 window.capture=(id)=>{studio.setCar(id,{});studio.tick();return studio.renderer.domElement.toDataURL('image/webp',.9);};
 </script>`;
@@ -56,16 +56,19 @@ try {
   page.on("pageerror", (e) => console.error(e.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/__previews`);
   await page.waitForFunction(() => !!window.capture, { timeout: 90000 });
-  for (const id of [
-    "classic",
-    "gt",
-    "rally",
-    "suv",
-    "falcon",
-    "rioni",
-    "coast",
-    "creator",
-  ]) {
+  for (const id of process.env.CAR_PREVIEW_ID
+    ? [process.env.CAR_PREVIEW_ID]
+    : [
+        "classic",
+        "gt",
+        "rally",
+        "suv",
+        "falcon",
+        "rioni",
+        "coast",
+        "creator",
+        "batmobile",
+      ]) {
     const data = await page.evaluate((id) => capture(id), id);
     const bytes = Buffer.from(data.split(",")[1], "base64");
     await writeFile(path.join(out, id + ".webp"), bytes);

@@ -198,6 +198,7 @@ export function driveRamp(p, input, dt, ramps = RAMPS, before = p) {
   p.pitch = 0;
 }
 export function stepAirborne(p, input, dt, obstacles, resolve) {
+  stepAirTurbo(p, input, dt);
   p.airTime += dt;
   p.airDistance += Math.hypot(p.vx, p.vz) * dt;
   p.impact = 0;
@@ -218,8 +219,10 @@ export function stepAirborne(p, input, dt, obstacles, resolve) {
       if (p.y < (o.h || 50) - 0.1) resolve(p, 2.1, o);
   }
   p.invulnerable = Math.max(0, p.invulnerable - dt);
-  p.boosting = false;
-  p.boostStrength *= Math.exp(-dt * 10);
+  if (p.carId !== "batmobile") {
+    p.boosting = false;
+    p.boostStrength *= Math.exp(-dt * 10);
+  }
   const roof = roofAt(p, 1);
   const surface = Math.max(
     roof && previousY >= roof.h - 0.01 && p.vy <= 0 ? roof.h : 0,
@@ -258,4 +261,32 @@ export function stepAirborne(p, input, dt, obstacles, resolve) {
     ramp: p.lastRamp,
     time: p.airTime,
   };
+}
+
+// The turbine adds bounded horizontal thrust; gravity and collision sweeps stay active.
+export function stepAirTurbo(p, input, dt) {
+  if (p.carId !== "batmobile") return;
+  const spec = p.performance;
+  if (!spec) return;
+  p.boostCooldown = Math.max(0, (p.boostCooldown || 0) - dt);
+  if (p.nitroLocked && p.nitro >= 22) p.nitroLocked = false;
+  p.boosting = !!input.boost && p.nitro > 0 && !p.nitroLocked;
+  p.boostStrength =
+    (p.boostStrength || 0) +
+    (Number(p.boosting) - (p.boostStrength || 0)) * (1 - Math.exp(-dt * 8));
+  if (p.boosting) {
+    const limit = spec.topSpeed + spec.boostSpeed;
+    const speed = Math.hypot(p.vx, p.vz);
+    const thrust = Math.min(
+      spec.boostPower * p.boostStrength * dt,
+      Math.max(0, limit - speed),
+    );
+    p.vx += Math.sin(p.angle) * thrust;
+    p.vz += Math.cos(p.angle) * thrust;
+    p.nitro = Math.max(0, p.nitro - dt * spec.nitroDrain);
+    p.boostCooldown = spec.boostDelay;
+    if (!p.nitro) p.nitroLocked = true;
+  } else if (p.boostCooldown <= 0)
+    p.nitro = Math.min(100, p.nitro + dt * spec.nitroRegen);
+  p.speed = Math.hypot(p.vx, p.vz);
 }

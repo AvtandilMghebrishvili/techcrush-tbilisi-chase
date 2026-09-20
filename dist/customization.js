@@ -250,8 +250,16 @@ export function installWheelKits(car, equipment, { classic = false } = {}) {
       Math.sign(center.x),
       classic
         ? Math.min(0.37, Math.max(0.32, center.y))
-        : car.userData.wheelRadius || 0.35,
+        : car.userData.shape === "batmobile"
+          ? center.y
+          : car.userData.wheelRadius || 0.35,
     );
+    if (car.userData.shape === "batmobile") {
+      kit.scale.x =
+        (center.z < 0 ? 0.59 : 0.48) /
+        (0.23 + tierValue(equipment.tires) * 0.009);
+      kit.userData.rollingRadius = center.y * 0.76;
+    }
     pivot.add(kit);
     wheels.push(kit);
     if (center.z > 0) pivots.push(pivot);

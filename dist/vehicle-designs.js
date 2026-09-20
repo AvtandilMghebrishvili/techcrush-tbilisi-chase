@@ -157,6 +157,22 @@ export const MODEL_SHAPES = {
       [2.425, 0.86, 0.46],
     ],
   },
+  batmobile: {
+    name: "Batmobile",
+    length: 5.6,
+    width: 2.55,
+    roof: 1.41,
+    wheelbase: 3.192,
+    angular: true,
+    stockWing: true,
+    stations: [
+      [-2.8, 0.8, 0.7],
+      [-1.6, 1.25, 1.1],
+      [0, 1.0, 0.85],
+      [1.6, 1.23, 0.9],
+      [2.8, 0.75, 0.43],
+    ],
+  },
   creator: {
     name: "TECHCRUSH Cyber",
     length: 5.3,

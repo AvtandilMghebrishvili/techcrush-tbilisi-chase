@@ -69,7 +69,9 @@ for (const map of CITY_IDS)
     );
     p = win(p, map);
     assert.equal(cityLevel(p, map), 10);
-    for (const id of CAR_IDS.filter((id) => id !== "creator"))
+    for (const id of CAR_IDS.filter(
+      (id) => !["creator", "batmobile"].includes(id),
+    ))
       assert(carUnlocked(p, id), id);
     assert(!carUnlocked(p, "creator"));
     assert.deepEqual(
@@ -136,7 +138,9 @@ test("legacy migration preserves claimed and pending cars, equipment, wallet, in
   assert.deepEqual(p.inventory, old.inventory);
   assert.equal(p.mysteryBoxes, 5);
   assert.equal(p.specialBoxes, 5);
-  for (const id of CAR_IDS) assert(carUnlocked(p, id));
+  for (const id of CAR_IDS.filter((id) => id !== "batmobile"))
+    assert(carUnlocked(p, id));
+  assert(!carUnlocked(p, "batmobile"));
   assert(p.carBoxes.includes("batumi"));
   p = applyProgressAction(p, { type: "claim-car-box", map: "batumi" });
   p = applyProgressAction(

@@ -9,7 +9,11 @@ import {
   settleEvent,
 } from "./event-rules.js";
 import { TIME_COURSES } from "./race-timing.js";
-import { ticketRewardMultiplier } from "./car-bonuses.js";
+import {
+  ticketCashMultiplier,
+  isEliteCar,
+  BAT_PATROL_CASH,
+} from "./car-bonuses.js";
 import { isPrivateDriverName } from "./private-driver.js";
 import {
   mapUnlocked,
@@ -143,7 +147,12 @@ export const CITY_CARS = {
   kutaisi: "rioni",
   batumi: "coast",
 };
-export const CAR_IDS = [...BASE_CARS, ...Object.values(CITY_CARS), "creator"];
+export const CAR_IDS = [
+  ...BASE_CARS,
+  ...Object.values(CITY_CARS),
+  "creator",
+  "batmobile",
+];
 export const carUnlocked = (p, id) =>
   BASE_CARS.includes(id) || (p.unlockedCars || []).includes(id);
 export const totalTakedowns = (p) =>
@@ -187,6 +196,10 @@ export const BOX_SHOP = {
   platinum: { name: "Platinum", field: "platinumBoxes", price: 22000 },
   creator: { name: "TECHCRUSH", field: "creatorBoxes", price: 35000 },
 };
+export const BOX_TYPES = {
+  ...BOX_SHOP,
+  bat: { name: "BAT", field: "batBoxes" },
+};
 export const BOX_OPEN_LIMIT = 10;
 export const BOX_BUY_LIMIT = 10;
 export const boxOpenCount = (selection, owned) =>
@@ -197,6 +210,7 @@ const BOX_OPEN_ACTIONS = {
   "open-special-box": "special",
   "open-platinum-box": "platinum",
   "open-creator-box": "creator",
+  "open-bat-box": "bat",
 };
 export const ARTIFACT_PRICE = 1_000_000;
 export const artifactPrice = (owned = 0) =>
@@ -206,6 +220,7 @@ export const totalBoxes = (p) =>
   p.boxes +
   (p.platinumBoxes || 0) +
   (p.creatorBoxes || 0) +
+  (p.batBoxes || 0) +
   (p.mysteryBoxes || 0) +
   (p.specialBoxes || 0);
 export function syncMilestones(p) {
@@ -214,6 +229,8 @@ export function syncMilestones(p) {
   p.claimedCityCars ||= [];
   p.creatorBoxes ||= 0;
   p.creatorMilestones ||= 0;
+  p.batBoxes ||= 0;
+  p.batTakedowns ||= 0;
   p.mysteryBoxes ||= 0;
   p.specialBoxes ||= 0;
   p.levelMilestones ||= {};
@@ -224,6 +241,7 @@ export function syncMilestones(p) {
       : highest >= 10
         ? Object.values(CITY_CARS)
         : [];
+  if (highest >= 25) unlocks.push("batmobile");
   for (const id of unlocks)
     if (!p.unlockedCars.includes(id)) p.unlockedCars.push(id);
   // Fixed-size per-city high-water marks make reloads and retries idempotent,
@@ -273,6 +291,8 @@ export function newProfile() {
     claimedCityCars: [],
     creatorBoxes: 0,
     creatorMilestones: 0,
+    batBoxes: 0,
+    batTakedowns: 0,
     mysteryBoxes: 0,
     specialBoxes: 0,
     levelMilestones: {},
@@ -334,7 +354,7 @@ export function upgradedSpec(base, equipment = {}) {
     boostDelay: 0.85,
     braking: 34,
     grip: 8.5,
-    landingScale: 1,
+    landingScale: base.id === "batmobile" ? 0.7 : 1,
   };
   for (const part of PARTS) {
     const tier = partPower(equipment, part.id);
@@ -345,8 +365,9 @@ export function upgradedSpec(base, equipment = {}) {
       else spec[stat] = (spec[stat] || 0) + value * tier;
     }
   }
-  spec.landingScale = Math.max(0.1, spec.landingScale);
-  spec.damageScale = Math.max(0.12, spec.damageScale);
+  const armorFactor = base.id === "batmobile" ? 0.7 : 1;
+  spec.landingScale = Math.max(0.1 * armorFactor, spec.landingScale);
+  spec.damageScale = Math.max(0.12 * armorFactor, spec.damageScale);
   spec.topSpeed = Math.min(145, spec.topSpeed);
   spec.boostSpeed = Math.min(45, spec.boostSpeed);
   spec.nitroDrain = Math.max(6, spec.nitroDrain);
@@ -404,7 +425,10 @@ function rollSupplyBox(kind, rng) {
   const items = Array.from({ length: 3 }, () => {
     const part =
       PARTS[Math.min(PARTS.length - 1, Math.floor(rng() * PARTS.length))].id;
-    let tier = kind === "creator" ? 5 + Math.min(3, Math.floor(rng() * 4)) : 5;
+    let tier =
+      kind === "creator" || kind === "bat"
+        ? 5 + Math.min(3, Math.floor(rng() * 4))
+        : 5;
     if (box) {
       const roll = rng() * 100;
       let threshold = 0;
@@ -604,9 +628,9 @@ export function applyProgressAction(
       action.type === "open-boxes"
         ? action.kind
         : BOX_OPEN_ACTIONS[action.type];
-    if (!Object.hasOwn(BOX_SHOP, kind))
+    if (!Object.hasOwn(BOX_TYPES, kind))
       throw Error("Choose a valid supply box.");
-    const box = BOX_SHOP[kind],
+    const box = BOX_TYPES[kind],
       owned = p[box.field] || 0;
     if (action.type !== "open-boxes" && owned < 1) {
       const message = MILESTONE_BOXES[kind]
@@ -716,9 +740,9 @@ export function applyProgressAction(
       throw Error(
         "Platinum parts come from stunt and milestone boxes. Install an owned part.",
       );
-    if (action.type !== "sell" && tier > 5 && car !== "creator")
+    if (action.type !== "sell" && tier > 5 && !isEliteCar(car))
       throw Error(
-        "Emerald, Ruby and TECHCRUSH parts fit the YouTuber Car only.",
+        "Emerald, Ruby and TECHCRUSH parts fit TECHCRUSH Cyber and Batmobile.",
       );
     const key = partKey(item.id, tier);
     if (action.type === "sell") {
@@ -755,6 +779,7 @@ export function applyProgressAction(
       mystery: p.mysteryBoxes,
       special: p.specialBoxes,
       creator: p.creatorBoxes,
+      bat: p.batBoxes,
       cars: [...p.unlockedCars],
     };
     const level = Number(action.level);
@@ -793,7 +818,7 @@ export function applyProgressAction(
         action.result,
         level,
         context.now,
-        ticketRewardMultiplier(p.activeRun),
+        ticketCashMultiplier(p.activeRun),
       );
       runProfile.community.lastTime =
         action.result === "won" && metrics.timing
@@ -815,6 +840,29 @@ export function applyProgressAction(
         };
         for (const key of ["credits", "boxes", "platinumBoxes", "quests"])
           p[key] = runProfile[key];
+      }
+      if (p.activeRun.car === "batmobile") {
+        const before = p.batTakedowns;
+        p.batTakedowns += metrics.takedowns;
+        const rewards = cityCommunity(p, map).lastReward;
+        const bonusCount =
+          Math.floor(p.batTakedowns / 5) - Math.floor(before / 5);
+        const bonusCash = bonusCount * BAT_PATROL_CASH;
+        const randomBoxes = {};
+        const kinds = Object.keys(BOX_TYPES);
+        for (let i = 0; i < bonusCount; i++) {
+          const kind =
+            kinds[Math.min(kinds.length - 1, Math.floor(rng() * kinds.length))];
+          const field = BOX_TYPES[kind].field;
+          p[field] = (p[field] || 0) + 1;
+          randomBoxes[kind] = (randomBoxes[kind] || 0) + 1;
+          if (kind === "street") rewards.boxes++;
+          if (kind === "platinum") rewards.platinumBoxes++;
+        }
+        p.batBoxes += Math.floor(p.batTakedowns / 10) - Math.floor(before / 10);
+        p.credits += bonusCash;
+        rewards.cash += bonusCash;
+        rewards.batBonus = { cash: bonusCash, randomBoxes };
       }
       settleEvent(
         p,
@@ -859,6 +907,7 @@ export function applyProgressAction(
         mysteryBoxes: p.mysteryBoxes - beforeMilestones.mystery,
         specialBoxes: p.specialBoxes - beforeMilestones.special,
         creatorBoxes: p.creatorBoxes - beforeMilestones.creator,
+        batBoxes: p.batBoxes - beforeMilestones.bat,
         unlockedCars: p.unlockedCars.filter(
           (id) => !beforeMilestones.cars.includes(id),
         ),
