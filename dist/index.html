@@ -1269,138 +1269,161 @@
           <span><kbd>WASD</kbd> Drive</span><span><kbd>SPACE</kbd> Drift</span>
           <span><kbd>SHIFT</kbd> Nitro</span><span><kbd>Q</kbd> Rewind</span>
         </div>
-        <details class="setup-section" id="map-options">
-          <summary>MAP &amp; RADAR <small>SIZE + ZOOM</small></summary>
-          <div class="radar-setup">
-            <div class="radar-range-controls">
-              <label class="map-range" for="radar-size"
-                ><span>Minimap size</span
-                ><output id="radar-size-value">110%</output></label
-              ><input
-                id="radar-size"
-                data-radar-pref="size"
-                type="range"
-                min="80"
-                max="160"
-                step="5"
-                value="110"
-              />
-              <label class="map-range" for="radar-zoom"
-                ><span>Minimap zoom</span
-                ><output id="radar-zoom-value">1.00×</output></label
-              ><input
-                id="radar-zoom"
-                data-radar-pref="zoom"
-                type="range"
-                min="0.5"
-                max="2.5"
-                step="0.25"
-                value="1"
-              />
-              <div class="map-range-hints">
-                <span>WIDER AREA</span><span>CLOSER STREETS</span>
+        <div class="setup-grid">
+          <details class="setup-section setup-map" id="map-options" open>
+            <summary>
+              <b>03</b> MAP &amp; RADAR <small>SIZE + ZOOM</small>
+            </summary>
+            <div class="radar-setup">
+              <div class="radar-range-controls">
+                <label class="map-range" for="radar-size"
+                  ><span>Minimap size</span
+                  ><output id="radar-size-value">110%</output></label
+                ><input
+                  id="radar-size"
+                  data-radar-pref="size"
+                  type="range"
+                  min="80"
+                  max="160"
+                  step="5"
+                  value="110"
+                />
+                <label class="map-range" for="radar-zoom"
+                  ><span>Minimap zoom</span
+                  ><output id="radar-zoom-value">1.00×</output></label
+                ><input
+                  id="radar-zoom"
+                  data-radar-pref="zoom"
+                  type="range"
+                  min="0.5"
+                  max="2.5"
+                  step="0.25"
+                  value="1"
+                />
+                <div class="map-range-hints">
+                  <span>WIDER AREA</span><span>CLOSER STREETS</span>
+                </div>
+                <button type="button" data-reset-radar class="map-reset">
+                  RESET MINIMAP
+                </button>
+                <p class="setting-note">
+                  Size changes the display; zoom changes the visible area. The
+                  size adapts to small screens to keep driving controls clear.
+                  Saved in this browser.
+                </p>
               </div>
-              <button type="button" data-reset-radar class="map-reset">
-                RESET MINIMAP
+              <div class="radar-sample">
+                <canvas
+                  id="radar-preview"
+                  width="256"
+                  height="256"
+                  aria-label="Live minimap settings preview"
+                ></canvas
+                ><small>LIVE PREVIEW</small>
+              </div>
+            </div>
+          </details>
+          <section class="setup-section setup-driving">
+            <h3><b>02</b> DRIVING <small>TOUCH + STEERING</small></h3>
+            <div
+              class="steering-choice"
+              role="group"
+              aria-label="Steering mode"
+            >
+              <button id="buttons-enable" aria-pressed="true">
+                TOUCH STEERING</button
+              ><button id="tilt-enable" aria-pressed="false">
+                ENABLE GYRO
               </button>
-              <p class="setting-note">
-                Size changes the display; zoom changes the visible area. The
-                size adapts to small screens to keep driving controls clear.
-                Saved in this browser.
-              </p>
             </div>
-            <div class="radar-sample">
-              <canvas
-                id="radar-preview"
-                width="256"
-                height="256"
-                aria-label="Live minimap settings preview"
-              ></canvas
-              ><small>LIVE PREVIEW</small>
+            <label class="setting-check"
+              ><input id="auto-gas" type="checkbox" /> Arcade · auto accelerator
+              <small
+                >On by default on mobile. Turn off for manual GAS. Brake always
+                overrides it.</small
+              ></label
+            >
+            <label class="setting-select"
+              >Touch steering<select id="touch-steering-mode">
+                <option value="pad">Thumb pad · slide + drift</option>
+                <option value="buttons">Left / right buttons</option>
+              </select></label
+            >
+            <p class="setting-note">
+              Slide to steer, pull down to drift. Tap NITRO to burn the tank;
+              BRAKE overrides acceleration.
+            </p>
+          </section>
+          <details class="setup-section setup-gyro" id="gyro-options" open>
+            <summary>
+              <b>04</b> GYRO TUNING <small>CALIBRATION + SENSITIVITY</small>
+            </summary>
+            <p id="tilt-status" role="status" aria-live="polite"></p>
+            <div id="tilt-meter" aria-hidden="true">
+              <span>LEFT</span><i></i><span>RIGHT</span>
             </div>
-          </div>
-        </details>
-        <section class="setup-section">
-          <h3>DRIVING <small>TOUCH + GYRO</small></h3>
-          <div class="steering-choice" role="group" aria-label="Steering mode">
-            <button id="buttons-enable" aria-pressed="true">
-              TOUCH STEERING</button
-            ><button id="tilt-enable" aria-pressed="false">ENABLE GYRO</button>
-          </div>
-          <label class="setting-check"
-            ><input id="auto-gas" type="checkbox" /> Arcade · auto accelerator
-            <small
-              >On by default on mobile. Turn off for manual GAS. Brake always
-              overrides it.</small
-            ></label
+            <button id="tilt-center" class="secondary">CENTER STEERING</button>
+            <label class="setting-range" for="tilt-range"
+              >Steering sensitivity
+              <b id="tilt-range-value">24° to full lock</b></label
+            ><input
+              id="tilt-range"
+              type="range"
+              min="12"
+              max="40"
+              step="1"
+              value="24"
+            /><small class="setting-note"
+              >Lower angle = quicker steering. Hold the phone comfortably before
+              centering.</small
+            >
+            <label class="setting-check"
+              ><input id="tilt-invert" type="checkbox" /> Reverse gyro
+              direction</label
+            >
+            <p class="setting-note">
+              Motion permission is required. If gyro is unavailable, touch
+              steering still works. In social apps, open the game in Safari or
+              Chrome.
+            </p>
+          </details>
+          <details
+            class="setup-section setup-display"
+            id="display-options"
+            open
           >
-          <label class="setting-select"
-            >Touch steering<select id="touch-steering-mode">
-              <option value="pad">Thumb pad · slide + drift</option>
-              <option value="buttons">Left / right buttons</option>
-            </select></label
-          >
-          <p class="setting-note">
-            Slide to steer, pull down to drift. Tap NITRO to burn the tank;
-            BRAKE overrides acceleration.
-          </p>
-        </section>
-        <details class="setup-section" id="gyro-options">
-          <summary>
-            GYRO TUNING <small>CALIBRATION + SENSITIVITY</small>
-          </summary>
-          <p id="tilt-status" role="status" aria-live="polite"></p>
-          <div id="tilt-meter" aria-hidden="true">
-            <span>LEFT</span><i></i><span>RIGHT</span>
-          </div>
-          <button id="tilt-center" class="secondary">CENTER STEERING</button>
-          <label class="setting-range" for="tilt-range"
-            >Steering sensitivity
-            <b id="tilt-range-value">24° to full lock</b></label
-          ><input
-            id="tilt-range"
-            type="range"
-            min="12"
-            max="40"
-            step="1"
-            value="24"
-          /><small class="setting-note"
-            >Lower angle = quicker steering. Hold the phone comfortably before
-            centering.</small
-          >
-          <label class="setting-check"
-            ><input id="tilt-invert" type="checkbox" /> Reverse gyro
-            direction</label
-          >
-          <p class="setting-note">
-            Motion permission is required. If gyro is unavailable, touch
-            steering still works. In social apps, open the game in Safari or
-            Chrome.
-          </p>
-        </details>
-        <details class="setup-section" id="display-options">
-          <summary>DISPLAY <small>QUALITY + FULLSCREEN</small></summary>
-          <label class="setting-select"
-            >Touch controls<select id="touch-visibility">
-              <option value="auto">Auto · detect touch screen</option>
-              <option value="on">Always show</option>
-            </select></label
-          >
-          <label class="setting-select"
-            >Graphics<select id="graphics-quality">
-              <option value="auto">Auto · lighter on phones</option>
-              <option value="battery">Battery saver</option>
-              <option value="high">High detail</option>
-            </select></label
-          >
-          <button id="mobile-fullscreen" class="secondary">
-            FULLSCREEN / LANDSCAPE
-          </button>
-          <p id="screen-status" class="setting-note">
-            Portrait and landscape both work. Fullscreen support depends on your
-            browser.
-          </p>
-        </details>
+            <summary>
+              <b>01</b> GRAPHICS &amp; DISPLAY <small>QUALITY + SCREEN</small>
+            </summary>
+            <div class="graphics-intro">
+              <strong>VISUAL QUALITY</strong>
+              <small
+                >Choose the balance between detail and smoother
+                performance.</small
+              >
+            </div>
+            <label class="setting-select"
+              >Touch controls<select id="touch-visibility">
+                <option value="auto">Auto · detect touch screen</option>
+                <option value="on">Always show</option>
+              </select></label
+            >
+            <label class="setting-select"
+              >Graphics<select id="graphics-quality">
+                <option value="auto">Auto · lighter on phones</option>
+                <option value="battery">Battery saver</option>
+                <option value="high">High detail</option>
+              </select></label
+            >
+            <button id="mobile-fullscreen" class="secondary">
+              FULLSCREEN / LANDSCAPE
+            </button>
+            <p id="screen-status" class="setting-note">
+              Portrait and landscape both work. Fullscreen support depends on
+              your browser.
+            </p>
+          </details>
+        </div>
         <p class="settings-bottom-note">
           Changes save automatically. Hold REWIND to undo up to 5 seconds.
         </p>

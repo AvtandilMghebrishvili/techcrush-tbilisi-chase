@@ -189,20 +189,22 @@ export class GarageUI {
     if (!["build", "parts", "boxes"].includes(tab)) return;
     this.tab = tab;
     if (tab !== "parts") this.inspection = null;
-    $("workshop").dataset.tab = tab;
+    const garageMode = tab !== "boxes";
+    $("workshop").dataset.tab = garageMode ? "garage" : "boxes";
     $("workshop").dataset.shop = String(tab === "boxes");
     $("workshop-eyebrow").textContent =
       tab === "boxes" ? "TECHCRUSH / SHOP" : "TECHCRUSH / WORKSHOP";
     $("workshop-title").innerHTML =
       tab === "boxes" ? "BOX SHOP<span>.</span>" : "YOUR GARAGE<span>.</span>";
     for (const button of document.querySelectorAll("[data-workshop-tab]")) {
-      const active = button.dataset.workshopTab === tab;
+      const active = garageMode || button.dataset.workshopTab === tab;
       button.setAttribute("aria-selected", String(active));
-      button.tabIndex = active ? 0 : -1;
-      $(button.getAttribute("aria-controls")).hidden = !active;
+      button.tabIndex = garageMode ? -1 : active ? 0 : -1;
+      $(button.getAttribute("aria-controls")).hidden = !garageMode && !active;
     }
-    for (const panel of ["build", "parts", "boxes"])
-      $(panel + "-panel").hidden = panel !== tab;
+    $("build-panel").hidden = !garageMode;
+    $("parts-panel").hidden = !garageMode;
+    $("boxes-panel").hidden = garageMode;
     this.render();
     this.updatePreviewActivity();
   }

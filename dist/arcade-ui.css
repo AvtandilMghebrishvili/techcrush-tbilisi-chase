@@ -536,6 +536,281 @@
   }
 }
 
+/* Driver setup dashboard: every major setting is visible and grouped by task. */
+#controls-dialog {
+  width: min(980px, calc(100% - 28px));
+  padding: 14px 16px;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  border: 2px solid #4b6176;
+  border-top: 3px solid var(--arcade-red);
+  background: linear-gradient(180deg, #1b2938 0 62px, #101923 62px), #101923;
+}
+
+#controls-dialog .controls-heading {
+  position: static;
+  top: auto;
+  padding: 0 0 9px;
+  border-bottom: 1px solid #60758c88;
+  background: transparent;
+}
+
+#controls-dialog h2 {
+  margin: 3px 0 0;
+  font-size: 27px;
+}
+
+#controls-dialog .setup-lead {
+  margin: 7px 0 5px;
+  color: #aebfd0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#controls-dialog .keyboard-guide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 6px 0 8px;
+}
+
+#controls-dialog .keyboard-guide span {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 4px 8px;
+  border: 1px solid #40556b;
+  border-radius: 6px;
+  background: #172432;
+  color: #c8d7e6;
+}
+
+#controls-dialog .keyboard-guide kbd {
+  min-width: 54px;
+  padding: 4px;
+  color: #fff2c8;
+  background: #293a4e;
+}
+
+#controls-dialog .setup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+
+#controls-dialog .setup-section {
+  min-width: 0;
+  margin: 0;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, #1c2c3d, #14202d 72%), #162334;
+  box-shadow: inset 3px 0 var(--section-accent, #67dfe4);
+}
+
+#controls-dialog .setup-display {
+  --section-accent: #f0c452;
+  order: 1;
+}
+
+#controls-dialog .setup-driving {
+  --section-accent: #f2395b;
+  order: 2;
+}
+
+#controls-dialog .setup-map {
+  --section-accent: #55d8df;
+  order: 3;
+}
+
+#controls-dialog .setup-gyro {
+  --section-accent: #9b88ff;
+  order: 4;
+}
+
+#controls-dialog .setup-section h3,
+#controls-dialog .setup-section summary {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 31px;
+  margin: 0 0 8px;
+  padding: 0;
+  color: #f7f9fd;
+  font-size: 12px;
+  cursor: default;
+}
+
+#controls-dialog .setup-section h3 > b,
+#controls-dialog .setup-section summary > b {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid color-mix(in srgb, var(--section-accent) 78%, #fff 12%);
+  border-radius: 5px;
+  color: var(--section-accent);
+  background: #0e1822;
+  font-size: 9px;
+}
+
+#controls-dialog .setup-section h3 small,
+#controls-dialog .setup-section summary small {
+  display: block;
+  margin: 0;
+  color: #92a8bd;
+  font-size: 8px;
+  text-align: right;
+}
+
+#controls-dialog .setup-section summary::after {
+  display: none;
+}
+
+#controls-dialog .setup-section[open] summary {
+  margin-bottom: 8px;
+}
+
+#controls-dialog .graphics-intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border: 1px solid #665d3e;
+  border-radius: 6px;
+  background: #292718;
+}
+
+#controls-dialog .graphics-intro strong {
+  color: #ffe184;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+#controls-dialog .graphics-intro small {
+  color: #c7c0a7;
+  font-size: 8px;
+  text-align: right;
+}
+
+#controls-dialog .setting-select {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.62fr) minmax(0, 1fr);
+  gap: 8px;
+  margin: 7px 0 0;
+  font-size: 10px;
+}
+
+#controls-dialog .setting-select select {
+  width: 100%;
+  max-width: none;
+  min-height: 34px;
+  padding: 5px 8px;
+  border-color: #566c83;
+  background: #0d1722;
+  font-size: 10px;
+}
+
+#controls-dialog .steering-choice {
+  gap: 6px;
+}
+
+#controls-dialog .steering-choice button,
+#controls-dialog .secondary {
+  min-height: 34px;
+  margin: 0;
+  font-size: 9px;
+}
+
+#controls-dialog .setting-check {
+  min-height: 34px;
+  margin: 6px 0;
+  font-size: 10px;
+}
+
+#controls-dialog .setting-check input {
+  width: 17px;
+  height: 17px;
+}
+
+#controls-dialog .setting-check small,
+#controls-dialog .setting-note {
+  font-size: 8px !important;
+  line-height: 1.35;
+}
+
+#controls-dialog .setting-note {
+  margin-top: 6px;
+}
+
+#controls-dialog .radar-setup {
+  grid-template-columns: minmax(0, 1fr) 116px;
+  gap: 10px;
+}
+
+#controls-dialog .map-range,
+#controls-dialog .setting-range {
+  margin: 5px 0 1px;
+  font-size: 9px;
+}
+
+#controls-dialog input[type="range"] {
+  height: 24px;
+}
+
+#controls-dialog .radar-sample {
+  gap: 4px;
+}
+
+#controls-dialog #radar-preview {
+  --sample-base: 76px;
+}
+
+#controls-dialog #tilt-meter {
+  height: 30px;
+  margin: 5px 0;
+}
+
+#controls-dialog #tilt-status {
+  min-height: 0;
+  margin: 0 0 4px;
+  font-size: 9px;
+}
+
+#controls-dialog .settings-bottom-note {
+  margin: 8px 2px 0;
+  padding: 6px 9px;
+  border: 1px solid #37566a;
+  border-radius: 6px;
+  background: #102633;
+  color: #a8e1e5;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  #controls-dialog {
+    width: calc(100% - 16px);
+    padding: 12px;
+  }
+
+  #controls-dialog .keyboard-guide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #controls-dialog .setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #controls-dialog .setup-section h3 small,
+  #controls-dialog .setup-section summary small {
+    display: none;
+  }
+
+  #controls-dialog .radar-setup {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+}
+
 @media (max-width: 500px) {
   #workshop[data-shop="true"] .box-bench {
     grid-template-columns: 1fr;
@@ -771,5 +1046,298 @@
     grid-template-rows: 1fr;
     height: 122px;
     margin-bottom: 8px;
+  }
+}
+
+/* Unified garage: car, live specs, paint and upgrades remain visible together. */
+#workshop:not([data-shop="true"]) {
+  gap: 6px;
+}
+
+#workshop:not([data-shop="true"]) .workshop-nav {
+  display: none;
+}
+
+#workshop:not([data-shop="true"]) .workshop-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(158px, 0.72fr) auto minmax(270px, 1.28fr);
+  gap: 7px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#workshop:not([data-shop="true"]) #build-panel,
+#workshop:not([data-shop="true"]) #parts-panel {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+#workshop:not([data-shop="true"]) #build-panel > .panel-title,
+#workshop:not([data-shop="true"]) .build-brief,
+#workshop:not([data-shop="true"]) .level-threat,
+#workshop:not([data-shop="true"]) #build-panel .garage-backup {
+  display: none;
+}
+
+#workshop:not([data-shop="true"]) #build-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+  gap: 7px;
+}
+
+#workshop:not([data-shop="true"]) #build-panel .garage-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+#workshop:not([data-shop="true"]) #build-panel .garage-stats > div {
+  min-height: 60px;
+  padding: 8px 10px;
+}
+
+#workshop:not([data-shop="true"]) #build-panel .garage-stats strong {
+  font-size: clamp(20px, 2vw, 29px);
+}
+
+#workshop:not([data-shop="true"]) .paint-bench {
+  min-height: 60px;
+  margin: 0;
+  padding: 8px 10px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+#workshop:not([data-shop="true"]) #paint-swatches {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(22px, 1fr));
+  gap: 5px;
+}
+
+#workshop:not([data-shop="true"]) #paint-swatches button {
+  width: 100%;
+  min-width: 22px;
+  max-width: 34px;
+  height: 30px;
+}
+
+#workshop:not([data-shop="true"]) #parts-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 5px;
+}
+
+#workshop:not([data-shop="true"]) #parts-heading {
+  min-height: 24px;
+}
+
+#workshop:not([data-shop="true"]) .part-filters {
+  margin: 0;
+}
+
+#workshop:not([data-shop="true"]) .part-filters button {
+  min-height: 28px;
+  padding: 4px 12px;
+}
+
+#workshop:not([data-shop="true"]) .parts-workspace {
+  grid-template-columns: minmax(650px, 1fr) minmax(310px, 0.42fr);
+  gap: 7px;
+  min-height: 0;
+}
+
+#workshop:not([data-shop="true"]) .part-grid {
+  grid-template-columns: repeat(7, minmax(82px, 1fr));
+  grid-template-rows: repeat(2, minmax(88px, 1fr));
+  gap: 5px;
+  min-height: 0;
+}
+
+#workshop:not([data-shop="true"]) .part-tile {
+  min-height: 88px;
+  padding: 4px;
+}
+
+#workshop:not([data-shop="true"]) .tile-photo {
+  width: 48px;
+  flex-basis: 48px;
+}
+
+#workshop:not([data-shop="true"]) .part-inspector {
+  min-height: 0;
+  padding: 7px 9px;
+  overflow: hidden;
+}
+
+#workshop:not([data-shop="true"]) .studio-column,
+#workshop:not([data-shop="true"]) .garage-preview {
+  min-height: 150px;
+}
+
+#workshop:not([data-shop="true"]) .garage-build {
+  padding-top: 34px;
+}
+
+#workshop:not([data-shop="true"]) .studio-note {
+  display: none;
+}
+
+#workshop:not([data-shop="true"]) .inspector-heading {
+  gap: 7px;
+  margin-bottom: 4px;
+}
+
+#workshop:not([data-shop="true"]) .inspector-art {
+  width: 66px;
+  flex-basis: 66px;
+}
+
+#workshop:not([data-shop="true"]) .inspector-copy h3 {
+  margin: 2px 0;
+  font-size: 19px;
+}
+
+#workshop:not([data-shop="true"]) .inspector-copy p {
+  display: none;
+}
+
+#workshop:not([data-shop="true"]) .quality-picker {
+  grid-template-columns: repeat(var(--grade-columns, 5), minmax(0, 1fr));
+  gap: 3px;
+  margin-bottom: 5px;
+}
+
+#workshop:not([data-shop="true"]) .quality-picker button {
+  min-height: 29px;
+  padding: 3px 1px;
+  font-size: 8px;
+}
+
+#workshop:not([data-shop="true"]) .quality-picker button small {
+  margin-top: 1px;
+  font-size: 7px;
+}
+
+#workshop:not([data-shop="true"]) .upgrade-impact {
+  gap: 3px;
+  margin-bottom: 5px;
+}
+
+#workshop:not([data-shop="true"]) .upgrade-impact b {
+  display: none;
+}
+
+#workshop:not([data-shop="true"]) .upgrade-impact span {
+  padding: 3px 5px;
+  font-size: 7px;
+}
+
+#workshop:not([data-shop="true"]) .comparison-meters {
+  gap: 5px 8px;
+}
+
+#workshop:not([data-shop="true"]) .comparison-row > span {
+  font-size: 7px;
+}
+
+#workshop:not([data-shop="true"]) .comparison-numbers {
+  margin: 1px 0 3px;
+}
+
+#workshop:not([data-shop="true"]) .comparison-numbers b {
+  font-size: 10px;
+}
+
+#workshop:not([data-shop="true"]) .comparison-numbers strong {
+  font-size: 14px;
+}
+
+#workshop:not([data-shop="true"]) .preview-disclaimer,
+#workshop:not([data-shop="true"]) .grade-source {
+  display: none;
+}
+
+#workshop:not([data-shop="true"]) .inspector-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 5px;
+}
+
+#workshop:not([data-shop="true"]) .inspector-actions button {
+  min-height: 29px;
+  padding: 4px 6px;
+  font-size: 8px;
+}
+
+#workshop:not([data-shop="true"]) .fusion-panel {
+  margin-top: 5px;
+  padding: 5px 7px;
+  gap: 3px;
+}
+
+#workshop:not([data-shop="true"]) .fusion-panel small,
+#workshop:not([data-shop="true"]) .fusion-panel button {
+  font-size: 7px;
+}
+
+#workshop:not([data-shop="true"]) .part-explanation {
+  margin-top: 3px;
+  font-size: 8px;
+}
+
+#workshop:not([data-shop="true"]) .part-explanation p {
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+@media (max-width: 1120px) and (min-width: 801px) {
+  #workshop:not([data-shop="true"]) .workshop-workspace {
+    grid-template-rows: minmax(180px, 0.8fr) auto minmax(245px, 1.2fr);
+  }
+
+  #workshop:not([data-shop="true"]) #build-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #workshop:not([data-shop="true"]) .paint-bench {
+    min-height: 54px;
+  }
+
+  #workshop:not([data-shop="true"]) .parts-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(265px, 0.42fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  #workshop:not([data-shop="true"]) .part-grid {
+    grid-template-columns: repeat(7, minmax(74px, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  #workshop:not([data-shop="true"]) .workshop-workspace {
+    display: block;
+    overflow: auto;
+  }
+
+  #workshop:not([data-shop="true"]) #build-panel {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  #workshop:not([data-shop="true"]) #parts-panel {
+    display: block;
+  }
+
+  #workshop:not([data-shop="true"]) .paint-bench {
+    min-height: 0;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  #workshop:not([data-shop="true"]) .parts-workspace {
+    display: block;
   }
 }
