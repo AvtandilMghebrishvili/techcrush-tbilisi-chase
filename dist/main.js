@@ -791,7 +791,7 @@ function updateHUD() {
   );
   $("gear").textContent = soundscape.telemetry.gearLabel || "1";
   $("takedowns").textContent = String(sim.takedowns);
-  const pursuitActive = sim.checkpoint > 0;
+  const pursuitActive = sim.pursuitStarted || sim.checkpoint > 0;
   $("heat").textContent = pursuitActive
     ? sim.police.filter((c) => !c.destroyed).length +
       " UNITS · H" +

@@ -11,6 +11,7 @@ const scalars = [
   "nextCopId",
   "nextWaveAt",
   "heatLevel",
+  "pursuitStarted",
   "closestPolice",
   "roadblockAhead",
   "stuntScore",

@@ -4,7 +4,10 @@ import { applyCityBranding, updateCityBranding } from "./city-branding.js";
 import { prepareSceneAssets } from "./scene-assets.js";
 import { releaseResources } from "./resource-lifetime.js";
 import { supportedVisualY } from "./vehicle-ground.js";
-import { updateExpansion } from "./expansion-visuals.js";
+import {
+  updateExpansion,
+  updateDistanceCulledStatic,
+} from "./expansion-visuals.js";
 import { IS_KUTAISI, IS_BATUMI } from "./map-selection.js";
 import { batchStreetLamps } from "./lamp-batches.js";
 import { updateBridgeRails } from "./bridge-visuals.js";
@@ -117,6 +120,12 @@ export class SceneView {
     this.assetLoad = assets || prepareSceneAssets(this.mobile);
     try {
       buildRealisticCity(this);
+      this.distanceCulledStatic = [];
+      this.scene.traverse((object) => {
+        if (object.userData.maxDrawDistance)
+          this.distanceCulledStatic.push(object);
+      });
+      this.staticCullFocus = null;
       // A positive offset moves toward the eye with reversed depth. Keep façade
       // fills behind their cornices on either depth convention.
       const facadeBias = this.renderer.capabilities.reversedDepthBuffer
@@ -485,6 +494,23 @@ export class SceneView {
     updateBreakables(this, sim);
     updateSponsorBanners(this, sim);
     const ready = sim.phase === "ready";
+    if (this.distanceCulledStatic?.length) {
+      const focus = ready ? this.camera.position : sim.player;
+      if (
+        !this.staticCullFocus ||
+        Math.hypot(
+          focus.x - this.staticCullFocus.x,
+          focus.z - this.staticCullFocus.z,
+        ) > 32
+      ) {
+        updateDistanceCulledStatic(
+          this.distanceCulledStatic,
+          focus,
+          this.budget.low,
+        );
+        this.staticCullFocus = { x: focus.x, z: focus.z };
+      }
+    }
     if (!ready) {
       const p = sim.player;
       this.player.position.set(
@@ -583,7 +609,7 @@ export class SceneView {
             meshes[i].userData.lights.forEach(
               (m, j) =>
                 (m.emissiveIntensity =
-                  sim.checkpoint > 0
+                  sim.pursuitStarted || sim.checkpoint > 0
                     ? Math.sin(sim.time * 19 + j * Math.PI) > 0
                       ? 6
                       : 0.3

@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as THREE from "../dist/vendor/three.module.js";
 import { detachStaticMeshes } from "../dist/static-detach.js";
-import { batchStatic } from "../dist/expansion-visuals.js";
+import {
+  batchStatic,
+  updateDistanceCulledStatic,
+} from "../dist/expansion-visuals.js";
 import { compileScene } from "../dist/compile-scene.js";
 test("bulk mesh detachment preserves parent/child events, sibling order and dynamic groups", () => {
   const root = new THREE.Group(),
@@ -61,6 +64,23 @@ test("static batching retains transformed vertices and skips animated subtrees",
       "batch must preserve world coordinates",
     );
   assert.equal(root.children.length, 2);
+});
+test("distance-cull batches keep full geometry and swap only very distant tiles", () => {
+  const root = new THREE.Group();
+  const material = new THREE.MeshStandardMaterial();
+  const near = new THREE.Mesh(new THREE.BoxGeometry(20, 40, 20), material);
+  const far = near.clone();
+  near.position.set(0, 20, 0);
+  far.position.set(1200, 20, 0);
+  root.add(near, far);
+  batchStatic(root, 100, { maxDrawDistance: 400, lowScale: 0.75 });
+  const batches = root.children.filter((o) => o.isMesh);
+  assert.equal(batches.length, 2);
+  assert(batches.every((m) => m.geometry.attributes.position.count > 0));
+  assert.equal(updateDistanceCulledStatic(batches, { x: 0, z: 0 }), 1);
+  assert.equal(batches.filter((m) => m.visible).length, 1);
+  assert.equal(updateDistanceCulledStatic(batches, { x: 1200, z: 0 }), 1);
+  assert.equal(batches.filter((m) => m.visible).length, 1);
 });
 function fixture() {
   let id = 0;

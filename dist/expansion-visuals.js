@@ -111,7 +111,7 @@ export function facadeMaterial(style, palette) {
   palette?.set(style, m);
   return m;
 }
-export function batchStatic(group, tile = 320) {
+export function batchStatic(group, tile = 320, options = {}) {
   group.updateMatrixWorld(true);
   const batches = new Map(),
     remove = [];
@@ -181,8 +181,27 @@ export function batchStatic(group, tile = 320) {
     m.position.set(batch.x, 0, batch.z);
     m.updateMatrix();
     m.matrixAutoUpdate = false;
+    if (options.maxDrawDistance) {
+      m.userData.maxDrawDistance = options.maxDrawDistance;
+      m.userData.lowDrawDistanceScale = options.lowScale || 1;
+    }
     group.add(m);
   }
+}
+export function updateDistanceCulledStatic(meshes, focus, low = false) {
+  let visible = 0;
+  for (const mesh of meshes) {
+    const base = mesh.userData.maxDrawDistance;
+    if (!base) continue;
+    const scale = low ? mesh.userData.lowDrawDistanceScale || 1 : 1;
+    const radius = mesh.geometry.boundingSphere?.radius || 0;
+    const limit = base * scale + radius;
+    const dx = mesh.position.x - focus.x;
+    const dz = mesh.position.z - focus.z;
+    mesh.visible = dx * dx + dz * dz <= limit * limit;
+    if (mesh.visible) visible++;
+  }
+  return visible;
 }
 export function buildExpansion(v, root, box, label, materials) {
   const stone = mat("#b7b4a8"),

@@ -154,6 +154,7 @@ test("time-based reinforcements wait for checkpoint one and stop at twelve cars"
   assert.equal(s.police.length, 4);
   assert.equal(s.heatLevel, 1);
   s.checkpoint = 1;
+  s.update(1 / 120, {});
   s.time = s.nextWaveAt + 0.01;
   s.update(1 / 120, {});
   assert.equal(s.police.length, 5);

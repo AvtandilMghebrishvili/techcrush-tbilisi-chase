@@ -297,7 +297,11 @@ export function buildRealisticCity(v) {
     if (b.h > 20)
       v.box(2, 2.5, 2, concrete, b.x + 3, b.h + 2.1, b.z - 3, staticCity);
   }
-  batchStatic(staticCity);
+  batchStatic(
+    staticCity,
+    320,
+    IS_BATUMI ? { maxDrawDistance: 2350, lowScale: 0.78 } : undefined,
+  );
   streetDetails(v, line);
   if (!IS_KUTAISI && !IS_BATUMI && !IS_RUSTAVI) clockBuilding(v, facades[1]);
   mountains(v);

@@ -104,6 +104,25 @@ test("pursuit starts with four units, adds checkpoint reinforcements, and retain
   assert.equal(s.police.length, 7);
   assert.equal(s.police.filter((c) => c.role === "blockade").length, 2);
 });
+test("hitting an ambient patrol activates the full pursuit before checkpoint one", () => {
+  const s = new ChaseSimulation();
+  s.start();
+  s.obstacles = [];
+  s.trees = [];
+  s.traffic = [];
+  const cop = s.makePolice(s.player.x, s.player.z + 3.5);
+  s.police = [cop];
+  s.player.vz = 22;
+  s.player.speed = 22;
+  s.update(1 / 120, {});
+  assert.equal(s.checkpoint, 0);
+  assert.equal(s.pursuitStarted, true);
+  assert.equal(s.radioContact.x, s.player.x);
+  assert(s.nextWaveAt > s.time);
+  assert.match(s.events.join(" "), /PATROL HIT/);
+  s.timeline.restore(s, 0);
+  assert.equal(s.pursuitStarted, false);
+});
 test("a blockade unit plans a road position ahead of the observed moving player", () => {
   const s = new ChaseSimulation();
   s.start();

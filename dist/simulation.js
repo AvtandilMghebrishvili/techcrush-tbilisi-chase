@@ -399,6 +399,7 @@ export class ChaseSimulation {
     this.stuntScore = 0;
     this.nextWaveAt = this.difficulty.waveInterval;
     this.heatLevel = 1;
+    this.pursuitStarted = false;
     this.ramps = RAMPS;
     this.timeline = new RewindTimeline();
     this.trees = TREES.map((t) => ({
@@ -615,6 +616,31 @@ export class ChaseSimulation {
     dentVehicle(cop, cop.impact, this.time);
     if (cop.impact > 4)
       this.emitSound("stone", cop, cop.impact, "wall:" + cop.id);
+  }
+  activatePursuit(reason = "checkpoint") {
+    if (this.pursuitStarted) return false;
+    const p = this.player;
+    this.pursuitStarted = true;
+    this.radioContact = {
+      x: p.x,
+      z: p.z,
+      y: p.y || 0,
+      vx: p.vx,
+      vz: p.vz,
+      time: this.time,
+    };
+    this.nextWaveAt = this.time + this.difficulty.waveInterval;
+    for (const cop of this.police) {
+      cop.lastSeen = { x: p.x, z: p.z, y: p.y || 0 };
+      cop.path.length = 0;
+      cop.repath = 0;
+    }
+    this.events.push(
+      reason === "collision"
+        ? "PATROL HIT — ALL UNITS RESPONDING"
+        : "PURSUIT ENGAGED — ALL UNITS RESPONDING",
+    );
+    return true;
   }
   start(carId = this.selectedCar || "gt", options = this.runOptions || {}) {
     this.runOptions = options;
@@ -991,7 +1017,9 @@ export class ChaseSimulation {
           "wall",
         );
     }
-    const pursuitActive = this.checkpoint > 0;
+    if (!this.pursuitStarted && this.checkpoint > 0)
+      this.activatePursuit("checkpoint");
+    const pursuitActive = this.pursuitStarted;
     if (pursuitActive && this.time >= this.nextWaveAt) {
       const role = ["pursuit", "intercept", "blockade"][this.heatLevel % 3];
       this.addReinforcement(role, role === "blockade" ? 180 : -160);
@@ -1365,6 +1393,15 @@ export class ChaseSimulation {
           )
             continue;
           const impact = collideVehicles(a, b);
+          const playerHit = a === p || b === p;
+          const other = playerHit ? (a === p ? b : a) : null;
+          if (
+            !this.pursuitStarted &&
+            playerHit &&
+            officers.has(other) &&
+            impact > 0.45
+          )
+            this.activatePursuit("collision");
           if (impact > 0 && (a === p || b === p))
             (a === p ? b : a).nearHitAt = this.time;
           if (!a.destroyed) dentVehicle(a, impact, this.time);
@@ -1377,12 +1414,10 @@ export class ChaseSimulation {
               `cars:${a.id ?? "player"}:${b.id ?? "player"}`,
             );
           if (impact <= 4) continue;
-          const playerHit = a === p || b === p;
           if (playerHit && p.invulnerable <= 0) {
-            const other = a === p ? b : a,
-              damage = officers.has(other)
-                ? patrolCollisionDamage(impact, other.kind)
-                : impact * 0.55;
+            const damage = officers.has(other)
+              ? patrolCollisionDamage(impact, other.kind)
+              : impact * 0.55;
             p.health = Math.max(
               0,
               p.health - damage * p.performance.damageScale,
@@ -1602,23 +1637,7 @@ export class ChaseSimulation {
       !p.flipped
     ) {
       this.checkpoint++;
-      if (this.checkpoint === 1) {
-        this.radioContact = {
-          x: p.x,
-          z: p.z,
-          y: p.y || 0,
-          vx: p.vx,
-          vz: p.vz,
-          time: this.time,
-        };
-        this.nextWaveAt = this.time + this.difficulty.waveInterval;
-        for (const cop of this.police) {
-          cop.lastSeen = { x: p.x, z: p.z, y: p.y || 0 };
-          cop.path.length = 0;
-          cop.repath = 0;
-        }
-        this.events.push("PURSUIT ENGAGED — ALL UNITS RESPONDING");
-      }
+      if (this.checkpoint === 1) this.activatePursuit("checkpoint");
       this.emitSound("checkpoint", p, 20, "checkpoint:" + this.checkpoint);
       this.runCash += creditAward(150, this.level, this.player.carId);
       const bonus = Math.round(
