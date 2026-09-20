@@ -160,6 +160,7 @@ test("vehicle contacts and wall impacts produce cues; police destruction produce
     p = s.player,
     cop = s.makePolice(p.x, p.z + 4);
   s.police = [cop];
+  s.checkpoint = 1;
   p.vz = 22;
   p.speed = 22;
   s.update(1 / 120, {});

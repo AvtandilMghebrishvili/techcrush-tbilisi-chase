@@ -791,18 +791,25 @@ function updateHUD() {
   );
   $("gear").textContent = soundscape.telemetry.gearLabel || "1";
   $("takedowns").textContent = String(sim.takedowns);
-  $("heat").textContent =
-    sim.police.filter((c) => !c.destroyed).length +
-    " UNITS · H" +
-    sim.heatLevel +
-    (sim.helicopter ? " · AIR" : "");
+  const pursuitActive = sim.checkpoint > 0;
+  $("heat").textContent = pursuitActive
+    ? sim.police.filter((c) => !c.destroyed).length +
+      " UNITS · H" +
+      sim.heatLevel +
+      (sim.helicopter ? " · AIR" : "")
+    : sim.police.filter((c) => !c.destroyed).length + " PATROLS · STANDBY";
   const escape = sim.checkpoint === 6;
   $("bust-bar").style.width =
     (escape ? sim.escape / 8 : sim.bust / 4) * 100 + "%";
   $("bust-bar").style.background = escape ? "#73e6ed" : "#ff796e";
-  $("heat-label").textContent = escape ? "ESCAPING" : "PURSUIT";
-  $("pursuit-text").textContent =
-    sim.bust > 1
+  $("heat-label").textContent = escape
+    ? "ESCAPING"
+    : pursuitActive
+      ? "PURSUIT"
+      : "PATROL";
+  $("pursuit-text").textContent = !pursuitActive
+    ? "REACH THE FIRST CHECKPOINT TO START THE CHASE"
+    : sim.bust > 1
       ? "BOXED IN — ACCELERATE!"
       : sim.helicopter?.tracking
         ? "AIR SUPPORT HAS VISUAL — BREAK SIGHT"

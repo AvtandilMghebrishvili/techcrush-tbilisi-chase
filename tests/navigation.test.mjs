@@ -203,6 +203,7 @@ test("aggressive patrol gains on a moving car while respecting its speed limit",
 test("patrol radio shares sightings but cannot track an unseen player through buildings", () => {
   const sim = new ChaseSimulation();
   sim.start();
+  sim.checkpoint = 1;
   sim.traffic = [];
   sim.obstacles = [{ minX: 40, maxX: 100, minZ: 20, maxZ: 150 }];
   Object.assign(sim.player, { x: 0, z: 10, angle: 0 });

@@ -583,7 +583,11 @@ export class SceneView {
             meshes[i].userData.lights.forEach(
               (m, j) =>
                 (m.emissiveIntensity =
-                  Math.sin(sim.time * 19 + j * Math.PI) > 0 ? 6 : 0.3),
+                  sim.checkpoint > 0
+                    ? Math.sin(sim.time * 19 + j * Math.PI) > 0
+                      ? 6
+                      : 0.3
+                    : 0.08),
             );
         });
       updateExpansion(this, sim);

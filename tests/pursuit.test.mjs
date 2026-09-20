@@ -110,6 +110,7 @@ test("a blockade unit plans a road position ahead of the observed moving player"
   s.obstacles = [];
   s.trees = [];
   s.traffic = [];
+  s.checkpoint = 1;
   Object.assign(s.player, { x: 0, z: 0, angle: 0, vz: 25 });
   s.police = [s.makePolice(0, -20, "blockade")];
   s.update(1 / 120, { throttle: 1 });

@@ -69,7 +69,16 @@ export function airLineOfSight(helicopter, player, obstacles) {
   }
   return true;
 }
-export function updateAirSupport(h, player, obstacles, radio, time, dt, level) {
+export function updateAirSupport(
+  h,
+  player,
+  obstacles,
+  radio,
+  time,
+  dt,
+  level,
+  trackingEnabled = true,
+) {
   if (!h) return;
   if (h.destroyed) {
     h.tracking = false;
@@ -81,7 +90,9 @@ export function updateAirSupport(h, player, obstacles, radio, time, dt, level) {
   }
   h.rotor += dt * 34;
   h.tracking =
-    distance(h, player) < 165 && airLineOfSight(h, player, obstacles);
+    trackingEnabled &&
+    distance(h, player) < 165 &&
+    airLineOfSight(h, player, obstacles);
   if (h.tracking) {
     h.lastSeen = { x: player.x, z: player.z };
     h.searchAge = 0;

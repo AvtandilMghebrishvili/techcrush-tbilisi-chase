@@ -409,7 +409,7 @@ export class ChaseAudio {
     if (active && a.shift > 0) this.effect({ kind: "shift", impact: 10 }, p);
     this.lastBoost = boost;
     this.wasBoosting = p.boosting;
-    const nearby = sim.police
+    const nearby = (sim.checkpoint > 0 ? sim.police : [])
       .filter((x) => !x.destroyed && x.waterAt == null && x.kind !== "tank")
       .map((car) => ({ car, ...spatialSound(p, car, 110) }))
       .sort((a, b) => a.distance - b.distance)
@@ -426,7 +426,7 @@ export class ChaseAudio {
       if (n) this.set(s.panner.pan, n.pan, t, 0.06);
     });
     const air =
-      sim.helicopter && !sim.helicopter.destroyed
+      sim.checkpoint > 0 && sim.helicopter && !sim.helicopter.destroyed
         ? spatialSound(p, sim.helicopter, 230)
         : null;
     this.set(this.chopper.gain.gain, air ? air.gain * 0.022 : 0, t, 0.1);
