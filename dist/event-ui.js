@@ -85,7 +85,7 @@ export class EventUI {
       <div class="event-bottom"><section><form id="event-register"><label for="event-handle">YOUR UNIQUE EVENT USERNAME</label><div class="event-inline"><input id="event-handle" name="handle" minlength="3" maxlength="20" required autocomplete="nickname" placeholder="Choose your racer name"><button>JOIN EVENT ↗</button></div><p class="event-join-note">Joining keeps your profile in CITY WARS until 24 SEP, 21:00. Every new chase counts automatically.</p><label class="event-check"><input type="checkbox" id="event-subscribe" required> I subscribe to TECHCRUSH on YouTube.</label><label class="event-check"><input type="checkbox" id="event-rules" required> I accept the rules and public display of my event name and scores.</label><a id="event-channel" hidden target="_blank" rel="noopener">OPEN TECHCRUSH ON YOUTUBE ↗</a></form>
       <div id="event-member" hidden><small>REGISTERED RACER</small><b id="event-member-name"></b><p id="event-member-status" role="status"></p><p id="event-member-help"></p><div class="event-member-actions"><button type="button" id="event-enter"><span class="event-play-icon" aria-hidden="true">▶</span><span class="event-play-copy"><strong id="event-play-label">PLAY</strong><span id="event-play-context"></span></span><span class="event-play-arrow" aria-hidden="true">↗</span></button><button type="button" id="event-secret" hidden>ENTER CHALLENGE ↗</button></div></div>
       <p id="event-entry-status" role="status"></p><p id="event-message" role="status"></p></section>
-      <section class="event-board"><div class="event-board-head"><h3>EVENT STANDINGS</h3><div><button type="button" id="event-regular-board">REGULAR RANKS</button><button type="button" id="event-refresh" aria-label="Refresh standings">↻</button></div></div><p id="event-board-callout"></p><nav id="event-board-tabs" aria-label="City ranking"></nav><p id="event-board-stats"></p><div id="event-board-table" role="status"></div></section></div>${EVENT_RULES_COPY}`;
+      <section class="event-board"><div class="event-board-head"><h3>EVENT STANDINGS</h3><div><button type="button" id="event-regular-board">REGULAR RANKS</button><button type="button" id="event-refresh" aria-label="Refresh standings">↻</button></div></div><p id="event-board-callout"></p><nav id="event-board-tabs" aria-label="City ranking"></nav><div id="event-board-stats" class="event-board-stats" aria-label="CITY WARS statistics"><article><small>REGISTERED</small><strong id="event-stat-registered">—</strong><span>event racers</span></article><article><small>PLAYED</small><strong id="event-stat-players">—</strong><span>unique racers</span></article><article><small>TOTAL ROUNDS</small><strong id="event-stat-runs">—</strong><span>banked chases</span></article><article><small>LEVEL CLEARS</small><strong id="event-stat-clears">—</strong><span>all cities</span></article></div><p id="event-board-summary"></p><div id="event-board-table" role="status"></div></section></div>${EVENT_RULES_COPY}`;
     document.body.append(dialog);
     const notice = document.createElement("aside");
     notice.id = "event-notice";
@@ -458,10 +458,16 @@ export class EventUI {
         this.actions.cities?.();
         this.render();
       }
-      $("event-board-stats").textContent =
-        `${number(data.participants)} racers · ${number(data.total)} in this city${data.mine ? " · YOU #" + data.mine.rank + " / " + data.total : ""}`;
+      $("event-stat-registered").textContent = number(
+        data.stats?.registered ?? data.participants,
+      );
+      $("event-stat-players").textContent = number(data.stats?.uniquePlayers);
+      $("event-stat-runs").textContent = number(data.stats?.totalRuns);
+      $("event-stat-clears").textContent = number(data.stats?.levelsCleared);
+      $("event-board-summary").textContent =
+        `${names[data.map] || "CHALLENGE"} · ${number(data.total)} RACERS · ${number(data.stats?.cityRuns)} ROUNDS · ${number(data.stats?.cityLevelsCleared)} LEVEL CLEARS${data.mine ? " · YOU #" + data.mine.rank + " / " + data.total : ""}`;
       $("event-board-table").innerHTML = data.entries.length
-        ? `<table><thead><tr><th>#</th><th>RACER</th><th>POINTS</th><th>LVL</th></tr></thead><tbody>${data.entries.map((r) => `<tr class="${r.you ? "you" : ""}"><td>${r.rank}</td><td>${escape(r.name)}${r.you ? " · YOU" : ""}</td><td>${number(r.score)}</td><td>${r.level}</td></tr>`).join("")}</tbody></table>`
+        ? `<table><thead><tr><th>#</th><th>RACER</th><th>POINTS</th><th>LEVEL</th><th>ROUNDS</th></tr></thead><tbody>${data.entries.map((r) => `<tr class="${r.you ? "you " : ""}${r.rank <= 3 ? "podium podium-" + r.rank : ""}"><td class="event-rank">${r.rank <= 3 ? '<span class="event-rank-medal">' + r.rank + "</span>" : r.rank}</td><td class="event-racer"><b>${escape(r.name)}</b>${r.you ? "<small>YOU</small>" : ""}</td><td class="event-score">${number(r.score)}</td><td class="event-level"><strong>${r.level}</strong><small>REACHED</small></td><td class="event-runs">${number(r.runs)}</td></tr>`).join("")}</tbody></table>`
         : "No banked runs yet. Take the first spot.";
     } catch (e) {
       if (generation === this.requestGeneration)

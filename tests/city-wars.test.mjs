@@ -417,6 +417,14 @@ test("API unique names, transactional totals, ranking isolation, secret gate, de
     assert.equal(board.entries[0].score, 1900);
     assert.equal(board.mine.rank, 1);
     assert.equal(board.total, 2);
+    assert.deepEqual(board.stats, {
+      registered: 2,
+      uniquePlayers: 2,
+      totalRuns: 3,
+      levelsCleared: 0,
+      cityRuns: 3,
+      cityLevelsCleared: 0,
+    });
     assert(!JSON.stringify(board).includes(await keyHash(a)));
     assert.equal(
       (await call(a, "/api/event/leaderboard?map=kutaisi")).total,

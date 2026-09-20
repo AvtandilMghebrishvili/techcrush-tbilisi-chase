@@ -33,6 +33,16 @@ export async function eventBoard(DB, url, hash, now, preview = false) {
   )
     .bind(EVENT_ID)
     .first();
+  const eventStats = await DB.prepare(
+    "SELECT COUNT(DISTINCT key_hash) players,COUNT(*) runs,COALESCE(SUM(CASE WHEN result='won' THEN 1 ELSE 0 END),0) clears FROM event_runs WHERE event_id=?",
+  )
+    .bind(EVENT_ID)
+    .first();
+  const cityStats = await DB.prepare(
+    "SELECT COUNT(*) runs,COALESCE(SUM(CASE WHEN result='won' THEN 1 ELSE 0 END),0) clears FROM event_runs WHERE event_id=? AND map=?",
+  )
+    .bind(EVENT_ID, map)
+    .first();
   const mine = await DB.prepare(
     `SELECT e.handle,e.handle_key,s.score,s.level,s.runs,s.rank_at ${base} AND s.key_hash=?`,
   )
@@ -65,6 +75,14 @@ export async function eventBoard(DB, url, hash, now, preview = false) {
     endsAt: EVENT_END,
     total: total.n,
     participants: participants.n,
+    stats: {
+      registered: Number(participants.n),
+      uniquePlayers: Number(eventStats.players),
+      totalRuns: Number(eventStats.runs),
+      levelsCleared: Number(eventStats.clears),
+      cityRuns: Number(cityStats.runs),
+      cityLevelsCleared: Number(cityStats.clears),
+    },
     entries: results.map((r, i) => ({
       rank: i + 1,
       name: r.handle,
