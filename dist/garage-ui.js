@@ -372,6 +372,8 @@ export class GarageUI {
     section.innerHTML = `<div class="inspector-heading"><div class="inspector-art">${partArtwork(part, "", tier)}</div><div class="inspector-copy"><small>${installed ? "UPGRADE INSTALLED" : tier === actual ? "CURRENT BUILD" : "UPGRADE PREVIEW"}</small><h3>${vehiclePartName(part, this.car)}</h3><div class="installed-status"><span>✓ CURRENTLY FITTED</span><strong>${TIERS[actual].name.toUpperCase()}${actualStars ? ` · ${"★".repeat(actualStars)}` : ""}</strong><small>${actual ? `GRADE ${actual}/${maxTier}` : "FACTORY PART"}</small></div><div class="tier-progress" aria-label="Upgrade level ${actual} of ${maxTier}">${tierSteps}</div><p>${part.effect}</p></div></div>
       ${tier !== actual ? `<div class="upgrade-route"><span><small>NOW</small><b>✓ ${TIERS[actual].name}${actualStars ? ` ${"★".repeat(actualStars)}` : ""}</b></span><em>→</em><span><small>PREVIEW</small><b>↑ ${TIERS[tier].name}${stars ? ` ${"★".repeat(stars)}` : ""}</b></span></div>` : ""}
       <div class="quality-picker" role="group" aria-label="Preview quality and spare inventory">${grades}</div>
+      ${install ? `<div class="upgrade-ready-callout"><span>↑↑ BETTER PART OWNED</span><strong>${TIERS[tier].name.toUpperCase()} IS READY TO FIT</strong></div>` : ""}
+      ${buy || install ? `<div class="inspector-actions primary-actions">${buy}${install}</div>` : ""}
       <div class="upgrade-impact"><b>WHAT GETS STRONGER</b>${upgradeBenefits(
         carSpec(this.car),
         equipment,
@@ -383,7 +385,7 @@ export class GarageUI {
         .join("")}</div>
       <div class="comparison-meters">${rows.map((r) => `<div class="comparison-row"><span>${r.label} ${r.lower ? "↓" : "↑"}</span><div class="comparison-numbers"><b>${r.before.toFixed(r.unit === "s" ? 2 : 1)}</b><span>→</span><strong data-after="${r.key}">${r.after.toFixed(r.unit === "s" ? 2 : 1)}</strong><small>${r.unit}</small></div><div class="meter" style="--from:${Math.min(100, (r.before / r.max) * 100)}%;--to:${Math.min(100, (r.after / r.max) * 100)}%"><i></i><b></b></div></div>`).join("")}</div>
       <small class="preview-disclaimer">${installed ? "Installed and saved." : `Comparing ${TIERS[tier].name} · ${spare} spare${spare === 1 ? "" : "s"}. Preview changes are not installed.`}</small>
-      <div class="inspector-actions">${buy}${install}${sell}</div>
+      ${sell ? `<div class="inspector-actions secondary-actions">${sell}</div>` : ""}
       ${!buy && !install ? `<small class="grade-source">${actual >= maxTier ? "Top grade fitted. Collect duplicates to fuse." : this.car === "creator" ? "Higher grades drop from TECHCRUSH boxes." : "Find Platinum in city stunt boxes."}</small>` : ""}
       ${fusion}<details class="part-explanation"><summary>WHAT CHANGES?</summary><p>${vehiclePartDetails(part, this.car)}</p><p>Fusion bonuses belong to this car. Spare counts appear under each grade.</p></details>`;
     const mutate = (type, extra = {}) =>

@@ -1960,3 +1960,60 @@
     min-height: 76px;
   }
 }
+
+/* Keep the primary fit action visible; optional detail can scroll below it. */
+#workshop:not([data-shop="true"]) .part-inspector {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #617891 #172230;
+}
+
+#workshop:not([data-shop="true"]) .upgrade-ready-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 0 0 4px;
+  padding: 4px 6px;
+  border: 1px solid #f0c559;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #4b3711, #2a291a);
+  color: #ffe899;
+  box-shadow: inset 0 0 0 1px #ffe78018;
+}
+
+#workshop:not([data-shop="true"]) .upgrade-ready-callout span {
+  font:
+    900 7px/1 "Barlow Condensed",
+    Barlow,
+    sans-serif;
+  letter-spacing: 0.06em;
+}
+
+#workshop:not([data-shop="true"]) .upgrade-ready-callout strong {
+  color: #fffbd8;
+  font:
+    900 8px/1 "Barlow Condensed",
+    Barlow,
+    sans-serif;
+  text-align: right;
+}
+
+#workshop:not([data-shop="true"]) .inspector-actions.primary-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin: 0 0 5px;
+}
+
+#workshop:not([data-shop="true"]) .inspector-actions.primary-actions button {
+  width: 100%;
+  min-height: 31px;
+  font-size: 9px;
+}
+
+#workshop:not([data-shop="true"]) .inspector-actions.secondary-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-top: 5px;
+}
